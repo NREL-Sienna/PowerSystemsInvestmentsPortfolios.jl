@@ -1,6 +1,25 @@
 module PowerSystemsInvestmentsPortfolios
 
 import InfrastructureSystems
+import InfrastructureSystems:
+    add_time_series,
+    to_json,
+    from_json,
+    serialize,
+    deserialize,
+    get_time_series,
+    has_time_series,
+    get_time_series_array,
+    get_time_series_timestamps,
+    get_time_series_values,
+    get_time_series_names,
+    CompressionSettings,
+    CompressionTypes,
+    MultiLogger,
+    LogEventTracker,
+    StructField
+
+
 import PowerSystems
 
 export Portfolio

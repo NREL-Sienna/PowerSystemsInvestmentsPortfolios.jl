@@ -1,12 +1,12 @@
 """
 Required fields for a technology Type
-    - name
-    - available
-    - power_systems_type
-    - time_series_container
-    - internal
+- name
+- available
+- power_systems_type
+- time_series_container
+- internal
 """
-abstract type Technology <: IS.Component end
+abstract type Technology <: IS.InfrastructureSystemsComponent end
 
 get_name(val::Technology) = val.name
 get_available(val::Technology) = val.available
