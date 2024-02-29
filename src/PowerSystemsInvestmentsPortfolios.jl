@@ -1,6 +1,7 @@
 module PowerSystemsInvestmentsPortfolios
 
 import InfrastructureSystems
+# TODO: Some of these re-exports may cause name collisions
 import InfrastructureSystems:
     add_time_series,
     to_json,
@@ -18,7 +19,6 @@ import InfrastructureSystems:
     MultiLogger,
     LogEventTracker,
     StructField
-
 
 import PowerSystems
 
