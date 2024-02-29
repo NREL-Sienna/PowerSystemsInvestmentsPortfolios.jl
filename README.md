@@ -1,13 +1,13 @@
 # SIIP-Template
 
 [![main - CI](https://github.com/NREL-Sienna/Sienna-PACKAGE.jl/workflows/main%20-%20CI/badge.svg)](https://github.com/NREL-Sienna/Sienna-PACKAGE.jl/actions/workflows/main-tests.yml)
-[![codecov](https://codecov.io/gh/NREL-Sienna/Sienna-PACKAGE.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/NREL-SIIP/SIIP-PACKAGE.jl)
+[![codecov](https://codecov.io/gh/NREL-Sienna/Sienna-PACKAGE.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/NREL-SIIP/PowerSystemsInvestmentsPortfolios.jl)
 [![Documentation Build](https://github.com/NREL-Sienna/Sienna-PACKAGE.jl/workflows/Documentation/badge.svg?)](https://nrel-sienna.github.io/Sienna-PACKAGE.jl/stable)
 [<img src="https://img.shields.io/badge/slack-@Sienna/SiennaPACKAGE-sienna.svg?logo=slack">](https://join.slack.com/t/nrel-siip/shared_invite/zt-glam9vdu-o8A9TwZTZqqNTKHa7q3BpQ)
-[![Sienna-PACKAGE.jl Downloads](https://shields.io/endpoint?url=https://pkgs.genieframework.com/api/v1/badge/SIIP-PACKAGE)](https://pkgs.genieframework.com?packages=Sienna-PACKAGE)
+[![Sienna-PACKAGE.jl Downloads](https://shields.io/endpoint?url=https://pkgs.genieframework.com/api/v1/badge/PowerSystemsInvestmentsPortfolios)](https://pkgs.genieframework.com?packages=Sienna-PACKAGE)
 
 
-This repository contains the template files for a dummy package called SIIP-PACKAGE. IT contains the required files for
+This repository contains the template files for a dummy package called PowerSystemsInvestmentsPortfolios. IT contains the required files for
 
 - Testing
 - Documentation
@@ -20,4 +20,4 @@ Contributions to the development and enahancement of Sienna-PACKAGE is welcome. 
 
 ## License
 
-SIIP-PACKAGE is released under a BSD [license](https://github.com/NREL/SIIP-PACKAGE/blob/main/LICENSE). Sienna PACKAGE has been developed as part of A PROJECT at the U.S. Department of Energy's National Renewable Energy Laboratory ([NREL](https://www.nrel.gov/))
+PowerSystemsInvestmentsPortfolios is released under a BSD [license](https://github.com/NREL/PowerSystemsInvestmentsPortfolios/blob/main/LICENSE). Sienna PACKAGE has been developed as part of A PROJECT at the U.S. Department of Energy's National Renewable Energy Laboratory ([NREL](https://www.nrel.gov/))

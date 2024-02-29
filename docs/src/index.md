@@ -1,14 +1,14 @@
-# PowerSystems.jl
+# PowerSystemsInvestmentsPortfolio.jl
 
 ```@meta
-CurrentModule = SIIP_PACKAGE
+CurrentModule = PowerSystemsInvestmentsPortfolios
 ```
 
 ## Overview
 
-`PSIIP-PACKAGE .jl` is a [`Julia`](http://www.julialang.org) package that provides blah blah
+`PowerSystemsInvestmentsPortfolios .jl` is a [`Julia`](http://www.julialang.org) package that provides blah blah
 
-------------
-SIIP-PACKAGE  has been developed as part of the Scalable Integrated Infrastructure Planning
-(SIIP) initiative at the U.S. Department of Energy's National Renewable Energy
+* * *
+
+PowerSystemsInvestmentsPortfolios  has been developed as part of XXX initiative at the U.S. Department of Energy's National Renewable Energy
 Laboratory ([NREL](https://www.nrel.gov/)).

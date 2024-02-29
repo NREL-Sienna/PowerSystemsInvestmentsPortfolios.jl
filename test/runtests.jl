@@ -87,7 +87,7 @@ function run_tests()
         end
 
         # Testing Topological components of the schema
-        @time @testset "Begin SIIP-PACKAGE tests" begin
+        @time @testset "Begin PowerSystemsInvestmentsPortfolios tests" begin
             @includetests ARGS
         end
 

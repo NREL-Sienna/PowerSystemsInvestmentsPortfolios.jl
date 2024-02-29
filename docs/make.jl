@@ -9,15 +9,15 @@ pages = OrderedDict(
 )
 
 makedocs(
-    modules=[SIIP-PACKAGE],
+    modules=[PowerSystemsInvestmentsPortfolios],
     format=Documenter.HTML(prettyurls=haskey(ENV, "GITHUB_ACTIONS")),
-    sitename="SIIP-PACKAGE.jl",
+    sitename="PowerSystemsInvestmentsPortfolios.jl",
     authors="Freddy Mercury, Nikola Tesla, Leonard Bernestein",
     pages=Any[p for p in pages],
 )
 
 deploydocs(
-    repo="github.com/NREL-SIIP/SIIP-PACKAGE.git",
+    repo="github.com/NREL-SIIP/PowerSystemsInvestmentsPortfolios.git",
     target="build",
     branch="gh-pages",
     devbranch="main",
