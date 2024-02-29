@@ -1,6 +1,6 @@
 # Public API Reference
 
 ```@autodocs
-Modules = [SIIP-Package]
+Modules = [PowerSystemsInvestmentsPortfolios]
 Public = true
 ```

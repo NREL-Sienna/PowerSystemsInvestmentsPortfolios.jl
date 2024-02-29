@@ -1,6 +1,6 @@
 # Internal API
 
 ```@autodocs
-Modules = [SIIP-Package]
+Modules = [PowerSystemsInvestmentsPortfolios]
 Public = false
 ```

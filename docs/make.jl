@@ -1,4 +1,4 @@
-using Documenter, SIIP - PACKAGE
+using Documenter, PowerSystemsInvestmentsPortfolios
 
 pages = OrderedDict(
     "Welcome Page" => "index.md",
@@ -17,7 +17,7 @@ makedocs(
 )
 
 deploydocs(
-    repo="github.com/NREL-SIIP/PowerSystemsInvestmentsPortfolios.git",
+    repo="github.com/NREL-Sienna/PowerSystemsInvestmentsPortfolios.git",
     target="build",
     branch="gh-pages",
     devbranch="main",

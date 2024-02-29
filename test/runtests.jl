@@ -2,11 +2,11 @@ using Test
 import Logging
 
 import Aqua
-Aqua.test_unbound_args(SIIP - PACKAGE)
-Aqua.test_undefined_exports(SIIP - PACKAGE)
-Aqua.test_ambiguities(SIIP - PACKAGE)
-Aqua.test_stale_deps(SIIP - PACKAGE)
-Aqua.test_deps_compat(SIIP - PACKAGE)
+Aqua.test_unbound_args(PowerSystemsInvestmentsPortfolios)
+Aqua.test_undefined_exports(PowerSystemsInvestmentsPortfolios)
+Aqua.test_ambiguities(PowerSystemsInvestmentsPortfolios)
+Aqua.test_stale_deps(PowerSystemsInvestmentsPortfolios)
+Aqua.test_deps_compat(PowerSystemsInvestmentsPortfolios)
 
 LOG_FILE = "power-systems.log"
 LOG_LEVELS = Dict(
@@ -64,7 +64,7 @@ function get_logging_level_from_env(env_name::String, default)
 end
 
 function run_tests()
-    logging_config_filename = get(ENV, "SIIP_LOGGING_CONFIG", nothing)
+    logging_config_filename = get(ENV, "Sienna_LOGGING_CONFIG", nothing)
     if logging_config_filename !== nothing
         config = IS.LoggingConfiguration(logging_config_filename)
     else
