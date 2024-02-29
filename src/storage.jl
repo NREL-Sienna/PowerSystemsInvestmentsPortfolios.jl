@@ -1,5 +1,6 @@
 struct StorageTechnology{T <: PSY.Storage} <: Technology
     name::String
+    available::Bool
     power_systems_type::Type{T}
     capital_cost::Float64
     battery_chemistry::String # Implement Chemistry Type Enums in PowerSystems

@@ -7,6 +7,10 @@ export Portfolio
 export SupplyTechnology
 export TransportTechnology
 export DemandTechnology
+export StorageTechnology
+
+export add_technology!
+export add_technologies!
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems
