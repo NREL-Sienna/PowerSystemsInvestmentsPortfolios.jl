@@ -11,6 +11,7 @@ export DemandTechnology
 const PSY = PowerSystems
 const IS = InfrastructureSystems
 
+include("technologies.jl")
 include("demand.jl")
 include("supply.jl")
 include("transport.jl")

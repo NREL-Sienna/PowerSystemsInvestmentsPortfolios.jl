@@ -1,6 +1,6 @@
-struct StorageTechnology{T <: PSY.Storage} <: IS.Component
+struct StorageTechnology{T <: PSY.Storage} <: Technology
     name::String
-    power_systems_type::PSY.Device
+    power_systems_type::Type{T}
     capital_cost::Float64
     battery_chemistry::String # Implement Chemistry Type Enums in PowerSystems
     prime_mover::PSY.Primer_mover

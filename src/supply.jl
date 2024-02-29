@@ -1,4 +1,4 @@
-struct SupplyTechnology{T <: PSY.Device} <: IS.Component
+struct SupplyTechnology{T <: PSY.Generator} <: Technology
     name::String
     power_systems_type::Type{T}
     fuel::PSY.ThermalFuels
@@ -6,7 +6,6 @@ struct SupplyTechnology{T <: PSY.Device} <: IS.Component
     capacity_factor::Float64
     capital_cost::Float64
     operational_cost::PSY.OperationalCost
-    ext::Dict{String, Any}
     time_series_container::InfrastructureSystems.TimeSeriesContainer
     internal::InfrastructureSystemsInternal
 end

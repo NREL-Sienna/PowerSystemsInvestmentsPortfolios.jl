@@ -1,8 +1,7 @@
-struct DemandTechnology{T <: PSY.Device} <: IS.Component
+struct DemandTechnology{T <: PSY.StaticInjection} <: Technology
     name::String
-    power_systems_type::PSY.Device
+    power_systems_type::Type{T}
     capital_cost::Float64
-    ext::Dict{String, Any}
     time_series_container::InfrastructureSystems.TimeSeriesContainer
     internal::InfrastructureSystemsInternal
 end
