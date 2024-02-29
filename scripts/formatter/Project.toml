@@ -1,5 +1,5 @@
 uuid = "c6367ca8-164d-4469-afe3-c91cf8860505"
-authors = ["Jose Daniel Lara <jdlara@berkeley.edu>"]
+authors = ["Jose Daniel Lara"]
 
 [deps]
 JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
