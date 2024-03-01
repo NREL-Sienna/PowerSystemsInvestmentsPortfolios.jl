@@ -1,7 +1,7 @@
 module PowerSystemsInvestmentsPortfolios
 
 import InfrastructureSystems
-# TODO: Some of these re-exports may cause name collisions
+# TODO: Some of these re-exports may cause name collisions with PowerSystems
 import InfrastructureSystems:
     add_time_series,
     to_json,
@@ -36,8 +36,9 @@ const PSY = PowerSystems
 const IS = InfrastructureSystems
 
 include("technologies.jl")
-include("demand.jl")
+include("demand_requirement.jl")
 include("supply.jl")
+include("demand_side.jl")
 include("transport.jl")
 include("storage.jl")
 include("portfolio.jl")
