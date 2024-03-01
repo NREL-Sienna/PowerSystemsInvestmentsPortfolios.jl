@@ -8,6 +8,7 @@ struct StorageTechnology{T <: PSY.Storage} <: Technology
     capital_cost::Float64
     operational_cost::PSY.OperationalCost
     ext::Dict{String, Any}
-    time_series_container::InfrastructureSystems.TimeSeriesContainer
+    supplemental_attributes_container::IS.SupplementalAttributesContainer
+    time_series_container::IS.TimeSeriesContainer
     internal::InfrastructureSystemsInternal
 end

@@ -3,6 +3,7 @@ struct TransportTechnology{T <: PSY.Device} <: Technology
     available::Bool
     power_systems_type::Type{T}
     capital_cost::Float64
-    time_series_container::InfrastructureSystems.TimeSeriesContainer
+    supplemental_attributes_container::IS.SupplementalAttributesContainer
+    time_series_container::IS.TimeSeriesContainer
     internal::InfrastructureSystemsInternal
 end

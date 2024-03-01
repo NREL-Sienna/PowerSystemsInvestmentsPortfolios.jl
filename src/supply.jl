@@ -7,6 +7,7 @@ struct SupplyTechnology{T <: PSY.Generator} <: Technology
     capacity_factor::Float64
     capital_cost::Float64
     operational_cost::PSY.OperationalCost
-    time_series_container::InfrastructureSystems.TimeSeriesContainer
+    supplemental_attributes_container::IS.SupplementalAttributesContainer
+    time_series_container::IS.TimeSeriesContainer
     internal::InfrastructureSystemsInternal
 end

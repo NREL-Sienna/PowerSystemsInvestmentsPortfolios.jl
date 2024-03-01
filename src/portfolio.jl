@@ -8,7 +8,7 @@ struct Portfolio <: IS.InfrastructurePortfoliosType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     discount_rate::Float64
     portfolio_data::IS.PortfolioData # Inputs to the model
-    investment_data::Dict # Investment decisions container i.e., model outputs. Container TBD
+    investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     metadata::PortfolioMetadata
     time_series_directory::Union{Nothing, String}
     time_series_container::InfrastructurePortfolios.TimeSeriesContainer
