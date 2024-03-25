@@ -7,7 +7,7 @@ end
 struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     discount_rate::Float64
-    data::IS.SystemData # Inputs to the model
+    portfolio_data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     metadata::PortfolioMetadata
     time_series_directory::Union{Nothing, String}
@@ -307,7 +307,7 @@ Throws ArgumentError if the component is not stored in the system.
 function add_time_series!(
     portfolio::Portfolio,
     component::Technology,
-    time_series::PSY.TimeSeriesData,
+    time_series::IS.TimeSeriesData,
 )
     return IS.add_time_series!(portfolio.data, component, time_series)
 end
@@ -320,11 +320,7 @@ individually with the same data because in this case, only one time series array
 
 Throws ArgumentError if a component is not stored in the system.
 """
-function add_time_series!(
-    portfolio::Portfolio,
-    technologies,
-    time_series::PSY.TimeSeriesData,
-)
+function add_time_series!(portfolio::Portfolio, technologies, time_series::IS.TimeSeriesData)
     return IS.add_time_series!(portfolio.data, technologies, time_series)
 end
 
@@ -354,17 +350,14 @@ function remove_time_series!(
     ::Type{T},
     component::PSY.Component,
     name::String,
-) where {T <: PSY.TimeSeriesData}
+) where {T <: IS.TimeSeriesData}
     return IS.remove_time_series!(portfolio.data, T, component, name)
 end
 
 """
 Remove all the time series data for a time series type.
 """
-function remove_time_series!(
-    portfolio::Portfolio,
-    ::Type{T},
-) where {T <: PSY.TimeSeriesData}
+function remove_time_series!(portfolio::Portfolio, ::Type{T}) where {T <: IS.TimeSeriesData}
     return IS.remove_time_series!(portfolio.data, T)
 end
 
