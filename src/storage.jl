@@ -4,8 +4,7 @@ struct StorageTechnology{T <: PSY.Storage} <: Technology
     power_systems_type::Type{T}
     capital_cost::IS.FunctionData
     battery_chemistry::String # Implement Chemistry Type Enums in PowerSystems
-    prime_mover::PSY.Primer_mover
-    capital_cost::IS.FunctionData
+    prime_mover::PSY.PrimeMovers
     operational_cost::PSY.OperationalCost
     supplemental_attributes_container::IS.SupplementalAttributesContainer
     time_series_container::IS.TimeSeriesContainer

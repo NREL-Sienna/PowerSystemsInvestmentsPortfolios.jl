@@ -1,18 +1,18 @@
-mutable struct PortfolioMetadata <: IS.InfrastructurePortfoliosType
+mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
     description::Union{Nothing, String}
     data_source::Union{Nothing, String}
 end
 
-struct Portfolio <: IS.InfrastructurePortfoliosType
+struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     discount_rate::Float64
-    portfolio_data::IS.PortfolioData # Inputs to the model
+    portfolio_data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     metadata::PortfolioMetadata
     time_series_directory::Union{Nothing, String}
-    time_series_container::InfrastructurePortfolios.TimeSeriesContainer
-    internal::IS.InfrastructurePortfoliosInternal
+    time_series_container::IS.TimeSeriesContainer
+    internal::IS.InfrastructureSystemsInternal
 end
 
 """
@@ -176,7 +176,7 @@ Throws ArgumentError if the component is not stored in the system.
 function add_time_series!(
     portfolio::Portfolio,
     component::Technology,
-    time_series::TimeSeriesData,
+    time_series::IS.TimeSeriesData,
 )
     return IS.add_time_series!(portfolio.data, component, time_series)
 end
@@ -189,7 +189,7 @@ individually with the same data because in this case, only one time series array
 
 Throws ArgumentError if a component is not stored in the system.
 """
-function add_time_series!(portfolio::Portfolio, technologies, time_series::TimeSeriesData)
+function add_time_series!(portfolio::Portfolio, technologies, time_series::IS.TimeSeriesData)
     return IS.add_time_series!(portfolio.data, technologies, time_series)
 end
 
@@ -218,14 +218,14 @@ function remove_time_series!(
     ::Type{T},
     component::Component,
     name::String,
-) where {T <: TimeSeriesData}
+) where {T <: IS.TimeSeriesData}
     return IS.remove_time_series!(portfolio.data, T, component, name)
 end
 
 """
 Remove all the time series data for a time series type.
 """
-function remove_time_series!(portfolio::Portfolio, ::Type{T}) where {T <: TimeSeriesData}
+function remove_time_series!(portfolio::Portfolio, ::Type{T}) where {T <: IS.TimeSeriesData}
     return IS.remove_time_series!(portfolio.data, T)
 end
 

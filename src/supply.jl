@@ -3,7 +3,7 @@ struct SupplyTechnology{T <: PSY.Generator} <: Technology
     available::Bool
     power_systems_type::Type{T}
     fuel::PSY.ThermalFuels
-    prime_mover::PSY.Primer_mover
+    prime_mover::PSY.PrimeMovers
     capacity_factor::Float64
     capital_cost::IS.FunctionData
     operational_cost::PSY.OperationalCost
