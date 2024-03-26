@@ -10,3 +10,5 @@ struct StorageTechnology{T <: PSY.Storage} <: Technology
     time_series_container::IS.TimeSeriesContainer
     internal::InfrastructureSystemsInternal
 end
+
+get_name(technology::StorageTechnology) = technology.name
