@@ -47,11 +47,6 @@ Get the description of the portfolio.
 get_description(val::Portfolio) = val.metadata.description
 
 """
-Get the description of the portfolio.
-"""
-get_description(val::Portfolio) = val.metadata.description
-
-"""
 Add a technology to the portfoliotem.
 
 Throws ArgumentError if the technology's name is already stored for its concrete type.
