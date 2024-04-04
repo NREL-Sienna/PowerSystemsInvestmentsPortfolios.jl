@@ -201,7 +201,8 @@ get_compression_settings(portfolio::Portfolio) = IS.get_compression_settings(por
 """
 Return the resolution for all time series.
 """
-get_time_series_resolution(portfolio::Portfolio) = IS.get_time_series_resolution(portfolio.data)
+get_time_series_resolution(portfolio::Portfolio) =
+    IS.get_time_series_resolution(portfolio.data)
 
 """
 Remove all time series data from the system.
@@ -229,6 +230,164 @@ function remove_time_series!(portfolio::Portfolio, ::Type{T}) where {T <: TimeSe
     return IS.remove_time_series!(portfolio.data, T)
 end
 
+"""
+Iterates over all techonologies.
+
+# Examples
+
+```julia
+for tech in iterate_technologies(portfolio)
+    @show tech
+end
+```
+
+See also: [`get_technologies`](@ref)
+"""
+function iterate_technologies(portfolio::Portfolio)
+    return IS.iterate_components(portfolio.data)
+end
+
+"""
+Remove all technologies from the portfolio.
+"""
+function clear_technologies!(portfolio::Portfolio)
+    return IS.clear_components!(portfolio.data)
+end
+
+"""
+Remove all technologies of type T from the portfolio.
+
+Throws ArgumentError if the type is not stored.
+"""
+function remove_technologies!(portfolio::Portfolio, ::Type{T}) where {T <: Technology}
+    components = IS.remove_components!(T, portfolio.data)
+    for component in components
+        handle_component_removal!(portfolio, component)
+    end
+    return components
+end
+
+function remove_technologies!(
+    filter_func::Function,
+    portfolio::Portfolio,
+    ::Type{T},
+) where {T <: Technology}
+    components = collect(get_technologies(filter_func, T, portfolio))
+    for component in components
+        remove_technology!(portfolio, component)
+    end
+    return components
+end
+
+#=
+### Not sure if these methods make sense for technologies
+"""
+Set the name for a technology that is attached to the Portfolio.
+"""
+set_name!(portfolio::Portfolio, technology::Technology, name::AbstractString) =
+    set_name!(portfolio.data, technology, name)
+
+"""
+Set the name of a technology.
+
+Throws an exception if the technology is attached to a system.
+TODO: Check if this method makes sense here
+"""
+function set_name!(technology::Technology, name::AbstractString)
+    # The units setting is nothing until the component is attached to the system.
+    if get_units_setting(technology) !== nothing
+        # This is not allowed because components are stored in the system in a Dict
+        # keyed by name.
+        error(
+            "The component is attached to a system. " *
+            "Call set_name!(system, component, name) instead.",
+        )
+    end
+
+    technology.name = name
+end
+=#
+
+function clear_units!(technology::Technology)
+    get_internal(technology).units_info = nothing
+    return
+end
+
+"""
+Remove a technology from the portfolio by its value.
+
+Throws ArgumentError if the technology is not stored.
+"""
+function remove_technology!(portfolio::Portfolio, technology::T) where {T <: Technology}
+    check_technology_removal(portfolio, technology)
+    IS.remove_component!(portfolio.data, technology)
+    handle_technology_removal!(portfolio, technology)
+    return
+end
+
+"""
+Throws ArgumentError if a PowerSystemsInvestmentPorfol rule blocks removal from the system.
+"""
+function check_technology_removal(
+    portfolio::Portfolio,
+    technology::T,
+) where {T <: Technology}
+    # TODO: Implement checks if needed
+    if 1 == 2
+        throw(
+            ArgumentError(
+                "Tech $(get_name(technology)) cannot be removed for a specific logic",
+            ),
+        )
+        return
+    end
+end
+
+"""
+Remove a technology from the portfolio by its name.
+
+Throws ArgumentError if the technology is not stored.
+"""
+function remove_technology!(
+    ::Type{T},
+    portfolio::Portfolio,
+    name::AbstractString,
+) where {T <: Technology}
+    technology = IS.remove_component!(T, portfolio.data, name)
+    handle_technology_removal!(portfolio, technology)
+    return
+end
+
+"""
+Check to see if the technology of type T with name exists.
+"""
+function has_technology(
+    ::Type{T},
+    portfolio::Portfolio,
+    name::AbstractString,
+) where {T <: Portfolio}
+    return IS.has_component(T, portfolio.data.components, name)
+end
+
+"""
+Get the technology of type T with name. Returns nothing if no technology matches. If T is an abstract
+type then the names of technologies across all subtypes of T must be unique.
+
+See [`get_technologies_by_name`](@ref) for abstract types with non-unique names across subtypes.
+
+Throws ArgumentError if T is not a concrete type and there is more than one component with
+requested name
+"""
+function get_component(
+    ::Type{T},
+    portfolio::Portfolio,
+    name::AbstractString,
+) where {T <: Technology}
+    return IS.get_component(T, portfolio.data, name)
+end
+
+## To continue: base.jl in PSY line 887.
+
 function IS.serialize(portfolio::Portfolio)
     return
 end
@@ -236,13 +395,12 @@ end
 function IS.deserialize(
     ::Type{Portfolio},
     filename::AbstractString;
-    time_series_read_only = false,
-    time_series_directory = nothing,
+    time_series_read_only=false,
+    time_series_directory=nothing,
     kwargs...,
 )
     portfolio = nothing
     return portfolio
 end
 
-function deserialize_components!(portfolio::Portfolio, raw)
-end
+function deserialize_components!(portfolio::Portfolio, raw) end
