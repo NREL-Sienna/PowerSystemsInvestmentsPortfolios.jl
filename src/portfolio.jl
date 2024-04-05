@@ -1,18 +1,18 @@
-mutable struct PortfolioMetadata <: IS.InfrastructurePortfoliosType
+mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
     description::Union{Nothing, String}
     data_source::Union{Nothing, String}
 end
 
-struct Portfolio <: IS.InfrastructurePortfoliosType
+struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     discount_rate::Float64
-    portfolio_data::IS.PortfolioData # Inputs to the model
+    data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     metadata::PortfolioMetadata
     time_series_directory::Union{Nothing, String}
-    time_series_container::InfrastructurePortfolios.TimeSeriesContainer
-    internal::IS.InfrastructurePortfoliosInternal
+    time_series_container::IS.TimeSeriesContainer
+    internal::IS.InfrastructureSystemsInternal
 end
 
 """
@@ -47,11 +47,6 @@ Get the description of the portfolio.
 get_description(val::Portfolio) = val.metadata.description
 
 """
-Get the description of the portfolio.
-"""
-get_description(val::Portfolio) = val.metadata.description
-
-"""
 Add a technology to the portfoliotem.
 
 Throws ArgumentError if the technology's name is already stored for its concrete type.
@@ -77,12 +72,13 @@ function add_technology!(
     skip_validation=false,
     kwargs...,
 ) where {T <: Technology}
+    deserialization_in_progress = _is_deserialization_in_progress(portfolio)
     IS.add_component!(
         portfolio.data,
         technology;
         allow_existing_time_series=deserialization_in_progress,
         skip_validation=skip_validation,
-        _kwargs...,
+        kwargs...,
     )
 
     return
@@ -199,11 +195,11 @@ See [`get_technology`](@ref) if the concrete type is known.
 
 Throws ArgumentError if T is not an abstract type.
 """
-function get_components_by_name(
+function get_technologies_by_name(
     ::Type{T},
     portfolio::Portfolio,
     name::AbstractString,
-) where {T <: Component}
+) where {T <: Technology}
     return IS.get_components_by_name(T, portfolio.data, name)
 end
 
@@ -218,7 +214,7 @@ end
 """
 Return true if the component is attached to the system.
 """
-function is_attached(technology::T, portfolio::Porftolio) where {T <: Technology}
+function is_attached(technology::T, portfolio::Portfolio) where {T <: Technology}
     return is_attached(T, get_name(technology), portfolio)
 end
 
@@ -229,9 +225,9 @@ end
 """
 Throws ArgumentError if the component is not attached to the system.
 """
-function throw_if_not_attached(component::Component, sys::System)
-    if !is_attached(component, sys)
-        throw(ArgumentError("$(summary(component)) is not attached to the system"))
+function throw_if_not_attached(technology::Technology, portfolio::Portfolio)
+    if !is_attached(technology, portfolio)
+        throw(ArgumentError("$(summary(technology)) is not attached to the system"))
     end
 end
 
@@ -284,7 +280,7 @@ function remove_technologies!(
     return components
 end
 
-handle_technology_removal!(::Portfolio, component::Component) = nothing
+handle_technology_removal!(::Portfolio, technology::Technology) = nothing
 
 function handle_component_removal!(portfolio::Portfolio, technology::Technology)
     _handle_technology_removal_common!(technology)
@@ -311,7 +307,7 @@ Throws ArgumentError if the component is not stored in the system.
 function add_time_series!(
     portfolio::Portfolio,
     component::Technology,
-    time_series::TimeSeriesData,
+    time_series::PSY.TimeSeriesData,
 )
     return IS.add_time_series!(portfolio.data, component, time_series)
 end
@@ -324,7 +320,11 @@ individually with the same data because in this case, only one time series array
 
 Throws ArgumentError if a component is not stored in the system.
 """
-function add_time_series!(portfolio::Portfolio, technologies, time_series::TimeSeriesData)
+function add_time_series!(
+    portfolio::Portfolio,
+    technologies,
+    time_series::PSY.TimeSeriesData,
+)
     return IS.add_time_series!(portfolio.data, technologies, time_series)
 end
 
@@ -352,16 +352,19 @@ Remove the time series data for a component and time series type.
 function remove_time_series!(
     portfolio::Portfolio,
     ::Type{T},
-    component::Component,
+    component::PSY.Component,
     name::String,
-) where {T <: TimeSeriesData}
+) where {T <: PSY.TimeSeriesData}
     return IS.remove_time_series!(portfolio.data, T, component, name)
 end
 
 """
 Remove all the time series data for a time series type.
 """
-function remove_time_series!(portfolio::Portfolio, ::Type{T}) where {T <: TimeSeriesData}
+function remove_time_series!(
+    portfolio::Portfolio,
+    ::Type{T},
+) where {T <: PSY.TimeSeriesData}
     return IS.remove_time_series!(portfolio.data, T)
 end
 
@@ -484,3 +487,8 @@ function IS.deserialize(
 end
 
 function deserialize_components!(portfolio::Portfolio, raw) end
+
+function _is_deserialization_in_progress(portfolio::Portfolio)
+    ext = get_ext(portfolio)
+    return get(ext, "deserialization_in_progress", false)
+end
