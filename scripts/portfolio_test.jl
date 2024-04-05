@@ -42,3 +42,4 @@ t = SupplyTechnology{ThermalStandard}(
 )
 
 PSIP.add_technology!(p, t)
+PSIP.remove_technology!(SupplyTechnology{ThermalStandard}, p, "thermal_tech")

@@ -428,6 +428,21 @@ function remove_technology!(portfolio::Portfolio, technology::T) where {T <: Tec
 end
 
 """
+Remove a technology from the portfolio by its name.
+
+Throws ArgumentError if the component is not stored.
+"""
+function remove_technology!(
+    ::Type{T},
+    portfolio::Portfolio,
+    name::AbstractString,
+) where {T <: Technology}
+    tech = IS.remove_component!(T, portfolio.data, name)
+    handle_technology_removal!(portfolio, tech)
+    return
+end
+
+"""
 Throws ArgumentError if a PowerSystemsInvestmentPorfol rule blocks removal from the system.
 """
 function check_technology_removal(
