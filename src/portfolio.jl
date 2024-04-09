@@ -368,6 +368,38 @@ function remove_time_series!(
     return IS.remove_time_series!(portfolio.data, T)
 end
 
+
+# TODO: Check if this method makes sense for technologies, also if this is called correctly
+"""
+Returns an iterator of TimeSeriesData instances attached to the component.
+"""
+function get_time_series_multiple(
+    component::InfrastructureSystemsComponent,
+    filter_func = nothing;
+    type = nothing,
+    start_time = nothing,
+    name = nothing,
+)
+    return IS.get_time_series_multiple(
+        component,
+        filter_func;
+        type=type,
+        start_time=start_time,
+        name=name,
+    )
+end
+
+"""
+Returns an iterator of TimeSeriesData instances attached to the component.
+"""
+function get_time_series_multiple(
+    ::Type{TimeSeriesMetadata},
+    component::InfrastructureSystemsComponent,
+)
+    return IS.get_time_series_multiple(component, TimeSeriesMetadata)
+end
+
+
 #=
 ### Not sure if these methods make sense for technologies
 """
