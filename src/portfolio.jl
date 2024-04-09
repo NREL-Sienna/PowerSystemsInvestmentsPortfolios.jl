@@ -368,6 +368,24 @@ function remove_time_series!(
     return IS.remove_time_series!(portfolio.data, T)
 end
 
+"""
+Getting a time series by key
+"""
+function get_time_series_by_key(
+    key::TimeSeriesKey,
+    component::InfrastructureSystemsComponent;
+    start_time::Union{Nothing, Dates.DateTime} = nothing,
+    len::Union{Nothing, Int} = nothing,
+    count::Union{Nothing, Int} = nothing,
+)
+    return IS.get_time_series_by_key(
+        key,
+        component,
+        start_time=start_time,
+        len=len,
+        count=count,
+    )
+end
 
 # TODO: Check if this method makes sense for technologies, also if this is called correctly
 """
