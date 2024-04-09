@@ -459,6 +459,31 @@ function _get_single_time_series_transformed_parameters(
     return IS._get_single_time_series_transformed_parameters(ts_metadata, T, horizon, interval)
 end
 
+"""
+Clearing the time series for a storage device
+"""
+function clear_time_series_storage!(component::InfrastructureSystemsComponent)
+    return IS.clear_time_series_storage!(component)
+end
+
+
+"""
+Setting the time series for a storage device
+"""
+function set_time_series_storage!(
+    component::InfrastructureSystemsComponent,
+    storage::Union{Nothing, TimeSeriesStorage},
+)
+    return IS.set_time_series_storage!(component, storage)
+end
+
+"""
+Getting the time series for a storage device
+"""
+function _get_time_series_storage(component::InfrastructureSystemsComponent)
+    return IS._get_time_series_storage(component)
+end
+
 #=
 ### Not sure if these methods make sense for technologies
 """
