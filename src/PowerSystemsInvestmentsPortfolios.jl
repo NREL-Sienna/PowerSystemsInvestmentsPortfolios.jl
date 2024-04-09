@@ -22,6 +22,7 @@ import InfrastructureSystems:
     StructField
 
 import PowerSystems
+import PrettyTables
 
 export Portfolio
 export SupplyTechnology
@@ -42,6 +43,7 @@ include("demand_side.jl")
 include("transport.jl")
 include("storage.jl")
 include("portfolio.jl")
+include("utils/print.jl")
 
 using DocStringExtensions
 
