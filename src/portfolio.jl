@@ -1,18 +1,99 @@
+const PORTFOLIO_KWARGS =
+    Set((:name, :description, :data_source, :run_checks, :unit_portfolio))
+
+const DEFAULT_DISCOUNT_RATE = 0.07
+const DEFAULT_AGGREGATION = PSY.ACBus
+
 mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
     description::Union{Nothing, String}
     data_source::Union{Nothing, String}
 end
 
+#TODO: Define if we are going to support unit systems
 struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     discount_rate::Float64
     data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
-    metadata::PortfolioMetadata
+    #units_settings::IS.SystemUnitsSettings
     time_series_directory::Union{Nothing, String}
     time_series_container::IS.TimeSeriesContainer
+    metadata::PortfolioMetadata
     internal::IS.InfrastructureSystemsInternal
+
+    function Portfolio(
+        aggregation,
+        discount_rate::Float64,
+        data,
+        investment_schedule::Dict,
+        #units_settings::IS.SystemUnitsSettings,
+        internal::IS.InfrastructureSystemsInternal,
+        time_series_directory=nothing,
+        name=nothing,
+        description=nothing,
+        data_source=nothing,
+        kwargs...,
+    )
+        #TODO: Provide support to kwargs
+        #=
+        unsupported = setdiff(keys(kwargs), PORTFOLIO_KWARGS)
+        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
+        if !isnothing(get(kwargs, :unit_system, nothing))
+            @warn(
+                "unit_system kwarg ignored. The value in SystemUnitsSetting takes precedence"
+            )
+        end
+        =#
+        return new(
+            aggregation,
+            discount_rate,
+            data,
+            investment_schedule,
+            #units_settings,
+            time_series_directory,
+            IS.TimeSeriesContainer(),
+            PortfolioMetadata(name, description, data_source),
+            internal,
+        )
+    end
+end
+
+#= #TODO: Check how to handle unit settings
+function Portfolio(aggregation, discount_rate::Number, data, investment_schedule, internal; kwargs...)
+    unit_portfolio_ = get(kwargs, "unit_system", "NATURAL_UNITS")
+    unit_portfolio = PSY.UNIT_SYSTEM_MAPPING[unit_portfolio_]
+    unit_settings = IS.SystemUnitsSettings(base_power, unit_portfolio)
+    return Portfolio(aggregation, data, discount_rate, investment_schedule, unit_settings, internal; kwargs...)
+end
+=#
+
+"""
+Construct an empty `Portfolio`. Useful for building a Portfolio from scratch.
+"""
+function Portfolio(discount_rate; kwargs...)
+    data = PSY._create_system_data_from_kwargs(; kwargs...)
+    return Portfolio(
+        DEFAULT_AGGREGATION,
+        discount_rate,
+        data,
+        Dict(),
+        IS.InfrastructureSystemsInternal(),
+    )
+end
+
+"""
+Construct an empty `Portfolio` specifying aggregation. Useful for building a Portfolio from scratch.
+"""
+function Portfolio(aggregation, discount_rate; kwargs...)
+    data = _create_system_data_from_kwargs(; kwargs...)
+    return Portfolio(
+        aggregation,
+        discount_rate,
+        data,
+        Dict(),
+        IS.InfrastructureSystemsInternal(),
+    )
 end
 
 """
@@ -458,21 +539,6 @@ function check_technology_removal(
         )
         return
     end
-end
-
-"""
-Remove a technology from the portfolio by its name.
-
-Throws ArgumentError if the technology is not stored.
-"""
-function remove_technology!(
-    ::Type{T},
-    portfolio::Portfolio,
-    name::AbstractString,
-) where {T <: Technology}
-    technology = IS.remove_component!(T, portfolio.data, name)
-    handle_technology_removal!(portfolio, technology)
-    return
 end
 
 """
