@@ -448,7 +448,7 @@ Getting a time series by key
 """
 function get_time_series_by_key(
     key::TimeSeriesKey,
-    component::InfrastructureSystemsComponent;
+    component::Technology;
     start_time::Union{Nothing, Dates.DateTime} = nothing,
     len::Union{Nothing, Int} = nothing,
     count::Union{Nothing, Int} = nothing,
@@ -467,7 +467,7 @@ end
 Returns an iterator of TimeSeriesData instances attached to the component.
 """
 function get_time_series_multiple(
-    component::InfrastructureSystemsComponent,
+    component::Technology,
     filter_func = nothing;
     type = nothing,
     start_time = nothing,
@@ -487,7 +487,7 @@ Returns an iterator of TimeSeriesData instances attached to the component.
 """
 function get_time_series_multiple(
     ::Type{TimeSeriesMetadata},
-    component::InfrastructureSystemsComponent,
+    component::Technology,
 )
     return IS.get_time_series_multiple(component, TimeSeriesMetadata)
 end
@@ -497,7 +497,7 @@ end
 Returns the TimeSeriesData instance with the metadata that's attached to the component.
 """
 function get_time_series_with_metadata_multiple(
-    component::InfrastructureSystemsComponent,
+    component::Technology,
     filter_func = nothing;
     type = nothing,
     start_time = nothing,
@@ -521,7 +521,7 @@ All required checks must have been completed by the caller.
 Return true if a transformation occurs.
 """
 function transform_single_time_series_internal!(
-    component::InfrastructureSystemsComponent,
+    component::Technology,
     ::Type{T},
     params::TimeSeriesParameters,
 ) where {T <: DeterministicSingleTimeSeries}
@@ -532,7 +532,7 @@ end
 Method to get the time series transformed parameters
 """
 function get_single_time_series_transformed_parameters(
-    component::InfrastructureSystemsComponent,
+    component::Technology,
     ::Type{T},
     horizon::Int,
     interval::Dates.Period,
@@ -544,7 +544,7 @@ end
 Get method for transformed parameters from metadata instead
 """
 function _get_single_time_series_transformed_parameters(
-    ts_metadata::SingleTimeSeriesMetadata,
+    ts_metadata::Technology,
     ::Type{T},
     horizon::Int,
     interval::Dates.Period,
@@ -555,7 +555,7 @@ end
 """
 Clearing the time series for a storage device
 """
-function clear_time_series_storage!(component::InfrastructureSystemsComponent)
+function clear_time_series_storage!(component::StorageTechnology)
     return IS.clear_time_series_storage!(component)
 end
 
@@ -564,7 +564,7 @@ end
 Setting the time series for a storage device
 """
 function set_time_series_storage!(
-    component::InfrastructureSystemsComponent,
+    component::StorageTechnology,
     storage::Union{Nothing, TimeSeriesStorage},
 )
     return IS.set_time_series_storage!(component, storage)
@@ -573,7 +573,7 @@ end
 """
 Getting the time series for a storage device
 """
-function _get_time_series_storage(component::InfrastructureSystemsComponent)
+function _get_time_series_storage(component::StorageTechnology)
     return IS._get_time_series_storage(component)
 end
 

@@ -1,6 +1,6 @@
 name = "PowerSystemsInvestmentsPortfolios"
 uuid = "9212B679-331E-471F-8FA8-FF293E16DBC8"
-authors = ["Jose Daniel Lara", "Sourabh Dalvi"]
+authors = ["Jose Daniel Lara", "Sourabh Dalvi", "Rodrigo Henríquez-Auba", "Pradyumna Rao"]
 version = "0.1.0"
 
 [deps]
