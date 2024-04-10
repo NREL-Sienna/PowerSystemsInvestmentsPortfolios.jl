@@ -1,0 +1,50 @@
+{
+    "name": "",
+    "description": "",
+    "frequency": 60,
+    "time_series_resolution_milliseconds": 3600000,
+    "component_counts": [
+        {
+            "type": "Arc",
+            "count": 6
+        },
+        {
+            "type": "Area",
+            "count": 1
+        },
+        {
+            "type": "Bus",
+            "count": 5
+        },
+        {
+            "type": "GenericBattery",
+            "count": 1
+        },
+        {
+            "type": "Line",
+            "count": 6
+        },
+        {
+            "type": "LoadZone",
+            "count": 1
+        },
+        {
+            "type": "PowerLoad",
+            "count": 3
+        },
+        {
+            "type": "RenewableDispatch",
+            "count": 3
+        },
+        {
+            "type": "ThermalStandard",
+            "count": 5
+        }
+    ],
+    "time_series_counts": [
+        {
+            "type": "SingleTimeSeries",
+            "count": 6
+        }
+    ]
+}
