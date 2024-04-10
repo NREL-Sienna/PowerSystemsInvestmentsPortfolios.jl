@@ -20,10 +20,9 @@ t = SupplyTechnology{ThermalStandard}(
     0.98, # cap factor
     nothing,
     nothing,
-    IS.SupplementalAttributesContainer(),
-    IS.TimeSeriesContainer(),
-    IS.InfrastructureSystemsInternal(),
 )
 
 PSIP.add_technology!(p, t)
+IS.serialize(t)
+IS.serialize(p)
 PSIP.remove_technology!(SupplyTechnology{ThermalStandard}, p, "thermal_tech")
