@@ -19,7 +19,7 @@ struct Portfolio <: IS.InfrastructureSystemsType
     #units_settings::IS.SystemUnitsSettings
     time_series_directory::Union{Nothing, String}
     time_series_container::IS.TimeSeriesContainer
-    metadata::PortfolioMetadata
+metadata::PortfolioMetadata
     internal::IS.InfrastructureSystemsInternal
 
     function Portfolio(
@@ -552,19 +552,46 @@ function has_technology(
     return IS.has_component(T, portfolio.data.components, name)
 end
 
-function IS.serialize(portfolio::Portfolio)
-    return
+
+function IS.serialize(portfolio::T) where {T <: Portfolio}
+    data = Dict{String, Any}()
+    data["data_format_version"] = DATA_FORMAT_VERSION
+    for field in fieldnames(T)
+        # Exclude bus_numbers because they will get rebuilt during deserialization.
+        # Exclude time_series_directory because the portfolio may get deserialized on a
+        # different portfolio.
+        if field != :bus_numbers && field != :time_series_directory
+            data[string(field)] = serialize(getfield(portfolio, field))
+        end
+    end
+
+    return data
 end
 
 function IS.deserialize(
     ::Type{Portfolio},
-    filename::AbstractString;
+    filename::AbstractString,
     time_series_read_only=false,
     time_series_directory=nothing,
     kwargs...,
 )
-    portfolio = nothing
-    return portfolio
+    raw = open(filename) do io
+        JSON3.read(io, Dict)
+    end
+
+    if raw["data_format_version"] != DATA_FORMAT_VERSION
+        pre_read_conversion!(raw)
+    end
+
+    # These file paths are relative to the system file.
+    directory = dirname(filename)
+    for file_key in ("time_series_storage_file",)
+        if haskey(raw["data"], file_key) && !isabspath(raw["data"][file_key])
+            raw["data"][file_key] = joinpath(directory, raw["data"][file_key])
+        end
+    end
+
+    return from_dict(Portfolio, raw; kwargs...)
 end
 
 function deserialize_components!(portfolio::Portfolio, raw) end
