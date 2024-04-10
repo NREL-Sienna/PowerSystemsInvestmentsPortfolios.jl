@@ -1,0 +1,292 @@
+{
+    "auto_generated_structs": [
+        {
+            "struct_name": "DemandRequirement",
+            "parametric": "PSY.StaticInjection",
+            "docstring": "This struct represents the demand requirement for a power system.",
+            "fields": [
+                {
+                    "name": "name",
+                    "comment": "The name of the load demand requirement.",
+                    "data_type": "String"
+                },
+                {
+                    "name": "available",
+                    "comment": "Indicates whether the load demand is available or not in the simulation.",
+                    "null_value": "true",
+                    "data_type": "Bool"
+                },
+                {
+                    "name": "power_systems_type",
+                    "comment": "The type of PowerSystems Component this build option translates to.",
+                    "data_type": "Type{T}"
+                },
+                {
+                    "name": "region",
+                    "comment": "The region of the demand requirement.",
+                    "data_type": "Union{PSY.ACBus, PSY.AggregationTopology}"
+                },
+                {
+                    "name": "supplemental_attributes_container",
+                    "comment": "Container for supplemental attributes.",
+                    "null_value": "InfrastructureSystems.SupplementalAttributesContainer()",
+                    "data_type": "InfrastructureSystems.SupplementalAttributesContainer",
+                    "default": "InfrastructureSystems.SupplementalAttributesContainer()"
+                },
+                {
+                    "name": "time_series_container",
+                    "comment": "internal time_series storage",
+                    "null_value": "InfrastructureSystems.TimeSeriesContainer()",
+                    "data_type": "InfrastructureSystems.TimeSeriesContainer",
+                    "default": "InfrastructureSystems.TimeSeriesContainer()"
+                },
+                {
+                    "name": "internal",
+                    "comment": "power system internal reference, do not modify",
+                    "data_type": "InfrastructureSystemsInternal",
+                    "internal_default": "InfrastructureSystemsInternal()",
+                    "exclude_setter": true
+                }
+            ],
+            "supertype": "PSY.StaticInjection"
+        },
+        {
+            "struct_name": "DemandSideTechnology",
+            "parametric": "PSY.StaticInjection",
+            "docstring": "This struct represents a demand side technology in a power system.",
+            "fields": [
+                {
+                    "name": "name",
+                    "comment": "The name of the demand side technology.",
+                    "data_type": "String"
+                },
+                {
+                    "name": "available",
+                    "comment": "Indicates whether the technology is available or not in the simulation.",
+                    "null_value": "true",
+                    "data_type": "Bool"
+                },
+                {
+                    "name": "power_systems_type",
+                    "comment": "The type of PowerSystems Component this build option translates to.",
+                    "data_type": "Type{T}"
+                },
+                {
+                    "name": "capital_cost",
+                    "comment": "The capital cost of the technology.",
+                    "data_type": "IS.FunctionData"
+                },
+                {
+                    "name": "supplemental_attributes_container",
+                    "comment": "Container for supplemental attributes.",
+                    "null_value": "InfrastructureSystems.SupplementalAttributesContainer()",
+                    "data_type": "InfrastructureSystems.SupplementalAttributesContainer",
+                    "default": "InfrastructureSystems.SupplementalAttributesContainer()"
+                },
+                {
+                    "name": "time_series_container",
+                    "comment": "internal time_series storage",
+                    "null_value": "InfrastructureSystems.TimeSeriesContainer()",
+                    "data_type": "InfrastructureSystems.TimeSeriesContainer",
+                    "default": "InfrastructureSystems.TimeSeriesContainer()"
+                },
+                {
+                    "name": "internal",
+                    "comment": "power system internal reference, do not modify",
+                    "data_type": "InfrastructureSystemsInternal",
+                    "internal_default": "InfrastructureSystemsInternal()",
+                    "exclude_setter": true
+                }
+            ],
+            "supertype": "Technology"
+        },
+        {
+            "struct_name": "StorageTechnology",
+            "parametric": "PSY.Storage",
+            "docstring": "This struct represents a storage technology in a power system.",
+            "fields": [
+                {
+                    "name": "name",
+                    "comment": "The name of the storage technology.",
+                    "data_type": "String"
+                },
+                {
+                    "name": "available",
+                    "comment": "Indicates whether the technology is available or not in the simulation.",
+                    "null_value": "true",
+                    "data_type": "Bool"
+                },
+                {
+                    "name": "power_systems_type",
+                    "comment": "The type of PowerSystems Component this build option translates to.",
+                    "data_type": "Type{T}"
+                },
+                {
+                    "name": "capital_cost",
+                    "comment": "The capital cost of the technology.",
+                    "data_type": "IS.FunctionData"
+                },
+                {
+                    "name": "battery_chemistry",
+                    "comment": "The type of battery chemistry. Implement Chemistry Type Enums in PowerSystems.",
+                    "data_type": "String"
+                },
+                {
+                    "name": "prime_mover",
+                    "comment": "The prime mover of the storage technology.",
+                    "data_type": "PSY.PrimeMovers"
+                },
+                {
+                    "name": "operational_cost",
+                    "comment": "The operational cost of the storage technology.",
+                    "data_type": "PSY.OperationalCost"
+                },
+                {
+                    "name": "supplemental_attributes_container",
+                    "comment": "Container for supplemental attributes.",
+                    "null_value": "InfrastructureSystems.SupplementalAttributesContainer()",
+                    "data_type": "InfrastructureSystems.SupplementalAttributesContainer",
+                    "default": "InfrastructureSystems.SupplementalAttributesContainer()"
+                },
+                {
+                    "name": "time_series_container",
+                    "comment": "internal time_series storage",
+                    "null_value": "InfrastructureSystems.TimeSeriesContainer()",
+                    "data_type": "InfrastructureSystems.TimeSeriesContainer",
+                    "default": "InfrastructureSystems.TimeSeriesContainer()"
+                },
+                {
+                    "name": "internal",
+                    "comment": "power system internal reference, do not modify",
+                    "data_type": "InfrastructureSystemsInternal",
+                    "internal_default": "InfrastructureSystemsInternal()",
+                    "exclude_setter": true
+                }
+            ],
+            "supertype": "Technology"
+        },
+        {
+            "struct_name": "SupplyTechnology",
+            "parametric": "PSY.Generator",
+            "docstring": "This struct represents a supply technology in a power system.",
+            "fields": [
+                {
+                    "name": "name",
+                    "comment": "The name of the supply technology.",
+                    "data_type": "String"
+                },
+                {
+                    "name": "available",
+                    "comment": "Indicates whether the technology is available or not in the simulation.",
+                    "null_value": "true",
+                    "data_type": "Bool"
+                },
+                {
+                    "name": "power_systems_type",
+                    "comment": "The type of PowerSystems Component this build option translates to.",
+                    "data_type": "Type{T}"
+                },
+                {
+                    "name": "fuel",
+                    "comment": "The type of fuel used by the supply technology.",
+                    "data_type": "PSY.ThermalFuels"
+                },
+                {
+                    "name": "prime_mover",
+                    "comment": "The prime mover of the supply technology.",
+                    "data_type": "PSY.PrimeMovers"
+                },
+                {
+                    "name": "capacity_factor",
+                    "comment": "The capacity factor of the supply technology.",
+                    "data_type": "Float64"
+                },
+                {
+                    "name": "capital_cost",
+                    "comment": "The capital cost of the technology.",
+                    "null_value": "null",
+                    "data_type": "Union{Nothing, IS.FunctionData}"
+                },
+                {
+                    "name": "operational_cost",
+                    "comment": "The operational cost of the supply technology.",
+                    "null_value": "null",
+                    "data_type": "Union{Nothing, PSY.OperationalCost}"
+                },
+                {
+                    "name": "supplemental_attributes_container",
+                    "comment": "Container for supplemental attributes.",
+                    "null_value": "InfrastructureSystems.SupplementalAttributesContainer()",
+                    "data_type": "InfrastructureSystems.SupplementalAttributesContainer",
+                    "default": "InfrastructureSystems.SupplementalAttributesContainer()"
+                },
+                {
+                    "name": "time_series_container",
+                    "comment": "internal time_series storage",
+                    "null_value": "InfrastructureSystems.TimeSeriesContainer()",
+                    "data_type": "InfrastructureSystems.TimeSeriesContainer",
+                    "default": "InfrastructureSystems.TimeSeriesContainer()"
+                },
+                {
+                    "name": "internal",
+                    "comment": "power system internal reference, do not modify",
+                    "data_type": "InfrastructureSystemsInternal",
+                    "internal_default": "InfrastructureSystemsInternal()",
+                    "exclude_setter": true
+                }
+            ],
+            "supertype": "Technology"
+        },
+        {
+            "struct_name": "TransportTechnology",
+            "parametric": "PSY.Device",
+            "docstring": "This struct represents a transport technology in a power system.",
+            "fields": [
+                {
+                    "name": "name",
+                    "comment": "The name of the transport technology.",
+                    "data_type": "String"
+                },
+                {
+                    "name": "available",
+                    "comment": "Indicates whether the technology is available or not in the simulation.",
+                    "null_value": "true",
+                    "data_type": "Bool"
+                },
+                {
+                    "name": "power_systems_type",
+                    "comment": "The type of PowerSystems Component this build option translates to.",
+                    "data_type": "Type{T}"
+                },
+                {
+                    "name": "capital_cost",
+                    "comment": "The capital cost of the technology.",
+                    "data_type": "IS.FunctionData"
+                },
+                {
+                    "name": "supplemental_attributes_container",
+                    "comment": "Container for supplemental attributes.",
+                    "null_value": "InfrastructureSystems.SupplementalAttributesContainer()",
+                    "data_type": "InfrastructureSystems.SupplementalAttributesContainer",
+                    "default": "InfrastructureSystems.SupplementalAttributesContainer()"
+                },
+                {
+                    "name": "time_series_container",
+                    "comment": "internal time_series storage",
+                    "null_value": "InfrastructureSystems.TimeSeriesContainer()",
+                    "data_type": "InfrastructureSystems.TimeSeriesContainer",
+                    "default": "InfrastructureSystems.TimeSeriesContainer()"
+                },
+                {
+                    "name": "internal",
+                    "comment": "power system internal reference, do not modify",
+                    "data_type": "InfrastructureSystemsInternal",
+                    "internal_default": "InfrastructureSystemsInternal()",
+                    "exclude_setter": true
+                }
+            ],
+            "supertype": "Technology"
+        }
+    ],
+    "struct_validation_descriptors": []
+}

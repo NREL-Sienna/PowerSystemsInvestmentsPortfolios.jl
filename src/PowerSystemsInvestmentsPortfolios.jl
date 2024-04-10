@@ -82,6 +82,7 @@ const IS = InfrastructureSystems
 
 import PowerSystems
 import PrettyTables
+import JSON3
 
 export Portfolio
 export SupplyTechnology
@@ -96,16 +97,19 @@ const PSY = PowerSystems
 const IS = InfrastructureSystems
 
 include("technologies.jl")
-include("demand_requirement.jl")
-include("supply.jl")
-include("demand_side.jl")
-include("transport.jl")
-include("storage.jl")
+include("models/includes.jl")
+include("models/serialization.jl")
+# include("demand_requirement.jl")
+# include("supply.jl")
+# include("demand_side.jl")
+# include("transport.jl")
+# include("storage.jl")
 include("portfolio.jl")
 include("utils/print.jl")
 
 using DocStringExtensions
 
+const DATA_FORMAT_VERSION = "0.1.0"
 @template (FUNCTIONS, METHODS) = """
                                  $(TYPEDSIGNATURES)
                                  $(DOCSTRING)
