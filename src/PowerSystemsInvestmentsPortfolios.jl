@@ -83,6 +83,7 @@ const IS = InfrastructureSystems
 import PowerSystems
 import PrettyTables
 import JSON3
+import DataStructures: OrderedDict
 
 export Portfolio
 export SupplyTechnology

@@ -727,3 +727,118 @@ function _is_deserialization_in_progress(portfolio::Portfolio)
     ext = get_ext(portfolio)
     return get(ext, "deserialization_in_progress", false)
 end
+
+
+"""
+Serializes a portfolio to a JSON file and saves time series to an HDF5 file.
+
+# Arguments
+- `portfolio::Portfolio`: portfolio
+- `filename::AbstractString`: filename to write
+
+# Keyword arguments
+- `user_data::Union{Nothing, Dict} = nothing`: optional metadata to record
+- `pretty::Bool = false`: whether to pretty-print the JSON
+- `force::Bool = false`: whether to overwrite existing files
+- `check::Bool = false`: whether to run portfolio validation checks
+
+Refer to [`check_component`](@ref) for exceptions thrown if `check = true`.
+"""
+function IS.to_json(
+    portfolio::Portfolio,
+    filename::AbstractString;
+    user_data = nothing,
+    pretty = false,
+    force = false,
+    runchecks = false,
+)   
+    # TODO: add checks for portfolio and technology
+    # if runchecks
+    #     check(portfolio)
+    #     check_technologies(portfolio)
+    # end
+
+    IS.prepare_for_serialization_to_file!(portfolio.data, filename; force = force)
+    data = to_json(portfolio; pretty = pretty)
+    open(filename, "w") do io
+        write(io, data)
+    end
+
+    mfile = joinpath(dirname(filename), splitext(basename(filename))[1] * "_metadata.json")
+    _serialize_portfolio_metadata_to_file(portfolio, mfile, user_data)
+    @info "Serialized Portfolio to $filename"
+
+    return
+end
+
+function _serialize_portfolio_metadata_to_file(portfolio::Portfolio, filename, user_data)
+    name = get_name(portfolio)
+    description = get_description(portfolio)
+    resolution = get_time_series_resolution(portfolio).value
+    metadata = OrderedDict(
+        "name" => isnothing(name) ? "" : name,
+        "description" => isnothing(description) ? "" : description,
+        "time_series_resolution_milliseconds" => resolution,
+        "component_counts" => IS.get_component_counts_by_type(portfolio.data),
+        "time_series_counts" => IS.get_time_series_counts_by_type(portfolio.data),
+    )
+    if !isnothing(user_data)
+        metadata["user_data"] = user_data
+    end
+
+    open(filename, "w") do io
+        JSON3.pretty(io, metadata)
+    end
+
+    @info "Serialized Portfolio metadata to $filename"
+end
+
+
+"""
+If assign_new_uuids = true, generate new UUIDs for the portfolio and all components.
+
+Warning: time series data is not restored by this method. If that is needed, use the normal
+process to construct the portfolio from a serialized JSON file instead, such as with
+`Portfolio("portfolio.json")`.
+"""
+function IS.from_json(
+    io::Union{IO, String},
+    ::Type{Portfolio};
+    runchecks = true,
+    assign_new_uuids = false,
+    kwargs...,
+)
+    data = JSON3.read(io, Dict)
+    # These objects could be removed in to_json(portfolio). Doing it here will allow us to
+    # keep that JSON string fully consistent with time series and potentially use it in the
+    # future.
+    for component in data["data"]["components"]
+        if haskey(component, "time_series_container")
+            empty!(component["time_series_container"])
+        end
+    end
+
+    portfolio = from_dict(Portfolio, data; kwargs...)
+    _post_deserialize_handling(
+        portfolio;
+        runchecks = runchecks,
+        assign_new_uuids = assign_new_uuids,
+    )
+    return portfolio
+end
+
+function _post_deserialize_handling(portfolio::Portfolio; runchecks = true, assign_new_uuids = false)
+    runchecks && check(portfolio)
+    if assign_new_uuids
+        IS.assign_new_uuid!(portfolio)
+        for component in get_components(Technology, portfolio)
+            assign_new_uuid!(portfolio, component)
+        end
+        for component in
+            IS.get_masked_components(InfrastructureSystemsComponent, portfolio.data)
+            assign_new_uuid!(portfolio, component)
+        end
+        # Note: this does not change UUIDs for time series data because they are
+        # shared with components.
+    end
+end
