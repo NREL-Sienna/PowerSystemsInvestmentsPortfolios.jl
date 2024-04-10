@@ -442,6 +442,7 @@ function remove_time_series!(portfolio::Portfolio, ::Type{T}) where {T <: IS.Tim
     return IS.remove_time_series!(portfolio.data, T)
 end
 
+# TODO: Convert this method for their inputs to be based on portfolio systems as well
 """
 Getting a time series by key
 """
