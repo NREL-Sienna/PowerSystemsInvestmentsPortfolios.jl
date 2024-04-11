@@ -445,7 +445,7 @@ end
 # TODO: Convert this method for their inputs to be based on portfolio systems as well
 """
 Getting a time series by key
-"""
+"""#=
 function get_time_series_by_key(
     key::TimeSeriesKey,
     component::Technology;
@@ -461,7 +461,7 @@ function get_time_series_by_key(
         count=count,
     )
 end
-
+=#
 # TODO: Check if this method makes sense for technologies, also if this is called correctly
 """
 Returns an iterator of TimeSeriesData instances attached to the component.
@@ -482,6 +482,7 @@ function get_time_series_multiple(
     )
 end
 
+#=
 """
 Returns an iterator of TimeSeriesData instances attached to the component.
 """
@@ -576,7 +577,7 @@ Getting the time series for a storage device
 function _get_time_series_storage(component::StorageTechnology)
     return IS._get_time_series_storage(component)
 end
-
+=#
 #=
 ### Not sure if these methods make sense for technologies
 """
