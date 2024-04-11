@@ -9,7 +9,23 @@ const IS = InfrastructureSystems
 const PSY = PowerSystems
 const PSIP = PowerSystemsInvestmentsPortfolios
 
-p = Portfolio(0.07)
+data = PSY._create_system_data_from_kwargs()
+
+bus = ACBus(nothing)
+discount_rate = 0.07
+investment_schedule = Dict()
+port_metadata = PSIP.PortfolioMetadata("portfolio_test", nothing, nothing)
+
+p = Portfolio(
+    ACBus,
+    discount_rate,
+    data,
+    investment_schedule,
+    port_metadata,
+    nothing,
+    IS.TimeSeriesContainer(),
+    IS.InfrastructureSystemsInternal(),
+)
 
 t = SupplyTechnology{ThermalStandard}(
     "thermal_tech",
