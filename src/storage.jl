@@ -12,12 +12,24 @@ struct StorageTechnology{T <: PSY.Storage} <: Technology
 end
 
 get_name(technology::StorageTechnology) = technology.name
+get_available(technology::StorageTechnology) = technology.available
+get_power_systems_type(technology::StorageTechnology) = technology.power_systems_type
+get_capital_cost(technology::StorageTechnology) = technology.capital_cost
+get_battery_chemistry(technology::StorageTechnology) = technology.battery_chemistry
+get_operational_cost(technology::StorageTechnology) = technology.operational_cost
+
+set_name!(technology::StorageTechnology, v::AbstractString) = technology.name = v
+set_available!(technology::StorageTechnology, v::Bool) = technology.available = v
+set_power_systems_type!(technology::StorageTechnology, v::Type) = technology.power_systems_type = v
+set_capital_cost!(technology::StorageTechnology, v::IS.FunctionData) = technology.capital_cost = v
+set_battery_chemistry!(technology::StorageTechnology, v::String) = technology.battery_chemistry = v
+set_operational_cost!(technology::StorageTechnology, v::PSY.OperationalCost) = technology.operational_cost = v
 
 """
 Clearing the time series for a storage device
 """
-function clear_time_series_storage!(component::StorageTechnology)
-    return IS.clear_time_series_storage!(component)
+function clear_time_series_storage!(storagetech::StorageTechnology)
+    return IS.clear_time_series_storage!(storagetech)
 end
 
 
@@ -25,15 +37,15 @@ end
 Setting the time series for a storage device
 """
 function set_time_series_storage!(
-    component::StorageTechnology,
+    storagetech::StorageTechnology,
     storage::Union{Nothing, TimeSeriesStorage},
 )
-    return IS.set_time_series_storage!(component, storage)
+    return IS.set_time_series_storage!(storagetech, storage)
 end
 
 """
 Getting the time series for a storage device
 """
-function _get_time_series_storage(component::StorageTechnology)
-    return IS._get_time_series_storage(component)
+function _get_time_series_storage(storagetech::StorageTechnology)
+    return IS._get_time_series_storage(storagetech)
 end
