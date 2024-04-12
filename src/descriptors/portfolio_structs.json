@@ -17,14 +17,15 @@
                     "data_type": "Bool"
                 },
                 {
-                    "name": "power_systems_type",
-                    "comment": "The type of PowerSystems Component this build option translates to.",
-                    "data_type": "Type{T}"
-                },
-                {
                     "name": "region",
                     "comment": "The region of the demand requirement.",
                     "data_type": "Union{PSY.ACBus, PSY.AggregationTopology}"
+                },
+                {
+                    "name": "ext",
+                    "data_type": "Dict{String, Any}",
+                    "null_value": "Dict{String, Any}()",
+                    "default": "Dict{String, Any}()"
                 },
                 {
                     "name": "supplemental_attributes_container",
@@ -67,14 +68,15 @@
                     "data_type": "Bool"
                 },
                 {
-                    "name": "power_systems_type",
-                    "comment": "The type of PowerSystems Component this build option translates to.",
-                    "data_type": "Type{T}"
-                },
-                {
                     "name": "capital_cost",
                     "comment": "The capital cost of the technology.",
                     "data_type": "IS.FunctionData"
+                },
+                {
+                    "name": "ext",
+                    "data_type": "Dict{String, Any}",
+                    "null_value": "Dict{String, Any}()",
+                    "default": "Dict{String, Any}()"
                 },
                 {
                     "name": "supplemental_attributes_container",
@@ -117,11 +119,6 @@
                     "data_type": "Bool"
                 },
                 {
-                    "name": "power_systems_type",
-                    "comment": "The type of PowerSystems Component this build option translates to.",
-                    "data_type": "Type{T}"
-                },
-                {
                     "name": "capital_cost",
                     "comment": "The capital cost of the technology.",
                     "data_type": "IS.FunctionData"
@@ -140,6 +137,12 @@
                     "name": "operational_cost",
                     "comment": "The operational cost of the storage technology.",
                     "data_type": "PSY.OperationalCost"
+                },
+                {
+                    "name": "ext",
+                    "data_type": "Dict{String, Any}",
+                    "null_value": "Dict{String, Any}()",
+                    "default": "Dict{String, Any}()"
                 },
                 {
                     "name": "supplemental_attributes_container",
@@ -182,11 +185,6 @@
                     "data_type": "Bool"
                 },
                 {
-                    "name": "power_systems_type",
-                    "comment": "The type of PowerSystems Component this build option translates to.",
-                    "data_type": "Type{T}"
-                },
-                {
                     "name": "fuel",
                     "comment": "The type of fuel used by the supply technology.",
                     "data_type": "PSY.ThermalFuels"
@@ -212,6 +210,12 @@
                     "comment": "The operational cost of the supply technology.",
                     "null_value": "null",
                     "data_type": "Union{Nothing, PSY.OperationalCost}"
+                },
+                {
+                    "name": "ext",
+                    "data_type": "Dict{String, Any}",
+                    "null_value": "Dict{String, Any}()",
+                    "default": "Dict{String, Any}()"
                 },
                 {
                     "name": "supplemental_attributes_container",
@@ -254,14 +258,15 @@
                     "data_type": "Bool"
                 },
                 {
-                    "name": "power_systems_type",
-                    "comment": "The type of PowerSystems Component this build option translates to.",
-                    "data_type": "Type{T}"
-                },
-                {
                     "name": "capital_cost",
                     "comment": "The capital cost of the technology.",
                     "data_type": "IS.FunctionData"
+                },
+                {
+                    "name": "ext",
+                    "data_type": "Dict{String, Any}",
+                    "null_value": "Dict{String, Any}()",
+                    "default": "Dict{String, Any}()"
                 },
                 {
                     "name": "supplemental_attributes_container",

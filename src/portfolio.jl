@@ -4,6 +4,9 @@ const PORTFOLIO_KWARGS =
 const DEFAULT_DISCOUNT_RATE = 0.07
 const DEFAULT_AGGREGATION = PSY.ACBus
 
+const PORTFOLIO_STRUCT_DESCRIPTOR_FILE =
+    joinpath(dirname(pathof(PowerSystemsInvestmentsPortfolios)), "descriptors", "portfolio_structs.json")
+
 mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
     description::Union{Nothing, String}
@@ -19,7 +22,7 @@ struct Portfolio <: IS.InfrastructureSystemsType
     #units_settings::IS.SystemUnitsSettings
     time_series_directory::Union{Nothing, String}
     time_series_container::IS.TimeSeriesContainer
-metadata::PortfolioMetadata
+    metadata::PortfolioMetadata
     internal::IS.InfrastructureSystemsInternal
 
     function Portfolio(
@@ -571,8 +574,6 @@ end
 function IS.deserialize(
     ::Type{Portfolio},
     filename::AbstractString,
-    time_series_read_only=false,
-    time_series_directory=nothing,
     kwargs...,
 )
     raw = open(filename) do io
@@ -590,11 +591,162 @@ function IS.deserialize(
             raw["data"][file_key] = joinpath(directory, raw["data"][file_key])
         end
     end
-
+    # return raw
     return from_dict(Portfolio, raw; kwargs...)
 end
 
-function deserialize_components!(portfolio::Portfolio, raw) end
+"""
+Clear any value stored in ext.
+"""
+clear_ext!(sys::Portfolio) = IS.clear_ext!(sys.internal)
+
+
+function from_dict(
+    ::Type{Portfolio},
+    raw::Dict{String, Any};
+    time_series_read_only = false,
+    time_series_directory = nothing,
+    config_path = PORTFOLIO_STRUCT_DESCRIPTOR_FILE,
+    kwargs...,
+)
+    # Read any field that is defined in Portfolio but optional for the constructors and not
+    # already handled here.
+
+    handled = (
+        "aggregation",
+        "discount_rate",
+        "data",
+        "investment_schedule",
+        "time_series_directory",
+        "time_series_container",
+        "metadata",
+        "internal",
+    )
+    parsed_kwargs = Dict{Symbol, Any}()
+    for field in setdiff(keys(raw), handled)
+        parsed_kwargs[Symbol(field)] = raw[field]
+    end
+
+    # The user can override the serialized runchecks value by passing a kwarg here.
+    if haskey(kwargs, :runchecks)
+        parsed_kwargs[:runchecks] = kwargs[:runchecks]
+    end
+
+    # units = IS.deserialize(SystemUnitsSettings, raw["units_settings"])
+    data = IS.deserialize(
+        IS.SystemData,
+        raw["data"];
+        time_series_read_only = time_series_read_only,
+        time_series_directory = time_series_directory,
+        validation_descriptor_file = config_path,
+    )
+    metadata = get(raw, "metadata", Dict())
+    name = get(metadata, "name", nothing)
+    description = get(metadata, "description", nothing)
+    internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
+    aggregation = PSY.ACBus
+    discount_rate = raw["discount_rate"]
+    investment_schedule = raw["investment_schedule"]
+    portfolio = Portfolio(
+        aggregation,
+        discount_rate,
+        data,
+        investment_schedule,
+        internal,
+        # name = name,
+        # description = description,
+        # parsed_kwargs...,
+    )
+
+    if raw["data_format_version"] != DATA_FORMAT_VERSION
+        pre_deserialize_conversion!(raw, portfolio)
+    end
+
+    ext = get_ext(portfolio)
+    ext["deserialization_in_progress"] = true
+    try
+        deserialize_components!(portfolio, raw["data"])
+    finally
+        pop!(ext, "deserialization_in_progress")
+        isempty(ext) && clear_ext!(portfolio)
+    end
+
+    # if !get_runchecks(portfolio)
+    #     @warn "The System was deserialized with checks disabled, and so was not validated."
+    # end
+
+    if raw["data_format_version"] != DATA_FORMAT_VERSION
+        post_deserialize_conversion!(portfolio, raw)
+    end
+
+    return portfolio
+end
+
+function deserialize_components!(sys::Portfolio, raw)
+    # Convert the array of components into type-specific arrays to allow addition by type.
+    data = Dict{Any, Vector{Dict}}()
+
+    for component in raw["components"]
+        type = IS.get_type_from_serialization_data(component)
+        components = get(data, type, nothing)
+        if components === nothing
+            components = Vector{Dict}()
+            data[type] = components
+        end
+        push!(components, component)
+    end
+
+    # Maintain a lookup of UUID to component because some component types encode
+    # composed types as UUIDs instead of actual types.
+    component_cache = Dict{Base.UUID, Technology}()
+
+    # Add each type to this as we parse.
+    parsed_types = Set()
+
+    function is_matching_type(type, types)
+        return any(x -> type <: x, types)
+    end
+
+    function deserialize_and_add!(;
+        skip_types = nothing,
+        include_types = nothing,
+        post_add_func = nothing,
+    )
+        for (type, components) in data
+            type in parsed_types && continue
+            if !isnothing(skip_types) && is_matching_type(type, skip_types)
+                continue
+            end
+            if !isnothing(include_types) && !is_matching_type(type, include_types)
+                continue
+            end
+            for component in components
+                handle_deserialization_special_cases!(component, type)
+                comp = deserialize(type, component, component_cache)
+                add_technology!(sys, comp)
+                component_cache[IS.get_uuid(comp)] = comp
+                if !isnothing(post_add_func)
+                    post_add_func(comp)
+                end
+            end
+            push!(parsed_types, type)
+        end
+    end
+
+
+    deserialize_and_add!()
+
+end
+
+"""
+Allow types to implement handling of special cases during deserialization.
+
+# Arguments
+- `component::Dict`: The component serialized as a dictionary.
+- `::Type`: The type of the technology.
+"""
+handle_deserialization_special_cases!(component::Dict, ::Type{<:Technology}) = nothing
+
 
 function _is_deserialization_in_progress(portfolio::Portfolio)
     ext = get_ext(portfolio)
@@ -701,7 +853,7 @@ function IS.from_json(
 end
 
 function _post_deserialize_handling(portfolio::Portfolio; runchecks = true, assign_new_uuids = false)
-    runchecks && check(portfolio)
+    # runchecks && check(portfolio)
     if assign_new_uuids
         IS.assign_new_uuid!(portfolio)
         for component in get_components(Technology, portfolio)
@@ -713,5 +865,37 @@ function _post_deserialize_handling(portfolio::Portfolio; runchecks = true, assi
         end
         # Note: this does not change UUIDs for time series data because they are
         # shared with components.
+    end
+end
+
+function Portfolio(file_path::AbstractString; assign_new_uuids = false, kwargs...)
+    ext = splitext(file_path)[2]
+    if lowercase(ext) in [".m", ".raw"]
+        pm_kwargs = Dict(k => v for (k, v) in kwargs if !in(k, PORTFOLIO_KWARGS))
+        sys_kwargs = Dict(k => v for (k, v) in kwargs if in(k, PORTFOLIO_KWARGS))
+        return System(PowerModelsData(file_path; pm_kwargs...); sys_kwargs...)
+    elseif lowercase(ext) == ".json"
+        unsupported = setdiff(keys(kwargs), PORTFOLIO_KWARGS)
+        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
+        runchecks = get(kwargs, :runchecks, true)
+        time_series_read_only = get(kwargs, :time_series_read_only, false)
+        time_series_directory = get(kwargs, :time_series_directory, nothing)
+        config_path = get(kwargs, :config_path, PORTFOLIO_STRUCT_DESCRIPTOR_FILE)
+        portfolio = deserialize(
+            Portfolio,
+            file_path;
+            # time_series_read_only = time_series_read_only,
+            # runchecks = runchecks,
+            # time_series_directory = time_series_directory,
+            # config_path = config_path,
+        )
+        _post_deserialize_handling(
+            portfolio;
+            runchecks = runchecks,
+            assign_new_uuids = assign_new_uuids,
+        )
+        return portfolio
+    else
+        throw(DataFormatError("$file_path is not a supported file type"))
     end
 end

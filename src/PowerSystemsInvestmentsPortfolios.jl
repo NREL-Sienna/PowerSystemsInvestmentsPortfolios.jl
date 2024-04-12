@@ -9,7 +9,21 @@ import PowerSystems:
     get_time_series_array,
     get_time_series_timestamps,
     get_time_series_values,
-    get_time_series_names
+    get_time_series_names,
+    ThermalGen,
+    HydroGen,
+    RenewableGen,
+    Storage,
+    ThermalStandard,
+    ThermalMultiStart,
+    ThermalFuels,
+    PrimeMovers,
+    RenewableFix,
+    RenewableDispatch,
+    GenericBattery,
+    BatteryEMS,
+    HydroEnergyReservoir,
+    HydroDispatch
 
 import InfrastructureSystems
 import InfrastructureSystems:
@@ -35,6 +49,8 @@ import InfrastructureSystems:
     InvalidRange,
     InvalidValue,
     copy_time_series!,
+    clear_ext!,
+    get_type_from_serialization_data,
     get_count,
     get_data,
     get_horizon,
