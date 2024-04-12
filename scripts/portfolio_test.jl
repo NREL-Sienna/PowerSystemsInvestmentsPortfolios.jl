@@ -21,7 +21,6 @@ p = Portfolio(0.07)
 t = SupplyTechnology{ThermalStandard}(
     "thermal_tech",
     true,
-    ThermalStandard,
     PSY.ThermalFuels.COAL,
     PSY.PrimeMovers.ST,
     0.98, # cap factor
@@ -39,3 +38,4 @@ get_technologies(SupplyTechnology{ThermalStandard}, p)
 PSIP.remove_technology!(SupplyTechnology{ThermalStandard}, p, "thermal_tech")
 
 get_available(t)
+IS.deserialize(p)
