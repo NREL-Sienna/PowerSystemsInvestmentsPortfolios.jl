@@ -3,11 +3,18 @@ Pkg.activate("")
 Pkg.instantiate()
 using Revise
 using PowerSystems
-using InfrastructureSystems
+import InfrastructureSystems
 using PowerSystemsInvestmentsPortfolios
 const IS = InfrastructureSystems
 const PSY = PowerSystems
 const PSIP = PowerSystemsInvestmentsPortfolios
+
+data = PSY._create_system_data_from_kwargs()
+
+bus = ACBus(nothing)
+discount_rate = 0.07
+investment_schedule = Dict()
+port_metadata = PSIP.PortfolioMetadata("portfolio_test", nothing, nothing)
 
 p = Portfolio(0.07)
 
@@ -25,4 +32,10 @@ t = SupplyTechnology{ThermalStandard}(
 PSIP.add_technology!(p, t)
 IS.serialize(t)
 IS.serialize(p)
+
+get_technologies(x -> (!get_available(x)), SupplyTechnology{ThermalStandard}, p)
+
+get_technologies(SupplyTechnology{ThermalStandard}, p)
 PSIP.remove_technology!(SupplyTechnology{ThermalStandard}, p, "thermal_tech")
+
+get_available(t)

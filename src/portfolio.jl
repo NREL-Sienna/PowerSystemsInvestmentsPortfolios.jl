@@ -226,26 +226,16 @@ generators = collect(Portfolio.get_technologies(Generator, portfolio))
 
 See also: [`iterate_technologies`](@ref)
 """
-function get_technologies(
-    ::Type{T},
-    portfolio::Portfolio;
-    subportfoliotem_name=nothing,
-) where {T <: Technology}
-    return IS.get_components(T, portfolio.data; subportfoliotem_name=subportfoliotem_name)
+function get_technologies(::Type{T}, portfolio::Portfolio;) where {T <: Technology}
+    return IS.get_components(T, portfolio.data)
 end
 
 function get_technologies(
     filter_func::Function,
     ::Type{T},
-    portfolio::Portfolio;
-    subportfoliotem_name=nothing,
+    portfolio::Portfolio,
 ) where {T <: Technology}
-    return IS.get_components(
-        filter_func,
-        T,
-        portfolio.data;
-        subportfoliotem_name=subportfoliotem_name,
-    )
+    return IS.get_components(filter_func, T, portfolio.data)
 end
 
 # These are helper functions for debugging problems.
