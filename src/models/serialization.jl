@@ -9,7 +9,7 @@ const _ENCODE_AS_UUID_A = (
     PSY.ThermalGen,
     PSY.Storage,
     PSY.StaticLoad,
-    PSY.RenewableGen
+    PSY.RenewableGen,
 )
 
 const _ENCODE_AS_UUID_B = (
@@ -23,7 +23,7 @@ const _ENCODE_AS_UUID_B = (
     PSY.ThermalGen,
     PSY.Storage,
     PSY.StaticLoad,
-    PSY.RenewableGen
+    PSY.RenewableGen,
 )
 
 @assert length(_ENCODE_AS_UUID_A) == length(_ENCODE_AS_UUID_B)
@@ -31,7 +31,6 @@ const _ENCODE_AS_UUID_B = (
 should_encode_as_uuid(val) = any(x -> val isa x, _ENCODE_AS_UUID_B)
 # TODO: how does this work?
 should_encode_as_uuid(::Type{T}) where {T} = any(x -> T <: x, _ENCODE_AS_UUID_A)
-
 
 function IS.serialize(technology::T) where {T <: Technology}
     @debug "serialize" _group = IS.LOG_GROUP_SERIALIZATION technology T
@@ -72,7 +71,6 @@ function serialize_uuid_handling(val)
 
     return serialize(value)
 end
-
 
 function IS.deserialize(::Type{T}, data::Dict, tech_cache::Dict) where {T <: Technology}
     @debug "deserialize Technology" _group = IS.LOG_GROUP_SERIALIZATION T data

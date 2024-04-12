@@ -4,8 +4,11 @@ const PORTFOLIO_KWARGS =
 const DEFAULT_DISCOUNT_RATE = 0.07
 const DEFAULT_AGGREGATION = PSY.ACBus
 
-const PORTFOLIO_STRUCT_DESCRIPTOR_FILE =
-    joinpath(dirname(pathof(PowerSystemsInvestmentsPortfolios)), "descriptors", "portfolio_structs.json")
+const PORTFOLIO_STRUCT_DESCRIPTOR_FILE = joinpath(
+    dirname(pathof(PowerSystemsInvestmentsPortfolios)),
+    "descriptors",
+    "portfolio_structs.json",
+)
 
 mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
@@ -545,7 +548,6 @@ function has_technology(
     return IS.has_component(T, portfolio.data.components, name)
 end
 
-
 function IS.serialize(portfolio::T) where {T <: Portfolio}
     data = Dict{String, Any}()
     data["data_format_version"] = DATA_FORMAT_VERSION
@@ -561,11 +563,7 @@ function IS.serialize(portfolio::T) where {T <: Portfolio}
     return data
 end
 
-function IS.deserialize(
-    ::Type{Portfolio},
-    filename::AbstractString,
-    kwargs...,
-)
+function IS.deserialize(::Type{Portfolio}, filename::AbstractString, kwargs...)
     raw = open(filename) do io
         JSON3.read(io, Dict)
     end
@@ -590,13 +588,12 @@ Clear any value stored in ext.
 """
 clear_ext!(sys::Portfolio) = IS.clear_ext!(sys.internal)
 
-
 function from_dict(
     ::Type{Portfolio},
     raw::Dict{String, Any};
-    time_series_read_only = false,
-    time_series_directory = nothing,
-    config_path = PORTFOLIO_STRUCT_DESCRIPTOR_FILE,
+    time_series_read_only=false,
+    time_series_directory=nothing,
+    config_path=PORTFOLIO_STRUCT_DESCRIPTOR_FILE,
     kwargs...,
 )
     # Read any field that is defined in Portfolio but optional for the constructors and not
@@ -626,9 +623,9 @@ function from_dict(
     data = IS.deserialize(
         IS.SystemData,
         raw["data"];
-        time_series_read_only = time_series_read_only,
-        time_series_directory = time_series_directory,
-        validation_descriptor_file = config_path,
+        time_series_read_only=time_series_read_only,
+        time_series_directory=time_series_directory,
+        validation_descriptor_file=config_path,
     )
     metadata = get(raw, "metadata", Dict())
     name = get(metadata, "name", nothing)
@@ -698,9 +695,9 @@ function deserialize_components!(sys::Portfolio, raw)
     end
 
     function deserialize_and_add!(;
-        skip_types = nothing,
-        include_types = nothing,
-        post_add_func = nothing,
+        skip_types=nothing,
+        include_types=nothing,
+        post_add_func=nothing,
     )
         for (type, components) in data
             type in parsed_types && continue
@@ -723,58 +720,57 @@ function deserialize_components!(sys::Portfolio, raw)
         end
     end
 
-
     deserialize_and_add!()
-
 end
 
 """
 Allow types to implement handling of special cases during deserialization.
 
 # Arguments
-- `component::Dict`: The component serialized as a dictionary.
-- `::Type`: The type of the technology.
+
+  - `component::Dict`: The component serialized as a dictionary.
+  - `::Type`: The type of the technology.
 """
 handle_deserialization_special_cases!(component::Dict, ::Type{<:Technology}) = nothing
-
 
 function _is_deserialization_in_progress(portfolio::Portfolio)
     ext = get_ext(portfolio)
     return get(ext, "deserialization_in_progress", false)
 end
 
-
 """
 Serializes a portfolio to a JSON file and saves time series to an HDF5 file.
 
 # Arguments
-- `portfolio::Portfolio`: portfolio
-- `filename::AbstractString`: filename to write
+
+  - `portfolio::Portfolio`: portfolio
+  - `filename::AbstractString`: filename to write
 
 # Keyword arguments
-- `user_data::Union{Nothing, Dict} = nothing`: optional metadata to record
-- `pretty::Bool = false`: whether to pretty-print the JSON
-- `force::Bool = false`: whether to overwrite existing files
-- `check::Bool = false`: whether to run portfolio validation checks
+
+  - `user_data::Union{Nothing, Dict} = nothing`: optional metadata to record
+  - `pretty::Bool = false`: whether to pretty-print the JSON
+  - `force::Bool = false`: whether to overwrite existing files
+  - `check::Bool = false`: whether to run portfolio validation checks
 
 Refer to [`check_component`](@ref) for exceptions thrown if `check = true`.
 """
 function IS.to_json(
     portfolio::Portfolio,
     filename::AbstractString;
-    user_data = nothing,
-    pretty = false,
-    force = false,
-    runchecks = false,
-)   
+    user_data=nothing,
+    pretty=false,
+    force=false,
+    runchecks=false,
+)
     # TODO: add checks for portfolio and technology
     # if runchecks
     #     check(portfolio)
     #     check_technologies(portfolio)
     # end
 
-    IS.prepare_for_serialization_to_file!(portfolio.data, filename; force = force)
-    data = to_json(portfolio; pretty = pretty)
+    IS.prepare_for_serialization_to_file!(portfolio.data, filename; force=force)
+    data = to_json(portfolio; pretty=pretty)
     open(filename, "w") do io
         write(io, data)
     end
@@ -808,7 +804,6 @@ function _serialize_portfolio_metadata_to_file(portfolio::Portfolio, filename, u
     @info "Serialized Portfolio metadata to $filename"
 end
 
-
 """
 If assign_new_uuids = true, generate new UUIDs for the portfolio and all components.
 
@@ -819,8 +814,8 @@ process to construct the portfolio from a serialized JSON file instead, such as 
 function IS.from_json(
     io::Union{IO, String},
     ::Type{Portfolio};
-    runchecks = true,
-    assign_new_uuids = false,
+    runchecks=true,
+    assign_new_uuids=false,
     kwargs...,
 )
     data = JSON3.read(io, Dict)
@@ -836,13 +831,17 @@ function IS.from_json(
     portfolio = from_dict(Portfolio, data; kwargs...)
     _post_deserialize_handling(
         portfolio;
-        runchecks = runchecks,
-        assign_new_uuids = assign_new_uuids,
+        runchecks=runchecks,
+        assign_new_uuids=assign_new_uuids,
     )
     return portfolio
 end
 
-function _post_deserialize_handling(portfolio::Portfolio; runchecks = true, assign_new_uuids = false)
+function _post_deserialize_handling(
+    portfolio::Portfolio;
+    runchecks=true,
+    assign_new_uuids=false,
+)
     # runchecks && check(portfolio)
     if assign_new_uuids
         IS.assign_new_uuid!(portfolio)
@@ -858,7 +857,7 @@ function _post_deserialize_handling(portfolio::Portfolio; runchecks = true, assi
     end
 end
 
-function Portfolio(file_path::AbstractString; assign_new_uuids = false, kwargs...)
+function Portfolio(file_path::AbstractString; assign_new_uuids=false, kwargs...)
     ext = splitext(file_path)[2]
     if lowercase(ext) in [".m", ".raw"]
         pm_kwargs = Dict(k => v for (k, v) in kwargs if !in(k, PORTFOLIO_KWARGS))
@@ -881,8 +880,8 @@ function Portfolio(file_path::AbstractString; assign_new_uuids = false, kwargs..
         )
         _post_deserialize_handling(
             portfolio;
-            runchecks = runchecks,
-            assign_new_uuids = assign_new_uuids,
+            runchecks=runchecks,
+            assign_new_uuids=assign_new_uuids,
         )
         return portfolio
     else
