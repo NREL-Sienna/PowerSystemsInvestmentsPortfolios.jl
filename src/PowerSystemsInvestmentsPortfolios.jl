@@ -3,7 +3,6 @@ module PowerSystemsInvestmentsPortfolios
 import InfrastructureSystems
 # TODO: Some of these re-exports may cause name collisions with PowerSystems
 import InfrastructureSystems:
-    add_time_series,
     to_json,
     from_json,
     serialize,
@@ -25,13 +24,29 @@ import PowerSystems
 import PrettyTables
 
 export Portfolio
+export Technology
 export SupplyTechnology
 export TransportTechnology
-export DemandTechnology
+export DemandSideTechnology
 export StorageTechnology
 
 export add_technology!
 export add_technologies!
+export remove_technology!
+export remove_technologies!
+export get_technology
+export get_technologies
+export get_technologies_by_name
+export get_available_technologies
+export iterate_technologies
+export clear_technologies!
+
+export get_name
+export set_name!
+export get_description
+export set_description!
+export get_available
+export set_available!
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems
