@@ -3,7 +3,7 @@ Pkg.activate("")
 Pkg.instantiate()
 using Revise
 using PowerSystems
-using InfrastructureSystems
+import InfrastructureSystems
 using PowerSystemsInvestmentsPortfolios
 const IS = InfrastructureSystems
 const PSY = PowerSystems
@@ -16,16 +16,7 @@ discount_rate = 0.07
 investment_schedule = Dict()
 port_metadata = PSIP.PortfolioMetadata("portfolio_test", nothing, nothing)
 
-p = Portfolio(
-    ACBus,
-    discount_rate,
-    data,
-    investment_schedule,
-    port_metadata,
-    nothing,
-    IS.TimeSeriesContainer(),
-    IS.InfrastructureSystemsInternal(),
-)
+p = Portfolio(0.07)
 
 t = SupplyTechnology{ThermalStandard}(
     "thermal_tech",
@@ -42,4 +33,10 @@ t = SupplyTechnology{ThermalStandard}(
 )
 
 PSIP.add_technology!(p, t)
+
+get_technologies(x -> (!get_available(x)), SupplyTechnology{ThermalStandard}, p)
+
+get_technologies(SupplyTechnology{ThermalStandard}, p)
 PSIP.remove_technology!(SupplyTechnology{ThermalStandard}, p, "thermal_tech")
+
+get_available(t)
