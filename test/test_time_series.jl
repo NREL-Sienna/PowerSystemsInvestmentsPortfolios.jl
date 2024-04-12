@@ -1,6 +1,8 @@
 import DataFrames
 import Dates
 import TimeSeries
+import PowerSystemCaseBuilder
+const PSB = PowerSystemCaseBuilder
 
 ##### All these copied PSY tests need to be looked at again to see compatibility with PSIP #####
 

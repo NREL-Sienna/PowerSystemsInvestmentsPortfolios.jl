@@ -387,10 +387,10 @@ Throws ArgumentError if the component is not stored in the system.
 """
 function add_time_series!(
     portfolio::Portfolio,
-    component::Technology,
+    technology::Technology,
     time_series::IS.TimeSeriesData,
 )
-    return IS.add_time_series!(portfolio.data, component, time_series)
+    return IS.add_time_series!(portfolio.data, technology, time_series)
 end
 
 """
@@ -406,6 +406,67 @@ function add_time_series!(portfolio::Portfolio, technologies, time_series::IS.Ti
 end
 
 """
+Add time series data from a metadata file or metadata descriptors.
+
+# Arguments
+- `portfolio::Portfolio`: portfolio
+- `metadata_file::AbstractString`: metadata file for timeseries
+  that includes an array of IS.TimeSeriesFileMetadata instances or a vector.
+- `resolution::DateTime.Period=nothing`: skip time series that don't match this resolution.
+"""
+function add_time_series!(portfolio::Portfolio, metadata_file::AbstractString; resolution = nothing)
+    return IS.add_time_series_from_file_metadata!(
+        portfolio.data,
+        Technology,
+        metadata_file;
+        resolution = resolution,
+    )
+end
+
+"""
+Add time series data from a metadata file or metadata descriptors.
+
+# Arguments
+- `portfolio::Portfolio`: portfolio
+- `timeseries_metadata::Vector{IS.TimeSeriesFileMetadata}`: metadata for timeseries
+- `resolution::DateTime.Period=nothing`: skip time series that don't match this resolution.
+"""
+function add_time_series!(
+    portfolio::Portfolio,
+    file_metadata::Vector{IS.TimeSeriesFileMetadata};
+    resolution = nothing,
+)
+    return IS.add_time_series_from_file_metadata!(
+        portfolio.data,
+        Technology,
+        file_metadata;
+        resolution = resolution,
+    )
+end
+
+"""
+Add time series data to a technology.
+
+Throws ArgumentError if the technology is not stored in the system.
+
+"""
+function add_time_series!(portfolio::Portfolio, technology::Technology, time_series::TimeSeriesData)
+    return IS.add_time_series!(portfolio.data, technology, time_series)
+end
+
+"""
+Add the same time series data to multiple technologies.
+
+This is significantly more efficent than calling `add_time_series!` for each technology
+individually with the same data because in this case, only one time series array is stored.
+
+Throws ArgumentError if a technology is not stored in the system.
+"""
+function add_time_series!(portfolio::Portfolio, technologies, time_series::TimeSeriesData)
+    return IS.add_time_series!(portfolio.data, technologies, time_series)
+end
+
+"""
 Return the compression settings used for system data such as time series arrays.
 """
 get_compression_settings(portfolio::Portfolio) = IS.get_compression_settings(portfolio.data)
@@ -413,8 +474,76 @@ get_compression_settings(portfolio::Portfolio) = IS.get_compression_settings(por
 """
 Return the resolution for all time series.
 """
-get_time_series_resolution(portfolio::Portfolio) =
-    IS.get_time_series_resolution(portfolio.data)
+get_time_series_resolution(portfolio::Portfolio) = IS.get_time_series_resolution(portfolio.data)
+
+
+# TODO: Check if the forecast systems need to be added
+"""
+Return the initial times for all forecasts.
+"""
+get_forecast_initial_times(portfolio::Portfolio) = IS.get_forecast_initial_times(portfolio.data)
+
+"""
+Return the total period covered by all forecasts.
+"""
+get_forecast_total_period(portfolio::Portfolio) = IS.get_forecast_total_period(portfolio.data)
+
+"""
+Return the window count for all forecasts.
+"""
+get_forecast_window_count(portfolio::Portfolio) = IS.get_forecast_window_count(portfolio.data)
+
+"""
+Return the horizon for all forecasts.
+"""
+get_forecast_horizon(portfolio::Portfolio) = IS.get_forecast_horizon(portfolio.data)
+
+"""
+Return the initial_timestamp for all forecasts.
+"""
+get_forecast_initial_timestamp(portfolio::Portfolio) = IS.get_forecast_initial_timestamp(portfolio.data)
+
+"""
+Return the interval for all forecasts.
+"""
+get_forecast_interval(portfolio::Portfolio) = IS.get_forecast_interval(portfolio.data)
+
+"""
+Return the resolution for all time series.
+"""
+get_time_series_resolution(portfolio::Portfolio) = IS.get_time_series_resolution(portfolio.data)
+
+"""
+Return an iterator of time series in order of initial time.
+
+Note that passing a filter function can be much slower than the other filtering parameters
+because it reads time series data from media.
+
+Call `collect` on the result to get an array.
+
+# Arguments
+- `portfolio::Portfolio`: portfolio
+- `filter_func = nothing`: Only return time series for which this returns true.
+- `type = nothing`: Only return time series with this type.
+- `name = nothing`: Only return time series matching this value.
+
+# Examples
+```julia
+for time_series in get_time_series_multiple(sys)
+    @show time_series
+end
+
+ts = collect(get_time_series_multiple(sys; type = SingleTimeSeries))
+```
+"""
+function IS.get_time_series_multiple(
+    portfolio::Portfolio,
+    filter_func = nothing;
+    type = nothing,
+    name = nothing,
+)
+    return get_time_series_multiple(portfolio.data, filter_func; type = type, name = name)
+end
 
 """
 Remove all time series data from the system.
@@ -429,10 +558,49 @@ Remove the time series data for a component and time series type.
 function remove_time_series!(
     portfolio::Portfolio,
     ::Type{T},
-    component::PSY.Component,
+    technology::Technology,
+    name::String,
+) where {T <: TimeSeriesData}
+    return IS.remove_time_series!(portfolio.data, T, technology, name)
+end
+
+"""
+Remove all the time series data for a time series type.
+"""
+function remove_time_series!(portfolio::Portfolio, ::Type{T}) where {T <: TimeSeriesData}
+    return IS.remove_time_series!(portfolio.data, T)
+end
+
+"""
+Transform all instances of SingleTimeSeries to DeterministicSingleTimeSeries.
+"""
+function transform_single_time_series!(portfolio::Portfolio, horizon::Int, interval::Dates.Period)
+    IS.transform_single_time_series!(
+        portfolio.data,
+        IS.DeterministicSingleTimeSeries,
+        horizon,
+        interval,
+    )
+    return
+end
+
+"""
+Remove all time series data from the system.
+"""
+function clear_time_series!(portfolio::Portfolio)
+    return IS.clear_time_series!(portfolio.data)
+end
+
+"""
+Remove the time series data for a component and time series type.
+"""
+function remove_time_series!(
+    portfolio::Portfolio,
+    ::Type{T},
+    technology::Technology,
     name::String,
 ) where {T <: IS.TimeSeriesData}
-    return IS.remove_time_series!(portfolio.data, T, component, name)
+    return IS.remove_time_series!(portfolio.data, T, technology, name)
 end
 
 """

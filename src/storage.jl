@@ -24,28 +24,3 @@ set_power_systems_type!(technology::StorageTechnology, v::Type) = technology.pow
 set_capital_cost!(technology::StorageTechnology, v::IS.FunctionData) = technology.capital_cost = v
 set_battery_chemistry!(technology::StorageTechnology, v::String) = technology.battery_chemistry = v
 set_operational_cost!(technology::StorageTechnology, v::PSY.OperationalCost) = technology.operational_cost = v
-
-"""
-Clearing the time series for a storage device
-"""
-function clear_time_series_storage!(storagetech::StorageTechnology)
-    return IS.clear_time_series_storage!(storagetech)
-end
-
-
-"""
-Setting the time series for a storage device
-"""
-function set_time_series_storage!(
-    storagetech::StorageTechnology,
-    storage::Union{Nothing, TimeSeriesStorage},
-)
-    return IS.set_time_series_storage!(storagetech, storage)
-end
-
-"""
-Getting the time series for a storage device
-"""
-function _get_time_series_storage(storagetech::StorageTechnology)
-    return IS._get_time_series_storage(storagetech)
-end
