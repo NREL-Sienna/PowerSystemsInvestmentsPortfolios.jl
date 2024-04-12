@@ -7,9 +7,9 @@ const PSB = PowerSystemCaseBuilder
 ##### All these copied PSY tests need to be looked at again to see compatibility with PSIP #####
 
 
-function verify_time_series(sys::System, num_initial_times, num_time_series, len)
+function verify_time_series(portfolio::Portfolio, num_initial_times, num_time_series, len)
     total_time_series = 0
-    all_time_series = get_time_series_multiple(sys)
+    all_time_series = get_time_series_multiple(portfolio)
     for time_series in all_time_series
         if length(time_series) != len
             @error "length doesn't match" length(time_series) len
