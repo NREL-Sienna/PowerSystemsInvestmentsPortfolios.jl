@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct DemandRequirement{T <: PSY.StaticInjection} <: PSY.StaticInjection
+    mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
         name::String
         available::Bool
         region::Union{PSY.ACBus, PSY.AggregationTopology}
@@ -26,7 +26,7 @@ This struct represents the demand requirement for a power system.
 - `time_series_container::InfrastructureSystems.TimeSeriesContainer`: internal time_series storage
 - `internal::InfrastructureSystemsInternal`: power system internal reference, do not modify
 """
-mutable struct DemandRequirement{T <: PSY.StaticInjection} <: PSY.StaticInjection
+mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     "The name of the load demand requirement."
     name::String
     "Indicates whether the load demand is available or not in the simulation."

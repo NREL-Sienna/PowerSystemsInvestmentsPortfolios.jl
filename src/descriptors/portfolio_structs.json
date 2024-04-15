@@ -49,7 +49,7 @@
                     "exclude_setter": true
                 }
             ],
-            "supertype": "PSY.StaticInjection"
+            "supertype": "Technology"
         },
         {
             "struct_name": "DemandSideTechnology",
