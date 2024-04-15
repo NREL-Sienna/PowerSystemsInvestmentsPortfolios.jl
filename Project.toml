@@ -1,6 +1,6 @@
 name = "PowerSystemsInvestmentsPortfolios"
 uuid = "bed98974-b02a-5e2f-9fe0-a103f8c450dd"
-authors = ["Jose Daniel Lara", "Sourabh Dalvi"]
+authors = ["Jose Daniel Lara", "Sourabh Dalvi", "Rodrigo Henriquez-Auba"]
 version = "0.1.0"
 
 [deps]
@@ -17,3 +17,5 @@ julia = "^1.6"
 InfrastructureSystems = "1"
 PowerSystems = "^3.3"
 PrettyTables = "1, 2"
+JSON3 = "1"
+DataStructures = "~0.18"
