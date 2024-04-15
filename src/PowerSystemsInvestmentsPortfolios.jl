@@ -127,7 +127,6 @@ export get_available
 export set_available!
 
 const PSY = PowerSystems
-const IS = InfrastructureSystems
 
 include("technologies.jl")
 include("models/includes.jl")
