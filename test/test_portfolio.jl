@@ -4,17 +4,13 @@
     @test length(collect(get_technologies(Technology, p))) == 0
 
     tech1 = SupplyTechnology{ThermalStandard}(
-        "thermal_tech",
-        true,
-        ThermalStandard,
-        PSY.ThermalFuels.COAL,
-        PSY.PrimeMovers.ST,
-        0.98, # cap factor
-        nothing,
-        nothing,
-        IS.SupplementalAttributesContainer(),
-        IS.TimeSeriesContainer(),
-        IS.InfrastructureSystemsInternal(),
+        name="thermal_tech",
+        available=true,
+        fuel=PSY.ThermalFuels.COAL,
+        prime_mover=PSY.PrimeMovers.ST,
+        capacity_factor=0.98, # cap factor
+        capital_cost=nothing,
+        operational_cost=nothing,
     )
 
     # Test adding technology
@@ -25,17 +21,13 @@
     @test_throws(IS.ArgumentError, add_technology!(p, tech1))
 
     tech2 = SupplyTechnology{ThermalStandard}(
-        "thermal_tech2",
-        true,
-        ThermalStandard,
-        PSY.ThermalFuels.COAL,
-        PSY.PrimeMovers.ST,
-        0.98, # cap factor
-        nothing,
-        nothing,
-        IS.SupplementalAttributesContainer(),
-        IS.TimeSeriesContainer(),
-        IS.InfrastructureSystemsInternal(),
+        name="thermal_tech2",
+        available=true,
+        fuel=PSY.ThermalFuels.COAL,
+        prime_mover=PSY.PrimeMovers.ST,
+        capacity_factor=0.98, # cap factor
+        capital_cost=nothing,
+        operational_cost=nothing,
     )
 
     # Test adding another technology

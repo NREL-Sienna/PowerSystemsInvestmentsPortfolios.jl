@@ -19,13 +19,13 @@ port_metadata = PSIP.PortfolioMetadata("portfolio_test", nothing, nothing)
 p = Portfolio(0.07)
 
 t = SupplyTechnology{ThermalStandard}(
-    "thermal_tech",
-    true,
-    PSY.ThermalFuels.COAL,
-    PSY.PrimeMovers.ST,
-    0.98, # cap factor
-    nothing,
-    nothing,
+    name="thermal_tech",
+    available=true,
+    fuel=PSY.ThermalFuels.COAL,
+    prime_mover=PSY.PrimeMovers.ST,
+    capacity_factor=0.98, # cap factor
+    capital_cost=nothing,
+    operational_cost=nothing,
 )
 
 PSIP.add_technology!(p, t)
