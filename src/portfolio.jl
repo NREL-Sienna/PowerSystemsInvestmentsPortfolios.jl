@@ -57,7 +57,6 @@ struct Portfolio <: IS.InfrastructureSystemsType
             investment_schedule,
             #units_settings,
             time_series_directory,
-            IS.TimeSeriesContainer(),
             PortfolioMetadata(name, description, data_source),
             internal,
         )
