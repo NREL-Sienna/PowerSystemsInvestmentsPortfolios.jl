@@ -14,8 +14,6 @@ export get_name
 export get_operational_cost
 export get_prime_mover
 export get_region
-export get_supplemental_attributes_container
-export get_time_series_container
 export set_available!
 export set_battery_chemistry!
 export set_capacity_factor!
@@ -26,5 +24,3 @@ export set_name!
 export set_operational_cost!
 export set_prime_mover!
 export set_region!
-export set_supplemental_attributes_container!
-export set_time_series_container!

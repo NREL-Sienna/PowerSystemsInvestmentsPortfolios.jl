@@ -24,7 +24,6 @@ struct Portfolio <: IS.InfrastructureSystemsType
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     #units_settings::IS.SystemUnitsSettings
     time_series_directory::Union{Nothing, String}
-    time_series_container::IS.TimeSeriesContainer
     metadata::PortfolioMetadata
     internal::IS.InfrastructureSystemsInternal
 

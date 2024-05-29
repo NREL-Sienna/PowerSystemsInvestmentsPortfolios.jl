@@ -13,8 +13,6 @@ This file is auto-generated. Do not edit.
         prime_mover::PSY.PrimeMovers
         operational_cost::PSY.OperationalCost
         ext::Dict{String, Any}
-        supplemental_attributes_container::InfrastructureSystems.SupplementalAttributesContainer
-        time_series_container::InfrastructureSystems.TimeSeriesContainer
         internal::InfrastructureSystemsInternal
     end
 
@@ -28,8 +26,6 @@ This struct represents a storage technology in a power system.
 - `prime_mover::PSY.PrimeMovers`: The prime mover of the storage technology.
 - `operational_cost::PSY.OperationalCost`: The operational cost of the storage technology.
 - `ext::Dict{String, Any}`
-- `supplemental_attributes_container::InfrastructureSystems.SupplementalAttributesContainer`: Container for supplemental attributes.
-- `time_series_container::InfrastructureSystems.TimeSeriesContainer`: internal time_series storage
 - `internal::InfrastructureSystemsInternal`: power system internal reference, do not modify
 """
 mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
@@ -46,20 +42,16 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     "The operational cost of the storage technology."
     operational_cost::PSY.OperationalCost
     ext::Dict{String, Any}
-    "Container for supplemental attributes."
-    supplemental_attributes_container::InfrastructureSystems.SupplementalAttributesContainer
-    "internal time_series storage"
-    time_series_container::InfrastructureSystems.TimeSeriesContainer
     "power system internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
-function StorageTechnology{T}(name, available, capital_cost, battery_chemistry, prime_mover, operational_cost, ext=Dict{String, Any}(), supplemental_attributes_container=InfrastructureSystems.SupplementalAttributesContainer(), time_series_container=InfrastructureSystems.TimeSeriesContainer(), ) where T <: PSY.Storage
-    StorageTechnology{T}(name, available, capital_cost, battery_chemistry, prime_mover, operational_cost, ext, supplemental_attributes_container, time_series_container, InfrastructureSystemsInternal(), )
+function StorageTechnology{T}(name, available, capital_cost, battery_chemistry, prime_mover, operational_cost, ext=Dict{String, Any}(), ) where T <: PSY.Storage
+    StorageTechnology{T}(name, available, capital_cost, battery_chemistry, prime_mover, operational_cost, ext, InfrastructureSystemsInternal(), )
 end
 
-function StorageTechnology{T}(; name, available, capital_cost, battery_chemistry, prime_mover, operational_cost, ext=Dict{String, Any}(), supplemental_attributes_container=InfrastructureSystems.SupplementalAttributesContainer(), time_series_container=InfrastructureSystems.TimeSeriesContainer(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Storage
-    StorageTechnology{T}(name, available, capital_cost, battery_chemistry, prime_mover, operational_cost, ext, supplemental_attributes_container, time_series_container, internal, )
+function StorageTechnology{T}(; name, available, capital_cost, battery_chemistry, prime_mover, operational_cost, ext=Dict{String, Any}(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Storage
+    StorageTechnology{T}(name, available, capital_cost, battery_chemistry, prime_mover, operational_cost, ext, internal, )
 end
 
 """Get [`StorageTechnology`](@ref) `name`."""
@@ -76,10 +68,6 @@ get_prime_mover(value::StorageTechnology) = value.prime_mover
 get_operational_cost(value::StorageTechnology) = value.operational_cost
 """Get [`StorageTechnology`](@ref) `ext`."""
 get_ext(value::StorageTechnology) = value.ext
-"""Get [`StorageTechnology`](@ref) `supplemental_attributes_container`."""
-get_supplemental_attributes_container(value::StorageTechnology) = value.supplemental_attributes_container
-"""Get [`StorageTechnology`](@ref) `time_series_container`."""
-get_time_series_container(value::StorageTechnology) = value.time_series_container
 """Get [`StorageTechnology`](@ref) `internal`."""
 get_internal(value::StorageTechnology) = value.internal
 
@@ -97,7 +85,3 @@ set_prime_mover!(value::StorageTechnology, val) = value.prime_mover = val
 set_operational_cost!(value::StorageTechnology, val) = value.operational_cost = val
 """Set [`StorageTechnology`](@ref) `ext`."""
 set_ext!(value::StorageTechnology, val) = value.ext = val
-"""Set [`StorageTechnology`](@ref) `supplemental_attributes_container`."""
-set_supplemental_attributes_container!(value::StorageTechnology, val) = value.supplemental_attributes_container = val
-"""Set [`StorageTechnology`](@ref) `time_series_container`."""
-set_time_series_container!(value::StorageTechnology, val) = value.time_series_container = val

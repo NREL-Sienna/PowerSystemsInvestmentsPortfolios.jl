@@ -10,8 +10,6 @@ This file is auto-generated. Do not edit.
         available::Bool
         capital_cost::IS.FunctionData
         ext::Dict{String, Any}
-        supplemental_attributes_container::InfrastructureSystems.SupplementalAttributesContainer
-        time_series_container::InfrastructureSystems.TimeSeriesContainer
         internal::InfrastructureSystemsInternal
     end
 
@@ -22,8 +20,6 @@ This struct represents a demand side technology in a power system.
 - `available::Bool`: Indicates whether the technology is available or not in the simulation.
 - `capital_cost::IS.FunctionData`: The capital cost of the technology.
 - `ext::Dict{String, Any}`
-- `supplemental_attributes_container::InfrastructureSystems.SupplementalAttributesContainer`: Container for supplemental attributes.
-- `time_series_container::InfrastructureSystems.TimeSeriesContainer`: internal time_series storage
 - `internal::InfrastructureSystemsInternal`: power system internal reference, do not modify
 """
 mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: Technology
@@ -34,20 +30,16 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: Technology
     "The capital cost of the technology."
     capital_cost::IS.FunctionData
     ext::Dict{String, Any}
-    "Container for supplemental attributes."
-    supplemental_attributes_container::InfrastructureSystems.SupplementalAttributesContainer
-    "internal time_series storage"
-    time_series_container::InfrastructureSystems.TimeSeriesContainer
     "power system internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
-function DemandSideTechnology{T}(name, available, capital_cost, ext=Dict{String, Any}(), supplemental_attributes_container=InfrastructureSystems.SupplementalAttributesContainer(), time_series_container=InfrastructureSystems.TimeSeriesContainer(), ) where T <: PSY.StaticInjection
-    DemandSideTechnology{T}(name, available, capital_cost, ext, supplemental_attributes_container, time_series_container, InfrastructureSystemsInternal(), )
+function DemandSideTechnology{T}(name, available, capital_cost, ext=Dict{String, Any}(), ) where T <: PSY.StaticInjection
+    DemandSideTechnology{T}(name, available, capital_cost, ext, InfrastructureSystemsInternal(), )
 end
 
-function DemandSideTechnology{T}(; name, available, capital_cost, ext=Dict{String, Any}(), supplemental_attributes_container=InfrastructureSystems.SupplementalAttributesContainer(), time_series_container=InfrastructureSystems.TimeSeriesContainer(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.StaticInjection
-    DemandSideTechnology{T}(name, available, capital_cost, ext, supplemental_attributes_container, time_series_container, internal, )
+function DemandSideTechnology{T}(; name, available, capital_cost, ext=Dict{String, Any}(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.StaticInjection
+    DemandSideTechnology{T}(name, available, capital_cost, ext, internal, )
 end
 
 """Get [`DemandSideTechnology`](@ref) `name`."""
@@ -58,10 +50,6 @@ get_available(value::DemandSideTechnology) = value.available
 get_capital_cost(value::DemandSideTechnology) = value.capital_cost
 """Get [`DemandSideTechnology`](@ref) `ext`."""
 get_ext(value::DemandSideTechnology) = value.ext
-"""Get [`DemandSideTechnology`](@ref) `supplemental_attributes_container`."""
-get_supplemental_attributes_container(value::DemandSideTechnology) = value.supplemental_attributes_container
-"""Get [`DemandSideTechnology`](@ref) `time_series_container`."""
-get_time_series_container(value::DemandSideTechnology) = value.time_series_container
 """Get [`DemandSideTechnology`](@ref) `internal`."""
 get_internal(value::DemandSideTechnology) = value.internal
 
@@ -73,7 +61,3 @@ set_available!(value::DemandSideTechnology, val) = value.available = val
 set_capital_cost!(value::DemandSideTechnology, val) = value.capital_cost = val
 """Set [`DemandSideTechnology`](@ref) `ext`."""
 set_ext!(value::DemandSideTechnology, val) = value.ext = val
-"""Set [`DemandSideTechnology`](@ref) `supplemental_attributes_container`."""
-set_supplemental_attributes_container!(value::DemandSideTechnology, val) = value.supplemental_attributes_container = val
-"""Set [`DemandSideTechnology`](@ref) `time_series_container`."""
-set_time_series_container!(value::DemandSideTechnology, val) = value.time_series_container = val

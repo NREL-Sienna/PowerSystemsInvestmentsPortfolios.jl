@@ -14,8 +14,6 @@ This file is auto-generated. Do not edit.
         capital_cost::Union{Nothing, IS.FunctionData}
         operational_cost::Union{Nothing, PSY.OperationalCost}
         ext::Dict{String, Any}
-        supplemental_attributes_container::InfrastructureSystems.SupplementalAttributesContainer
-        time_series_container::InfrastructureSystems.TimeSeriesContainer
         internal::InfrastructureSystemsInternal
     end
 
@@ -30,8 +28,6 @@ This struct represents a supply technology in a power system.
 - `capital_cost::Union{Nothing, IS.FunctionData}`: The capital cost of the technology.
 - `operational_cost::Union{Nothing, PSY.OperationalCost}`: The operational cost of the supply technology.
 - `ext::Dict{String, Any}`
-- `supplemental_attributes_container::InfrastructureSystems.SupplementalAttributesContainer`: Container for supplemental attributes.
-- `time_series_container::InfrastructureSystems.TimeSeriesContainer`: internal time_series storage
 - `internal::InfrastructureSystemsInternal`: power system internal reference, do not modify
 """
 mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
@@ -50,20 +46,16 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     "The operational cost of the supply technology."
     operational_cost::Union{Nothing, PSY.OperationalCost}
     ext::Dict{String, Any}
-    "Container for supplemental attributes."
-    supplemental_attributes_container::InfrastructureSystems.SupplementalAttributesContainer
-    "internal time_series storage"
-    time_series_container::InfrastructureSystems.TimeSeriesContainer
     "power system internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
-function SupplyTechnology{T}(name, available, fuel, prime_mover, capacity_factor, capital_cost, operational_cost, ext=Dict{String, Any}(), supplemental_attributes_container=InfrastructureSystems.SupplementalAttributesContainer(), time_series_container=InfrastructureSystems.TimeSeriesContainer(), ) where T <: PSY.Generator
-    SupplyTechnology{T}(name, available, fuel, prime_mover, capacity_factor, capital_cost, operational_cost, ext, supplemental_attributes_container, time_series_container, InfrastructureSystemsInternal(), )
+function SupplyTechnology{T}(name, available, fuel, prime_mover, capacity_factor, capital_cost, operational_cost, ext=Dict{String, Any}(), ) where T <: PSY.Generator
+    SupplyTechnology{T}(name, available, fuel, prime_mover, capacity_factor, capital_cost, operational_cost, ext, InfrastructureSystemsInternal(), )
 end
 
-function SupplyTechnology{T}(; name, available, fuel, prime_mover, capacity_factor, capital_cost, operational_cost, ext=Dict{String, Any}(), supplemental_attributes_container=InfrastructureSystems.SupplementalAttributesContainer(), time_series_container=InfrastructureSystems.TimeSeriesContainer(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
-    SupplyTechnology{T}(name, available, fuel, prime_mover, capacity_factor, capital_cost, operational_cost, ext, supplemental_attributes_container, time_series_container, internal, )
+function SupplyTechnology{T}(; name, available, fuel, prime_mover, capacity_factor, capital_cost, operational_cost, ext=Dict{String, Any}(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
+    SupplyTechnology{T}(name, available, fuel, prime_mover, capacity_factor, capital_cost, operational_cost, ext, internal, )
 end
 
 """Get [`SupplyTechnology`](@ref) `name`."""
@@ -82,10 +74,6 @@ get_capital_cost(value::SupplyTechnology) = value.capital_cost
 get_operational_cost(value::SupplyTechnology) = value.operational_cost
 """Get [`SupplyTechnology`](@ref) `ext`."""
 get_ext(value::SupplyTechnology) = value.ext
-"""Get [`SupplyTechnology`](@ref) `supplemental_attributes_container`."""
-get_supplemental_attributes_container(value::SupplyTechnology) = value.supplemental_attributes_container
-"""Get [`SupplyTechnology`](@ref) `time_series_container`."""
-get_time_series_container(value::SupplyTechnology) = value.time_series_container
 """Get [`SupplyTechnology`](@ref) `internal`."""
 get_internal(value::SupplyTechnology) = value.internal
 
@@ -105,7 +93,3 @@ set_capital_cost!(value::SupplyTechnology, val) = value.capital_cost = val
 set_operational_cost!(value::SupplyTechnology, val) = value.operational_cost = val
 """Set [`SupplyTechnology`](@ref) `ext`."""
 set_ext!(value::SupplyTechnology, val) = value.ext = val
-"""Set [`SupplyTechnology`](@ref) `supplemental_attributes_container`."""
-set_supplemental_attributes_container!(value::SupplyTechnology, val) = value.supplemental_attributes_container = val
-"""Set [`SupplyTechnology`](@ref) `time_series_container`."""
-set_time_series_container!(value::SupplyTechnology, val) = value.time_series_container = val
