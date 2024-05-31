@@ -22,6 +22,7 @@ import InfrastructureSystems:
     StructField
 
 import PowerSystems
+import JSONSchema
 
 export Portfolio
 export SupplyTechnology
@@ -35,13 +36,9 @@ export add_technologies!
 const PSY = PowerSystems
 const IS = InfrastructureSystems
 
-include("technologies.jl")
-include("demand_requirement.jl")
-include("supply.jl")
-include("demand_side.jl")
-include("transport.jl")
-include("storage.jl")
+include("models/includes.jl")
 include("portfolio.jl")
+include("generate_structs.jl")
 
 using DocStringExtensions
 
