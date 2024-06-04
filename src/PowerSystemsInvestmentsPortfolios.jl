@@ -23,6 +23,7 @@ import InfrastructureSystems:
 
 import PowerSystems
 import JSONSchema
+import JSON3
 
 export Portfolio
 export SupplyTechnology
@@ -32,6 +33,8 @@ export StorageTechnology
 
 export add_technology!
 export add_technologies!
+export read_json_data
+export generate_invest_structs
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems
