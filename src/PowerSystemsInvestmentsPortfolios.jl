@@ -35,6 +35,7 @@ export add_technology!
 export add_technologies!
 export read_json_data
 export generate_invest_structs
+export generate_structs
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems
