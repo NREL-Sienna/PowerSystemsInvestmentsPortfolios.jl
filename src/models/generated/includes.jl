@@ -7,6 +7,7 @@ include("StorageTechnology.jl")
 export get_available
 export get_capacity_factor
 export get_capital_cost
+export get_demand
 export get_fuel
 export get_initial_capacity
 export get_maximum_capacity
@@ -19,6 +20,7 @@ export get_variable_cost
 export set_available!
 export set_capacity_factor!
 export set_capital_cost!
+export set_demand!
 export set_fuel!
 export set_initial_capacity!
 export set_maximum_capacity!
