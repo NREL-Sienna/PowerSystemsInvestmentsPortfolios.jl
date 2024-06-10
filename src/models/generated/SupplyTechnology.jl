@@ -5,51 +5,51 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct SupplyTechnology{T <: Dict{String, Any}(&quot;type&quot; =&gt; &quot;string&quot;, &quot;description&quot; =&gt; &quot;maps to a valid PowerSystems.jl for PCM modeling&quot;)} <: 
-        capital_cost::float
-        minimum_required_capacity::float
-        available::boolean
-        name::string
-        initial_capacity::float
-        fuel::string
-        power_systems_type::string
-        variable_cost::float
-        operations_cost::float
-        maximum_capacity::float
-        capacity_factor::string
+    mutable struct SupplyTechnology{T <: PSY.Generator} <: InfrastructureSystemsComponent
+        capital_cost::Float
+        minimum_required_capacity::Float
+        available::Boolean
+        name::String
+        initial_capacity::Float
+        fuel::String
+        power_systems_type::String
+        variable_cost::Float
+        operations_cost::Float
+        maximum_capacity::Float
+        capacity_factor::String
     end
 
 
 
 # Arguments
-- `capital_cost::float`:
-- `minimum_required_capacity::float`:
-- `available::boolean`:
-- `name::string`:
-- `initial_capacity::float`:
-- `fuel::string`:
-- `power_systems_type::string`:
-- `variable_cost::float`:
-- `operations_cost::float`:
-- `maximum_capacity::float`:
-- `capacity_factor::string`:
+- `capital_cost::Float`:
+- `minimum_required_capacity::Float`:
+- `available::Boolean`:
+- `name::String`:
+- `initial_capacity::Float`:
+- `fuel::String`:
+- `power_systems_type::String`:
+- `variable_cost::Float`:
+- `operations_cost::Float`:
+- `maximum_capacity::Float`:
+- `capacity_factor::String`:
 """
-mutable struct SupplyTechnology{T <: Dict{String, Any}(&quot;type&quot; =&gt; &quot;string&quot;, &quot;description&quot; =&gt; &quot;maps to a valid PowerSystems.jl for PCM modeling&quot;)} <: 
-    capital_cost::float
-    minimum_required_capacity::float
-    available::boolean
-    name::string
-    initial_capacity::float
-    fuel::string
-    power_systems_type::string
-    variable_cost::float
-    operations_cost::float
-    maximum_capacity::float
-    capacity_factor::string
+mutable struct SupplyTechnology{T <: PSY.Generator} <: InfrastructureSystemsComponent
+    capital_cost::Float
+    minimum_required_capacity::Float
+    available::Boolean
+    name::String
+    initial_capacity::Float
+    fuel::String
+    power_systems_type::String
+    variable_cost::Float
+    operations_cost::Float
+    maximum_capacity::Float
+    capacity_factor::String
 end
 
 
-function SupplyTechnology{T}(; capital_cost, minimum_required_capacity, available, name, initial_capacity, fuel, power_systems_type, variable_cost, operations_cost, maximum_capacity, capacity_factor, ) where T <: Dict{String, Any}("type" => "string", "description" => "maps to a valid PowerSystems.jl for PCM modeling")
+function SupplyTechnology{T}(; capital_cost, minimum_required_capacity, available, name, initial_capacity, fuel, power_systems_type, variable_cost, operations_cost, maximum_capacity, capacity_factor, ) where T <: PSY.Generator
     SupplyTechnology{T}(capital_cost, minimum_required_capacity, available, name, initial_capacity, fuel, power_systems_type, variable_cost, operations_cost, maximum_capacity, capacity_factor, )
 end
 

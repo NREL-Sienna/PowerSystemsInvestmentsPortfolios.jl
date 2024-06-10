@@ -5,30 +5,30 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct StorageTechnology{T <: Dict{String, Any}(&quot;type&quot; =&gt; &quot;string&quot;, &quot;description&quot; =&gt; &quot;maps to a valid PowerSystems.jl for PCM modeling&quot;)} <: 
-        name::string
-        storage_tech::string
-        power_systems_type::string
-        available::boolean
+    mutable struct StorageTechnology{T <: PSY.Storage} <: InfrastructureSystemsComponent
+        name::String
+        storage_tech::String
+        power_systems_type::String
+        available::Boolean
     end
 
 
 
 # Arguments
-- `name::string`:
-- `storage_tech::string`:
-- `power_systems_type::string`:
-- `available::boolean`:
+- `name::String`:
+- `storage_tech::String`:
+- `power_systems_type::String`:
+- `available::Boolean`:
 """
-mutable struct StorageTechnology{T <: Dict{String, Any}(&quot;type&quot; =&gt; &quot;string&quot;, &quot;description&quot; =&gt; &quot;maps to a valid PowerSystems.jl for PCM modeling&quot;)} <: 
-    name::string
-    storage_tech::string
-    power_systems_type::string
-    available::boolean
+mutable struct StorageTechnology{T <: PSY.Storage} <: InfrastructureSystemsComponent
+    name::String
+    storage_tech::String
+    power_systems_type::String
+    available::Boolean
 end
 
 
-function StorageTechnology{T}(; name, storage_tech, power_systems_type, available, ) where T <: Dict{String, Any}("type" => "string", "description" => "maps to a valid PowerSystems.jl for PCM modeling")
+function StorageTechnology{T}(; name, storage_tech, power_systems_type, available, ) where T <: PSY.Storage
     StorageTechnology{T}(name, storage_tech, power_systems_type, available, )
 end
 

@@ -1,80 +1,11 @@
-import Mustache
+using JSON3
+using JSONSchema
+using Mustache
+using InfrastructureSystems
+using PowerSystems
 
-const STRUCT_TEMPLATE = """
-#=
-This file is auto-generated. Do not edit.
-=#
-
-#! format: off
-
-\"\"\"
-    mutable struct {{struct_name}}{{#parametric}}{T <: {{parametric}}}{{/parametric}} <: {{supertype}}
-        {{#parameters}}
-        {{name}}::{{{data_type}}}
-        {{/parameters}}
-    end
-
-{{#docstring}}{{{docstring}}}{{/docstring}}
-
-# Arguments
-{{#parameters}}
-- `{{name}}::{{{data_type}}}`:{{#default}} (default: `{{{default}}}`){{/default}}{{#comment}} {{{comment}}}{{/comment}}{{#valid_range}}, validation range: `{{{valid_range}}}`{{/valid_range}}
-{{/parameters}}
-\"\"\"
-mutable struct {{struct_name}}{{#parametric}}{T <: {{parametric}}}{{/parametric}} <: {{supertype}}
-    {{#parameters}}
-    {{#comment}}"{{{comment}}}"\n    {{/comment}}{{name}}::{{{data_type}}}
-    {{/parameters}}
-    {{#inner_constructor_check}}
-
-    function {{struct_name}}({{#parameters}}{{name}}, {{/parameters}})
-        ({{#parameters}}{{name}}, {{/parameters}}) = {{inner_constructor_check}}(
-            {{#parameters}}
-            {{name}},
-            {{/parameters}}
-        )
-        new({{#parameters}}{{name}}, {{/parameters}})
-    end
-    {{/inner_constructor_check}}
-end
-
-{{#needs_positional_constructor}}
-function {{constructor_func}}({{#parameters}}{{^internal_default}}{{name}}{{#default}}={{default}}{{/default}}, {{/internal_default}}{{/parameters}}){{{closing_constructor_text}}}
-    {{constructor_func}}({{#parameters}}{{^internal_default}}{{name}}, {{/internal_default}}{{/parameters}}{{#parameters}}{{#internal_default}}{{{internal_default}}}, {{/internal_default}}{{/parameters}})
-end
-{{/needs_positional_constructor}}
-
-function {{constructor_func}}(; {{#parameters}}{{name}}{{#kwarg_value}}{{{kwarg_value}}}{{/kwarg_value}}, {{/parameters}}){{{closing_constructor_text}}}
-    {{constructor_func}}({{#parameters}}{{name}}, {{/parameters}})
-end
-
-{{#has_null_values}}
-# Constructor for demo purposes; non-functional.
-function {{constructor_func}}(::Nothing){{{closing_constructor_text}}}
-    {{constructor_func}}(;
-        {{#parameters}}
-        {{^internal_default}}
-        {{name}}={{#quotes}}"{{null_value}}"{{/quotes}}{{^quotes}}{{null_value}}{{/quotes}},
-        {{/internal_default}}
-        {{/parameters}}
-    )
-end
-
-{{/has_null_values}}
-{{#accessors}}
-{{#create_docstring}}\"\"\"Get [`{{struct_name}}`](@ref) `{{name}}`.\"\"\"{{/create_docstring}}
-{{accessor}}(value::{{struct_name}}) = {{#needs_conversion}}get_value(value, value.{{name}}){{/needs_conversion}}{{^needs_conversion}}value.{{name}}{{/needs_conversion}}
-{{/accessors}}
-
-{{#setters}}
-{{#create_docstring}}\"\"\"Set [`{{struct_name}}`](@ref) `{{name}}`.\"\"\"{{/create_docstring}}
-{{setter}}(value::{{struct_name}}, val) = value.{{name}} = {{#needs_conversion}}set_value(value, val){{/needs_conversion}}{{^needs_conversion}}val{{/needs_conversion}}
-{{/setters}}
-
-{{#custom_code}}
-{{{custom_code}}}
-{{/custom_code}}
-"""
+const IS = InfrastructureSystems
+const PSY = PowerSystems
 
 function read_json_data(filename::String)
     try
@@ -95,25 +26,29 @@ function generate_invest_structs(directory, data::Schema; print_results=true)
         item = Dict{String, Any}()
         item["has_internal"] = false
         item["has_null_values"] = true
-        
+        item["supertype"] = input["supertype"]
+
         accessors = Vector{Dict}()
         setters = Vector{Dict}()
 
         item["has_non_default_values"] = false
 
         item["constructor_func"] = struct_name
-        item["constructor_func"] *= "{T}"
         item["struct_name"] = struct_name
         item["closing_constructor_text"] = ""
-        item["parametric"] = properties["power_systems_type"]
-        item["closing_constructor_text"] = " where T <: $(item["parametric"])"
 
+        item["parametric"] = input["parametric"]
+        if haskey(item, "parametric")
+            item["constructor_func"] *= "{T}"
+            item["closing_constructor_text"] = " where T <: $(item["parametric"])"
+        end
+
+        
         parameters = Vector{Dict}()
         for (field, values) in properties
             param = Dict{String, Any}()
 
-            #param["struct_name"] = item["struct_name"]
-            param["struct_name"] = item["constructor_func"]
+            param["struct_name"] = item["struct_name"]
             param["name"] = field
             param["data_type"] = values["type"]
 
@@ -208,7 +143,7 @@ function generate_invest_structs(directory, data::Schema; print_results=true)
         filename = joinpath(directory, item["struct_name"] * ".jl")
         
         open(filename, "w") do io
-            write(io, strip(Mustache.render(STRUCT_TEMPLATE, item)))
+            write(io, strip(Mustache.render(IS.STRUCT_TEMPLATE, item)))
             write(io, "\n")
             push!(struct_names, item["struct_name"])
         end

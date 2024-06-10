@@ -5,27 +5,27 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct DemandRequirement{T <: Dict{String, Any}(&quot;type&quot; =&gt; &quot;string&quot;, &quot;description&quot; =&gt; &quot;maps to a valid PowerSystems.jl for PCM modeling&quot;)} <: 
-        name::string
-        power_systems_type::string
-        available::boolean
+    mutable struct DemandRequirement{T <: PSY.StaticInjection} <: InfrastructureSystemsComponent
+        name::String
+        power_systems_type::String
+        available::Boolean
     end
 
 
 
 # Arguments
-- `name::string`:
-- `power_systems_type::string`:
-- `available::boolean`:
+- `name::String`:
+- `power_systems_type::String`:
+- `available::Boolean`:
 """
-mutable struct DemandRequirement{T <: Dict{String, Any}(&quot;type&quot; =&gt; &quot;string&quot;, &quot;description&quot; =&gt; &quot;maps to a valid PowerSystems.jl for PCM modeling&quot;)} <: 
-    name::string
-    power_systems_type::string
-    available::boolean
+mutable struct DemandRequirement{T <: PSY.StaticInjection} <: InfrastructureSystemsComponent
+    name::String
+    power_systems_type::String
+    available::Boolean
 end
 
 
-function DemandRequirement{T}(; name, power_systems_type, available, ) where T <: Dict{String, Any}("type" => "string", "description" => "maps to a valid PowerSystems.jl for PCM modeling")
+function DemandRequirement{T}(; name, power_systems_type, available, ) where T <: PSY.StaticInjection
     DemandRequirement{T}(name, power_systems_type, available, )
 end
 

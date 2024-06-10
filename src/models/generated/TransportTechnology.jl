@@ -5,27 +5,27 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct TransportTechnology{T <: Dict{String, Any}(&quot;type&quot; =&gt; &quot;string&quot;, &quot;description&quot; =&gt; &quot;maps to a valid PowerSystems.jl for PCM modeling&quot;)} <: 
-        name::string
-        power_systems_type::string
-        available::boolean
+    mutable struct TransportTechnology{T <: PSY.Device} <: InfrastructureSystemsComponent
+        name::String
+        power_systems_type::String
+        available::Boolean
     end
 
 
 
 # Arguments
-- `name::string`:
-- `power_systems_type::string`:
-- `available::boolean`:
+- `name::String`:
+- `power_systems_type::String`:
+- `available::Boolean`:
 """
-mutable struct TransportTechnology{T <: Dict{String, Any}(&quot;type&quot; =&gt; &quot;string&quot;, &quot;description&quot; =&gt; &quot;maps to a valid PowerSystems.jl for PCM modeling&quot;)} <: 
-    name::string
-    power_systems_type::string
-    available::boolean
+mutable struct TransportTechnology{T <: PSY.Device} <: InfrastructureSystemsComponent
+    name::String
+    power_systems_type::String
+    available::Boolean
 end
 
 
-function TransportTechnology{T}(; name, power_systems_type, available, ) where T <: Dict{String, Any}("type" => "string", "description" => "maps to a valid PowerSystems.jl for PCM modeling")
+function TransportTechnology{T}(; name, power_systems_type, available, ) where T <: PSY.Device
     TransportTechnology{T}(name, power_systems_type, available, )
 end
 
