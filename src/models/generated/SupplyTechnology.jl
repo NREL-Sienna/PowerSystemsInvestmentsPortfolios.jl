@@ -26,37 +26,52 @@ This file is auto-generated. Do not edit.
 
 
 # Arguments
-- `base_power::Float`:
-- `capital_cost::Float`:
-- `minimum_required_capacity::Float`:
-- `prime_mover_type::String`:
-- `available::Boolean`:
-- `gen_ID::String`:
-- `name::String`:
-- `initial_capacity::Float`:
-- `fuel::String`:
-- `power_systems_type::String`:
-- `variable_cost::Float`:
-- `balancing_topology::String`:
-- `operations_cost::Float`:
-- `maximum_capacity::Float`:
-- `capacity_factor::String`:
+- `base_power::Float`: Base power
+- `capital_cost::Float`: Capital costs for investing in a technology.
+- `minimum_required_capacity::Float`: Minimum required capacity for a technology
+- `prime_mover_type::String`: Prime mover for generator
+- `available::Boolean`: identifies whether the technology is available
+- `gen_ID::String`: ID for individual generator
+- `name::String`: The technology name
+- `initial_capacity::Float`: Pre-existing capacity for a technology
+- `fuel::String`: Fuel type according to IEA
+- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
+- `variable_cost::Float`: Variable O&M costs for a technology
+- `balancing_topology::String`: Set of balancing nodes
+- `operations_cost::Float`: Fixed O&M costs for a technology
+- `maximum_capacity::Float`: Maximum allowable installed capacity for a technology
+- `capacity_factor::String`: Derating factor to account for planned or forced outages of a technology
 """
 mutable struct SupplyTechnology{T <: PSY.Generator} <: InfrastructureSystemsComponent
+    "Base power"
     base_power::Float
+    "Capital costs for investing in a technology."
     capital_cost::Float
+    "Minimum required capacity for a technology"
     minimum_required_capacity::Float
+    "Prime mover for generator"
     prime_mover_type::String
+    "identifies whether the technology is available"
     available::Boolean
+    "ID for individual generator"
     gen_ID::String
+    "The technology name"
     name::String
+    "Pre-existing capacity for a technology"
     initial_capacity::Float
+    "Fuel type according to IEA"
     fuel::String
+    "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
+    "Variable O&M costs for a technology"
     variable_cost::Float
+    "Set of balancing nodes"
     balancing_topology::String
+    "Fixed O&M costs for a technology"
     operations_cost::Float
+    "Maximum allowable installed capacity for a technology"
     maximum_capacity::Float
+    "Derating factor to account for planned or forced outages of a technology"
     capacity_factor::String
 end
 

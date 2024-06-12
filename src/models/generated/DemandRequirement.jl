@@ -17,19 +17,25 @@ This file is auto-generated. Do not edit.
 
 
 # Arguments
-- `load_growth::Float`:
-- `name::String`:
-- `power_systems_type::String`:
-- `region::String`:
-- `available::Boolean`:
-- `peak_load::Float`:
+- `load_growth::Float`: Annual load growth (%)
+- `name::String`: The technology name
+- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
+- `region::String`: Corresponding region for peak demand
+- `available::Boolean`: identifies whether the technology is available
+- `peak_load::Float`: Demand value (MW) for single timepoint (for now)
 """
 mutable struct DemandRequirement{T <: PSY.StaticInjection} <: InfrastructureSystemsComponent
+    "Annual load growth (%)"
     load_growth::Float
+    "The technology name"
     name::String
+    "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
+    "Corresponding region for peak demand"
     region::String
+    "identifies whether the technology is available"
     available::Boolean
+    "Demand value (MW) for single timepoint (for now)"
     peak_load::Float
 end
 

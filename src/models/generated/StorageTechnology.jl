@@ -15,15 +15,19 @@ This file is auto-generated. Do not edit.
 
 
 # Arguments
-- `name::String`:
-- `storage_tech::String`:
-- `power_systems_type::String`:
-- `available::Boolean`:
+- `name::String`: The technology name
+- `storage_tech::String`: Storage Technology Type
+- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
+- `available::Boolean`: identifies whether the technology is available
 """
 mutable struct StorageTechnology{T <: PSY.Storage} <: InfrastructureSystemsComponent
+    "The technology name"
     name::String
+    "Storage Technology Type"
     storage_tech::String
+    "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
+    "identifies whether the technology is available"
     available::Boolean
 end
 

@@ -51,6 +51,7 @@ function generate_invest_structs(directory, data::Schema; print_results=true)
             param["struct_name"] = item["struct_name"]
             param["name"] = field
             param["data_type"] = values["type"]
+            param["comment"] = values["description"]
 
             if haskey(param, "valid_range")
                 if typeof(param["valid_range"]) == Dict{String, Any}

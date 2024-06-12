@@ -14,13 +14,16 @@ This file is auto-generated. Do not edit.
 
 
 # Arguments
-- `name::String`:
-- `power_systems_type::String`:
-- `available::Boolean`:
+- `name::String`: The technology name
+- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
+- `available::Boolean`: identifies whether the technology is available
 """
 mutable struct TransportTechnology{T <: PSY.Device} <: InfrastructureSystemsComponent
+    "The technology name"
     name::String
+    "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
+    "identifies whether the technology is available"
     available::Boolean
 end
 
