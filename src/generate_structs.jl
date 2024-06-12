@@ -21,7 +21,6 @@ function generate_invest_structs(directory, data::Schema; print_results=true)
     unique_setter_functions = Set{String}()
 
     for (struct_name, input) in data.data["\$defs"]
-        
         properties = input["properties"]
         item = Dict{String, Any}()
         item["has_internal"] = false
@@ -43,7 +42,6 @@ function generate_invest_structs(directory, data::Schema; print_results=true)
             item["closing_constructor_text"] = " where T <: $(item["parametric"])"
         end
 
-        
         parameters = Vector{Dict}()
         for (field, values) in properties
             param = Dict{String, Any}()
@@ -78,7 +76,7 @@ function generate_invest_structs(directory, data::Schema; print_results=true)
 
             accessor_name = accessor_module * "get_" * param["name"]
             setter_name = accessor_module * "set_" * param["name"] * "!"
-            
+
             push!(
                 accessors,
                 Dict(
@@ -139,21 +137,22 @@ function generate_invest_structs(directory, data::Schema; print_results=true)
 
         # If all parameters have defaults then the positional constructor will
         # collide with the kwarg constructor.
-        item["needs_positional_constructor"] = item["has_internal"] && item["has_non_default_values"]
+        item["needs_positional_constructor"] =
+            item["has_internal"] && item["has_non_default_values"]
 
         filename = joinpath(directory, item["struct_name"] * ".jl")
-        
+
         open(filename, "w") do io
             write(io, strip(Mustache.render(IS.STRUCT_TEMPLATE, item)))
             write(io, "\n")
             push!(struct_names, item["struct_name"])
         end
-        
+
         if print_results
             println("Wrote $filename")
         end
     end
-    
+
     accessors = sort!(collect(unique_accessor_functions))
     setters = sort!(collect(unique_setter_functions))
     filename = joinpath(directory, "includes.jl")
@@ -173,7 +172,6 @@ function generate_invest_structs(directory, data::Schema; print_results=true)
             println("Wrote $filename")
         end
     end
-    
 end
 
 function generate_structs(
