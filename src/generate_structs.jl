@@ -6,30 +6,42 @@ function read_json_data(filename::String)
     end
 end
 
-function generate_invest_structs(directory, data::Dict{String, Any}; print_results=true)
+function generate_invest_structs(directory, data::JSONSchema.Schema; print_results=true)
     struct_names = Vector{String}()
     unique_accessor_functions = Set{String}()
     unique_setter_functions = Set{String}()
 
-    for (struc_name, input) in data
+    for (struct_name, input) in data.data["\$defs"]
         properties = input["properties"]
         item = Dict{String, Any}()
-        item["has_internal"] = true
+        item["has_internal"] = false
+        item["has_null_values"] = true
+        item["supertype"] = input["supertype"]
+
         accessors = Vector{Dict}()
         setters = Vector{Dict}()
-        item["has_null_values"] = true
-        has_non_default_values = false
+
+        item["has_non_default_values"] = false
 
         item["constructor_func"] = struct_name
+        item["struct_name"] = struct_name
         item["closing_constructor_text"] = ""
-        item["parametric"] = properties["power_systems_type"]
-        item["constructor_func"] *= "{T}"
-        item["closing_constructor_text"] = " where T <: $(item["parametric"])"
+
+        item["parametric"] = input["parametric"]
+        if haskey(item, "parametric")
+            item["constructor_func"] *= "{T}"
+            item["closing_constructor_text"] = " where T <: $(item["parametric"])"
+        end
 
         parameters = Vector{Dict}()
         for (field, values) in properties
             param = Dict{String, Any}()
+
             param["struct_name"] = item["struct_name"]
+            param["name"] = field
+            param["data_type"] = values["type"]
+            param["comment"] = values["description"]
+
             if haskey(param, "valid_range")
                 if typeof(param["valid_range"]) == Dict{String, Any}
                     min = param["valid_range"]["min"]
@@ -52,8 +64,10 @@ function generate_invest_structs(directory, data::Dict{String, Any}; print_resul
                 accessor_module = ""
                 create_docstring = true
             end
+
             accessor_name = accessor_module * "get_" * param["name"]
             setter_name = accessor_module * "set_" * param["name"] * "!"
+
             push!(
                 accessors,
                 Dict(
@@ -63,6 +77,7 @@ function generate_invest_structs(directory, data::Dict{String, Any}; print_resul
                     "needs_conversion" => get(param, "needs_conversion", false),
                 ),
             )
+
             include_setter = !get(param, "exclude_setter", false)
             if include_setter
                 push!(
@@ -76,7 +91,8 @@ function generate_invest_structs(directory, data::Dict{String, Any}; print_resul
                     ),
                 )
             end
-            if field["name"] != "internal" && accessor_module == ""
+
+            if field != "internal" && accessor_module == ""
                 push!(unique_accessor_functions, accessor_name)
                 push!(unique_setter_functions, setter_name)
             end
@@ -86,10 +102,10 @@ function generate_invest_structs(directory, data::Dict{String, Any}; print_resul
                 param["kwarg_value"] = "=" * param["default"]
             elseif !isnothing(get(param, "internal_default", nothing))
                 param["kwarg_value"] = "=" * string(param["internal_default"])
-                has_internal = true
+                item["has_internal"] = true
                 continue
             else
-                has_non_default_values = true
+                item["has_non_default_values"] = true
             end
 
             # This controls whether a demo constructor will be generated.
@@ -109,13 +125,16 @@ function generate_invest_structs(directory, data::Dict{String, Any}; print_resul
         item["parameters"] = parameters
         item["accessors"] = accessors
         item["setters"] = setters
+
         # If all parameters have defaults then the positional constructor will
         # collide with the kwarg constructor.
-        item["needs_positional_constructor"] = has_internal && has_non_default_values
+        item["needs_positional_constructor"] =
+            item["has_internal"] && item["has_non_default_values"]
 
         filename = joinpath(directory, item["struct_name"] * ".jl")
+
         open(filename, "w") do io
-            write(io, strip(Mustache.render(IS.STRUCT_TEMPLATE, item)))
+            write(io, strip(MU.render(IS.STRUCT_TEMPLATE, item)))
             write(io, "\n")
             push!(struct_names, item["struct_name"])
         end
@@ -157,6 +176,6 @@ function generate_structs(
     end
 
     data = read_json_data(input_file)
-    generate_structs(output_directory, data; print_results=print_results)
+    generate_invest_structs(output_directory, data; print_results=print_results)
     return
 end

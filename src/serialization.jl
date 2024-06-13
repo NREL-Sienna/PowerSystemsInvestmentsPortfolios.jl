@@ -299,7 +299,7 @@ function _post_deserialize_handling(
             assign_new_uuid!(portfolio, component)
         end
         for component in
-            IS.get_masked_components(InfrastructureSystemsComponent, portfolio.data)
+            IS.get_masked_components(IS.InfrastructureSystemsComponent, portfolio.data)
             assign_new_uuid!(portfolio, component)
         end
         # Note: this does not change UUIDs for time series data because they are
