@@ -19,7 +19,8 @@ import InfrastructureSystems:
     CompressionTypes,
     MultiLogger,
     LogEventTracker,
-    StructField
+    StructField,
+    InfrastructureSystemsComponent
 
 import PowerSystems
 import JSONSchema
@@ -39,8 +40,10 @@ export generate_structs
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems
+const MU = IS.Mustache
 
-include("models/includes.jl")
+include("models/technologies.jl")
+include("models/generated/includes.jl")
 include("portfolio.jl")
 include("generate_structs.jl")
 

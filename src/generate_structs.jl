@@ -1,11 +1,8 @@
-using JSON3
-using JSONSchema
-using Mustache
-using InfrastructureSystems
-using PowerSystems
-
-const IS = InfrastructureSystems
-const PSY = PowerSystems
+#using JSON3
+#using JSONSchema
+#using InfrastructureSystems
+#using InfrastructureSystems.Mustache
+#using PowerSystems
 
 function read_json_data(filename::String)
     try
@@ -15,7 +12,7 @@ function read_json_data(filename::String)
     end
 end
 
-function generate_invest_structs(directory, data::Schema; print_results=true)
+function generate_invest_structs(directory, data::JSONSchema.Schema; print_results=true)
     struct_names = Vector{String}()
     unique_accessor_functions = Set{String}()
     unique_setter_functions = Set{String}()
@@ -143,7 +140,7 @@ function generate_invest_structs(directory, data::Schema; print_results=true)
         filename = joinpath(directory, item["struct_name"] * ".jl")
 
         open(filename, "w") do io
-            write(io, strip(Mustache.render(IS.STRUCT_TEMPLATE, item)))
+            write(io, strip(MU.render(IS.STRUCT_TEMPLATE, item)))
             write(io, "\n")
             push!(struct_names, item["struct_name"])
         end
