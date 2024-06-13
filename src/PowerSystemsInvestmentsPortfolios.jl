@@ -19,9 +19,12 @@ import InfrastructureSystems:
     CompressionTypes,
     MultiLogger,
     LogEventTracker,
-    StructField
+    StructField,
+    InfrastructureSystemsComponent
 
 import PowerSystems
+import JSONSchema
+import JSON3
 
 export Portfolio
 export SupplyTechnology
@@ -31,17 +34,18 @@ export StorageTechnology
 
 export add_technology!
 export add_technologies!
+export read_json_data
+export generate_invest_structs
+export generate_structs
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems
+const MU = IS.Mustache
 
-include("technologies.jl")
-include("demand_requirement.jl")
-include("supply.jl")
-include("demand_side.jl")
-include("transport.jl")
-include("storage.jl")
+include("models/technologies.jl")
+include("models/generated/includes.jl")
 include("portfolio.jl")
+include("generate_structs.jl")
 
 using DocStringExtensions
 
