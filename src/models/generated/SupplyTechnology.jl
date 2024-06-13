@@ -6,71 +6,71 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct SupplyTechnology{T <: PSY.Generator} <: InfrastructureSystemsComponent
-        base_power::Float
-        capital_cost::Float
-        minimum_required_capacity::Float
+        base_power::Float64
+        capital_cost::Float64
+        minimum_required_capacity::Float64
         prime_mover_type::String
-        available::Boolean
+        available::Bool
         gen_ID::String
         name::String
-        initial_capacity::Float
+        initial_capacity::Float64
         fuel::String
         power_systems_type::String
-        variable_cost::Float
+        variable_cost::Float64
         balancing_topology::String
-        operations_cost::Float
-        maximum_capacity::Float
+        operations_cost::Float64
+        maximum_capacity::Float64
         capacity_factor::String
     end
 
 
 
 # Arguments
-- `base_power::Float`: Base power
-- `capital_cost::Float`: Capital costs for investing in a technology.
-- `minimum_required_capacity::Float`: Minimum required capacity for a technology
+- `base_power::Float64`: Base power
+- `capital_cost::Float64`: Capital costs for investing in a technology.
+- `minimum_required_capacity::Float64`: Minimum required capacity for a technology
 - `prime_mover_type::String`: Prime mover for generator
-- `available::Boolean`: identifies whether the technology is available
+- `available::Bool`: identifies whether the technology is available
 - `gen_ID::String`: ID for individual generator
 - `name::String`: The technology name
-- `initial_capacity::Float`: Pre-existing capacity for a technology
+- `initial_capacity::Float64`: Pre-existing capacity for a technology
 - `fuel::String`: Fuel type according to IEA
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
-- `variable_cost::Float`: Variable O&M costs for a technology
+- `variable_cost::Float64`: Variable O&M costs for a technology
 - `balancing_topology::String`: Set of balancing nodes
-- `operations_cost::Float`: Fixed O&M costs for a technology
-- `maximum_capacity::Float`: Maximum allowable installed capacity for a technology
+- `operations_cost::Float64`: Fixed O&M costs for a technology
+- `maximum_capacity::Float64`: Maximum allowable installed capacity for a technology
 - `capacity_factor::String`: Derating factor to account for planned or forced outages of a technology
 """
 mutable struct SupplyTechnology{T <: PSY.Generator} <: InfrastructureSystemsComponent
     "Base power"
-    base_power::Float
+    base_power::Float64
     "Capital costs for investing in a technology."
-    capital_cost::Float
+    capital_cost::Float64
     "Minimum required capacity for a technology"
-    minimum_required_capacity::Float
+    minimum_required_capacity::Float64
     "Prime mover for generator"
     prime_mover_type::String
     "identifies whether the technology is available"
-    available::Boolean
+    available::Bool
     "ID for individual generator"
     gen_ID::String
     "The technology name"
     name::String
     "Pre-existing capacity for a technology"
-    initial_capacity::Float
+    initial_capacity::Float64
     "Fuel type according to IEA"
     fuel::String
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
     "Variable O&M costs for a technology"
-    variable_cost::Float
+    variable_cost::Float64
     "Set of balancing nodes"
     balancing_topology::String
     "Fixed O&M costs for a technology"
-    operations_cost::Float
+    operations_cost::Float64
     "Maximum allowable installed capacity for a technology"
-    maximum_capacity::Float
+    maximum_capacity::Float64
     "Derating factor to account for planned or forced outages of a technology"
     capacity_factor::String
 end
