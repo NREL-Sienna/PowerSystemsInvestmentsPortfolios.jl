@@ -44,6 +44,10 @@ const PSY = PowerSystems
 const IS = InfrastructureSystems
 const MU = IS.Mustache
 
+##### Imports #####
+
+import PowerSystems: ThermalFuels, PrimeMovers, StorageTech
+
 include("definitions.jl")
 include("models/technologies.jl")
 include("models/generated/includes.jl")
