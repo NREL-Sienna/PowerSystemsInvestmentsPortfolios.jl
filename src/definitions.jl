@@ -26,7 +26,6 @@ IS.@scoped_enum(
     WS = 23,  # Wind Turbine, Offshore
 )
 
-
 #AER Aggregated Fuel Code From https://www.eia.gov/survey/form/eia_923/instructions.pdf
 IS.@scoped_enum(
     ThermalFuels,

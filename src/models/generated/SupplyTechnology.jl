@@ -7,16 +7,17 @@ This file is auto-generated. Do not edit.
 """
     mutable struct SupplyTechnology{T <: PSY.Generator} <: IS.InfrastructureSystemsComponent
         base_power::Float64
-        prime_mover_type::String
+        prime_mover_type::PrimeMovers
         capital_cost::Float64
         minimum_required_capacity::Float64
         gen_ID::String
         available::Bool
         name::String
         initial_capacity::Float64
-        fuel::String
+        fuel::ThermalFuels
         power_systems_type::String
         variable_cost::Float64
+        ext::Dict
         balancing_topology::String
         operations_cost::Float64
         maximum_capacity::Float64
@@ -27,16 +28,17 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `base_power::Float64`: Base power
-- `prime_mover_type::String`: Prime mover for generator
+- `prime_mover_type::PrimeMovers`: (default: `OT`) Prime mover for generator
 - `capital_cost::Float64`: Capital costs for investing in a technology.
 - `minimum_required_capacity::Float64`: Minimum required capacity for a technology
 - `gen_ID::String`: ID for individual generator
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: The technology name
 - `initial_capacity::Float64`: Pre-existing capacity for a technology
-- `fuel::String`: (default: `OTHER`) Fuel type according to IEA
+- `fuel::ThermalFuels`: (default: `OTHER`) Fuel type according to IEA
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `variable_cost::Float64`: Variable O&M costs for a technology
+- `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `balancing_topology::String`: Set of balancing nodes
 - `operations_cost::Float64`: Fixed O&M costs for a technology
 - `maximum_capacity::Float64`: Maximum allowable installed capacity for a technology
@@ -46,7 +48,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: IS.InfrastructureSystemsC
     "Base power"
     base_power::Float64
     "Prime mover for generator"
-    prime_mover_type::String
+    prime_mover_type::PrimeMovers
     "Capital costs for investing in a technology."
     capital_cost::Float64
     "Minimum required capacity for a technology"
@@ -60,11 +62,13 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: IS.InfrastructureSystemsC
     "Pre-existing capacity for a technology"
     initial_capacity::Float64
     "Fuel type according to IEA"
-    fuel::String
+    fuel::ThermalFuels
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
     "Variable O&M costs for a technology"
     variable_cost::Float64
+    "Option for providing additional data"
+    ext::Dict
     "Set of balancing nodes"
     balancing_topology::String
     "Fixed O&M costs for a technology"
@@ -76,8 +80,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: IS.InfrastructureSystemsC
 end
 
 
-function SupplyTechnology{T}(; base_power, prime_mover_type, capital_cost, minimum_required_capacity, gen_ID, available, name, initial_capacity, fuel=OTHER, power_systems_type, variable_cost, balancing_topology, operations_cost, maximum_capacity, capacity_factor, ) where T <: PSY.Generator
-    SupplyTechnology{T}(base_power, prime_mover_type, capital_cost, minimum_required_capacity, gen_ID, available, name, initial_capacity, fuel, power_systems_type, variable_cost, balancing_topology, operations_cost, maximum_capacity, capacity_factor, )
+function SupplyTechnology{T}(; base_power, prime_mover_type=OT, capital_cost, minimum_required_capacity, gen_ID, available, name, initial_capacity, fuel=OTHER, power_systems_type, variable_cost, ext=Dict(), balancing_topology, operations_cost, maximum_capacity, capacity_factor, ) where T <: PSY.Generator
+    SupplyTechnology{T}(base_power, prime_mover_type, capital_cost, minimum_required_capacity, gen_ID, available, name, initial_capacity, fuel, power_systems_type, variable_cost, ext, balancing_topology, operations_cost, maximum_capacity, capacity_factor, )
 end
 
 """Get [`SupplyTechnology`](@ref) `base_power`."""
@@ -102,6 +106,8 @@ get_fuel(value::SupplyTechnology) = value.fuel
 get_power_systems_type(value::SupplyTechnology) = value.power_systems_type
 """Get [`SupplyTechnology`](@ref) `variable_cost`."""
 get_variable_cost(value::SupplyTechnology) = value.variable_cost
+"""Get [`SupplyTechnology`](@ref) `ext`."""
+get_ext(value::SupplyTechnology) = value.ext
 """Get [`SupplyTechnology`](@ref) `balancing_topology`."""
 get_balancing_topology(value::SupplyTechnology) = value.balancing_topology
 """Get [`SupplyTechnology`](@ref) `operations_cost`."""
@@ -133,6 +139,8 @@ set_fuel!(value::SupplyTechnology, val) = value.fuel = val
 set_power_systems_type!(value::SupplyTechnology, val) = value.power_systems_type = val
 """Set [`SupplyTechnology`](@ref) `variable_cost`."""
 set_variable_cost!(value::SupplyTechnology, val) = value.variable_cost = val
+"""Set [`SupplyTechnology`](@ref) `ext`."""
+set_ext!(value::SupplyTechnology, val) = value.ext = val
 """Set [`SupplyTechnology`](@ref) `balancing_topology`."""
 set_balancing_topology!(value::SupplyTechnology, val) = value.balancing_topology = val
 """Set [`SupplyTechnology`](@ref) `operations_cost`."""

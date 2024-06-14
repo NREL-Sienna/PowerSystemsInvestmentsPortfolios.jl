@@ -9,6 +9,7 @@ export get_balancing_topology
 export get_base_power
 export get_capacity_factor
 export get_capital_cost
+export get_ext
 export get_fuel
 export get_gen_ID
 export get_initial_capacity
@@ -28,6 +29,7 @@ export set_balancing_topology!
 export set_base_power!
 export set_capacity_factor!
 export set_capital_cost!
+export set_ext!
 export set_fuel!
 export set_gen_ID!
 export set_initial_capacity!
