@@ -25,6 +25,7 @@ import InfrastructureSystems:
 import PowerSystems
 import JSONSchema
 import JSON3
+import PrettyTables
 
 export Portfolio
 export SupplyTechnology
