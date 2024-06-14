@@ -42,10 +42,12 @@ const PSY = PowerSystems
 const IS = InfrastructureSystems
 const MU = IS.Mustache
 
+include("definitions.jl")
 include("models/technologies.jl")
 include("models/generated/includes.jl")
 include("portfolio.jl")
 include("generate_structs.jl")
+include("utils/print.jl")
 
 using DocStringExtensions
 
