@@ -1,6 +1,4 @@
-"""
-From https://www.eia.gov/survey/form/eia_923/instructions.pdf
-"""
+#From https://www.eia.gov/survey/form/eia_923/instructions.pdf
 IS.@scoped_enum(
     PrimeMovers,
     BA = 1,  # Energy Storage, Battery
@@ -28,9 +26,8 @@ IS.@scoped_enum(
     WS = 23,  # Wind Turbine, Offshore
 )
 
-"""
-AER Aggregated Fuel Code From https://www.eia.gov/survey/form/eia_923/instructions.pdf
-"""
+
+#AER Aggregated Fuel Code From https://www.eia.gov/survey/form/eia_923/instructions.pdf
 IS.@scoped_enum(
     ThermalFuels,
     COAL = 1,  # COL    # Anthracite Coal and Bituminous Coal
