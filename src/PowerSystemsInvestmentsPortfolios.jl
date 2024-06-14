@@ -30,8 +30,9 @@ import PrettyTables
 export Portfolio
 export SupplyTechnology
 export TransportTechnology
-export DemandTechnology
 export StorageTechnology
+export DemandRequirement
+export DemandsideTechnology
 
 export add_technology!
 export add_technologies!
