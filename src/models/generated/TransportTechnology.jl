@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct TransportTechnology{T <: PSY.Device} <: InfrastructureSystemsComponent
+    mutable struct TransportTechnology{T <: PSY.Device} <: IS.InfrastructureSystemsComponent
         name::String
         power_systems_type::String
         available::Bool
@@ -18,7 +18,7 @@ This file is auto-generated. Do not edit.
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `available::Bool`: identifies whether the technology is available
 """
-mutable struct TransportTechnology{T <: PSY.Device} <: InfrastructureSystemsComponent
+mutable struct TransportTechnology{T <: PSY.Device} <: IS.InfrastructureSystemsComponent
     "The technology name"
     name::String
     "maps to a valid PowerSystems.jl for PCM modeling"

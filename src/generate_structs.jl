@@ -98,7 +98,8 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
             end
 
             param["kwarg_value"] = ""
-            if !isnothing(get(param, "default", nothing))
+            if !isnothing(get(values, "default", nothing))
+                param["default"] = values["default"]
                 param["kwarg_value"] = "=" * param["default"]
             elseif !isnothing(get(param, "internal_default", nothing))
                 param["kwarg_value"] = "=" * string(param["internal_default"])

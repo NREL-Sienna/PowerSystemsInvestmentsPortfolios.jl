@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct DemandsideTechnology{T <: PSY.StaticInjection} <: InfrastructureSystemsComponent
+    mutable struct DemandsideTechnology{T <: PSY.StaticInjection} <: IS.InfrastructureSystemsComponent
         name::String
         power_systems_type::String
         available::Bool
@@ -18,7 +18,7 @@ This file is auto-generated. Do not edit.
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `available::Bool`: identifies whether the technology is available
 """
-mutable struct DemandsideTechnology{T <: PSY.StaticInjection} <: InfrastructureSystemsComponent
+mutable struct DemandsideTechnology{T <: PSY.StaticInjection} <: IS.InfrastructureSystemsComponent
     "The technology name"
     name::String
     "maps to a valid PowerSystems.jl for PCM modeling"
