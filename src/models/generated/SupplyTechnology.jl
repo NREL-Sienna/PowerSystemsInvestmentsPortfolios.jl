@@ -8,7 +8,7 @@ This file is auto-generated. Do not edit.
     mutable struct SupplyTechnology{T <: PSY.Generator} <: IS.InfrastructureSystemsComponent
         base_power::Float64
         prime_mover_type::PrimeMovers
-        capital_cost::Float64
+        capital_cost::IS.FunctionData
         minimum_required_capacity::Float64
         gen_ID::String
         available::Bool
@@ -16,10 +16,10 @@ This file is auto-generated. Do not edit.
         initial_capacity::Float64
         fuel::ThermalFuels
         power_systems_type::String
-        variable_cost::Float64
+        variable_cost::IS.FunctionData
         ext::Dict
         balancing_topology::String
-        operations_cost::Float64
+        operations_cost::IS.FunctionData
         maximum_capacity::Float64
         capacity_factor::Float64
     end
@@ -29,7 +29,7 @@ This file is auto-generated. Do not edit.
 # Arguments
 - `base_power::Float64`: Base power
 - `prime_mover_type::PrimeMovers`: (default: `OT`) Prime mover for generator
-- `capital_cost::Float64`: Capital costs for investing in a technology.
+- `capital_cost::IS.FunctionData`: Capital costs for investing in a technology.
 - `minimum_required_capacity::Float64`: Minimum required capacity for a technology
 - `gen_ID::String`: ID for individual generator
 - `available::Bool`: identifies whether the technology is available
@@ -37,10 +37,10 @@ This file is auto-generated. Do not edit.
 - `initial_capacity::Float64`: Pre-existing capacity for a technology
 - `fuel::ThermalFuels`: (default: `OTHER`) Fuel type according to IEA
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
-- `variable_cost::Float64`: Variable O&M costs for a technology
+- `variable_cost::IS.FunctionData`: Variable O&M costs for a technology
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `balancing_topology::String`: Set of balancing nodes
-- `operations_cost::Float64`: Fixed O&M costs for a technology
+- `operations_cost::IS.FunctionData`: Fixed O&M costs for a technology
 - `maximum_capacity::Float64`: Maximum allowable installed capacity for a technology
 - `capacity_factor::Float64`: Derating factor to account for planned or forced outages of a technology
 """
@@ -50,7 +50,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: IS.InfrastructureSystemsC
     "Prime mover for generator"
     prime_mover_type::PrimeMovers
     "Capital costs for investing in a technology."
-    capital_cost::Float64
+    capital_cost::IS.FunctionData
     "Minimum required capacity for a technology"
     minimum_required_capacity::Float64
     "ID for individual generator"
@@ -66,13 +66,13 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: IS.InfrastructureSystemsC
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
     "Variable O&M costs for a technology"
-    variable_cost::Float64
+    variable_cost::IS.FunctionData
     "Option for providing additional data"
     ext::Dict
     "Set of balancing nodes"
     balancing_topology::String
     "Fixed O&M costs for a technology"
-    operations_cost::Float64
+    operations_cost::IS.FunctionData
     "Maximum allowable installed capacity for a technology"
     maximum_capacity::Float64
     "Derating factor to account for planned or forced outages of a technology"
