@@ -1,8 +1,8 @@
 include("TransportTechnology.jl")
 include("SupplyTechnology.jl")
-include("DemandsideTechnology.jl")
 include("DemandRequirement.jl")
 include("StorageTechnology.jl")
+include("DemandSideTechnology.jl")
 
 export get_available
 export get_balancing_topology

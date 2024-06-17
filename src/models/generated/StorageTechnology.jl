@@ -7,7 +7,7 @@ This file is auto-generated. Do not edit.
 """
     mutable struct StorageTechnology{T <: PSY.Storage} <: IS.InfrastructureSystemsComponent
         name::String
-        storage_tech::String
+        storage_tech::StorageTech
         power_systems_type::String
         prime_mover_type::PrimeMovers
         ext::Dict
@@ -18,7 +18,7 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `name::String`: The technology name
-- `storage_tech::String`: Storage Technology Type
+- `storage_tech::StorageTech`: Storage Technology Type
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `prime_mover_type::PrimeMovers`: Prime mover for storage
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
@@ -28,7 +28,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: IS.InfrastructureSystemsCo
     "The technology name"
     name::String
     "Storage Technology Type"
-    storage_tech::String
+    storage_tech::StorageTech
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
     "Prime mover for storage"
