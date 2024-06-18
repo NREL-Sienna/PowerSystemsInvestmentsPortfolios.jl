@@ -48,6 +48,12 @@ const MU = IS.Mustache
 
 import PowerSystems: ThermalFuels, PrimeMovers, StorageTech
 
+##### Exports #####
+
+export ThermalFuels
+export PrimeMovers
+export StorageTech
+
 include("models/technologies.jl")
 include("models/generated/includes.jl")
 include("portfolio.jl")
