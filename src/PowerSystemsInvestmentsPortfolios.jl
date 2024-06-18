@@ -3,12 +3,10 @@ module PowerSystemsInvestmentsPortfolios
 import InfrastructureSystems
 # TODO: Some of these re-exports may cause name collisions with PowerSystems
 import InfrastructureSystems:
-    add_time_series,
     to_json,
     from_json,
     serialize,
     deserialize,
-    get_time_series,
     has_time_series,
     get_time_series_array,
     get_time_series_timestamps,
