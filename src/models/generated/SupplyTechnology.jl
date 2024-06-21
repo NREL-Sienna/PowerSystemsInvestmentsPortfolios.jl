@@ -16,6 +16,7 @@ This file is auto-generated. Do not edit.
         initial_capacity::Float64
         fuel::ThermalFuels
         power_systems_type::String
+        internal::InfrastructureSystemsInternal
         variable_cost::IS.FunctionData
         ext::Dict
         balancing_topology::String
@@ -37,6 +38,7 @@ This file is auto-generated. Do not edit.
 - `initial_capacity::Float64`: Pre-existing capacity for a technology
 - `fuel::ThermalFuels`: (default: `OTHER`) Fuel type according to IEA
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `variable_cost::IS.FunctionData`: Variable O&M costs for a technology
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `balancing_topology::String`: Set of balancing nodes
@@ -65,6 +67,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     fuel::ThermalFuels
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
+    "Internal field"
+    internal::InfrastructureSystemsInternal
     "Variable O&M costs for a technology"
     variable_cost::IS.FunctionData
     "Option for providing additional data"
@@ -80,8 +84,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
 end
 
 
-function SupplyTechnology{T}(; base_power, prime_mover_type=OT, capital_cost, minimum_required_capacity, gen_ID, available, name, initial_capacity, fuel=OTHER, power_systems_type, variable_cost, ext=Dict(), balancing_topology, operations_cost, maximum_capacity, capacity_factor, ) where T <: PSY.Generator
-    SupplyTechnology{T}(base_power, prime_mover_type, capital_cost, minimum_required_capacity, gen_ID, available, name, initial_capacity, fuel, power_systems_type, variable_cost, ext, balancing_topology, operations_cost, maximum_capacity, capacity_factor, )
+function SupplyTechnology{T}(; base_power, prime_mover_type=OT, capital_cost, minimum_required_capacity, gen_ID, available, name, initial_capacity, fuel=OTHER, power_systems_type, internal=InfrastructureSystemsInternal(), variable_cost, ext=Dict(), balancing_topology, operations_cost, maximum_capacity, capacity_factor, ) where T <: PSY.Generator
+    SupplyTechnology{T}(base_power, prime_mover_type, capital_cost, minimum_required_capacity, gen_ID, available, name, initial_capacity, fuel, power_systems_type, internal, variable_cost, ext, balancing_topology, operations_cost, maximum_capacity, capacity_factor, )
 end
 
 """Get [`SupplyTechnology`](@ref) `base_power`."""
@@ -104,6 +108,8 @@ get_initial_capacity(value::SupplyTechnology) = value.initial_capacity
 get_fuel(value::SupplyTechnology) = value.fuel
 """Get [`SupplyTechnology`](@ref) `power_systems_type`."""
 get_power_systems_type(value::SupplyTechnology) = value.power_systems_type
+"""Get [`SupplyTechnology`](@ref) `internal`."""
+get_internal(value::SupplyTechnology) = value.internal
 """Get [`SupplyTechnology`](@ref) `variable_cost`."""
 get_variable_cost(value::SupplyTechnology) = value.variable_cost
 """Get [`SupplyTechnology`](@ref) `ext`."""
@@ -137,6 +143,8 @@ set_initial_capacity!(value::SupplyTechnology, val) = value.initial_capacity = v
 set_fuel!(value::SupplyTechnology, val) = value.fuel = val
 """Set [`SupplyTechnology`](@ref) `power_systems_type`."""
 set_power_systems_type!(value::SupplyTechnology, val) = value.power_systems_type = val
+"""Set [`SupplyTechnology`](@ref) `internal`."""
+set_internal!(value::SupplyTechnology, val) = value.internal = val
 """Set [`SupplyTechnology`](@ref) `variable_cost`."""
 set_variable_cost!(value::SupplyTechnology, val) = value.variable_cost = val
 """Set [`SupplyTechnology`](@ref) `ext`."""
