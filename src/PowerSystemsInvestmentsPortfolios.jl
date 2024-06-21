@@ -54,6 +54,7 @@ export StorageTech
 include("models/technologies.jl")
 include("models/generated/includes.jl")
 include("portfolio.jl")
+include("serialization.jl")
 include("generate_structs.jl")
 include("utils/print.jl")
 
