@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct TransportTechnology{T <: PSY.Device} <: IS.InfrastructureSystemsComponent
+    mutable struct TransportTechnology{T <: PSY.Device} <: Technology
         name::String
         power_systems_type::String
         ext::Dict
@@ -20,7 +20,7 @@ This file is auto-generated. Do not edit.
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `available::Bool`: identifies whether the technology is available
 """
-mutable struct TransportTechnology{T <: PSY.Device} <: IS.InfrastructureSystemsComponent
+mutable struct TransportTechnology{T <: PSY.Device} <: Technology
     "The technology name"
     name::String
     "maps to a valid PowerSystems.jl for PCM modeling"

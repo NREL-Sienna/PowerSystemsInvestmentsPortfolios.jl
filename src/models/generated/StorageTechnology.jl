@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct StorageTechnology{T <: PSY.Storage} <: IS.InfrastructureSystemsComponent
+    mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
         name::String
         storage_tech::StorageTech
         power_systems_type::String
@@ -24,7 +24,7 @@ This file is auto-generated. Do not edit.
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `available::Bool`: identifies whether the technology is available
 """
-mutable struct StorageTechnology{T <: PSY.Storage} <: IS.InfrastructureSystemsComponent
+mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     "The technology name"
     name::String
     "Storage Technology Type"

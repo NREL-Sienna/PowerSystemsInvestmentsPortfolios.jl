@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct SupplyTechnology{T <: PSY.Generator} <: IS.InfrastructureSystemsComponent
+    mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
         base_power::Float64
         prime_mover_type::PrimeMovers
         capital_cost::IS.FunctionData
@@ -44,7 +44,7 @@ This file is auto-generated. Do not edit.
 - `maximum_capacity::Float64`: Maximum allowable installed capacity for a technology
 - `capacity_factor::Float64`: Derating factor to account for planned or forced outages of a technology
 """
-mutable struct SupplyTechnology{T <: PSY.Generator} <: IS.InfrastructureSystemsComponent
+mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     "Base power"
     base_power::Float64
     "Prime mover for generator"

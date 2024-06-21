@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct DemandRequirement{T <: PSY.StaticInjection} <: IS.InfrastructureSystemsComponent
+    mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
         load_growth::Float64
         name::String
         power_systems_type::String
@@ -26,7 +26,7 @@ This file is auto-generated. Do not edit.
 - `available::Bool`: identifies whether the technology is available
 - `peak_load::Float64`: Demand value (MW) for single timepoint (for now)
 """
-mutable struct DemandRequirement{T <: PSY.StaticInjection} <: IS.InfrastructureSystemsComponent
+mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     "Annual load growth (%)"
     load_growth::Float64
     "The technology name"
