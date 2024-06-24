@@ -19,14 +19,14 @@ This file is auto-generated. Do not edit.
 
 
 # Arguments
-- `load_growth::Float64`: Annual load growth (%)
+- `load_growth::Float64`: (default: `1.0`) Annual load growth (%)
 - `name::String`: The technology name
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `region::String`: Corresponding region for peak demand
-- `available::Bool`: identifies whether the technology is available
-- `peak_load::Float64`: Demand value (MW) for single timepoint (for now)
+- `available::Bool`: (default: `true`) identifies whether the technology is available
+- `peak_load::Float64`: (default: `100.0`) Demand value (MW) for single timepoint (for now)
 """
 mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     "Annual load growth (%)"
@@ -48,7 +48,7 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
 end
 
 
-function DemandRequirement{T}(; load_growth, name, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region, available, peak_load, ) where T <: PSY.StaticInjection
+function DemandRequirement{T}(; load_growth=1.0, name, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region, available=true, peak_load=100.0, ) where T <: PSY.StaticInjection
     DemandRequirement{T}(load_growth, name, power_systems_type, internal, ext, region, available, peak_load, )
 end
 

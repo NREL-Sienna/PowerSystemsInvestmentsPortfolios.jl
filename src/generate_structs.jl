@@ -270,12 +270,51 @@ function map_prime_mover(prime_mover::String)
 end
 
 function dataframe_to_structs(
-    dataframe::DataFrame,
-    schema_JSON_filepath::AbstractString,
+    df_dict::Dict,
+    #schema_JSON_filepath::AbstractString,
 )
-    # Get the schema
-    schema = read_json_data(schema_JSON_filepath)
-    # Generate the structs
-    generate_structs(schema, output_directory)
-    #return
+
+    #df = DataFrame(CSV.File("test_db.csv"))
+
+    test_df = Dict()
+
+    test_df["SupplyTechnology"] = Dict()
+    for row in eachrow( df_dict["supply_technologies"] )
+        test_df["SupplyTechnology"][row["technology_id"]] = SupplyTechnology{ThermalStandard}(;
+            #Data pulled from DB
+            name=string(row["technology_id"]),
+            gen_ID=string(row["technology_id"]),
+            capital_cost=LinearFunctionData(row["capital_cost"]),
+            variable_cost=LinearFunctionData(row["vom_cost"]),
+            balancing_topology=string(row["balancing_topology"]),
+            operations_cost=LinearFunctionData(row["fom_cost"]),
+            prime_mover_type=map_prime_mover(row["prime_mover"]),
+            
+            #Placeholder values
+            base_power=100.0,
+            minimum_required_capacity=0.0,
+            available=true,
+            initial_capacity=200.0,
+            fuel=ThermalFuels.COAL,
+            power_systems_type="ThermalStandard",
+            maximum_capacity=10000.0,
+            capacity_factor=0.98,
+        )
+    end
+    test_df["DemandRequirement"] = Dict()
+    for row in eachrow( df_dict["demand_requirements"] )
+        test_df["DemandRequirement"][row["entity_attribute_id"]] = DemandRequirement{ElectricLoad}(
+            #Data pulled from DB
+            name=string(row["entity_attribute_id"]),
+            region=string(row["area"]),
+            peak_load=row["peak_load"],
+
+            #Placeholder values
+            load_growth=0.05,
+            available=true,
+            power_systems_type="ElectricLoad",
+        )  
+    end 
+
+    return test_df
 end

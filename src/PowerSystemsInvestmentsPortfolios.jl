@@ -26,6 +26,7 @@ import PrettyTables
 import SQLite
 
 export Portfolio
+export Technology
 export SupplyTechnology
 export TransportTechnology
 export StorageTechnology
