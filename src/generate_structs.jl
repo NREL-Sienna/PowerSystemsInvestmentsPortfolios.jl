@@ -181,6 +181,25 @@ function generate_structs(
     return
 end
 
-function import_from_db()
-    
+
+"""
+The following function imports from the database and generates the structs for a portfolio
+@input database_filepath::AbstractString: The path to the database file
+@input schema_JSON_filepath::AbstractString: The path to the schema JSON file
+"""
+function db_to_portfolio_parser(
+    database_filepath::AbstractString,
+    output_directory::AbstractString,
+    schema_JSON_filepath::AbstractString,
+)
+    # Import the database
+    db = SQLite.DB(database_filepath)
+    # Get the schema
+    schema = read_json_data(schema_JSON_filepath)
+    # Generate the structs
+    generate_structs(schema, output_directory)
+    return
+
+
+    # Need to pull in the populating structs 
 end

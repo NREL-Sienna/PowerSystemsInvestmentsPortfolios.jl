@@ -10,6 +10,7 @@ JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 JSONSchema = "7d188eb4-7ad8-530c-ae41-71a32a6d4692"
 PowerSystems = "bcd98974-b02a-5e2f-9ee0-a103f5c450dd"
 PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
+SQLite = "0aa819cd-b072-5ff4-a722-6bc24af294d9"
 
 [compat]
 DocStringExtensions = "~0.9"

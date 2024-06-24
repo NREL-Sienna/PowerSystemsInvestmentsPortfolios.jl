@@ -23,6 +23,7 @@ import PowerSystems
 import JSONSchema
 import JSON3
 import PrettyTables
+import SQLite
 
 export Portfolio
 export SupplyTechnology
