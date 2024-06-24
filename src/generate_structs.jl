@@ -200,21 +200,50 @@ function db_to_portfolio_parser(
     generate_structs(schema, output_directory)
     #return
 
+    ## Demand Requirements
+    # db_to_dataframe, returns dataframe for demand requirements
+    # dataframe_to_structs, returns structs for demand requirements
+
+    ## SupplyTechnology
+    # db_to_dataframe, returns dataframe for supply technology
+    # dataframe_to_structs, returns structs for supply technology
 
     # Need to pull in the populating structs 
 end
 
-function db_to_dataframe(
-    database_filepath::AbstractString,
-    schema_JSON_filepath::AbstractString,
-)
-    # Import the database
-    db = SQLite.DB(database_filepath)
-    # Get the schema
-    schema = read_json_data(schema_JSON_filepath)
-    # Generate the structs
-    generate_structs(schema, output_directory)
-    #return
+"""
+The following function imports from the database and creates a dictionary
+of DataFrames for each table in the database
+
+# Example usage:
+db_path = "/Users/prao/GitHub_Repos/SiennaInvest/PowerSystemsInvestmentsPortfoliosTestData/RTS_GMLC.db"
+dataframes_all = db_to_dataframes(db_path)
+    
+# Access a specific DataFrame
+supply_technologies_df = dataframes_all["supply_technologies"]
+"""
+function db_to_dataframes(db_path::String)
+    # Connect to the SQLite database
+    db = SQLite.DB(db_path)
+    
+    # Get a list of tables in the database
+    tables = SQLite.tables(db)
+    
+    # Create a dictionary to store DataFrames for each table
+    dfs = Dict{String, DataFrame}()
+    
+    for table in tables
+        table_name = table.name
+        # Read each table into a DataFrame
+        query = "SELECT * FROM $table_name"
+        df = DataFrame(DBInterface.execute(db, query))
+        dfs[table_name] = df
+    end
+    
+    # Close the database connection
+    SQLite.close(db)
+    
+    return dfs
 end
 
 function dataframe_to_structs(
