@@ -198,8 +198,32 @@ function db_to_portfolio_parser(
     schema = read_json_data(schema_JSON_filepath)
     # Generate the structs
     generate_structs(schema, output_directory)
-    return
+    #return
 
 
     # Need to pull in the populating structs 
+end
+
+function db_to_dataframe(
+    database_filepath::AbstractString,
+    schema_JSON_filepath::AbstractString,
+)
+    # Import the database
+    db = SQLite.DB(database_filepath)
+    # Get the schema
+    schema = read_json_data(schema_JSON_filepath)
+    # Generate the structs
+    generate_structs(schema, output_directory)
+    #return
+end
+
+function dataframe_to_structs(
+    dataframe::DataFrame,
+    schema_JSON_filepath::AbstractString,
+)
+    # Get the schema
+    schema = read_json_data(schema_JSON_filepath)
+    # Generate the structs
+    generate_structs(schema, output_directory)
+    #return
 end
