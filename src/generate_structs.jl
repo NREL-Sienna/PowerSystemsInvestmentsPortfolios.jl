@@ -246,6 +246,29 @@ function db_to_dataframes(db_path::String)
     return dfs
 end
 
+# TODO: Figure out more permanent solution for mapping prime movers
+"""
+Function to map prime mover types to PrimeMovers
+"""
+function map_prime_mover(prime_mover::String)
+    mapping_dict = Dict(
+    "CT" => PrimeMovers.CT,
+    "STEAM" => PrimeMovers.ST,
+    "CC" => PrimeMovers.CC,
+    "SYNC_COND" => PrimeMovers.OT,
+    "NUCLEAR" => PrimeMovers.ST,
+    "HYDRO" => PrimeMovers.HA,
+    "ROR" => PrimeMovers.OT,
+    "PV" => PrimeMovers.PVe,
+    "CSP" => PrimeMovers.PVe,
+    "RTPV" => PrimeMovers.PVe,
+    "WIND" => PrimeMovers.WT,
+    "STORAGE" => PrimeMovers.BA
+    )
+    
+    return mapping_dict[prime_mover]
+end
+
 function dataframe_to_structs(
     dataframe::DataFrame,
     schema_JSON_filepath::AbstractString,
