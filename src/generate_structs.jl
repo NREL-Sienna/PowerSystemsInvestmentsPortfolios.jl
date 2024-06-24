@@ -189,26 +189,21 @@ The following function imports from the database and generates the structs for a
 """
 function db_to_portfolio_parser(
     database_filepath::AbstractString,
-    output_directory::AbstractString,
-    schema_JSON_filepath::AbstractString,
+    #output_directory::AbstractString,
+    #schema_JSON_filepath::AbstractString,
 )
     # Import the database
-    db = SQLite.DB(database_filepath)
+    #db = SQLite.DB(database_filepath)
     # Get the schema
-    schema = read_json_data(schema_JSON_filepath)
+    #schema = read_json_data(schema_JSON_filepath)
     # Generate the structs
-    generate_structs(schema, output_directory)
+    #generate_structs(schema, output_directory)
     #return
 
-    ## Demand Requirements
-    # db_to_dataframe, returns dataframe for demand requirements
-    # dataframe_to_structs, returns structs for demand requirements
+    dfs = db_to_dataframes(database_filepath)
+    struct_dict = dataframe_to_structs(dfs)
 
-    ## SupplyTechnology
-    # db_to_dataframe, returns dataframe for supply technology
-    # dataframe_to_structs, returns structs for supply technology
-
-    # Need to pull in the populating structs 
+    return struct_dict
 end
 
 """
