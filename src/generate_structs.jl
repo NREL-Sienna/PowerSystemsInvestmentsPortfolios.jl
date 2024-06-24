@@ -181,7 +181,6 @@ function generate_structs(
     return
 end
 
-
 """
 The following function imports from the database and generates the structs for a portfolio
 @input database_filepath::AbstractString: The path to the database file
@@ -211,22 +210,24 @@ The following function imports from the database and creates a dictionary
 of DataFrames for each table in the database
 
 # Example usage:
+
 db_path = "/Users/prao/GitHub_Repos/SiennaInvest/PowerSystemsInvestmentsPortfoliosTestData/RTS_GMLC.db"
 dataframes_all = db_to_dataframes(db_path)
-    
+
 # Access a specific DataFrame
+
 supply_technologies_df = dataframes_all["supply_technologies"]
 """
 function db_to_dataframes(db_path::String)
     # Connect to the SQLite database
     db = SQLite.DB(db_path)
-    
+
     # Get a list of tables in the database
     tables = SQLite.tables(db)
-    
+
     # Create a dictionary to store DataFrames for each table
     dfs = Dict{String, DataFrame}()
-    
+
     for table in tables
         table_name = table.name
         # Read each table into a DataFrame
@@ -234,10 +235,10 @@ function db_to_dataframes(db_path::String)
         df = DataFrame(DBInterface.execute(db, query))
         dfs[table_name] = df
     end
-    
+
     # Close the database connection
     SQLite.close(db)
-    
+
     return dfs
 end
 
@@ -247,20 +248,20 @@ Function to map prime mover types to PrimeMovers
 """
 function map_prime_mover(prime_mover::String)
     mapping_dict = Dict(
-    "CT" => PrimeMovers.CT,
-    "STEAM" => PrimeMovers.ST,
-    "CC" => PrimeMovers.CC,
-    "SYNC_COND" => PrimeMovers.OT,
-    "NUCLEAR" => PrimeMovers.ST,
-    "HYDRO" => PrimeMovers.HA,
-    "ROR" => PrimeMovers.OT,
-    "PV" => PrimeMovers.PVe,
-    "CSP" => PrimeMovers.PVe,
-    "RTPV" => PrimeMovers.PVe,
-    "WIND" => PrimeMovers.WT,
-    "STORAGE" => PrimeMovers.BA
+        "CT" => PrimeMovers.CT,
+        "STEAM" => PrimeMovers.ST,
+        "CC" => PrimeMovers.CC,
+        "SYNC_COND" => PrimeMovers.OT,
+        "NUCLEAR" => PrimeMovers.ST,
+        "HYDRO" => PrimeMovers.HA,
+        "ROR" => PrimeMovers.OT,
+        "PV" => PrimeMovers.PVe,
+        "CSP" => PrimeMovers.PVe,
+        "RTPV" => PrimeMovers.PVe,
+        "WIND" => PrimeMovers.WT,
+        "STORAGE" => PrimeMovers.BA,
     )
-    
+
     return mapping_dict[prime_mover]
 end
 
@@ -274,42 +275,44 @@ function dataframe_to_structs(
     test_df = Dict()
 
     test_df["SupplyTechnology"] = Dict()
-    for row in eachrow( df_dict["supply_technologies"] )
-        test_df["SupplyTechnology"][row["technology_id"]] = SupplyTechnology{ThermalStandard}(;
-            #Data pulled from DB
-            name=string(row["technology_id"]),
-            gen_ID=string(row["technology_id"]),
-            capital_cost=LinearFunctionData(row["capital_cost"]),
-            variable_cost=LinearFunctionData(row["vom_cost"]),
-            balancing_topology=string(row["balancing_topology"]),
-            operations_cost=LinearFunctionData(row["fom_cost"]),
-            prime_mover_type=map_prime_mover(row["prime_mover"]),
-            
-            #Placeholder values
-            base_power=100.0,
-            minimum_required_capacity=0.0,
-            available=true,
-            initial_capacity=200.0,
-            fuel=ThermalFuels.COAL,
-            power_systems_type="ThermalStandard",
-            maximum_capacity=10000.0,
-            capacity_factor=0.98,
-        )
+    for row in eachrow(df_dict["supply_technologies"])
+        test_df["SupplyTechnology"][row["technology_id"]] =
+            SupplyTechnology{ThermalStandard}(;
+                #Data pulled from DB
+                name=string(row["technology_id"]),
+                gen_ID=string(row["technology_id"]),
+                capital_cost=LinearFunctionData(row["capital_cost"]),
+                variable_cost=LinearFunctionData(row["vom_cost"]),
+                balancing_topology=string(row["balancing_topology"]),
+                operations_cost=LinearFunctionData(row["fom_cost"]),
+                prime_mover_type=map_prime_mover(row["prime_mover"]),
+
+                #Placeholder values
+                base_power=100.0,
+                minimum_required_capacity=0.0,
+                available=true,
+                initial_capacity=200.0,
+                fuel=ThermalFuels.COAL,
+                power_systems_type="ThermalStandard",
+                maximum_capacity=10000.0,
+                capacity_factor=0.98,
+            )
     end
     test_df["DemandRequirement"] = Dict()
-    for row in eachrow( df_dict["demand_requirements"] )
-        test_df["DemandRequirement"][row["entity_attribute_id"]] = DemandRequirement{ElectricLoad}(
-            #Data pulled from DB
-            name=string(row["entity_attribute_id"]),
-            region=string(row["area"]),
-            peak_load=row["peak_load"],
+    for row in eachrow(df_dict["demand_requirements"])
+        test_df["DemandRequirement"][row["entity_attribute_id"]] =
+            DemandRequirement{ElectricLoad}(
+                #Data pulled from DB
+                name=string(row["entity_attribute_id"]),
+                region=string(row["area"]),
+                peak_load=row["peak_load"],
 
-            #Placeholder values
-            load_growth=0.05,
-            available=true,
-            power_systems_type="ElectricLoad",
-        )  
-    end 
+                #Placeholder values
+                load_growth=0.05,
+                available=true,
+                power_systems_type="ElectricLoad",
+            )
+    end
 
     return test_df
 end
