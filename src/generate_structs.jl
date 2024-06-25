@@ -186,19 +186,7 @@ The following function imports from the database and generates the structs for a
 @input database_filepath::AbstractString: The path to the database file
 @input schema_JSON_filepath::AbstractString: The path to the schema JSON file
 """
-function db_to_portfolio_parser(
-    database_filepath::AbstractString,
-    #output_directory::AbstractString,
-    #schema_JSON_filepath::AbstractString,
-)
-    # Import the database
-    #db = SQLite.DB(database_filepath)
-    # Get the schema
-    #schema = read_json_data(schema_JSON_filepath)
-    # Generate the structs
-    #generate_structs(schema, output_directory)
-    #return
-
+function db_to_portfolio_parser(database_filepath::AbstractString)
     dfs = db_to_dataframes(database_filepath)
     struct_dict = dataframe_to_structs(dfs)
 
@@ -265,13 +253,7 @@ function map_prime_mover(prime_mover::String)
     return mapping_dict[prime_mover]
 end
 
-function dataframe_to_structs(
-    df_dict::Dict,
-    #schema_JSON_filepath::AbstractString,
-)
-
-    #df = DataFrame(CSV.File("test_db.csv"))
-
+function dataframe_to_structs(df_dict::Dict)
     test_df = Dict()
 
     test_df["SupplyTechnology"] = Dict()
@@ -298,6 +280,7 @@ function dataframe_to_structs(
                 capacity_factor=0.98,
             )
     end
+
     test_df["DemandRequirement"] = Dict()
     for row in eachrow(df_dict["demand_requirements"])
         test_df["DemandRequirement"][row["entity_attribute_id"]] =
