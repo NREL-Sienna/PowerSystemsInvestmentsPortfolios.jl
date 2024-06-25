@@ -254,8 +254,10 @@ function map_prime_mover(prime_mover::String)
 end
 
 function dataframe_to_structs(df_dict::Dict)
+    #Define dictionarty to store structs
     test_df = Dict()
 
+    #Populate SupplyTechnology structs from database
     test_df["SupplyTechnology"] = Dict()
     for row in eachrow(df_dict["supply_technologies"])
         test_df["SupplyTechnology"][row["technology_id"]] =
@@ -281,6 +283,7 @@ function dataframe_to_structs(df_dict::Dict)
             )
     end
 
+    #Populate DemandRequirement structs from database
     test_df["DemandRequirement"] = Dict()
     for row in eachrow(df_dict["demand_requirements"])
         test_df["DemandRequirement"][row["entity_attribute_id"]] =
