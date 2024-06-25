@@ -38,6 +38,10 @@ export add_technologies!
 export read_json_data
 export generate_invest_structs
 export generate_structs
+export db_to_dataframes
+export map_prime_mover
+export dataframe_to_structs
+export db_to_portfolio_parser
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems
