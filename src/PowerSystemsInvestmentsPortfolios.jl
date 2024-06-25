@@ -24,6 +24,7 @@ import JSONSchema
 import JSON3
 import PrettyTables
 import SQLite
+import DataFrames
 
 export Portfolio
 export Technology
