@@ -187,9 +187,9 @@ The following function imports from the database and generates the structs for a
 @input schema_JSON_filepath::AbstractString: The path to the schema JSON file
 """
 function db_to_portfolio_parser(database_filepath::AbstractString)
-    
+
     #Goal will be be able to read in database and populate structs simultaneously
-    
+
     dfs = db_to_dataframes(database_filepath)
     p = dataframe_to_structs(dfs)
 
@@ -258,56 +258,53 @@ function map_prime_mover(prime_mover::String)
 end
 
 function dataframe_to_structs(df_dict::Dict)
-    #Define dictionarty to store structs
-    dict_structs = Dict()
 
+    #Initialize Portfolio
     p = Portfolio(0.07)
 
-    #Populate SupplyTechnology structs from database
     #Temporary measure for small database, will go into
     #more complex query based methods once database is expanded
+
+    #Populate SupplyTechnology structs from database
     dict_structs["SupplyTechnology"] = Dict()
     for row in eachrow(df_dict["supply_technologies"])
-        dict_structs["SupplyTechnology"][row["technology_id"]] =
-            SupplyTechnology{ThermalStandard}(;
-                #Data pulled from DB
-                name=string(row["technology_id"]),
-                gen_ID=string(row["technology_id"]),
-                capital_cost=LinearFunctionData(row["capital_cost"]),
-                variable_cost=LinearFunctionData(row["vom_cost"]),
-                balancing_topology=string(row["balancing_topology"]),
-                operations_cost=LinearFunctionData(row["fom_cost"]),
-                prime_mover_type=map_prime_mover(row["prime_mover"]),
+        t = SupplyTechnology{ThermalStandard}(;
+            #Data pulled from DB
+            name=string(row["technology_id"]),
+            gen_ID=string(row["technology_id"]),
+            capital_cost=LinearFunctionData(row["capital_cost"]),
+            variable_cost=LinearFunctionData(row["vom_cost"]),
+            balancing_topology=string(row["balancing_topology"]),
+            operations_cost=LinearFunctionData(row["fom_cost"]),
+            prime_mover_type=map_prime_mover(row["prime_mover"]),
 
-                #Placeholder values
-                base_power=100.0,
-                minimum_required_capacity=0.0,
-                available=true,
-                initial_capacity=200.0,
-                fuel=ThermalFuels.COAL,
-                power_systems_type="ThermalStandard",
-                maximum_capacity=10000.0,
-                capacity_factor=0.98,
-            )
-        add_technology!(p, dict_structs["SupplyTechnology"][row["technology_id"]])
+            #Placeholder values
+            base_power=100.0,
+            minimum_required_capacity=0.0,
+            available=true,
+            initial_capacity=200.0,
+            fuel=ThermalFuels.COAL,
+            power_systems_type="ThermalStandard",
+            maximum_capacity=10000.0,
+            capacity_factor=0.98,
+        )
+        add_technology!(p, t)
     end
 
     #Populate DemandRequirement structs from database
-    dict_structs["DemandRequirement"] = Dict()
     for row in eachrow(df_dict["demand_requirements"])
-        dict_structs["DemandRequirement"][row["entity_attribute_id"]] =
-            DemandRequirement{ElectricLoad}(
-                #Data pulled from DB
-                name=string(row["entity_attribute_id"]),
-                region=string(row["area"]),
-                peak_load=row["peak_load"],
+        d = DemandRequirement{ElectricLoad}(
+            #Data pulled from DB
+            name=string(row["entity_attribute_id"]),
+            region=string(row["area"]),
+            peak_load=row["peak_load"],
 
-                #Placeholder values
-                load_growth=0.05,
-                available=true,
-                power_systems_type="ElectricLoad",
-            )
-            add_technology!(p, dict_structs["DemandRequirement"][row["entity_attribute_id"]])
+            #Placeholder values
+            load_growth=0.05,
+            available=true,
+            power_systems_type="ElectricLoad",
+        )
+        add_technology!(p, d)
     end
 
     return p
