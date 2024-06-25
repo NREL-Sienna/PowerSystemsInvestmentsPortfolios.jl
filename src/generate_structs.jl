@@ -187,10 +187,13 @@ The following function imports from the database and generates the structs for a
 @input schema_JSON_filepath::AbstractString: The path to the schema JSON file
 """
 function db_to_portfolio_parser(database_filepath::AbstractString)
+    
+    #Goal will be be able to read in database and populate structs simultaneously
+    
     dfs = db_to_dataframes(database_filepath)
-    struct_dict = dataframe_to_structs(dfs)
+    p = dataframe_to_structs(dfs)
 
-    return struct_dict
+    return p
 end
 
 """
@@ -216,6 +219,7 @@ function db_to_dataframes(db_path::String)
     # Create a dictionary to store DataFrames for each table
     dfs = Dict{String, DataFrame}()
 
+    #Will adjust queries to only pull a subset of data
     for table in tables
         table_name = table.name
         # Read each table into a DataFrame
@@ -255,12 +259,16 @@ end
 
 function dataframe_to_structs(df_dict::Dict)
     #Define dictionarty to store structs
-    test_df = Dict()
+    dict_structs = Dict()
+
+    p = Portfolio(0.07)
 
     #Populate SupplyTechnology structs from database
-    test_df["SupplyTechnology"] = Dict()
+    #Temporary measure for small database, will go into
+    #more complex query based methods once database is expanded
+    dict_structs["SupplyTechnology"] = Dict()
     for row in eachrow(df_dict["supply_technologies"])
-        test_df["SupplyTechnology"][row["technology_id"]] =
+        dict_structs["SupplyTechnology"][row["technology_id"]] =
             SupplyTechnology{ThermalStandard}(;
                 #Data pulled from DB
                 name=string(row["technology_id"]),
@@ -281,12 +289,13 @@ function dataframe_to_structs(df_dict::Dict)
                 maximum_capacity=10000.0,
                 capacity_factor=0.98,
             )
+        add_technology!(p, dict_structs["SupplyTechnology"][row["technology_id"]])
     end
 
     #Populate DemandRequirement structs from database
-    test_df["DemandRequirement"] = Dict()
+    dict_structs["DemandRequirement"] = Dict()
     for row in eachrow(df_dict["demand_requirements"])
-        test_df["DemandRequirement"][row["entity_attribute_id"]] =
+        dict_structs["DemandRequirement"][row["entity_attribute_id"]] =
             DemandRequirement{ElectricLoad}(
                 #Data pulled from DB
                 name=string(row["entity_attribute_id"]),
@@ -298,7 +307,8 @@ function dataframe_to_structs(df_dict::Dict)
                 available=true,
                 power_systems_type="ElectricLoad",
             )
+            add_technology!(p, dict_structs["DemandRequirement"][row["entity_attribute_id"]])
     end
 
-    return test_df
+    return p
 end
