@@ -266,7 +266,6 @@ function dataframe_to_structs(df_dict::Dict)
     #more complex query based methods once database is expanded
 
     #Populate SupplyTechnology structs from database
-    dict_structs["SupplyTechnology"] = Dict()
     for row in eachrow(df_dict["supply_technologies"])
         t = SupplyTechnology{ThermalStandard}(;
             #Data pulled from DB
