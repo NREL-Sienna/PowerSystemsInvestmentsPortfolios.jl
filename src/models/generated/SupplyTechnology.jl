@@ -8,7 +8,7 @@ This file is auto-generated. Do not edit.
     mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
         base_power::Float64
         prime_mover_type::PrimeMovers
-        capital_cost::IS.FunctionData
+        capital_cost::PSY.ValueCurve
         minimum_required_capacity::Float64
         gen_ID::String
         available::Bool
@@ -17,10 +17,10 @@ This file is auto-generated. Do not edit.
         fuel::ThermalFuels
         power_systems_type::String
         internal::InfrastructureSystemsInternal
-        variable_cost::IS.FunctionData
+        variable_cost::PSY.ValueCurve
         ext::Dict
         balancing_topology::String
-        operations_cost::IS.FunctionData
+        operations_cost::PSY.ValueCurve
         maximum_capacity::Float64
         capacity_factor::Float64
     end
@@ -30,19 +30,19 @@ This file is auto-generated. Do not edit.
 # Arguments
 - `base_power::Float64`: Base power
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
-- `capital_cost::IS.FunctionData`: (default: `0.0`) Capital costs for investing in a technology.
+- `capital_cost::PSY.ValueCurve`: (default: `0.0`) Capital costs for investing in a technology.
 - `minimum_required_capacity::Float64`: (default: `0.0`) Minimum required capacity for a technology
 - `gen_ID::String`: ID for individual generator
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: The technology name
-- `initial_capacity::Float64`: (default: `0.0`) Pre-existing capacity for a technology
+- `initial_capacity::Float64`: Pre-existing capacity for a technology
 - `fuel::ThermalFuels`: (default: `ThermalFuels.OTHER`) Fuel type according to IEA
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `variable_cost::IS.FunctionData`: (default: `0.0`) Variable O&M costs for a technology
+- `variable_cost::PSY.ValueCurve`: Variable O&M costs for a technology
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `balancing_topology::String`: Set of balancing nodes
-- `operations_cost::IS.FunctionData`: (default: `0.0`) Fixed O&M costs for a technology
+- `operations_cost::PSY.ValueCurve`: Fixed O&M costs for a technology
 - `maximum_capacity::Float64`: (default: `Inf`) Maximum allowable installed capacity for a technology
 - `capacity_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology
 """
@@ -52,7 +52,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     "Prime mover for generator"
     prime_mover_type::PrimeMovers
     "Capital costs for investing in a technology."
-    capital_cost::IS.FunctionData
+    capital_cost::PSY.ValueCurve
     "Minimum required capacity for a technology"
     minimum_required_capacity::Float64
     "ID for individual generator"
@@ -70,13 +70,13 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     "Internal field"
     internal::InfrastructureSystemsInternal
     "Variable O&M costs for a technology"
-    variable_cost::IS.FunctionData
+    variable_cost::PSY.ValueCurve
     "Option for providing additional data"
     ext::Dict
     "Set of balancing nodes"
     balancing_topology::String
     "Fixed O&M costs for a technology"
-    operations_cost::IS.FunctionData
+    operations_cost::PSY.ValueCurve
     "Maximum allowable installed capacity for a technology"
     maximum_capacity::Float64
     "Derating factor to account for planned or forced outages of a technology"
@@ -84,7 +84,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
 end
 
 
-function SupplyTechnology{T}(; base_power, prime_mover_type=PrimeMovers.OT, capital_cost=0.0, minimum_required_capacity=0.0, gen_ID, available, name, initial_capacity=0.0, fuel=ThermalFuels.OTHER, power_systems_type, internal=InfrastructureSystemsInternal(), variable_cost=0.0, ext=Dict(), balancing_topology, operations_cost=0.0, maximum_capacity=Inf, capacity_factor=1.0, ) where T <: PSY.Generator
+function SupplyTechnology{T}(; base_power, prime_mover_type=PrimeMovers.OT, capital_cost=0.0, minimum_required_capacity=0.0, gen_ID, available, name, initial_capacity, fuel=ThermalFuels.OTHER, power_systems_type, internal=InfrastructureSystemsInternal(), variable_cost, ext=Dict(), balancing_topology, operations_cost, maximum_capacity=Inf, capacity_factor=1.0, ) where T <: PSY.Generator
     SupplyTechnology{T}(base_power, prime_mover_type, capital_cost, minimum_required_capacity, gen_ID, available, name, initial_capacity, fuel, power_systems_type, internal, variable_cost, ext, balancing_topology, operations_cost, maximum_capacity, capacity_factor, )
 end
 
