@@ -98,7 +98,8 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
             end
 
             param["kwarg_value"] = ""
-            if !isnothing(get(param, "default", nothing))
+            if !isnothing(get(values, "default", nothing))
+                param["default"] = values["default"]
                 param["kwarg_value"] = "=" * param["default"]
             elseif !isnothing(get(param, "internal_default", nothing))
                 param["kwarg_value"] = "=" * string(param["internal_default"])
@@ -178,4 +179,132 @@ function generate_structs(
     data = read_json_data(input_file)
     generate_invest_structs(output_directory, data; print_results=print_results)
     return
+end
+
+"""
+The following function imports from the database and generates the structs for a portfolio
+@input database_filepath::AbstractString: The path to the database file
+@input schema_JSON_filepath::AbstractString: The path to the schema JSON file
+"""
+function db_to_portfolio_parser(database_filepath::AbstractString)
+
+    #Goal will be be able to read in database and populate structs simultaneously
+
+    dfs = db_to_dataframes(database_filepath)
+    p = dataframe_to_structs(dfs)
+
+    return p
+end
+
+"""
+The following function imports from the database and creates a dictionary
+of DataFrames for each table in the database
+
+# Example usage:
+
+db_path = "/Users/prao/GitHub_Repos/SiennaInvest/PowerSystemsInvestmentsPortfoliosTestData/RTS_GMLC.db"
+dataframes_all = db_to_dataframes(db_path)
+
+# Access a specific DataFrame
+
+supply_technologies_df = dataframes_all["supply_technologies"]
+"""
+function db_to_dataframes(db_path::String)
+    # Connect to the SQLite database
+    db = SQLite.DB(db_path)
+
+    # Get a list of tables in the database
+    tables = SQLite.tables(db)
+
+    # Create a dictionary to store DataFrames for each table
+    dfs = Dict{String, DataFrame}()
+
+    #Will adjust queries to only pull a subset of data
+    for table in tables
+        table_name = table.name
+        # Read each table into a DataFrame
+        query = "SELECT * FROM $table_name"
+        df = DataFrame(DBInterface.execute(db, query))
+        dfs[table_name] = df
+    end
+
+    # Close the database connection
+    SQLite.close(db)
+
+    return dfs
+end
+
+# TODO: Figure out more permanent solution for mapping prime movers
+"""
+Function to map prime mover types to PrimeMovers
+"""
+function map_prime_mover(prime_mover::String)
+    mapping_dict = Dict(
+        "CT" => PrimeMovers.CT,
+        "STEAM" => PrimeMovers.ST,
+        "CC" => PrimeMovers.CC,
+        "SYNC_COND" => PrimeMovers.OT,
+        "NUCLEAR" => PrimeMovers.ST,
+        "HYDRO" => PrimeMovers.HA,
+        "ROR" => PrimeMovers.IC,
+        "PV" => PrimeMovers.PVe,
+        "CSP" => PrimeMovers.CP,
+        "RTPV" => PrimeMovers.PVe,
+        "WIND" => PrimeMovers.WT,
+        "STORAGE" => PrimeMovers.BA,
+    )
+
+    return mapping_dict[prime_mover]
+end
+
+function dataframe_to_structs(df_dict::Dict)
+
+    #Initialize Portfolio
+    p = Portfolio(0.07)
+
+    #Temporary measure for small database, will go into
+    #more complex query based methods once database is expanded
+
+    #Populate SupplyTechnology structs from database
+    for row in eachrow(df_dict["supply_technologies"])
+        t = SupplyTechnology{ThermalStandard}(;
+            #Data pulled from DB
+            name=string(row["technology_id"]),
+            gen_ID=string(row["technology_id"]),
+            capital_cost=LinearFunctionData(row["capital_cost"]),
+            variable_cost=LinearFunctionData(row["vom_cost"]),
+            balancing_topology=string(row["balancing_topology"]),
+            operations_cost=LinearFunctionData(row["fom_cost"]),
+            prime_mover_type=map_prime_mover(row["prime_mover"]),
+
+            #Placeholder values
+            base_power=100.0,
+            minimum_required_capacity=0.0,
+            available=true,
+            initial_capacity=200.0,
+            fuel=ThermalFuels.COAL,
+            power_systems_type="ThermalStandard",
+            maximum_capacity=10000.0,
+            capacity_factor=0.98,
+        )
+        add_technology!(p, t)
+    end
+
+    #Populate DemandRequirement structs from database
+    for row in eachrow(df_dict["demand_requirements"])
+        d = DemandRequirement{ElectricLoad}(
+            #Data pulled from DB
+            name=string(row["entity_attribute_id"]),
+            region=string(row["area"]),
+            peak_load=row["peak_load"],
+
+            #Placeholder values
+            load_growth=0.05,
+            available=true,
+            power_systems_type="ElectricLoad",
+        )
+        add_technology!(p, d)
+    end
+
+    return p
 end
