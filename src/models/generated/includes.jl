@@ -1,7 +1,9 @@
+include("Electrolyzers.jl")
 include("TransportTechnology.jl")
 include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
 include("StorageTechnology.jl")
+include("FlexibleDemandTechnology.jl")
 include("DemandSideTechnology.jl")
 
 export get_available
@@ -10,24 +12,36 @@ export get_base_power
 export get_capital_cost
 export get_capital_cost_energy
 export get_capital_cost_power
+export get_cofire_level_max
+export get_cofire_level_min
+export get_cofire_start_max
+export get_cofire_start_min
 export get_cost_of_curtailment
+export get_demand_energy_efficiency
+export get_demand_mw_z
+export get_efficiency_down
+export get_efficiency_up
+export get_electrolyzer_min_kt
 export get_end_region
 export get_existing_flow_capacity
 export get_ext
 export get_fuel
 export get_gen_ID
 export get_heat_rate
+export get_hydrogen_mwh_per_tonne
+export get_hydrogen_price_per_tonne
 export get_initial_capacity
 export get_initial_capacity_energy
 export get_initial_capacity_power
 export get_line_loss
-export get_load_fraction
-export get_load_growth
 export get_max_curtailment
+export get_max_demand_advance
+export get_max_demand_delay
 export get_maximum_capacity
 export get_maximum_capacity_energy
 export get_maximum_duration
 export get_maximum_new_capacity
+export get_min_power
 export get_minimum_duration
 export get_minimum_generation
 export get_minimum_required_capacity
@@ -38,20 +52,17 @@ export get_operations_cost
 export get_operations_cost_energy
 export get_operations_cost_power
 export get_outage_factor
-export get_peak_load
 export get_power_systems_type
 export get_prime_mover_type
 export get_ramp_down
 export get_ramp_up
 export get_region
 export get_resistance
+export get_self_discharge
 export get_start_region
 export get_storage_tech
 export get_value_lost_load
-export get_variable_capacity_factor
-export get_variable_cost
-export get_variable_cost_energy
-export get_variable_cost_power
+export get_var_cost_per_mwh
 export get_voltage
 export set_available!
 export set_balancing_topology!
@@ -59,24 +70,36 @@ export set_base_power!
 export set_capital_cost!
 export set_capital_cost_energy!
 export set_capital_cost_power!
+export set_cofire_level_max!
+export set_cofire_level_min!
+export set_cofire_start_max!
+export set_cofire_start_min!
 export set_cost_of_curtailment!
+export set_demand_energy_efficiency!
+export set_demand_mw_z!
+export set_efficiency_down!
+export set_efficiency_up!
+export set_electrolyzer_min_kt!
 export set_end_region!
 export set_existing_flow_capacity!
 export set_ext!
 export set_fuel!
 export set_gen_ID!
 export set_heat_rate!
+export set_hydrogen_mwh_per_tonne!
+export set_hydrogen_price_per_tonne!
 export set_initial_capacity!
 export set_initial_capacity_energy!
 export set_initial_capacity_power!
 export set_line_loss!
-export set_load_fraction!
-export set_load_growth!
 export set_max_curtailment!
+export set_max_demand_advance!
+export set_max_demand_delay!
 export set_maximum_capacity!
 export set_maximum_capacity_energy!
 export set_maximum_duration!
 export set_maximum_new_capacity!
+export set_min_power!
 export set_minimum_duration!
 export set_minimum_generation!
 export set_minimum_required_capacity!
@@ -87,18 +110,15 @@ export set_operations_cost!
 export set_operations_cost_energy!
 export set_operations_cost_power!
 export set_outage_factor!
-export set_peak_load!
 export set_power_systems_type!
 export set_prime_mover_type!
 export set_ramp_down!
 export set_ramp_up!
 export set_region!
 export set_resistance!
+export set_self_discharge!
 export set_start_region!
 export set_storage_tech!
 export set_value_lost_load!
-export set_variable_capacity_factor!
-export set_variable_cost!
-export set_variable_cost_energy!
-export set_variable_cost_power!
+export set_var_cost_per_mwh!
 export set_voltage!

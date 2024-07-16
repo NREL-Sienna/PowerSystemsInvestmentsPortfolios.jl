@@ -15,8 +15,11 @@ This file is auto-generated. Do not edit.
         available::Bool
         name::String
         storage_tech::StorageTech
+        efficiency_down::Float64
+        self_discharge::Float64
         minimum_required_capacity_power::Float64
         minimum_duration::Float64
+        efficiency_up::Float64
         power_systems_type::String
         internal::InfrastructureSystemsInternal
         ext::Dict
@@ -25,12 +28,10 @@ This file is auto-generated. Do not edit.
         maximum_capacity::Float64
         maximum_duration::Float64
         initial_capacity_energy::Float64
-        operations_cost_power::PSY.ValueCurve
+        operations_cost_power::PSY.OperationalCost
         maximum_capacity_energy::Float64
-        operations_cost_energy::PSY.ValueCurve
+        operations_cost_energy::PSY.OperationalCost
         minimum_required_capacity_energy::Float64
-        variable_cost_power::PSY.ValueCurve
-        variable_cost_energy::PSY.ValueCurve
     end
 
 
@@ -45,8 +46,11 @@ This file is auto-generated. Do not edit.
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: The technology name
 - `storage_tech::StorageTech`: Storage Technology Type
+- `efficiency_down::Float64`: (default: `1.0`) Efficiency of discharging storage
+- `self_discharge::Float64`: (default: `1.0`) Efficiency of discharging storage
 - `minimum_required_capacity_power::Float64`: (default: `0.0`) Minimum required power capacity for a storage technology
 - `minimum_duration::Float64`: (default: `0.0`) Minimum required durection for a storage technology
+- `efficiency_up::Float64`: (default: `1.0`) Efficiency of charging storage
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
@@ -55,12 +59,10 @@ This file is auto-generated. Do not edit.
 - `maximum_capacity::Float64`: (default: `Inf`) Maximum allowable installed power capacity for a storage technology
 - `maximum_duration::Float64`: (default: `1000.0`) Maximum allowable durection for a storage technology
 - `initial_capacity_energy::Float64`: Pre-existing energy capacity for a technology (MWh)
-- `operations_cost_power::PSY.ValueCurve`: Fixed O&M costs for a technology
+- `operations_cost_power::PSY.OperationalCost`: Fixed O&M costs for a technology
 - `maximum_capacity_energy::Float64`: (default: `Inf`) Maximum allowable installed energy capacity for a storage technology
-- `operations_cost_energy::PSY.ValueCurve`: Fixed O&M costs for energy capacity of storage technology
+- `operations_cost_energy::PSY.OperationalCost`: Fixed O&M costs for energy capacity of storage technology
 - `minimum_required_capacity_energy::Float64`: (default: `0.0`) Minimum required energy capacity for a storage technology
-- `variable_cost_power::PSY.ValueCurve`: Variable O&M costs for a technology
-- `variable_cost_energy::PSY.ValueCurve`: Variable O&M costs for energy capacity of storage technology
 """
 mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     "Base power"
@@ -81,10 +83,16 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     name::String
     "Storage Technology Type"
     storage_tech::StorageTech
+    "Efficiency of discharging storage"
+    efficiency_down::Float64
+    "Efficiency of discharging storage"
+    self_discharge::Float64
     "Minimum required power capacity for a storage technology"
     minimum_required_capacity_power::Float64
     "Minimum required durection for a storage technology"
     minimum_duration::Float64
+    "Efficiency of charging storage"
+    efficiency_up::Float64
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
     "Internal field"
@@ -102,22 +110,18 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     "Pre-existing energy capacity for a technology (MWh)"
     initial_capacity_energy::Float64
     "Fixed O&M costs for a technology"
-    operations_cost_power::PSY.ValueCurve
+    operations_cost_power::PSY.OperationalCost
     "Maximum allowable installed energy capacity for a storage technology"
     maximum_capacity_energy::Float64
     "Fixed O&M costs for energy capacity of storage technology"
-    operations_cost_energy::PSY.ValueCurve
+    operations_cost_energy::PSY.OperationalCost
     "Minimum required energy capacity for a storage technology"
     minimum_required_capacity_energy::Float64
-    "Variable O&M costs for a technology"
-    variable_cost_power::PSY.ValueCurve
-    "Variable O&M costs for energy capacity of storage technology"
-    variable_cost_energy::PSY.ValueCurve
 end
 
 
-function StorageTechnology{T}(; base_power, capital_cost_energy=0.0, initial_capacity_power, prime_mover_type=PrimeMovers.OT, capital_cost_power=0.0, gen_ID, available, name, storage_tech, minimum_required_capacity_power=0.0, minimum_duration=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=1.0, maximum_capacity=Inf, maximum_duration=1000.0, initial_capacity_energy, operations_cost_power, maximum_capacity_energy=Inf, operations_cost_energy, minimum_required_capacity_energy=0.0, variable_cost_power, variable_cost_energy, ) where T <: PSY.Storage
-    StorageTechnology{T}(base_power, capital_cost_energy, initial_capacity_power, prime_mover_type, capital_cost_power, gen_ID, available, name, storage_tech, minimum_required_capacity_power, minimum_duration, power_systems_type, internal, ext, balancing_topology, region, maximum_capacity, maximum_duration, initial_capacity_energy, operations_cost_power, maximum_capacity_energy, operations_cost_energy, minimum_required_capacity_energy, variable_cost_power, variable_cost_energy, )
+function StorageTechnology{T}(; base_power, capital_cost_energy=0.0, initial_capacity_power, prime_mover_type=PrimeMovers.OT, capital_cost_power=0.0, gen_ID, available, name, storage_tech, efficiency_down=1.0, self_discharge=1.0, minimum_required_capacity_power=0.0, minimum_duration=0.0, efficiency_up=1.0, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=1.0, maximum_capacity=Inf, maximum_duration=1000.0, initial_capacity_energy, operations_cost_power, maximum_capacity_energy=Inf, operations_cost_energy, minimum_required_capacity_energy=0.0, ) where T <: PSY.Storage
+    StorageTechnology{T}(base_power, capital_cost_energy, initial_capacity_power, prime_mover_type, capital_cost_power, gen_ID, available, name, storage_tech, efficiency_down, self_discharge, minimum_required_capacity_power, minimum_duration, efficiency_up, power_systems_type, internal, ext, balancing_topology, region, maximum_capacity, maximum_duration, initial_capacity_energy, operations_cost_power, maximum_capacity_energy, operations_cost_energy, minimum_required_capacity_energy, )
 end
 
 """Get [`StorageTechnology`](@ref) `base_power`."""
@@ -138,10 +142,16 @@ get_available(value::StorageTechnology) = value.available
 get_name(value::StorageTechnology) = value.name
 """Get [`StorageTechnology`](@ref) `storage_tech`."""
 get_storage_tech(value::StorageTechnology) = value.storage_tech
+"""Get [`StorageTechnology`](@ref) `efficiency_down`."""
+get_efficiency_down(value::StorageTechnology) = value.efficiency_down
+"""Get [`StorageTechnology`](@ref) `self_discharge`."""
+get_self_discharge(value::StorageTechnology) = value.self_discharge
 """Get [`StorageTechnology`](@ref) `minimum_required_capacity_power`."""
 get_minimum_required_capacity_power(value::StorageTechnology) = value.minimum_required_capacity_power
 """Get [`StorageTechnology`](@ref) `minimum_duration`."""
 get_minimum_duration(value::StorageTechnology) = value.minimum_duration
+"""Get [`StorageTechnology`](@ref) `efficiency_up`."""
+get_efficiency_up(value::StorageTechnology) = value.efficiency_up
 """Get [`StorageTechnology`](@ref) `power_systems_type`."""
 get_power_systems_type(value::StorageTechnology) = value.power_systems_type
 """Get [`StorageTechnology`](@ref) `internal`."""
@@ -166,10 +176,6 @@ get_maximum_capacity_energy(value::StorageTechnology) = value.maximum_capacity_e
 get_operations_cost_energy(value::StorageTechnology) = value.operations_cost_energy
 """Get [`StorageTechnology`](@ref) `minimum_required_capacity_energy`."""
 get_minimum_required_capacity_energy(value::StorageTechnology) = value.minimum_required_capacity_energy
-"""Get [`StorageTechnology`](@ref) `variable_cost_power`."""
-get_variable_cost_power(value::StorageTechnology) = value.variable_cost_power
-"""Get [`StorageTechnology`](@ref) `variable_cost_energy`."""
-get_variable_cost_energy(value::StorageTechnology) = value.variable_cost_energy
 
 """Set [`StorageTechnology`](@ref) `base_power`."""
 set_base_power!(value::StorageTechnology, val) = value.base_power = val
@@ -189,10 +195,16 @@ set_available!(value::StorageTechnology, val) = value.available = val
 set_name!(value::StorageTechnology, val) = value.name = val
 """Set [`StorageTechnology`](@ref) `storage_tech`."""
 set_storage_tech!(value::StorageTechnology, val) = value.storage_tech = val
+"""Set [`StorageTechnology`](@ref) `efficiency_down`."""
+set_efficiency_down!(value::StorageTechnology, val) = value.efficiency_down = val
+"""Set [`StorageTechnology`](@ref) `self_discharge`."""
+set_self_discharge!(value::StorageTechnology, val) = value.self_discharge = val
 """Set [`StorageTechnology`](@ref) `minimum_required_capacity_power`."""
 set_minimum_required_capacity_power!(value::StorageTechnology, val) = value.minimum_required_capacity_power = val
 """Set [`StorageTechnology`](@ref) `minimum_duration`."""
 set_minimum_duration!(value::StorageTechnology, val) = value.minimum_duration = val
+"""Set [`StorageTechnology`](@ref) `efficiency_up`."""
+set_efficiency_up!(value::StorageTechnology, val) = value.efficiency_up = val
 """Set [`StorageTechnology`](@ref) `power_systems_type`."""
 set_power_systems_type!(value::StorageTechnology, val) = value.power_systems_type = val
 """Set [`StorageTechnology`](@ref) `internal`."""
@@ -217,7 +229,3 @@ set_maximum_capacity_energy!(value::StorageTechnology, val) = value.maximum_capa
 set_operations_cost_energy!(value::StorageTechnology, val) = value.operations_cost_energy = val
 """Set [`StorageTechnology`](@ref) `minimum_required_capacity_energy`."""
 set_minimum_required_capacity_energy!(value::StorageTechnology, val) = value.minimum_required_capacity_energy = val
-"""Set [`StorageTechnology`](@ref) `variable_cost_power`."""
-set_variable_cost_power!(value::StorageTechnology, val) = value.variable_cost_power = val
-"""Set [`StorageTechnology`](@ref) `variable_cost_energy`."""
-set_variable_cost_energy!(value::StorageTechnology, val) = value.variable_cost_energy = val

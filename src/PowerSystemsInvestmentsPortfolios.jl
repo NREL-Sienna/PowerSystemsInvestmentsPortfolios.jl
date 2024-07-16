@@ -33,6 +33,8 @@ export TransportTechnology
 export StorageTechnology
 export DemandRequirement
 export DemandsideTechnology
+export FlexibleDemandTechnology
+export Electrolyzers
 
 export add_technology!
 export add_technologies!

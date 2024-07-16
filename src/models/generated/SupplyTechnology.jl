@@ -10,23 +10,25 @@ This file is auto-generated. Do not edit.
         outage_factor::Float64
         prime_mover_type::PrimeMovers
         capital_cost::PSY.ValueCurve
+        cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}
         minimum_required_capacity::Float64
+        cofire_start_max::Union{Nothing, Dict{ThermalFuels, Float64}}
         gen_ID::String
+        cofire_start_min::Union{Nothing, Dict{ThermalFuels, Float64}}
         available::Bool
         name::String
-        variable_capacity_factor::Float64
         ramp_down::Float64
         initial_capacity::Float64
-        fuel::ThermalFuels
+        fuel::Union{ThermalFuels, Dict{ThermalFuels, ThermalFuels}}
         power_systems_type::String
+        cofire_level_max::Union{Nothing, Dict{ThermalFuels, Float64}}
         internal::InfrastructureSystemsInternal
-        variable_cost::PSY.ValueCurve
-        heat_rate::Float64
+        heat_rate::Union{PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}
         minimum_generation::Float64
         ext::Dict
         balancing_topology::String
         region::String
-        operations_cost::PSY.ValueCurve
+        operations_cost::PSY.OperationalCost
         maximum_capacity::Float64
         ramp_up::Float64
     end
@@ -38,23 +40,25 @@ This file is auto-generated. Do not edit.
 - `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `capital_cost::PSY.ValueCurve`: (default: `0.0`) Capital costs for investing in a technology.
+- `cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}`: Minimum blending level of each fuel during normal generation process for multi-fuel generator
 - `minimum_required_capacity::Float64`: (default: `0.0`) Minimum required capacity for a technology
+- `cofire_start_max::Union{Nothing, Dict{ThermalFuels, Float64}}`: Maximum blending level of each fuel during start-up process for multi-fuel generator
 - `gen_ID::String`: ID for individual generator
+- `cofire_start_min::Union{Nothing, Dict{ThermalFuels, Float64}}`: Minimum blending level of each fuel during start-up process for multi-fuel generator
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: The technology name
-- `variable_capacity_factor::Float64`: (default: `1.0`) Fraction of renewable resource capacity availble
 - `ramp_down::Float64`: (default: `1.0`) Maximum decrease in output between operation periods. Fraction of total capacity
 - `initial_capacity::Float64`: Pre-existing capacity for a technology
-- `fuel::ThermalFuels`: (default: `ThermalFuels.OTHER`) Fuel type according to IEA
+- `fuel::Union{ThermalFuels, Dict{ThermalFuels, ThermalFuels}}`: (default: `ThermalFuels.OTHER`) Fuel type according to IEA
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
+- `cofire_level_max::Union{Nothing, Dict{ThermalFuels, Float64}}`: Maximum blending level of each fuel during normal generation process for multi-fuel generator
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `variable_cost::PSY.ValueCurve`: Variable O&M costs for a technology
-- `heat_rate::Float64`: (default: `1.0`) Heat rate of generator, MMBTU/MWh
+- `heat_rate::Union{PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}`: (default: `1.0`) Heat rate of generator, MMBTU/MWh
 - `minimum_generation::Float64`: (default: `0.0`) Minimum generation as a fraction of total capacity
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `balancing_topology::String`: Set of balancing nodes
 - `region::String`: (default: `1.0`) Region/zone technology operates in
-- `operations_cost::PSY.ValueCurve`: Fixed O&M costs for a technology
+- `operations_cost::PSY.OperationalCost`: Fixed O&M costs for a technology
 - `maximum_capacity::Float64`: (default: `Inf`) Maximum allowable installed capacity for a technology
 - `ramp_up::Float64`: (default: `1.0`) Maximum increase in output between operation periods. Fraction of total capacity
 """
@@ -67,30 +71,34 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     prime_mover_type::PrimeMovers
     "Capital costs for investing in a technology."
     capital_cost::PSY.ValueCurve
+    "Minimum blending level of each fuel during normal generation process for multi-fuel generator"
+    cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}
     "Minimum required capacity for a technology"
     minimum_required_capacity::Float64
+    "Maximum blending level of each fuel during start-up process for multi-fuel generator"
+    cofire_start_max::Union{Nothing, Dict{ThermalFuels, Float64}}
     "ID for individual generator"
     gen_ID::String
+    "Minimum blending level of each fuel during start-up process for multi-fuel generator"
+    cofire_start_min::Union{Nothing, Dict{ThermalFuels, Float64}}
     "identifies whether the technology is available"
     available::Bool
     "The technology name"
     name::String
-    "Fraction of renewable resource capacity availble"
-    variable_capacity_factor::Float64
     "Maximum decrease in output between operation periods. Fraction of total capacity"
     ramp_down::Float64
     "Pre-existing capacity for a technology"
     initial_capacity::Float64
     "Fuel type according to IEA"
-    fuel::ThermalFuels
+    fuel::Union{ThermalFuels, Dict{ThermalFuels, ThermalFuels}}
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
+    "Maximum blending level of each fuel during normal generation process for multi-fuel generator"
+    cofire_level_max::Union{Nothing, Dict{ThermalFuels, Float64}}
     "Internal field"
     internal::InfrastructureSystemsInternal
-    "Variable O&M costs for a technology"
-    variable_cost::PSY.ValueCurve
     "Heat rate of generator, MMBTU/MWh"
-    heat_rate::Float64
+    heat_rate::Union{PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}
     "Minimum generation as a fraction of total capacity"
     minimum_generation::Float64
     "Option for providing additional data"
@@ -100,7 +108,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     "Region/zone technology operates in"
     region::String
     "Fixed O&M costs for a technology"
-    operations_cost::PSY.ValueCurve
+    operations_cost::PSY.OperationalCost
     "Maximum allowable installed capacity for a technology"
     maximum_capacity::Float64
     "Maximum increase in output between operation periods. Fraction of total capacity"
@@ -108,8 +116,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
 end
 
 
-function SupplyTechnology{T}(; base_power, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, capital_cost=0.0, minimum_required_capacity=0.0, gen_ID, available, name, variable_capacity_factor=1.0, ramp_down=1.0, initial_capacity, fuel=ThermalFuels.OTHER, power_systems_type, internal=InfrastructureSystemsInternal(), variable_cost, heat_rate=1.0, minimum_generation=0.0, ext=Dict(), balancing_topology, region=1.0, operations_cost, maximum_capacity=Inf, ramp_up=1.0, ) where T <: PSY.Generator
-    SupplyTechnology{T}(base_power, outage_factor, prime_mover_type, capital_cost, minimum_required_capacity, gen_ID, available, name, variable_capacity_factor, ramp_down, initial_capacity, fuel, power_systems_type, internal, variable_cost, heat_rate, minimum_generation, ext, balancing_topology, region, operations_cost, maximum_capacity, ramp_up, )
+function SupplyTechnology{T}(; base_power, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, capital_cost=0.0, cofire_level_min, minimum_required_capacity=0.0, cofire_start_max, gen_ID, cofire_start_min, available, name, ramp_down=1.0, initial_capacity, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max, internal=InfrastructureSystemsInternal(), heat_rate=1.0, minimum_generation=0.0, ext=Dict(), balancing_topology, region=1.0, operations_cost, maximum_capacity=Inf, ramp_up=1.0, ) where T <: PSY.Generator
+    SupplyTechnology{T}(base_power, outage_factor, prime_mover_type, capital_cost, cofire_level_min, minimum_required_capacity, cofire_start_max, gen_ID, cofire_start_min, available, name, ramp_down, initial_capacity, fuel, power_systems_type, cofire_level_max, internal, heat_rate, minimum_generation, ext, balancing_topology, region, operations_cost, maximum_capacity, ramp_up, )
 end
 
 """Get [`SupplyTechnology`](@ref) `base_power`."""
@@ -120,16 +128,20 @@ get_outage_factor(value::SupplyTechnology) = value.outage_factor
 get_prime_mover_type(value::SupplyTechnology) = value.prime_mover_type
 """Get [`SupplyTechnology`](@ref) `capital_cost`."""
 get_capital_cost(value::SupplyTechnology) = value.capital_cost
+"""Get [`SupplyTechnology`](@ref) `cofire_level_min`."""
+get_cofire_level_min(value::SupplyTechnology) = value.cofire_level_min
 """Get [`SupplyTechnology`](@ref) `minimum_required_capacity`."""
 get_minimum_required_capacity(value::SupplyTechnology) = value.minimum_required_capacity
+"""Get [`SupplyTechnology`](@ref) `cofire_start_max`."""
+get_cofire_start_max(value::SupplyTechnology) = value.cofire_start_max
 """Get [`SupplyTechnology`](@ref) `gen_ID`."""
 get_gen_ID(value::SupplyTechnology) = value.gen_ID
+"""Get [`SupplyTechnology`](@ref) `cofire_start_min`."""
+get_cofire_start_min(value::SupplyTechnology) = value.cofire_start_min
 """Get [`SupplyTechnology`](@ref) `available`."""
 get_available(value::SupplyTechnology) = value.available
 """Get [`SupplyTechnology`](@ref) `name`."""
 get_name(value::SupplyTechnology) = value.name
-"""Get [`SupplyTechnology`](@ref) `variable_capacity_factor`."""
-get_variable_capacity_factor(value::SupplyTechnology) = value.variable_capacity_factor
 """Get [`SupplyTechnology`](@ref) `ramp_down`."""
 get_ramp_down(value::SupplyTechnology) = value.ramp_down
 """Get [`SupplyTechnology`](@ref) `initial_capacity`."""
@@ -138,10 +150,10 @@ get_initial_capacity(value::SupplyTechnology) = value.initial_capacity
 get_fuel(value::SupplyTechnology) = value.fuel
 """Get [`SupplyTechnology`](@ref) `power_systems_type`."""
 get_power_systems_type(value::SupplyTechnology) = value.power_systems_type
+"""Get [`SupplyTechnology`](@ref) `cofire_level_max`."""
+get_cofire_level_max(value::SupplyTechnology) = value.cofire_level_max
 """Get [`SupplyTechnology`](@ref) `internal`."""
 get_internal(value::SupplyTechnology) = value.internal
-"""Get [`SupplyTechnology`](@ref) `variable_cost`."""
-get_variable_cost(value::SupplyTechnology) = value.variable_cost
 """Get [`SupplyTechnology`](@ref) `heat_rate`."""
 get_heat_rate(value::SupplyTechnology) = value.heat_rate
 """Get [`SupplyTechnology`](@ref) `minimum_generation`."""
@@ -167,16 +179,20 @@ set_outage_factor!(value::SupplyTechnology, val) = value.outage_factor = val
 set_prime_mover_type!(value::SupplyTechnology, val) = value.prime_mover_type = val
 """Set [`SupplyTechnology`](@ref) `capital_cost`."""
 set_capital_cost!(value::SupplyTechnology, val) = value.capital_cost = val
+"""Set [`SupplyTechnology`](@ref) `cofire_level_min`."""
+set_cofire_level_min!(value::SupplyTechnology, val) = value.cofire_level_min = val
 """Set [`SupplyTechnology`](@ref) `minimum_required_capacity`."""
 set_minimum_required_capacity!(value::SupplyTechnology, val) = value.minimum_required_capacity = val
+"""Set [`SupplyTechnology`](@ref) `cofire_start_max`."""
+set_cofire_start_max!(value::SupplyTechnology, val) = value.cofire_start_max = val
 """Set [`SupplyTechnology`](@ref) `gen_ID`."""
 set_gen_ID!(value::SupplyTechnology, val) = value.gen_ID = val
+"""Set [`SupplyTechnology`](@ref) `cofire_start_min`."""
+set_cofire_start_min!(value::SupplyTechnology, val) = value.cofire_start_min = val
 """Set [`SupplyTechnology`](@ref) `available`."""
 set_available!(value::SupplyTechnology, val) = value.available = val
 """Set [`SupplyTechnology`](@ref) `name`."""
 set_name!(value::SupplyTechnology, val) = value.name = val
-"""Set [`SupplyTechnology`](@ref) `variable_capacity_factor`."""
-set_variable_capacity_factor!(value::SupplyTechnology, val) = value.variable_capacity_factor = val
 """Set [`SupplyTechnology`](@ref) `ramp_down`."""
 set_ramp_down!(value::SupplyTechnology, val) = value.ramp_down = val
 """Set [`SupplyTechnology`](@ref) `initial_capacity`."""
@@ -185,10 +201,10 @@ set_initial_capacity!(value::SupplyTechnology, val) = value.initial_capacity = v
 set_fuel!(value::SupplyTechnology, val) = value.fuel = val
 """Set [`SupplyTechnology`](@ref) `power_systems_type`."""
 set_power_systems_type!(value::SupplyTechnology, val) = value.power_systems_type = val
+"""Set [`SupplyTechnology`](@ref) `cofire_level_max`."""
+set_cofire_level_max!(value::SupplyTechnology, val) = value.cofire_level_max = val
 """Set [`SupplyTechnology`](@ref) `internal`."""
 set_internal!(value::SupplyTechnology, val) = value.internal = val
-"""Set [`SupplyTechnology`](@ref) `variable_cost`."""
-set_variable_cost!(value::SupplyTechnology, val) = value.variable_cost = val
 """Set [`SupplyTechnology`](@ref) `heat_rate`."""
 set_heat_rate!(value::SupplyTechnology, val) = value.heat_rate = val
 """Set [`SupplyTechnology`](@ref) `minimum_generation`."""
