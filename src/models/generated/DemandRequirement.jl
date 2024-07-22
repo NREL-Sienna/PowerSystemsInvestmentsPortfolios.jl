@@ -25,7 +25,7 @@ This file is auto-generated. Do not edit.
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `demand_mw_z::Float64`: (default: `0.0`) Demand profile in MW
-- `value_lost_load::Float64`: (default: `0.0`) Value of lost load/non-served energy ($/MWh)
+- `value_lost_load::Float64`: (default: `0.0`) Value of lost load/non-served energy (USD/MWh)
 - `max_curtailment::Float64`: (default: `0.0`) Maximum percentage of demand that can be curtailed in an investment period
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `cost_of_curtailment::Float64`: (default: `0.0`) Cost of non-served energy, fraction of value of lost load
@@ -41,7 +41,7 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     internal::InfrastructureSystemsInternal
     "Demand profile in MW"
     demand_mw_z::Float64
-    "Value of lost load/non-served energy ($/MWh)"
+    "Value of lost load/non-served energy (USD/MWh)"
     value_lost_load::Float64
     "Maximum percentage of demand that can be curtailed in an investment period"
     max_curtailment::Float64
