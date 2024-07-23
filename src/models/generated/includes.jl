@@ -15,6 +15,7 @@ export get_base_power
 export get_can_retire
 export get_can_retrofit
 export get_cap_res_excl
+export get_cap_size
 export get_capital_cost
 export get_capital_cost_charge
 export get_capital_cost_energy
@@ -113,6 +114,7 @@ export set_base_power!
 export set_can_retire!
 export set_can_retrofit!
 export set_cap_res_excl!
+export set_cap_size!
 export set_capital_cost!
 export set_capital_cost_charge!
 export set_capital_cost_energy!
