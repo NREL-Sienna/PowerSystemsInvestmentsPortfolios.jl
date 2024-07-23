@@ -11,6 +11,7 @@ import InfrastructureSystems:
     get_time_series_array,
     get_time_series_timestamps,
     get_time_series_values,
+    supports_time_series,
     InfrastructureSystemsInternal,
     CompressionSettings,
     CompressionTypes,
