@@ -81,7 +81,6 @@ export get_minimum_required_capacity_power
 export get_name
 export get_network_lines
 export get_operations_cost
-export get_operations_cost_charge
 export get_operations_cost_energy
 export get_operations_cost_gen
 export get_operations_cost_inv
@@ -180,7 +179,6 @@ export set_minimum_required_capacity_power!
 export set_name!
 export set_network_lines!
 export set_operations_cost!
-export set_operations_cost_charge!
 export set_operations_cost_energy!
 export set_operations_cost_gen!
 export set_operations_cost_inv!
