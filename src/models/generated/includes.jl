@@ -14,7 +14,6 @@ export get_balancing_topology
 export get_base_power
 export get_can_retire
 export get_can_retrofit
-export get_cap_res_excl
 export get_cap_size
 export get_capital_cost
 export get_capital_cost_charge
@@ -31,7 +30,6 @@ export get_cofire_start_min
 export get_cost_of_curtailment
 export get_demand_energy_efficiency
 export get_demand_mw_z
-export get_derate_cap_res
 export get_down_time
 export get_efficiency_down
 export get_efficiency_down_ac
@@ -41,7 +39,7 @@ export get_efficiency_up_ac
 export get_efficiency_up_dc
 export get_electrolyzer_min_kt
 export get_end_region
-export get_existing_flow_capacity
+export get_existing_line_capacity
 export get_ext
 export get_fuel
 export get_gen_ID
@@ -66,6 +64,7 @@ export get_maximum_capacity
 export get_maximum_capacity_energy
 export get_maximum_capacity_power
 export get_maximum_duration
+export get_maximum_flow
 export get_maximum_gen_capacity
 export get_maximum_inverter_capacity
 export get_maximum_new_capacity
@@ -112,7 +111,6 @@ export set_balancing_topology!
 export set_base_power!
 export set_can_retire!
 export set_can_retrofit!
-export set_cap_res_excl!
 export set_cap_size!
 export set_capital_cost!
 export set_capital_cost_charge!
@@ -129,7 +127,6 @@ export set_cofire_start_min!
 export set_cost_of_curtailment!
 export set_demand_energy_efficiency!
 export set_demand_mw_z!
-export set_derate_cap_res!
 export set_down_time!
 export set_efficiency_down!
 export set_efficiency_down_ac!
@@ -139,7 +136,7 @@ export set_efficiency_up_ac!
 export set_efficiency_up_dc!
 export set_electrolyzer_min_kt!
 export set_end_region!
-export set_existing_flow_capacity!
+export set_existing_line_capacity!
 export set_ext!
 export set_fuel!
 export set_gen_ID!
@@ -164,6 +161,7 @@ export set_maximum_capacity!
 export set_maximum_capacity_energy!
 export set_maximum_capacity_power!
 export set_maximum_duration!
+export set_maximum_flow!
 export set_maximum_gen_capacity!
 export set_maximum_inverter_capacity!
 export set_maximum_new_capacity!
