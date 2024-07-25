@@ -27,7 +27,8 @@ export get_cofire_level_max
 export get_cofire_level_min
 export get_cofire_start_max
 export get_cofire_start_min
-export get_cost_of_curtailment
+export get_cost_of_curtailment_mw
+export get_cost_of_curtailment_mwh
 export get_demand_energy_efficiency
 export get_demand_mw_z
 export get_down_time
@@ -124,7 +125,8 @@ export set_cofire_level_max!
 export set_cofire_level_min!
 export set_cofire_start_max!
 export set_cofire_start_min!
-export set_cost_of_curtailment!
+export set_cost_of_curtailment_mw!
+export set_cost_of_curtailment_mwh!
 export set_demand_energy_efficiency!
 export set_demand_mw_z!
 export set_down_time!
