@@ -9,6 +9,7 @@ include("FlexibleDemandTechnology.jl")
 include("RetrofitTechnology.jl")
 include("DemandSideTechnology.jl")
 
+export get_angle_limit
 export get_available
 export get_balancing_topology
 export get_base_power
@@ -107,6 +108,8 @@ export get_up_time
 export get_value_lost_load
 export get_var_cost_per_mwh
 export get_voltage
+export get_wacc
+export set_angle_limit!
 export set_available!
 export set_balancing_topology!
 export set_base_power!
@@ -205,3 +208,4 @@ export set_up_time!
 export set_value_lost_load!
 export set_var_cost_per_mwh!
 export set_voltage!
+export set_wacc!
