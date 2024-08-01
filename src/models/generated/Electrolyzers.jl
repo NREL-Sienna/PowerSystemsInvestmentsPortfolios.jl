@@ -6,9 +6,9 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct Electrolyzers{T <: PSY.StaticInjection} <: Technology
+        ramp_dn_percentage::Float64
         available::Bool
         name::String
-        ramp_down::Float64
         hydrogen_mwh_per_tonne::PSY.ValueCurve
         power_systems_type::String
         internal::InfrastructureSystemsInternal
@@ -16,15 +16,15 @@ This file is auto-generated. Do not edit.
         ext::Dict
         electrolyzer_min_kt::Float64
         min_power::Float64
-        ramp_up::Float64
+        ramp_up_percentage::Float64
     end
 
 
 
 # Arguments
+- `ramp_dn_percentage::Float64`: Maximum decrease in power output from between two periods (typically hours), reported as a fraction of nameplate capacity.
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: The technology name
-- `ramp_down::Float64`: Maximum decrease in power output from between two periods (typically hours), reported as a fraction of nameplate capacity.
 - `hydrogen_mwh_per_tonne::PSY.ValueCurve`: Electrolyzer efficiency in megawatt-hours (MWh) of electricity per metric tonne of hydrogen produced (MWh/t)
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
@@ -32,15 +32,15 @@ This file is auto-generated. Do not edit.
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `electrolyzer_min_kt::Float64`: Minimum annual quantity of hydrogen that must be produced by electrolyzer in kilotonnes (kt)
 - `min_power::Float64`: The minimum generation level for a unit as a fraction of total capacity.
-- `ramp_up::Float64`: Maximum increase in power output from between two periods (typically hours), reported as a fraction of nameplate capacity.
+- `ramp_up_percentage::Float64`: Maximum increase in power output from between two periods (typically hours), reported as a fraction of nameplate capacity.
 """
 mutable struct Electrolyzers{T <: PSY.StaticInjection} <: Technology
+    "Maximum decrease in power output from between two periods (typically hours), reported as a fraction of nameplate capacity."
+    ramp_dn_percentage::Float64
     "identifies whether the technology is available"
     available::Bool
     "The technology name"
     name::String
-    "Maximum decrease in power output from between two periods (typically hours), reported as a fraction of nameplate capacity."
-    ramp_down::Float64
     "Electrolyzer efficiency in megawatt-hours (MWh) of electricity per metric tonne of hydrogen produced (MWh/t)"
     hydrogen_mwh_per_tonne::PSY.ValueCurve
     "maps to a valid PowerSystems.jl for PCM modeling"
@@ -56,20 +56,20 @@ mutable struct Electrolyzers{T <: PSY.StaticInjection} <: Technology
     "The minimum generation level for a unit as a fraction of total capacity."
     min_power::Float64
     "Maximum increase in power output from between two periods (typically hours), reported as a fraction of nameplate capacity."
-    ramp_up::Float64
+    ramp_up_percentage::Float64
 end
 
 
-function Electrolyzers{T}(; available, name, ramp_down, hydrogen_mwh_per_tonne, power_systems_type, internal=InfrastructureSystemsInternal(), hydrogen_price_per_tonne, ext=Dict(), electrolyzer_min_kt, min_power, ramp_up, ) where T <: PSY.StaticInjection
-    Electrolyzers{T}(available, name, ramp_down, hydrogen_mwh_per_tonne, power_systems_type, internal, hydrogen_price_per_tonne, ext, electrolyzer_min_kt, min_power, ramp_up, )
+function Electrolyzers{T}(; ramp_dn_percentage, available, name, hydrogen_mwh_per_tonne, power_systems_type, internal=InfrastructureSystemsInternal(), hydrogen_price_per_tonne, ext=Dict(), electrolyzer_min_kt, min_power, ramp_up_percentage, ) where T <: PSY.StaticInjection
+    Electrolyzers{T}(ramp_dn_percentage, available, name, hydrogen_mwh_per_tonne, power_systems_type, internal, hydrogen_price_per_tonne, ext, electrolyzer_min_kt, min_power, ramp_up_percentage, )
 end
 
+"""Get [`Electrolyzers`](@ref) `ramp_dn_percentage`."""
+get_ramp_dn_percentage(value::Electrolyzers) = value.ramp_dn_percentage
 """Get [`Electrolyzers`](@ref) `available`."""
 get_available(value::Electrolyzers) = value.available
 """Get [`Electrolyzers`](@ref) `name`."""
 get_name(value::Electrolyzers) = value.name
-"""Get [`Electrolyzers`](@ref) `ramp_down`."""
-get_ramp_down(value::Electrolyzers) = value.ramp_down
 """Get [`Electrolyzers`](@ref) `hydrogen_mwh_per_tonne`."""
 get_hydrogen_mwh_per_tonne(value::Electrolyzers) = value.hydrogen_mwh_per_tonne
 """Get [`Electrolyzers`](@ref) `power_systems_type`."""
@@ -84,15 +84,15 @@ get_ext(value::Electrolyzers) = value.ext
 get_electrolyzer_min_kt(value::Electrolyzers) = value.electrolyzer_min_kt
 """Get [`Electrolyzers`](@ref) `min_power`."""
 get_min_power(value::Electrolyzers) = value.min_power
-"""Get [`Electrolyzers`](@ref) `ramp_up`."""
-get_ramp_up(value::Electrolyzers) = value.ramp_up
+"""Get [`Electrolyzers`](@ref) `ramp_up_percentage`."""
+get_ramp_up_percentage(value::Electrolyzers) = value.ramp_up_percentage
 
+"""Set [`Electrolyzers`](@ref) `ramp_dn_percentage`."""
+set_ramp_dn_percentage!(value::Electrolyzers, val) = value.ramp_dn_percentage = val
 """Set [`Electrolyzers`](@ref) `available`."""
 set_available!(value::Electrolyzers, val) = value.available = val
 """Set [`Electrolyzers`](@ref) `name`."""
 set_name!(value::Electrolyzers, val) = value.name = val
-"""Set [`Electrolyzers`](@ref) `ramp_down`."""
-set_ramp_down!(value::Electrolyzers, val) = value.ramp_down = val
 """Set [`Electrolyzers`](@ref) `hydrogen_mwh_per_tonne`."""
 set_hydrogen_mwh_per_tonne!(value::Electrolyzers, val) = value.hydrogen_mwh_per_tonne = val
 """Set [`Electrolyzers`](@ref) `power_systems_type`."""
@@ -107,5 +107,5 @@ set_ext!(value::Electrolyzers, val) = value.ext = val
 set_electrolyzer_min_kt!(value::Electrolyzers, val) = value.electrolyzer_min_kt = val
 """Set [`Electrolyzers`](@ref) `min_power`."""
 set_min_power!(value::Electrolyzers, val) = value.min_power = val
-"""Set [`Electrolyzers`](@ref) `ramp_up`."""
-set_ramp_up!(value::Electrolyzers, val) = value.ramp_up = val
+"""Set [`Electrolyzers`](@ref) `ramp_up_percentage`."""
+set_ramp_up_percentage!(value::Electrolyzers, val) = value.ramp_up_percentage = val

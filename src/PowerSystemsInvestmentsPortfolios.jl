@@ -21,6 +21,10 @@ import InfrastructureSystems:
     InfrastructureSystemsComponent
 
 import PowerSystems
+import PowerSystems:
+    StorageCost,
+    LinearCurve
+
 import JSONSchema
 import JSON3
 import PrettyTables
@@ -36,7 +40,10 @@ export DemandRequirement
 export DemandsideTechnology
 export FlexibleDemandTechnology
 export Electrolyzers
+export CurtailableDemandSideTechnology
 
+export get_technologies
+export get_ext
 export add_technology!
 export add_technologies!
 export read_json_data
