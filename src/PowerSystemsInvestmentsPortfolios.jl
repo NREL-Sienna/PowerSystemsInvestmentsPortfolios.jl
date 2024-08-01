@@ -41,6 +41,8 @@ export DemandsideTechnology
 export FlexibleDemandTechnology
 export Electrolyzers
 export CurtailableDemandSideTechnology
+export RetireableTechnology
+export RetrofitTechnology
 
 export get_technologies
 export get_ext
