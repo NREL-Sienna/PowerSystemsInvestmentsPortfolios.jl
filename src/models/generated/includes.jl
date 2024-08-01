@@ -24,6 +24,7 @@ export get_capital_cost_inv
 export get_capital_cost_power
 export get_capital_recovery_factor
 export get_cluster
+export get_co2
 export get_cofire_level_max
 export get_cofire_level_min
 export get_cofire_start_max
@@ -136,6 +137,7 @@ export set_capital_cost_inv!
 export set_capital_cost_power!
 export set_capital_recovery_factor!
 export set_cluster!
+export set_co2!
 export set_cofire_level_max!
 export set_cofire_level_min!
 export set_cofire_start_max!
