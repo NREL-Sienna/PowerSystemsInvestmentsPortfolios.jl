@@ -16,7 +16,7 @@ This file is auto-generated. Do not edit.
         cofire_start_max::Union{Nothing, Dict{ThermalFuels, Float64}}
         available::Bool
         cofire_start_min::Union{Nothing, Dict{ThermalFuels, Float64}}
-        co2::Float64
+        co2::Union{Float64, Dict{String, Float64}, Dict{ThermalFuels, Float64}}
         name::String
         ramp_dn_percentage::Float64
         max_cap_mw::Float64
@@ -60,7 +60,7 @@ This file is auto-generated. Do not edit.
 - `cofire_start_max::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Maximum blending level of each fuel during start-up process for multi-fuel generator
 - `available::Bool`: (default: `True`) identifies whether the technology is available
 - `cofire_start_min::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Minimum blending level of each fuel during start-up process for multi-fuel generator
-- `co2::Float64`: (default: `0.0`) Carbon Intensity of fuel
+- `co2::Union{Float64, Dict{String, Float64}, Dict{ThermalFuels, Float64}}`: (default: `0.0`) Carbon Intensity of fuel
 - `name::String`: The technology name
 - `ramp_dn_percentage::Float64`: (default: `100.0`) Maximum decrease in output between operation periods. Fraction of total capacity
 - `max_cap_mw::Float64`: (default: `Inf`) Maximum allowable installed capacity for a technology
@@ -112,7 +112,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     "Minimum blending level of each fuel during start-up process for multi-fuel generator"
     cofire_start_min::Union{Nothing, Dict{ThermalFuels, Float64}}
     "Carbon Intensity of fuel"
-    co2::Float64
+    co2::Union{Float64, Dict{String, Float64}, Dict{ThermalFuels, Float64}}
     "The technology name"
     name::String
     "Maximum decrease in output between operation periods. Fraction of total capacity"
