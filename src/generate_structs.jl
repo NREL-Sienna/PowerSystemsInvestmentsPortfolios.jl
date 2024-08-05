@@ -27,8 +27,8 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
         item["struct_name"] = struct_name
         item["closing_constructor_text"] = ""
 
-        item["parametric"] = input["parametric"]
-        if haskey(item, "parametric")
+        if haskey(input, "parametric")
+            item["parametric"] = input["parametric"]
             item["constructor_func"] *= "{T}"
             item["closing_constructor_text"] = " where T <: $(item["parametric"])"
         end
