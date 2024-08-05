@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct MinimumCapacityRequirements <: PSY.Service
+    mutable struct MinimumCapacityRequirements <: Requirements
         name::String
         internal::InfrastructureSystemsInternal
         ext::Dict
@@ -24,7 +24,7 @@ This file is auto-generated. Do not edit.
 - `eligible_resources::Vector{String}`: (default: `Vector{String}()`) List of resources that contribute to the carbon cap constraint.
 - `available::Bool`: Availability
 """
-mutable struct MinimumCapacityRequirements <: PSY.Service
+mutable struct MinimumCapacityRequirements <: Requirements
     "The technology name"
     name::String
     "Internal field"

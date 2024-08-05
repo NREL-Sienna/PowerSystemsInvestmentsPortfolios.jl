@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct CarbonCaps <: PSY.Service
+    mutable struct CarbonCaps <: Requirements
         name::String
         internal::InfrastructureSystemsInternal
         eligible_zones::Vector{Int64}
@@ -28,7 +28,7 @@ This file is auto-generated. Do not edit.
 - `slack::Float64`: Slack value for carbon caps
 - `available::Bool`: Availability
 """
-mutable struct CarbonCaps <: PSY.Service
+mutable struct CarbonCaps <: Requirements
     "The technology name"
     name::String
     "Internal field"
