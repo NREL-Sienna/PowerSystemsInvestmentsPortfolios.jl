@@ -45,6 +45,7 @@ export RetireableTechnology
 export RetrofitTechnology
 
 export get_technologies
+export get_technology
 export get_ext
 export add_technology!
 export add_technologies!
