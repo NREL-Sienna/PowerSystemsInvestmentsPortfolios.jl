@@ -577,3 +577,17 @@ function Portfolio(file_path::AbstractString; assign_new_uuids=false, kwargs...)
         throw(DataFormatError("$file_path is not a supported file type"))
     end
 end
+
+################################
+######### Requirements #########
+################################
+
+"""
+Add policy requirement to portfolio 
+"""
+function add_requirement!(portfolio::Portfolio, req::Requirements)
+    #return PSY.add_service!(portfolio.data, req)
+    #skip_validation = false
+    #skip_validation = _validate_or_skip!(sys, service, skip_validation)
+    return IS.add_component!(portfolio.data, req, skip_validation = false)
+end
