@@ -1,4 +1,5 @@
 include("Electrolyzers.jl")
+include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
 include("RetireableTechnology.jl")
 include("DemandRequirement.jl")
@@ -6,6 +7,7 @@ include("RetrofitTechnology.jl")
 include("CoLocatedSupplyStorageTechnology.jl")
 include("DemandSideTechnology.jl")
 include("StorageTechnology.jl")
+include("CarbonCaps.jl")
 include("TransportTechnology.jl")
 include("CurtailableDemandSideTechnology.jl")
 include("FlexibleDemandTechnology.jl")
@@ -25,6 +27,8 @@ export get_capital_cost_power
 export get_capital_recovery_factor
 export get_cluster
 export get_co2
+export get_co_2_max_mtons
+export get_co_2_max_tons_mwh
 export get_cofire_level_max
 export get_cofire_level_min
 export get_cofire_start_max
@@ -41,6 +45,8 @@ export get_efficiency_down_dc
 export get_efficiency_up_ac
 export get_efficiency_up_dc
 export get_electrolyzer_min_kt
+export get_eligible_resources
+export get_eligible_zones
 export get_end_region
 export get_existing_cap_mw
 export get_existing_cap_mwh
@@ -83,6 +89,7 @@ export get_min_cap_mw
 export get_min_cap_mwh
 export get_min_charge_cap_mw
 export get_min_duration
+export get_min_mw
 export get_min_power
 export get_minimum_duration
 export get_minimum_inverter_capacity
@@ -113,6 +120,7 @@ export get_rsv_max
 export get_segments
 export get_self_disch
 export get_self_discharge
+export get_slack
 export get_start_cost_per_mw
 export get_start_fuel_mmbtu_per_mw
 export get_start_region
@@ -138,6 +146,8 @@ export set_capital_cost_power!
 export set_capital_recovery_factor!
 export set_cluster!
 export set_co2!
+export set_co_2_max_mtons!
+export set_co_2_max_tons_mwh!
 export set_cofire_level_max!
 export set_cofire_level_min!
 export set_cofire_start_max!
@@ -154,6 +164,8 @@ export set_efficiency_down_dc!
 export set_efficiency_up_ac!
 export set_efficiency_up_dc!
 export set_electrolyzer_min_kt!
+export set_eligible_resources!
+export set_eligible_zones!
 export set_end_region!
 export set_existing_cap_mw!
 export set_existing_cap_mwh!
@@ -196,6 +208,7 @@ export set_min_cap_mw!
 export set_min_cap_mwh!
 export set_min_charge_cap_mw!
 export set_min_duration!
+export set_min_mw!
 export set_min_power!
 export set_minimum_duration!
 export set_minimum_inverter_capacity!
@@ -226,6 +239,7 @@ export set_rsv_max!
 export set_segments!
 export set_self_disch!
 export set_self_discharge!
+export set_slack!
 export set_start_cost_per_mw!
 export set_start_fuel_mmbtu_per_mw!
 export set_start_region!
