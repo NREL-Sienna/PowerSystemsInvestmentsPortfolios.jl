@@ -6,6 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct RetrofitTechnology{T <: PSY.Generator} <: Technology
+        name::String
         retrofit_id::Dict{PrimeMovers,Dict{String, Int64}}
         retrofit_efficiency::Dict{PrimeMovers,Dict{String, Float64}}
         internal::InfrastructureSystemsInternal
@@ -16,6 +17,7 @@ This file is auto-generated. Do not edit.
 
 
 # Arguments
+- `name::String`: The technology name
 - `retrofit_id::Dict{PrimeMovers,Dict{String, Int64}}`: (default: `Dict()`) Dictionary of unique identifiers to group retrofittable source technologies with retrofit options inside the same zone.
 - `retrofit_efficiency::Dict{PrimeMovers,Dict{String, Float64}}`: (default: `Dict()`) Dictionary of Efficiency of the retrofit technology.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
@@ -23,6 +25,8 @@ This file is auto-generated. Do not edit.
 - `can_retrofit::Dict{PrimeMovers,Dict{String, Int64}}`: (default: `Dict()`) Dictionary of PrimeMovers in each region that can retire
 """
 mutable struct RetrofitTechnology{T <: PSY.Generator} <: Technology
+    "The technology name"
+    name::String
     "Dictionary of unique identifiers to group retrofittable source technologies with retrofit options inside the same zone."
     retrofit_id::Dict{PrimeMovers,Dict{String, Int64}}
     "Dictionary of Efficiency of the retrofit technology."
@@ -36,21 +40,12 @@ mutable struct RetrofitTechnology{T <: PSY.Generator} <: Technology
 end
 
 
-function RetrofitTechnology{T}(; retrofit_id=Dict(), retrofit_efficiency=Dict(), internal=InfrastructureSystemsInternal(), ext=Dict(), can_retrofit=Dict(), ) where T <: PSY.Generator
-    RetrofitTechnology{T}(retrofit_id, retrofit_efficiency, internal, ext, can_retrofit, )
+function RetrofitTechnology{T}(; name, retrofit_id=Dict(), retrofit_efficiency=Dict(), internal=InfrastructureSystemsInternal(), ext=Dict(), can_retrofit=Dict(), ) where T <: PSY.Generator
+    RetrofitTechnology{T}(name, retrofit_id, retrofit_efficiency, internal, ext, can_retrofit, )
 end
 
-# Constructor for demo purposes; non-functional.
-function RetrofitTechnology{T}(::Nothing) where T <: PSY.Generator
-    RetrofitTechnology{T}(;
-        retrofit_id=Dict(),
-        retrofit_efficiency=Dict(),
-        internal=Dict(),
-        ext=Dict(),
-        can_retrofit=Dict(),
-    )
-end
-
+"""Get [`RetrofitTechnology`](@ref) `name`."""
+get_name(value::RetrofitTechnology) = value.name
 """Get [`RetrofitTechnology`](@ref) `retrofit_id`."""
 get_retrofit_id(value::RetrofitTechnology) = value.retrofit_id
 """Get [`RetrofitTechnology`](@ref) `retrofit_efficiency`."""
@@ -62,6 +57,8 @@ get_ext(value::RetrofitTechnology) = value.ext
 """Get [`RetrofitTechnology`](@ref) `can_retrofit`."""
 get_can_retrofit(value::RetrofitTechnology) = value.can_retrofit
 
+"""Set [`RetrofitTechnology`](@ref) `name`."""
+set_name!(value::RetrofitTechnology, val) = value.name = val
 """Set [`RetrofitTechnology`](@ref) `retrofit_id`."""
 set_retrofit_id!(value::RetrofitTechnology, val) = value.retrofit_id = val
 """Set [`RetrofitTechnology`](@ref) `retrofit_efficiency`."""
