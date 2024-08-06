@@ -6,7 +6,7 @@ expansion decisions. Common requirements are carbon caps and system
 capacity requirements.
 """
 
-abstract type Requirements <: PSY.Service end
+abstract type Requirements <: IS.InfrastructureSystemsComponent end
 
 supports_time_series(::Requirements) = true
 supports_supplemental_attributes(::Requirements) = true

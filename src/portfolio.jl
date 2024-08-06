@@ -591,3 +591,7 @@ function add_requirement!(portfolio::Portfolio, req::Requirements)
     #skip_validation = _validate_or_skip!(sys, service, skip_validation)
     return IS.add_component!(portfolio.data, req, skip_validation = false)
 end
+
+function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirements}
+    return IS.get_components(T, portfolio.data)
+end
