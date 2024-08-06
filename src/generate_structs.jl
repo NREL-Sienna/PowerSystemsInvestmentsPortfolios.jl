@@ -217,7 +217,7 @@ function db_to_dataframes(db_path::String)
     tables = SQLite.tables(db)
 
     # Create a dictionary to store DataFrames for each table
-    dfs = Dict{String, DataFrame}()
+    dfs = Dict()
 
     #Will adjust queries to only pull a subset of data
     for table in tables
@@ -267,25 +267,44 @@ function dataframe_to_structs(df_dict::Dict)
 
     #Populate SupplyTechnology structs from database
     for row in eachrow(df_dict["supply_technologies"])
+        #start with piecewiselinear
+        #extract blob (THIS THE PIECEWISE COST CURVE)
+        #take entity_attribute id to find entity_id
+        #then go to supplytechnology and do the rest
         t = SupplyTechnology{ThermalStandard}(;
             #Data pulled from DB
             name=string(row["technology_id"]),
-            gen_ID=string(row["technology_id"]),
-            capital_cost=LinearFunctionData(row["capital_cost"]),
-            variable_cost=LinearFunctionData(row["vom_cost"]),
+            id=row["technology_id"],
+            inv_cost_per_mwyr=LinearFunctionData(row["capital_cost"]),
+            om_costs=ThermalGenerationCost(variable=CostCurve(LinearCurve(row["vom_cost"])), fixed=row["fom_cost"], start_up=91.0, shut_down=0.0),
             balancing_topology=string(row["balancing_topology"]),
-            operations_cost=LinearFunctionData(row["fom_cost"]),
             prime_mover_type=map_prime_mover(row["prime_mover"]),
 
-            #Placeholder values
+            #Placeholder or default values
+            ramp_dn_percentage = 0.64,
+            ramp_up_percentage = 0.64,
             base_power=100.0,
-            minimum_required_capacity=0.0,
+            min_cap_mw=0.0,
             available=true,
-            initial_capacity=200.0,
+            existing_cap_mw = 0.0,
             fuel=ThermalFuels.COAL,
             power_systems_type="ThermalStandard",
-            maximum_capacity=10000.0,
-            capacity_factor=0.98,
+            max_cap_mw=10000.0,
+            co2 = 0.05306,
+            cap_size=250.0,
+            heat_rate_mmbtu_per_mwh = 7.43,
+            min_power = 0.468,
+            balancing_topology="Region",
+            region = "MA",
+            zone = 1,
+            max_cap_mw = -1,
+            cluster = 1,
+            start_fuel_mmbtu_per_mw = 2.0,
+            start_cost_per_mw = 91.0,
+            up_time = 6.0,
+            down_time = 6.0,
+            reg_max = 0.25,
+            rsv_max = 0.5,
         )
         add_technology!(p, t)
     end
@@ -307,4 +326,9 @@ function dataframe_to_structs(df_dict::Dict)
     end
 
     return p
+end
+
+function extract_supply_curve()
+
+
 end
