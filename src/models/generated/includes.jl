@@ -106,6 +106,7 @@ export get_operations_cost_inv
 export get_operations_cost_power
 export get_outage_factor
 export get_power_systems_type
+export get_pricecap
 export get_prime_mover_type
 export get_ramp_dn_percentage
 export get_ramp_up_percentage
@@ -225,6 +226,7 @@ export set_operations_cost_inv!
 export set_operations_cost_power!
 export set_outage_factor!
 export set_power_systems_type!
+export set_pricecap!
 export set_prime_mover_type!
 export set_ramp_dn_percentage!
 export set_ramp_up_percentage!
