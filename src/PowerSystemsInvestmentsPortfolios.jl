@@ -33,6 +33,7 @@ import DataFrames
 
 export Portfolio
 export Technology
+export Requirements
 export SupplyTechnology
 export TransportTechnology
 export StorageTechnology
@@ -43,9 +44,12 @@ export Electrolyzers
 export CurtailableDemandSideTechnology
 export RetireableTechnology
 export RetrofitTechnology
+export CarbonCaps
+export MinimumCapacityRequirements
 
 export get_technologies
 export get_technology
+export get_requirements
 export get_ext
 export add_technology!
 export add_technologies!
@@ -72,6 +76,7 @@ export PrimeMovers
 export StorageTech
 
 include("models/technologies.jl")
+include("models/requirements.jl")
 include("models/generated/includes.jl")
 include("portfolio.jl")
 include("serialization.jl")
