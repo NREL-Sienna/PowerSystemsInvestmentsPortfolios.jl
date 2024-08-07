@@ -277,6 +277,48 @@ function map_prime_mover_to_parametric(prime_mover::String)
     return mapping_dict[prime_mover]
 end
 
+function parse_timestamps_and_values(json_str::String)
+    # Parse the JSON string into a Julia object
+    data = JSON.parse(json_str)
+
+    # Initialize arrays to store timestamps and values
+    timestamps = String[]
+    values = Float64[]
+
+    # Iterate over each dictionary in the parsed JSON data
+    for item in data
+        # Append the timestamp to the timestamps array
+        push!(timestamps, item["timestamp"])
+        
+        # Append the value to the values array
+        push!(values, item["value"])
+    end
+
+    return timestamps, values
+end
+
+function parse_json_to_arrays(json_str::String)
+    # Parse the JSON string into a Julia object
+    data = JSON.parse(json_str)
+
+    # Initialize arrays to store x and y values
+    x_values = Float64[]
+    y_values = Float64[]
+
+    # Iterate over each dictionary in the parsed JSON data
+    for item in data
+        # Append the x values to x_values array
+        push!(x_values, item["from_x"])
+        push!(x_values, item["to_x"])
+        
+        # Append the y values to y_values array
+        push!(y_values, item["from_y"])
+        push!(y_values, item["to_y"])
+    end
+
+    return unique(x_values), unique(y_values)
+end
+
 function dataframe_to_structs(df_dict::Dict)
 
     #Initialize Portfolio
@@ -284,8 +326,15 @@ function dataframe_to_structs(df_dict::Dict)
 
     #Populate SupplyTechnology structs from database (new builds)
     topologies = df_dict["balancing_topologies"]
-    for row in eachrow(df_dict["supply_technologies"])
+    for row_pw in eachrow(df_dict["piecewise_linear"])
 
+        # Extract supply curves and IDs
+        eaid = row_pw["entity_attribute_id"]
+        supply_curve = row_pw["piecewise_linear_blob"]
+        id = df_dict["attributes"][df_dict["attributes"][!, "entity_attribute_id"] .== eaid, "entity_id"]
+        
+        # Find corresponding supply technology for that supply curve
+        row = df_dict["supply_technologies"][df_dict["supply_technologies"][!, "technology_id"] .== id, :]
         #extract area
         area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
         area_int = parse(Int64, area)
