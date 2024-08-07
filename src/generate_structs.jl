@@ -331,6 +331,7 @@ function dataframe_to_structs(df_dict::Dict)
         add_technology!(p, d)
     end
 
+    #Transmission Lines
     topologies = df_dict["balancing_topologies"]
     lines = df_dict["transmission_lines"]
     for row in eachrow(df_dict["transmission_interchange"])
@@ -342,9 +343,10 @@ function dataframe_to_structs(df_dict::Dict)
         existing_capacity = 0.0
         for from in topologies_from
             for to in topologies_to
-                
                 line_cap = lines[(lines[!,"balancing_topology_from"] .== from) .& (lines[!,"balancing_topology_to"] .== to), "continuous_rating"][1]
-                existing_capacity += line_cap
+                if length(line_cap) == 1
+                    existing_capacity += line_cap[1]
+                end
             end
         end
     
