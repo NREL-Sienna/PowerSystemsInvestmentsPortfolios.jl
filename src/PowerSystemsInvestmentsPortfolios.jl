@@ -18,12 +18,14 @@ import InfrastructureSystems:
     MultiLogger,
     LogEventTracker,
     StructField,
+    CostCurve,
+    LinearCurve,
     InfrastructureSystemsComponent
 
 import PowerSystems
 import PowerSystems:
     StorageCost,
-    LinearCurve
+    ThermalGenerationCost
 
 import JSONSchema
 import JSON3
@@ -32,7 +34,9 @@ import SQLite
 import DataFrames
 import DBInterface
 
+# Temporary, imports not working properly for some reason?
 using DataFrames
+using PowerSystems
 
 export Portfolio
 export Technology
