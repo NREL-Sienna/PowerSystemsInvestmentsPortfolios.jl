@@ -347,11 +347,10 @@ function dataframe_to_structs(df_dict::Dict)
 
         parametric = map_prime_mover_to_parametric(row["prime_mover"])
         t = SupplyTechnology{parametric}(;
-            #Data pulled from DB
+            # Data pulled from DB
             name=row["name"],
             id=row["unit_id"],
             inv_cost_per_mwyr=LinearCurve(0.0), #just assume zero since pre-existing?
-            om_costs=ThermalGenerationCost(variable=CostCurve(LinearCurve(0.0)), fixed=0.0, start_up=0.0, shut_down=0.0),
             balancing_topology=string(row["balancing_topology"]),
             prime_mover_type=map_prime_mover(row["prime_mover"]),
             fuel=row["fuel_type"],
@@ -359,10 +358,11 @@ function dataframe_to_structs(df_dict::Dict)
             base_power=row["base_power"],
             existing_cap_mw = row["rating"],
 
-            #Problem ones, need to write functions to extract         
+            # Problem ones, need to write functions to extract         
             cap_size=250.0,
             
             # Data we should have but dont currently
+            om_costs=ThermalGenerationCost(variable=CostCurve(LinearCurve(0.0)), fixed=0.0, start_up=0.0, shut_down=0.0),
             start_fuel_mmbtu_per_mw = 2.0,
             start_cost_per_mw = 91.0,
             up_time = 6.0,
@@ -401,21 +401,21 @@ function dataframe_to_structs(df_dict::Dict)
             id=row["storage_unit_id"],
             zone = area_int,
             prime_mover_type=map_prime_mover(row["prime_mover"]),
-            inv_cost_per_mwyr=LinearCurve(0.0),
-            inv_cost_charge_per_mwyr=LinearCurve(0.0),
-            inv_cost_per_mwhyr=LinearCurve(0.0),
-            om_costs = StorageCost(charge_variable_cost=CostCurve(LinearCurve(0.0)), discharge_variable_cost=CostCurve(LinearCurve(0.0)), fixed=0.0, start_up=0.0, shut_down=0.0),
-            fixed_om_cost_per_mwhyr = LinearCurve(0.0),
             balancing_topology=row["balancing_topology"],
             existing_cap_mw = row["rating"],
             existing_cap_mwh = row["max_capacity"],
             
             #stuff we dont have but probably should
+            om_costs = StorageCost(charge_variable_cost=CostCurve(LinearCurve(0.0)), discharge_variable_cost=CostCurve(LinearCurve(0.0)), fixed=0.0, start_up=0.0, shut_down=0.0),
+            fixed_om_cost_per_mwhyr = LinearCurve(0.0),
             eff_up = 0.92,
             eff_down = 0.92,
             storage_tech = StorageTech.LIB,
             
             #Default or placeholder values
+            inv_cost_per_mwyr=LinearCurve(0.0),
+            inv_cost_charge_per_mwyr=LinearCurve(0.0),
+            inv_cost_per_mwhyr=LinearCurve(0.0),
             available=true,
             region = "ME",
             cluster = 0,
