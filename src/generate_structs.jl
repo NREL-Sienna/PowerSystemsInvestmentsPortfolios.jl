@@ -407,11 +407,10 @@ function dataframe_to_structs(df_dict::Dict)
             om_costs = StorageCost(charge_variable_cost=CostCurve(LinearCurve(0.0)), discharge_variable_cost=CostCurve(LinearCurve(0.0)), fixed=0.0, start_up=0.0, shut_down=0.0),
             fixed_om_cost_per_mwhyr = LinearCurve(0.0),
             balancing_topology=row["balancing_topology"],
-            
+            existing_cap_mw = row["rating"],
+            existing_cap_mwh = row["max_capacity"],
             
             #stuff we dont have but probably should
-            existing_cap_mw = 0.0,
-            existing_cap_mwh = 0.0,
             eff_up = 0.92,
             eff_down = 0.92,
             storage_tech = StorageTech.LIB,
