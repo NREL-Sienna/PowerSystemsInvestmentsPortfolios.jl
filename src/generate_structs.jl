@@ -326,7 +326,8 @@ function dataframe_to_structs(df_dict::Dict)
 
     #Populate SupplyTechnology structs from database (new builds)
     topologies = df_dict["balancing_topologies"]
-    for row_pw in eachrow(df_dict["piecewise_linear"])
+    supply_curves = filter("description" => contains("Supply"), df_dict["piecewise_linear"])
+    for row_pw in eachrow(supply_curves)
 
         # Extract supply curves and IDs
         eaid = row_pw["entity_attribute_id"]
@@ -336,7 +337,7 @@ function dataframe_to_structs(df_dict::Dict)
         # Find corresponding supply technology for that supply curve
         row = df_dict["supply_technologies"][df_dict["supply_technologies"][!, "technology_id"] .== id, :]
         #extract area
-        area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
+        area = topologies[topologies.name .== row[!,"balancing_topology"][1], "area"][1]
         area_int = parse(Int64, area)
 
         #extract supply curve, does every supply_technology have a supply curve?
@@ -345,16 +346,16 @@ function dataframe_to_structs(df_dict::Dict)
         #supply_curve = df_dict["time_series"][df_dict["entity_attribute_id"] .== eaid, "piecewise_linear_blob"][1]
         #Now just need to parse the blob
 
-        parametric = map_prime_mover_to_parametric(row["prime_mover"])
+        parametric = map_prime_mover_to_parametric(row[!, "prime_mover"][1])
         t = SupplyTechnology{parametric}(;
             #Data pulled from DB
-            name=string(row["technology_id"]),
-            id=row["technology_id"],
+            name=string(row[!,"technology_id"][1]),
+            id=row[!,"technology_id"][1],
             inv_cost_per_mwyr=LinearCurve(20000),
-            om_costs=ThermalGenerationCost(variable=CostCurve(LinearCurve(row["vom_cost"])), fixed=row["fom_cost"], start_up=0.0, shut_down=0.0),
-            balancing_topology=string(row["balancing_topology"]),
-            prime_mover_type=map_prime_mover(row["prime_mover"]),
-            fuel=row["fuel_type"],
+            om_costs=ThermalGenerationCost(variable=CostCurve(LinearCurve(row[!,"vom_cost"][1])), fixed=row[!,"fom_cost"][1], start_up=0.0, shut_down=0.0),
+            balancing_topology=string(row[!,"balancing_topology"][1]),
+            prime_mover_type=map_prime_mover(row[!,"prime_mover"][1]),
+            fuel=row[!,"fuel_type"][1],
             zone = area_int,
 
             #Problem ones, need to write functions to extract
@@ -487,7 +488,12 @@ function dataframe_to_structs(df_dict::Dict)
         #start in time_series
         eaid = row["entity_attribute_id"] 
         ts_blob = filter("entity_attribute_id" => isequal(eaid), df_dict["time_series"])[!,"time_series_blob"][1]
-    
+        ts_parsed = parse_timestamps_and_values(s)
+        dates = ts_parsed[1] #fix this later, dates syntax is inconsistent so hard to parse
+        dates = DateTime("2020-01-01T00:00:00"):Hour(1):DateTime("2020-12-31T23:00:00")
+        demand = ts_parsed[2]
+        demand_array = TimeArray(dates, demand)
+        ts = SingleTimeSeries(string(row["entity_attribute_id"]), demand_array)
         #How to parse this timestamp stuff??
     
         d = DemandRequirement{ElectricLoad}(
@@ -501,6 +507,7 @@ function dataframe_to_structs(df_dict::Dict)
             power_systems_type="ElectricLoad",
         )
         add_technology!(p, d)
+        IS.add_time_series!(p.data, d, ts)
     end
 
     #Transmission Lines
