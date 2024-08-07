@@ -121,7 +121,6 @@ export get_rsv_max
 export get_segments
 export get_self_disch
 export get_self_discharge
-export get_slack
 export get_start_cost_per_mw
 export get_start_fuel_mmbtu_per_mw
 export get_start_region
@@ -241,7 +240,6 @@ export set_rsv_max!
 export set_segments!
 export set_self_disch!
 export set_self_discharge!
-export set_slack!
 export set_start_cost_per_mw!
 export set_start_fuel_mmbtu_per_mw!
 export set_start_region!
