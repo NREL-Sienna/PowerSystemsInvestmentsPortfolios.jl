@@ -7,6 +7,7 @@ This file is auto-generated. Do not edit.
 """
     mutable struct MinimumCapacityRequirements <: Requirements
         name::String
+        power_systems_type::String
         pricecap::Float64
         internal::InfrastructureSystemsInternal
         ext::Dict
@@ -19,6 +20,7 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `name::String`: The technology name
+- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `pricecap::Float64`: (default: `Inf`) price threshold for policy constraint, USD/MW
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
@@ -29,6 +31,8 @@ This file is auto-generated. Do not edit.
 mutable struct MinimumCapacityRequirements <: Requirements
     "The technology name"
     name::String
+    "maps to a valid PowerSystems.jl for PCM modeling"
+    power_systems_type::String
     "price threshold for policy constraint, USD/MW"
     pricecap::Float64
     "Internal field"
@@ -44,12 +48,14 @@ mutable struct MinimumCapacityRequirements <: Requirements
 end
 
 
-function MinimumCapacityRequirements(; name, pricecap=Inf, internal=InfrastructureSystemsInternal(), ext=Dict(), min_mw=0.0, eligible_resources=Vector{String}(), available, )
-    MinimumCapacityRequirements(name, pricecap, internal, ext, min_mw, eligible_resources, available, )
+function MinimumCapacityRequirements(; name, power_systems_type, pricecap=Inf, internal=InfrastructureSystemsInternal(), ext=Dict(), min_mw=0.0, eligible_resources=Vector{String}(), available, )
+    MinimumCapacityRequirements(name, power_systems_type, pricecap, internal, ext, min_mw, eligible_resources, available, )
 end
 
 """Get [`MinimumCapacityRequirements`](@ref) `name`."""
 get_name(value::MinimumCapacityRequirements) = value.name
+"""Get [`MinimumCapacityRequirements`](@ref) `power_systems_type`."""
+get_power_systems_type(value::MinimumCapacityRequirements) = value.power_systems_type
 """Get [`MinimumCapacityRequirements`](@ref) `pricecap`."""
 get_pricecap(value::MinimumCapacityRequirements) = value.pricecap
 """Get [`MinimumCapacityRequirements`](@ref) `internal`."""
@@ -65,6 +71,8 @@ get_available(value::MinimumCapacityRequirements) = value.available
 
 """Set [`MinimumCapacityRequirements`](@ref) `name`."""
 set_name!(value::MinimumCapacityRequirements, val) = value.name = val
+"""Set [`MinimumCapacityRequirements`](@ref) `power_systems_type`."""
+set_power_systems_type!(value::MinimumCapacityRequirements, val) = value.power_systems_type = val
 """Set [`MinimumCapacityRequirements`](@ref) `pricecap`."""
 set_pricecap!(value::MinimumCapacityRequirements, val) = value.pricecap = val
 """Set [`MinimumCapacityRequirements`](@ref) `internal`."""

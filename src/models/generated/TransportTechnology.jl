@@ -12,6 +12,7 @@ This file is auto-generated. Do not edit.
         name::String
         capital_recovery_factor::Int64
         end_region::Int64
+        power_systems_type::String
         angle_limit::Float64
         internal::InfrastructureSystemsInternal
         network_lines::Int64
@@ -34,6 +35,7 @@ This file is auto-generated. Do not edit.
 - `name::String`: Name
 - `capital_recovery_factor::Int64`: (default: `0`) Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion.
 - `end_region::Int64`: End region for transport technology
+- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `angle_limit::Float64`: (default: `0.0`) Votlage angle limit (radians)
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `network_lines::Int64`: Numerical Index
@@ -59,6 +61,8 @@ mutable struct TransportTechnology{T <: PSY.Device} <: Technology
     capital_recovery_factor::Int64
     "End region for transport technology"
     end_region::Int64
+    "maps to a valid PowerSystems.jl for PCM modeling"
+    power_systems_type::String
     "Votlage angle limit (radians)"
     angle_limit::Float64
     "Internal field"
@@ -84,8 +88,8 @@ mutable struct TransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function TransportTechnology{T}(; capital_cost, start_region, available, name, capital_recovery_factor=0, end_region, angle_limit=0.0, internal=InfrastructureSystemsInternal(), network_lines, ext=Dict(), resistance=0.0, voltage=0.0, maximum_new_capacity, existing_line_capacity, wacc=0, line_loss, maximum_flow, ) where T <: PSY.Device
-    TransportTechnology{T}(capital_cost, start_region, available, name, capital_recovery_factor, end_region, angle_limit, internal, network_lines, ext, resistance, voltage, maximum_new_capacity, existing_line_capacity, wacc, line_loss, maximum_flow, )
+function TransportTechnology{T}(; capital_cost, start_region, available, name, capital_recovery_factor=0, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), network_lines, ext=Dict(), resistance=0.0, voltage=0.0, maximum_new_capacity, existing_line_capacity, wacc=0, line_loss, maximum_flow, ) where T <: PSY.Device
+    TransportTechnology{T}(capital_cost, start_region, available, name, capital_recovery_factor, end_region, power_systems_type, angle_limit, internal, network_lines, ext, resistance, voltage, maximum_new_capacity, existing_line_capacity, wacc, line_loss, maximum_flow, )
 end
 
 """Get [`TransportTechnology`](@ref) `capital_cost`."""
@@ -100,6 +104,8 @@ get_name(value::TransportTechnology) = value.name
 get_capital_recovery_factor(value::TransportTechnology) = value.capital_recovery_factor
 """Get [`TransportTechnology`](@ref) `end_region`."""
 get_end_region(value::TransportTechnology) = value.end_region
+"""Get [`TransportTechnology`](@ref) `power_systems_type`."""
+get_power_systems_type(value::TransportTechnology) = value.power_systems_type
 """Get [`TransportTechnology`](@ref) `angle_limit`."""
 get_angle_limit(value::TransportTechnology) = value.angle_limit
 """Get [`TransportTechnology`](@ref) `internal`."""
@@ -135,6 +141,8 @@ set_name!(value::TransportTechnology, val) = value.name = val
 set_capital_recovery_factor!(value::TransportTechnology, val) = value.capital_recovery_factor = val
 """Set [`TransportTechnology`](@ref) `end_region`."""
 set_end_region!(value::TransportTechnology, val) = value.end_region = val
+"""Set [`TransportTechnology`](@ref) `power_systems_type`."""
+set_power_systems_type!(value::TransportTechnology, val) = value.power_systems_type = val
 """Set [`TransportTechnology`](@ref) `angle_limit`."""
 set_angle_limit!(value::TransportTechnology, val) = value.angle_limit = val
 """Set [`TransportTechnology`](@ref) `internal`."""

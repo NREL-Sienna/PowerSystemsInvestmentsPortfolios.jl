@@ -26,6 +26,7 @@ This file is auto-generated. Do not edit.
         start_fuel_mmbtu_per_mw::Float64
         rsv_max::Float64
         fuel::Union{String, ThermalFuels, Vector{ThermalFuels}, Vector{String}}
+        power_systems_type::String
         cofire_level_max::Union{Nothing, Dict{ThermalFuels, Float64}}
         internal::InfrastructureSystemsInternal
         ext::Dict
@@ -70,6 +71,7 @@ This file is auto-generated. Do not edit.
 - `start_fuel_mmbtu_per_mw::Float64`: (default: `0.0`) Startup fuel use per MW of nameplate capacity of each generator (MMBtu/MW per start)
 - `rsv_max::Float64`: (default: `0.0`) Fraction of nameplate capacity that can committed to provided upwards spinning or contingency reserves.
 - `fuel::Union{String, ThermalFuels, Vector{ThermalFuels}, Vector{String}}`: (default: `ThermalFuels.OTHER`) Fuel type according to IEA
+- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `cofire_level_max::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Maximum blending level of each fuel during normal generation process for multi-fuel generator
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
@@ -131,6 +133,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     rsv_max::Float64
     "Fuel type according to IEA"
     fuel::Union{String, ThermalFuels, Vector{ThermalFuels}, Vector{String}}
+    "maps to a valid PowerSystems.jl for PCM modeling"
+    power_systems_type::String
     "Maximum blending level of each fuel during normal generation process for multi-fuel generator"
     cofire_level_max::Union{Nothing, Dict{ThermalFuels, Float64}}
     "Internal field"
@@ -172,8 +176,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
 end
 
 
-function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, zone, prime_mover_type=PrimeMovers.OT, outage_factor=1.0, cofire_level_min=nothing, rsv_cost=0.0, cofire_start_max=nothing, available=True, cofire_start_min=nothing, co2=0.0, name, ramp_dn_percentage=100.0, max_cap_mw=Inf, id, existing_cap_mw=0.0, down_time=0.0, start_fuel_mmbtu_per_mw=0.0, rsv_max=0.0, fuel=ThermalFuels.OTHER, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region, min_power=0.0, cluster=1, inv_cost_per_mwyr=0.0, min_cap_mw=0.0, ramp_up_percentage=100.0, maintenance_duration=0, maintenance_cycle_length_years=0, reg_cost=0.0, start_cost_per_mw=0.0, cap_size=1.0, reg_max=0.0, up_time=0.0, om_costs=ThermalGenerationCost(), maintenance_begin_cadence=1, ) where T <: PSY.Generator
-    SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, zone, prime_mover_type, outage_factor, cofire_level_min, rsv_cost, cofire_start_max, available, cofire_start_min, co2, name, ramp_dn_percentage, max_cap_mw, id, existing_cap_mw, down_time, start_fuel_mmbtu_per_mw, rsv_max, fuel, cofire_level_max, internal, ext, balancing_topology, region, min_power, cluster, inv_cost_per_mwyr, min_cap_mw, ramp_up_percentage, maintenance_duration, maintenance_cycle_length_years, reg_cost, start_cost_per_mw, cap_size, reg_max, up_time, om_costs, maintenance_begin_cadence, )
+function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, zone, prime_mover_type=PrimeMovers.OT, outage_factor=1.0, cofire_level_min=nothing, rsv_cost=0.0, cofire_start_max=nothing, available=True, cofire_start_min=nothing, co2=0.0, name, ramp_dn_percentage=100.0, max_cap_mw=Inf, id, existing_cap_mw=0.0, down_time=0.0, start_fuel_mmbtu_per_mw=0.0, rsv_max=0.0, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region, min_power=0.0, cluster=1, inv_cost_per_mwyr=0.0, min_cap_mw=0.0, ramp_up_percentage=100.0, maintenance_duration=0, maintenance_cycle_length_years=0, reg_cost=0.0, start_cost_per_mw=0.0, cap_size=1.0, reg_max=0.0, up_time=0.0, om_costs=ThermalGenerationCost(), maintenance_begin_cadence=1, ) where T <: PSY.Generator
+    SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, zone, prime_mover_type, outage_factor, cofire_level_min, rsv_cost, cofire_start_max, available, cofire_start_min, co2, name, ramp_dn_percentage, max_cap_mw, id, existing_cap_mw, down_time, start_fuel_mmbtu_per_mw, rsv_max, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, region, min_power, cluster, inv_cost_per_mwyr, min_cap_mw, ramp_up_percentage, maintenance_duration, maintenance_cycle_length_years, reg_cost, start_cost_per_mw, cap_size, reg_max, up_time, om_costs, maintenance_begin_cadence, )
 end
 
 """Get [`SupplyTechnology`](@ref) `base_power`."""
@@ -216,6 +220,8 @@ get_start_fuel_mmbtu_per_mw(value::SupplyTechnology) = value.start_fuel_mmbtu_pe
 get_rsv_max(value::SupplyTechnology) = value.rsv_max
 """Get [`SupplyTechnology`](@ref) `fuel`."""
 get_fuel(value::SupplyTechnology) = value.fuel
+"""Get [`SupplyTechnology`](@ref) `power_systems_type`."""
+get_power_systems_type(value::SupplyTechnology) = value.power_systems_type
 """Get [`SupplyTechnology`](@ref) `cofire_level_max`."""
 get_cofire_level_max(value::SupplyTechnology) = value.cofire_level_max
 """Get [`SupplyTechnology`](@ref) `internal`."""
@@ -295,6 +301,8 @@ set_start_fuel_mmbtu_per_mw!(value::SupplyTechnology, val) = value.start_fuel_mm
 set_rsv_max!(value::SupplyTechnology, val) = value.rsv_max = val
 """Set [`SupplyTechnology`](@ref) `fuel`."""
 set_fuel!(value::SupplyTechnology, val) = value.fuel = val
+"""Set [`SupplyTechnology`](@ref) `power_systems_type`."""
+set_power_systems_type!(value::SupplyTechnology, val) = value.power_systems_type = val
 """Set [`SupplyTechnology`](@ref) `cofire_level_max`."""
 set_cofire_level_max!(value::SupplyTechnology, val) = value.cofire_level_max = val
 """Set [`SupplyTechnology`](@ref) `internal`."""
