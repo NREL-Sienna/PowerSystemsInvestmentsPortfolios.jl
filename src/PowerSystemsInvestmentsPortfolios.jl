@@ -30,6 +30,9 @@ import JSON3
 import PrettyTables
 import SQLite
 import DataFrames
+import DBInterface
+
+using DataFrames
 
 export Portfolio
 export Technology
