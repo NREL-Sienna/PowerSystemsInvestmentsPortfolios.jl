@@ -387,9 +387,52 @@ function dataframe_to_structs(df_dict::Dict)
         add_technology!(p, t)
     end
 
-    # Get existing generation units
-    #for row in eachrow(df_dict["generation_units"])
+    # Get storage units
+    for row in eachrow(df_dict["storage_units"])
+        
+        #extract area
+        area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
+        area_int = parse(Int64, area)
 
+        s = StorageTechnology{Storage}(;
+            #Data pulled from DB
+            name=row["name"],
+            base_power=row["base_power"], # Natural Units
+            id=row["storage_unit_id"],
+            zone = area_int,
+            prime_mover_type=map_prime_mover(row["prime_mover"]),
+            inv_cost_per_mwyr=LinearCurve(0.0),
+            inv_cost_charge_per_mwyr=LinearCurve(0.0),
+            inv_cost_per_mwhyr=LinearCurve(0.0),
+            om_costs = StorageCost(charge_variable_cost=CostCurve(LinearCurve(0.0)), discharge_variable_cost=CostCurve(LinearCurve(0.0)), fixed=0.0, start_up=0.0, shut_down=0.0),
+            fixed_om_cost_per_mwhyr = LinearCurve(0.0),
+            balancing_topology=row["balancing_topology"],
+            
+            
+            #stuff we dont have but probably should
+            existing_cap_mw = 0.0,
+            existing_cap_mwh = 0.0,
+            eff_up = 0.92,
+            eff_down = 0.92,
+            storage_tech = StorageTech.LIB,
+            
+            #Default or placeholder values
+            available=true,
+            region = "ME",
+            cluster = 0,
+            self_disch = 0.0,
+            min_duration = 1.0,
+            max_duration = 10.0,
+            min_cap_mwh=0.0,
+            min_cap_mw=0.0,
+            min_charge_cap_mw=-1,
+            max_cap_mw = -1,
+            max_charge_cap_mw = -1,
+            max_cap_mwh = -1,
+            power_systems_type = "Test",
+        )
+        add_technology!(p, s)
+    end
 
     #Populate DemandRequirement structs from database
     for row in eachrow(df_dict["demand_requirements"])
