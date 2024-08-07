@@ -251,7 +251,27 @@ function map_prime_mover(prime_mover::String)
         "CSP" => PrimeMovers.CP,
         "RTPV" => PrimeMovers.PVe,
         "WIND" => PrimeMovers.WT,
+        "Wind" => PrimeMovers.WT,
         "STORAGE" => PrimeMovers.BA,
+    )
+
+    return mapping_dict[prime_mover]
+end
+
+function map_prime_mover_to_parametric(prime_mover::String)
+    mapping_dict = Dict(
+        "CT" => PSY.ThermalStandard,
+        "STEAM" => PSY.ThermalStandard,
+        "CC" => PSY.ThermalStandard,
+        "SYNC_COND" => PSY.ThermalStandard,
+        "NUCLEAR" => PSY.ThermalStandard,
+        "HYDRO" => PSY.ThermalStandard,
+        "ROR" => PSY.RenewableDispatch,
+        "PV" => PSY.RenewableDispatch,
+        "CSP" => PSY.RenewableDispatch,
+        "RTPV" => PSY.RenewableDispatch,
+        "WIND" => PSY.RenewableDispatch,
+        "Wind" => PSY.RenewableDispatch,
     )
 
     return mapping_dict[prime_mover]
@@ -262,33 +282,37 @@ function dataframe_to_structs(df_dict::Dict)
     #Initialize Portfolio
     p = Portfolio(0.07)
 
-    #Temporary measure for small database, will go into
-    #more complex query based methods once database is expanded
-
-    #Populate SupplyTechnology structs from database
+    #Populate SupplyTechnology structs from database (new builds)
+    topologies = df_dict["balancing_topologies"]
     for row in eachrow(df_dict["supply_technologies"])
-        #start with piecewiselinear
-        #extract blob (THIS IS THE PIECEWISE COST CURVE)
-        #take entity_attribute id to find entity_id
-        #then go to supplytechnology and do the rest
 
-        t = SupplyTechnology{ThermalStandard}(;
+        #extract area
+        area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
+        area_int = parse(Int64, area)
+
+        #extract supply curve, does every supply_technology have a supply curve?
+        #id = row["technology_id"]
+        #eaid = df_dict["attributes"][df_dict["attributes"] .== id, "entity_attribute_id"][1]
+        #supply_curve = df_dict["time_series"][df_dict["entity_attribute_id"] .== eaid, "piecewise_linear_blob"][1]
+        #Now just need to parse the blob
+
+        parametric = map_prime_mover_to_parametric(row["prime_mover"])
+        t = SupplyTechnology{parametric}(;
             #Data pulled from DB
             name=string(row["technology_id"]),
             id=row["technology_id"],
-            inv_cost_per_mwyr=LinearFunctionData(row["capital_cost"]),
-            om_costs=ThermalGenerationCost(variable=CostCurve(LinearCurve(row["vom_cost"])), fixed=row["fom_cost"], start_up=91.0, shut_down=0.0),
+            inv_cost_per_mwyr=LinearCurve(20000),
+            om_costs=ThermalGenerationCost(variable=CostCurve(LinearCurve(row["vom_cost"])), fixed=row["fom_cost"], start_up=0.0, shut_down=0.0),
             balancing_topology=string(row["balancing_topology"]),
             prime_mover_type=map_prime_mover(row["prime_mover"]),
-            fuel=ThermalFuels.COAL,
-            base_power=100.0,
+            fuel=row["fuel_type"],
+            zone = area_int,
 
             #Problem ones, need to write functions to extract
+            base_power=100.0,
             existing_cap_mw = 0.0,
             cap_size=250.0,
-            region = "MA",
-            zone = 1,
-
+            
             # Data we should have but dont currently
             start_fuel_mmbtu_per_mw = 2.0,
             start_cost_per_mw = 91.0,
@@ -300,31 +324,88 @@ function dataframe_to_structs(df_dict::Dict)
             ramp_up_percentage = 0.64,
 
             #Placeholder or default values (modeling assumptions)
+            region = "MA", #this one can probably just be removed from the structs, just descriptor for GenX
             available=true,
             min_cap_mw=0.0,
-            min_power = 0.468,
+            min_power = 0.0,
             max_cap_mw = -1,
-            power_systems_type="ThermalStandard",
+            power_systems_type=string(parametric),
             cluster = 1,
             reg_max = 0.25,
             rsv_max = 0.5,
+            #new_build = 1
         )
         add_technology!(p, t)
     end
 
+    # Get existing generation units
+    for row in eachrow(df_dict["generation_units"])
+
+        #extract area
+        area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
+        area_int = parse(Int64, area)
+
+        parametric = map_prime_mover_to_parametric(row["prime_mover"])
+        t = SupplyTechnology{parametric}(;
+            #Data pulled from DB
+            name=row["name"],
+            id=row["unit_id"],
+            inv_cost_per_mwyr=LinearCurve(0.0), #just assume zero since pre-existing?
+            om_costs=ThermalGenerationCost(variable=CostCurve(LinearCurve(0.0)), fixed=0.0, start_up=0.0, shut_down=0.0),
+            balancing_topology=string(row["balancing_topology"]),
+            prime_mover_type=map_prime_mover(row["prime_mover"]),
+            fuel=row["fuel_type"],
+            zone = area_int,
+            base_power=row["base_power"],
+            existing_cap_mw = row["rating"],
+
+            #Problem ones, need to write functions to extract         
+            cap_size=250.0,
+            
+            # Data we should have but dont currently
+            start_fuel_mmbtu_per_mw = 2.0,
+            start_cost_per_mw = 91.0,
+            up_time = 6.0,
+            down_time = 6.0,
+            heat_rate_mmbtu_per_mwh = 7.43,
+            co2 = 0.05306,
+            ramp_dn_percentage = 0.64,
+            ramp_up_percentage = 0.64,
+
+            #Placeholder or default values (modeling assumptions)
+            region = "MA",
+            available=true,
+            min_cap_mw=0.0,
+            min_power = 0.0,
+            max_cap_mw = -1,
+            power_systems_type=string(parametric),
+            cluster = 1,
+            reg_max = 0.25,
+            rsv_max = 0.5,
+            #new_build =  0#0 for existing builds
+        )
+        add_technology!(p, t)
+    end
+
+    # Get existing generation units
+    #for row in eachrow(df_dict["generation_units"])
+
+
     #Populate DemandRequirement structs from database
     for row in eachrow(df_dict["demand_requirements"])
         #start in time_series
-        #extract entity_attribute_id
-        #match to demand_requirements
+        eaid = row["entity_attribute_id"] 
+        ts_blob = filter("entity_attribute_id" => isequal(eaid), df_dict["time_series"])[!,"time_series_blob"][1]
+    
+        #How to parse this timestamp stuff??
+    
         d = DemandRequirement{ElectricLoad}(
             #Data pulled from DB
             name=string(row["entity_attribute_id"]),
-            region=string(row["area"]),
-            peak_load=row["peak_load"],
-
-            #Placeholder values
-            load_growth=0.05,
+            region=row["area"],
+            zone = parse(Int64, row["area"]),
+    
+            #Placeholder/default values
             available=true,
             power_systems_type="ElectricLoad",
         )
@@ -332,7 +413,6 @@ function dataframe_to_structs(df_dict::Dict)
     end
 
     #Transmission Lines
-    topologies = df_dict["balancing_topologies"]
     lines = df_dict["transmission_lines"]
     for row in eachrow(df_dict["transmission_interchange"])
     
@@ -343,7 +423,7 @@ function dataframe_to_structs(df_dict::Dict)
         existing_capacity = 0.0
         for from in topologies_from
             for to in topologies_to
-                line_cap = lines[(lines[!,"balancing_topology_from"] .== from) .& (lines[!,"balancing_topology_to"] .== to), "continuous_rating"][1]
+                line_cap = lines[(lines[!,"balancing_topology_from"] .== from) .& (lines[!,"balancing_topology_to"] .== to), "continuous_rating"]
                 if length(line_cap) == 1
                     existing_capacity += line_cap[1]
                 end
@@ -363,6 +443,7 @@ function dataframe_to_structs(df_dict::Dict)
             #stuff we don't have, but probably should
             capital_cost = LinearCurve(19261),
             line_loss = 0.019653847,
+            power_systems_type = "Branch"
         )
         add_technology!(p, tx)
     end
