@@ -191,9 +191,9 @@ function db_to_portfolio_parser(database_filepath::AbstractString)
     #Goal will be be able to read in database and populate structs simultaneously
 
     dfs = db_to_dataframes(database_filepath)
-    p = dataframe_to_structs(dfs)
+    portfolio = dataframe_to_structs(dfs)
 
-    return p
+    return portfolio
 end
 
 """
@@ -217,7 +217,7 @@ function db_to_dataframes(db_path::String)
     tables = SQLite.tables(db)
 
     # Create a dictionary to store DataFrames for each table
-    dfs = Dict()
+    dfs = Dict{String, DataFrame}()
 
     #Will adjust queries to only pull a subset of data
     for table in tables
@@ -268,9 +268,10 @@ function dataframe_to_structs(df_dict::Dict)
     #Populate SupplyTechnology structs from database
     for row in eachrow(df_dict["supply_technologies"])
         #start with piecewiselinear
-        #extract blob (THIS THE PIECEWISE COST CURVE)
+        #extract blob (THIS IS THE PIECEWISE COST CURVE)
         #take entity_attribute id to find entity_id
         #then go to supplytechnology and do the rest
+
         t = SupplyTechnology{ThermalStandard}(;
             #Data pulled from DB
             name=string(row["technology_id"]),
@@ -279,30 +280,32 @@ function dataframe_to_structs(df_dict::Dict)
             om_costs=ThermalGenerationCost(variable=CostCurve(LinearCurve(row["vom_cost"])), fixed=row["fom_cost"], start_up=91.0, shut_down=0.0),
             balancing_topology=string(row["balancing_topology"]),
             prime_mover_type=map_prime_mover(row["prime_mover"]),
-
-            #Placeholder or default values
-            ramp_dn_percentage = 0.64,
-            ramp_up_percentage = 0.64,
-            base_power=100.0,
-            min_cap_mw=0.0,
-            available=true,
-            existing_cap_mw = 0.0,
             fuel=ThermalFuels.COAL,
-            power_systems_type="ThermalStandard",
-            max_cap_mw=10000.0,
-            co2 = 0.05306,
+            base_power=100.0,
+
+            #Problem ones, need to write functions to extract
+            existing_cap_mw = 0.0,
             cap_size=250.0,
-            heat_rate_mmbtu_per_mwh = 7.43,
-            min_power = 0.468,
-            balancing_topology="Region",
             region = "MA",
             zone = 1,
-            max_cap_mw = -1,
-            cluster = 1,
+
+            # Data we should have but dont currently
             start_fuel_mmbtu_per_mw = 2.0,
             start_cost_per_mw = 91.0,
             up_time = 6.0,
             down_time = 6.0,
+            heat_rate_mmbtu_per_mwh = 7.43,
+            co2 = 0.05306,
+            ramp_dn_percentage = 0.64,
+            ramp_up_percentage = 0.64,
+
+            #Placeholder or default values (modeling assumptions)
+            available=true,
+            min_cap_mw=0.0,
+            min_power = 0.468,
+            max_cap_mw = -1,
+            power_systems_type="ThermalStandard",
+            cluster = 1,
             reg_max = 0.25,
             rsv_max = 0.5,
         )
@@ -311,6 +314,9 @@ function dataframe_to_structs(df_dict::Dict)
 
     #Populate DemandRequirement structs from database
     for row in eachrow(df_dict["demand_requirements"])
+        #start in time_series
+        #extract entity_attribute_id
+        #match to demand_requirements
         d = DemandRequirement{ElectricLoad}(
             #Data pulled from DB
             name=string(row["entity_attribute_id"]),
@@ -325,10 +331,52 @@ function dataframe_to_structs(df_dict::Dict)
         add_technology!(p, d)
     end
 
+    topologies = df_dict["balancing_topologies"]
+    lines = df_dict["transmission_lines"]
+    for row in eachrow(df_dict["transmission_interchange"])
+    
+        # get list of balancing topologies that correspond to the areas for line tx
+        topologies_from = filter("area" => isequal(row["area_from"]), topologies)[!, "name"]
+        topologies_to = filter("area" => isequal(row["area_to"]), topologies)[!, "name"]
+    
+        existing_capacity = 0.0
+        for from in topologies_from
+            for to in topologies_to
+                
+                line_cap = lines[(lines[!,"balancing_topology_from"] .== from) .& (lines[!,"balancing_topology_to"] .== to), "continuous_rating"][1]
+                existing_capacity += line_cap
+            end
+        end
+    
+        tx = TransportTechnology{Branch}(;
+            name = string(rownumber(row)),
+            network_lines = rownumber(row),
+            available=true,
+            start_region = parse(Int64, row["area_from"]),
+            end_region = parse(Int64, row["area_to"]),
+            maximum_new_capacity = row["max_flow_from"],
+            maximum_flow = row["max_flow_from"],
+            existing_line_capacity = existing_capacity,
+        
+            #stuff we don't have, but probably should
+            capital_cost = LinearCurve(19261),
+            line_loss = 0.019653847,
+        )
+        add_technology!(p, tx)
+    end
+
     return p
 end
 
+#function for reading timeseries
+
+#convert blob to supply curves
 function extract_supply_curve()
 
+
+end
+
+# map tables to one another based on entity_attribute_id
+function table_mapping()
 
 end
