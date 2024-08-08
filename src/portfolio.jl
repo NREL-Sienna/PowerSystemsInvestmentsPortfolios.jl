@@ -17,13 +17,15 @@ mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
 end
 
 #TODO: Define if we are going to support unit systems
-struct Portfolio <: IS.InfrastructureSystemsType
+#TODO: Make immutable
+mutable struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     discount_rate::Float64
     data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     #units_settings::IS.SystemUnitsSettings
     time_series_directory::Union{Nothing, String}
+    base_system::Union{Nothing, System}
     metadata::PortfolioMetadata
     internal::IS.InfrastructureSystemsInternal
 
@@ -38,6 +40,7 @@ struct Portfolio <: IS.InfrastructureSystemsType
         name=nothing,
         description=nothing,
         data_source=nothing,
+        base_system=nothing,
         kwargs...,
     )
         #TODO: Provide support to kwargs
@@ -57,6 +60,7 @@ struct Portfolio <: IS.InfrastructureSystemsType
             investment_schedule,
             #units_settings,
             time_series_directory,
+            base_system,
             PortfolioMetadata(name, description, data_source),
             internal,
         )
