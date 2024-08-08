@@ -301,22 +301,17 @@ function parse_json_to_arrays(json_str::String)
     # Parse the JSON string into a Julia object
     data = JSON3.read(json_str)
 
-    # Initialize arrays to store x and y values
-    x_values = Float64[]
-    y_values = Float64[]
-
+    # Initialize array to store x and y values
+    xy_values = []
+    
     # Iterate over each dictionary in the parsed JSON data
     for item in data
-        # Append the x values to x_values array
-        push!(x_values, item["from_x"])
-        push!(x_values, item["to_x"])
-        
-        # Append the y values to y_values array
-        push!(y_values, item["from_y"])
-        push!(y_values, item["to_y"])
+        # Append the x values to x_values array as vector of named tuples
+        push!(xy_values, IS.XY_COORDS((Float64(item["from_x"]),Float64(item["from_y"]))))
+        push!(xy_values, IS.XY_COORDS((Float64(item["to_x"]),Float64(item["to_y"]))))
     end
 
-    return unique(x_values), unique(y_values)
+    return unique(xy_values)
 end
 
 function dataframe_to_structs(df_dict::Dict)
