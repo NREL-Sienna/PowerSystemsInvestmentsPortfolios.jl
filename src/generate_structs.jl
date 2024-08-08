@@ -327,10 +327,13 @@ function dataframe_to_structs(df_dict::Dict)
         # Extract supply curves and IDs
         eaid = row_pw["entity_attribute_id"]
         supply_curve = row_pw["piecewise_linear_blob"]
+        supply_curve_parsed = parse_json_to_arrays(supply_curve)
+
         id = df_dict["attributes"][df_dict["attributes"][!, "entity_attribute_id"] .== eaid, "entity_id"]
         
         # Find corresponding supply technology for that supply curve
         row = df_dict["supply_technologies"][df_dict["supply_technologies"][!, "technology_id"] .== id, :]
+        
         #extract area
         area = topologies[topologies.name .== row[!,"balancing_topology"][1], "area"][1]
         area_int = parse(Int64, area)
@@ -346,7 +349,7 @@ function dataframe_to_structs(df_dict::Dict)
             #Data pulled from DB
             name=string(row[!,"technology_id"][1]),
             id=row[!,"technology_id"][1],
-            inv_cost_per_mwyr=LinearCurve(20000),
+            inv_cost_per_mwyr=InputOutputCurve(PiecewiseLinearData(supply_curve_parsed)),
             om_costs=ThermalGenerationCost(variable=CostCurve(LinearCurve(row[!,"vom_cost"][1])), fixed=row[!,"fom_cost"][1], start_up=0.0, shut_down=0.0),
             balancing_topology=string(row[!,"balancing_topology"][1]),
             prime_mover_type=map_prime_mover(row[!,"prime_mover"][1]),
