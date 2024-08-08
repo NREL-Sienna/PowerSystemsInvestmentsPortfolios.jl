@@ -543,16 +543,3 @@ function dataframe_to_structs(df_dict::Dict)
 
     return p
 end
-
-#function for reading timeseries
-
-#convert blob to supply curves
-function extract_supply_curve()
-
-
-end
-
-# map tables to one another based on entity_attribute_id
-function table_mapping()
-
-end
