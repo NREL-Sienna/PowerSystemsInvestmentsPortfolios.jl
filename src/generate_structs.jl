@@ -279,7 +279,7 @@ end
 
 function parse_timestamps_and_values(json_str::String)
     # Parse the JSON string into a Julia object
-    data = JSON.parse(json_str)
+    data = JSON3.read(json_str)
 
     # Initialize arrays to store timestamps and values
     timestamps = String[]
@@ -299,7 +299,7 @@ end
 
 function parse_json_to_arrays(json_str::String)
     # Parse the JSON string into a Julia object
-    data = JSON.parse(json_str)
+    data = JSON3.read(json_str)
 
     # Initialize arrays to store x and y values
     x_values = Float64[]
@@ -488,7 +488,7 @@ function dataframe_to_structs(df_dict::Dict)
         #start in time_series
         eaid = row["entity_attribute_id"] 
         ts_blob = filter("entity_attribute_id" => isequal(eaid), df_dict["time_series"])[!,"time_series_blob"][1]
-        ts_parsed = parse_timestamps_and_values(s)
+        ts_parsed = parse_timestamps_and_values(ts_blob)
         dates = ts_parsed[1] #fix this later, dates syntax is inconsistent so hard to parse
         dates = DateTime("2020-01-01T00:00:00"):Hour(1):DateTime("2020-12-31T23:00:00")
         demand = ts_parsed[2]
