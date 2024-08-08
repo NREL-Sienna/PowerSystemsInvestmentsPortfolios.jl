@@ -33,10 +33,14 @@ import PrettyTables
 import SQLite
 import DataFrames
 import DBInterface
+import TimeSeries
+import Dates
 
 # Temporary, imports not working properly for some reason?
 using DataFrames
 using PowerSystems
+using Dates
+using TimeSeries
 
 export Portfolio
 export Technology
