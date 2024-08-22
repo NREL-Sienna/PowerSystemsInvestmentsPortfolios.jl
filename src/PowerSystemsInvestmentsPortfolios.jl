@@ -71,6 +71,8 @@ export db_to_dataframes
 export map_prime_mover
 export dataframe_to_structs
 export db_to_portfolio_parser
+export add_supplemental_attribute!
+export remove_supplemental_attribute!
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems

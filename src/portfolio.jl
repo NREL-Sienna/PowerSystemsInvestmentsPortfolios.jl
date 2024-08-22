@@ -599,3 +599,48 @@ end
 function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirements}
     return IS.get_components(T, portfolio.data)
 end
+
+###########################################
+######### Supplemental Attributes #########
+###########################################
+
+"""
+Add a supplemental attribute to the component. The attribute may already be attached to a
+different component.
+"""
+function add_supplemental_attribute!(
+    p::Portfolio,
+    technology::Technology,
+    attribute::IS.SupplementalAttribute,
+)
+    return IS.add_supplemental_attribute!(p.data, technology, attribute)
+end
+
+"""
+Remove the supplemental attribute from the component. The attribute will be removed from the
+system if it is not attached to any other component.
+"""
+function remove_supplemental_attribute!(
+    p::Portfolio,
+    technology::Technology,
+    attribute::IS.SupplementalAttribute,
+)
+    return IS.remove_supplemental_attribute!(p.data, technology, attribute)
+end
+
+"""
+Remove the supplemental attribute from the system and all attached components.
+"""
+function remove_supplemental_attribute!(p::Portfolio, attribute::IS.SupplementalAttribute)
+    return IS.remove_supplemental_attribute!(p.data, attribute)
+end
+
+"""
+Remove all supplemental attributes with the given type from the system.
+"""
+function remove_supplemental_attributes!(
+    ::Type{T},
+    p::Portfolio,
+) where {T <: IS.SupplementalAttribute}
+    return IS.remove_supplemental_attributes!(T, p.data)
+end
