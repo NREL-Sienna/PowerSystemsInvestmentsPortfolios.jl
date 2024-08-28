@@ -89,6 +89,7 @@ export PrimeMovers
 export StorageTech
 
 include("models/technologies.jl")
+include("models/regions.jl")
 include("models/requirements.jl")
 include("models/generated/includes.jl")
 include("portfolio.jl")
