@@ -605,15 +605,15 @@ end
 ###########################################
 
 """
-Add a supplemental attribute to the component. The attribute may already be attached to a
+Add a supplemental attribute to a technology. The attribute may already be attached to a
 different component.
 """
 function add_supplemental_attribute!(
     p::Portfolio,
-    technology::Technology,
+    component::IS.InfrastructureSystemsComponent,
     attribute::IS.SupplementalAttribute,
 )
-    return IS.add_supplemental_attribute!(p.data, technology, attribute)
+    return IS.add_supplemental_attribute!(p.data, component, attribute)
 end
 
 """
@@ -622,10 +622,10 @@ system if it is not attached to any other component.
 """
 function remove_supplemental_attribute!(
     p::Portfolio,
-    technology::Technology,
+    component::IS.InfrastructureSystemsComponent,
     attribute::IS.SupplementalAttribute,
 )
-    return IS.remove_supplemental_attribute!(p.data, technology, attribute)
+    return IS.remove_supplemental_attribute!(p.data, component, attribute)
 end
 
 """
