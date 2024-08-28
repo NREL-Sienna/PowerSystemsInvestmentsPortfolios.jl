@@ -1,5 +1,5 @@
 """
-Supertype for all system requirements
+Supertype for all portfolio requirements
 
 Requirements include policies or other regional factors that may constrain
 expansion decisions. Common requirements are carbon caps and system

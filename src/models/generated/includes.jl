@@ -1,14 +1,16 @@
 include("Electrolyzers.jl")
 include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
-include("RetireableTechnology.jl")
 include("DemandRequirement.jl")
-include("RetrofitTechnology.jl")
+include("ExistingCapacity.jl")
 include("CoLocatedSupplyStorageTechnology.jl")
 include("DemandSideTechnology.jl")
+include("Zone.jl")
+include("RetrofitCapacity.jl")
 include("StorageTechnology.jl")
 include("CarbonCaps.jl")
 include("TransportTechnology.jl")
+include("RetireableCapacity.jl")
 include("CurtailableDemandSideTechnology.jl")
 include("FlexibleDemandTechnology.jl")
 
@@ -16,8 +18,6 @@ export get_angle_limit
 export get_available
 export get_balancing_topology
 export get_base_power
-export get_can_retire
-export get_can_retrofit
 export get_cap_size
 export get_capital_cost
 export get_capital_cost_energy
@@ -50,6 +50,7 @@ export get_eligible_zones
 export get_end_region
 export get_existing_cap_mw
 export get_existing_cap_mwh
+export get_existing_capacity
 export get_existing_line_capacity
 export get_ext
 export get_fixed_om_cost_per_mwhyr
@@ -114,6 +115,8 @@ export get_reg_cost
 export get_reg_max
 export get_region
 export get_resistance
+export get_retireable_capacity
+export get_retrofit_capacity
 export get_retrofit_efficiency
 export get_retrofit_id
 export get_rsv_cost
@@ -135,8 +138,6 @@ export set_angle_limit!
 export set_available!
 export set_balancing_topology!
 export set_base_power!
-export set_can_retire!
-export set_can_retrofit!
 export set_cap_size!
 export set_capital_cost!
 export set_capital_cost_energy!
@@ -169,6 +170,7 @@ export set_eligible_zones!
 export set_end_region!
 export set_existing_cap_mw!
 export set_existing_cap_mwh!
+export set_existing_capacity!
 export set_existing_line_capacity!
 export set_ext!
 export set_fixed_om_cost_per_mwhyr!
@@ -233,6 +235,8 @@ export set_reg_cost!
 export set_reg_max!
 export set_region!
 export set_resistance!
+export set_retireable_capacity!
+export set_retrofit_capacity!
 export set_retrofit_efficiency!
 export set_retrofit_id!
 export set_rsv_cost!

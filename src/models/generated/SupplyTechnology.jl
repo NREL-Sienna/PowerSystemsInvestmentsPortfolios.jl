@@ -79,7 +79,7 @@ This file is auto-generated. Do not edit.
 - `region::String`: Region/zone technology operates in
 - `min_power::Float64`: (default: `0.0`) Minimum generation as a fraction of total capacity
 - `cluster::Int64`: (default: `1`) Number of the cluster when representing multiple clusters of a given technology in a given region.
-- `inv_cost_per_mwyr::PSY.ValueCurve`: (default: `0.0`) Capital costs for investing in a technology.
+- `inv_cost_per_mwyr::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
 - `min_cap_mw::Float64`: (default: `0.0`) Minimum required capacity for a technology
 - `ramp_up_percentage::Float64`: (default: `100.0`) Maximum increase in output between operation periods. Fraction of total capacity
 - `maintenance_duration::Int64`: (default: `0`) Duration of the maintenance period, in number of timesteps.
@@ -176,7 +176,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
 end
 
 
-function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, zone, prime_mover_type=PrimeMovers.OT, outage_factor=1.0, cofire_level_min=nothing, rsv_cost=0.0, cofire_start_max=nothing, available=True, cofire_start_min=nothing, co2=0.0, name, ramp_dn_percentage=100.0, max_cap_mw=Inf, id, existing_cap_mw=0.0, down_time=0.0, start_fuel_mmbtu_per_mw=0.0, rsv_max=0.0, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region, min_power=0.0, cluster=1, inv_cost_per_mwyr=0.0, min_cap_mw=0.0, ramp_up_percentage=100.0, maintenance_duration=0, maintenance_cycle_length_years=0, reg_cost=0.0, start_cost_per_mw=0.0, cap_size=1.0, reg_max=0.0, up_time=0.0, om_costs=ThermalGenerationCost(), maintenance_begin_cadence=1, ) where T <: PSY.Generator
+function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, zone, prime_mover_type=PrimeMovers.OT, outage_factor=1.0, cofire_level_min=nothing, rsv_cost=0.0, cofire_start_max=nothing, available=True, cofire_start_min=nothing, co2=0.0, name, ramp_dn_percentage=100.0, max_cap_mw=Inf, id, existing_cap_mw=0.0, down_time=0.0, start_fuel_mmbtu_per_mw=0.0, rsv_max=0.0, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region, min_power=0.0, cluster=1, inv_cost_per_mwyr=LinearCurve(0.0), min_cap_mw=0.0, ramp_up_percentage=100.0, maintenance_duration=0, maintenance_cycle_length_years=0, reg_cost=0.0, start_cost_per_mw=0.0, cap_size=1.0, reg_max=0.0, up_time=0.0, om_costs=ThermalGenerationCost(), maintenance_begin_cadence=1, ) where T <: PSY.Generator
     SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, zone, prime_mover_type, outage_factor, cofire_level_min, rsv_cost, cofire_start_max, available, cofire_start_min, co2, name, ramp_dn_percentage, max_cap_mw, id, existing_cap_mw, down_time, start_fuel_mmbtu_per_mw, rsv_max, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, region, min_power, cluster, inv_cost_per_mwyr, min_cap_mw, ramp_up_percentage, maintenance_duration, maintenance_cycle_length_years, reg_cost, start_cost_per_mw, cap_size, reg_max, up_time, om_costs, maintenance_begin_cadence, )
 end
 
