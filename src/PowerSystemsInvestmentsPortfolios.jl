@@ -53,10 +53,13 @@ export DemandsideTechnology
 export FlexibleDemandTechnology
 export Electrolyzers
 export CurtailableDemandSideTechnology
-export RetireableTechnology
-export RetrofitTechnology
+export RetireableCapacity
+export RetrofitCapacity
+export ExistingCapacity
 export CarbonCaps
 export MinimumCapacityRequirements
+export Region
+export Zone
 
 export get_technologies
 export get_technology
@@ -73,6 +76,7 @@ export dataframe_to_structs
 export db_to_portfolio_parser
 export add_supplemental_attribute!
 export remove_supplemental_attribute!
+export get_supplemental_attribute
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems

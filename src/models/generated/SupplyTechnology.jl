@@ -8,7 +8,7 @@ This file is auto-generated. Do not edit.
     mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
         base_power::Float64
         heat_rate_mmbtu_per_mwh::Union{Float64, PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}
-        zone::Int64
+        zone::Zone
         prime_mover_type::PrimeMovers
         outage_factor::Float64
         cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}
@@ -53,7 +53,7 @@ This file is auto-generated. Do not edit.
 # Arguments
 - `base_power::Float64`: Base power
 - `heat_rate_mmbtu_per_mwh::Union{Float64, PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}`: (default: `0.0`) Heat rate of generator, MMBTU/MWh
-- `zone::Int64`: Zone number where tech operates in
+- `zone::Zone`: (default: `nothing`) Zone where tech operates in
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology
 - `cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Minimum blending level of each fuel during normal generation process for multi-fuel generator
@@ -97,8 +97,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     base_power::Float64
     "Heat rate of generator, MMBTU/MWh"
     heat_rate_mmbtu_per_mwh::Union{Float64, PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}
-    "Zone number where tech operates in"
-    zone::Int64
+    "Zone where tech operates in"
+    zone::Zone
     "Prime mover for generator"
     prime_mover_type::PrimeMovers
     "Derating factor to account for planned or forced outages of a technology"
@@ -176,7 +176,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
 end
 
 
-function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, zone, prime_mover_type=PrimeMovers.OT, outage_factor=1.0, cofire_level_min=nothing, rsv_cost=0.0, cofire_start_max=nothing, available=True, cofire_start_min=nothing, co2=0.0, name, ramp_dn_percentage=100.0, max_cap_mw=Inf, id, existing_cap_mw=0.0, down_time=0.0, start_fuel_mmbtu_per_mw=0.0, rsv_max=0.0, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region, min_power=0.0, cluster=1, inv_cost_per_mwyr=LinearCurve(0.0), min_cap_mw=0.0, ramp_up_percentage=100.0, maintenance_duration=0, maintenance_cycle_length_years=0, reg_cost=0.0, start_cost_per_mw=0.0, cap_size=1.0, reg_max=0.0, up_time=0.0, om_costs=ThermalGenerationCost(), maintenance_begin_cadence=1, ) where T <: PSY.Generator
+function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, zone=nothing, prime_mover_type=PrimeMovers.OT, outage_factor=1.0, cofire_level_min=nothing, rsv_cost=0.0, cofire_start_max=nothing, available=True, cofire_start_min=nothing, co2=0.0, name, ramp_dn_percentage=100.0, max_cap_mw=Inf, id, existing_cap_mw=0.0, down_time=0.0, start_fuel_mmbtu_per_mw=0.0, rsv_max=0.0, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region, min_power=0.0, cluster=1, inv_cost_per_mwyr=LinearCurve(0.0), min_cap_mw=0.0, ramp_up_percentage=100.0, maintenance_duration=0, maintenance_cycle_length_years=0, reg_cost=0.0, start_cost_per_mw=0.0, cap_size=1.0, reg_max=0.0, up_time=0.0, om_costs=ThermalGenerationCost(), maintenance_begin_cadence=1, ) where T <: PSY.Generator
     SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, zone, prime_mover_type, outage_factor, cofire_level_min, rsv_cost, cofire_start_max, available, cofire_start_min, co2, name, ramp_dn_percentage, max_cap_mw, id, existing_cap_mw, down_time, start_fuel_mmbtu_per_mw, rsv_max, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, region, min_power, cluster, inv_cost_per_mwyr, min_cap_mw, ramp_up_percentage, maintenance_duration, maintenance_cycle_length_years, reg_cost, start_cost_per_mw, cap_size, reg_max, up_time, om_costs, maintenance_begin_cadence, )
 end
 

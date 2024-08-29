@@ -173,8 +173,26 @@ function add_technology!(
     return
 end
 
+function add_region!(
+    portfolio::Portfolio,
+    zone::T;
+    skip_validation=false,
+    kwargs...,
+) where {T <: Region}
+    #deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+    IS.add_component!(
+        portfolio.data,
+        zone;
+        #allow_existing_time_series=deserialization_in_progress,
+        skip_validation=skip_validation,
+        kwargs...,
+    )
+
+    return
+end
+
 """
-Add many technologies to the portfoliotem at once.
+Add many technologies to the portfolio at once.
 
 Throws ArgumentError if the technology's name is already stored for its concrete type.
 Throws ArgumentError if any Technology-specific rule is violated.
@@ -644,3 +662,17 @@ function remove_supplemental_attributes!(
 ) where {T <: IS.SupplementalAttribute}
     return IS.remove_supplemental_attributes!(T, p.data)
 end
+
+"""
+Return the supplemental attribute with the given uuid.
+
+Throws ArgumentError if the attribute is not stored.
+"""
+function get_supplemental_attribute(p::Portfolio, uuid::Base.UUID)
+    return IS.get_supplemental_attribute(p.data, uuid)
+end
+
+"""
+Return the internal of a supplemental attribute, required to add to IS for SupplementalAttributes to work
+"""
+IS.get_internal(val::IS.SupplementalAttribute) = val.internal
