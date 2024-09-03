@@ -1,4 +1,4 @@
-include("Electrolyzers.jl")
+include("Zone.jl")
 include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
@@ -8,7 +8,6 @@ include("CoLocatedSupplyStorageTechnology.jl")
 include("AggregateRetrofitPotential.jl")
 include("DemandSideTechnology.jl")
 include("AggregateRetirementPotential.jl")
-include("Zone.jl")
 include("StorageTechnology.jl")
 include("CarbonCaps.jl")
 include("TransportTechnology.jl")
@@ -46,7 +45,6 @@ export get_efficiency_down_ac
 export get_efficiency_down_dc
 export get_efficiency_up_ac
 export get_efficiency_up_dc
-export get_electrolyzer_min_kt
 export get_eligible_resources
 export get_eligible_zones
 export get_end_region
@@ -59,8 +57,6 @@ export get_fixed_om_cost_per_mwhyr
 export get_fuel
 export get_gen_ID
 export get_heat_rate_mmbtu_per_mwh
-export get_hydrogen_mwh_per_tonne
-export get_hydrogen_price_per_tonne
 export get_id
 export get_initial_capacity_energy
 export get_initial_capacity_inverter
@@ -109,6 +105,7 @@ export get_operations_cost_inv
 export get_operations_cost_power
 export get_outage_factor
 export get_power_systems_type
+export get_price_per_unit
 export get_pricecap
 export get_prime_mover_type
 export get_ramp_dn_percentage
@@ -130,6 +127,7 @@ export get_start_cost_per_mw
 export get_start_fuel_mmbtu_per_mw
 export get_start_region
 export get_storage_tech
+export get_technology_efficiency
 export get_up_time
 export get_var_cost_per_mwh
 export get_voll
@@ -166,7 +164,6 @@ export set_efficiency_down_ac!
 export set_efficiency_down_dc!
 export set_efficiency_up_ac!
 export set_efficiency_up_dc!
-export set_electrolyzer_min_kt!
 export set_eligible_resources!
 export set_eligible_zones!
 export set_end_region!
@@ -179,8 +176,6 @@ export set_fixed_om_cost_per_mwhyr!
 export set_fuel!
 export set_gen_ID!
 export set_heat_rate_mmbtu_per_mwh!
-export set_hydrogen_mwh_per_tonne!
-export set_hydrogen_price_per_tonne!
 export set_id!
 export set_initial_capacity_energy!
 export set_initial_capacity_inverter!
@@ -229,6 +224,7 @@ export set_operations_cost_inv!
 export set_operations_cost_power!
 export set_outage_factor!
 export set_power_systems_type!
+export set_price_per_unit!
 export set_pricecap!
 export set_prime_mover_type!
 export set_ramp_dn_percentage!
@@ -250,6 +246,7 @@ export set_start_cost_per_mw!
 export set_start_fuel_mmbtu_per_mw!
 export set_start_region!
 export set_storage_tech!
+export set_technology_efficiency!
 export set_up_time!
 export set_var_cost_per_mwh!
 export set_voll!
