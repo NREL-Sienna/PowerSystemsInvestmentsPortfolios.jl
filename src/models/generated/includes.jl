@@ -1,16 +1,18 @@
-include("Zone.jl")
 include("Electrolyzers.jl")
 include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
+include("RetirementPotential.jl")
 include("ExistingCapacity.jl")
 include("CoLocatedSupplyStorageTechnology.jl")
+include("AggregateRetrofitPotential.jl")
 include("DemandSideTechnology.jl")
-include("RetrofitCapacity.jl")
+include("AggregateRetirementPotential.jl")
+include("Zone.jl")
 include("StorageTechnology.jl")
 include("CarbonCaps.jl")
 include("TransportTechnology.jl")
-include("RetireableCapacity.jl")
+include("RetrofitPotential.jl")
 include("CurtailableDemandSideTechnology.jl")
 include("FlexibleDemandTechnology.jl")
 
@@ -115,10 +117,10 @@ export get_reg_cost
 export get_reg_max
 export get_region
 export get_resistance
-export get_retireable_capacity
-export get_retrofit_capacity
-export get_retrofit_efficiency
+export get_retirement_potential
+export get_retrofit_fraction
 export get_retrofit_id
+export get_retrofit_potential
 export get_rsv_cost
 export get_rsv_max
 export get_segments
@@ -235,10 +237,10 @@ export set_reg_cost!
 export set_reg_max!
 export set_region!
 export set_resistance!
-export set_retireable_capacity!
-export set_retrofit_capacity!
-export set_retrofit_efficiency!
+export set_retirement_potential!
+export set_retrofit_fraction!
 export set_retrofit_id!
+export set_retrofit_potential!
 export set_rsv_cost!
 export set_rsv_max!
 export set_segments!
