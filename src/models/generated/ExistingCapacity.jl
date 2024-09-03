@@ -8,7 +8,7 @@ This file is auto-generated. Do not edit.
     mutable struct ExistingCapacity <: IS.SupplementalAttribute
         internal::InfrastructureSystemsInternal
         ext::Dict
-        existing_capacity::Dict{String, Dict{String, Float64}}
+        existing_capacity::Vector{PSY.Generator}
     end
 
 
@@ -16,28 +16,28 @@ This file is auto-generated. Do not edit.
 # Arguments
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `existing_capacity::Dict{String, Dict{String, Float64}}`: (default: `Dict()`) Map SupplyTechnologies to individual units in a zone and their existing capacity
+- `existing_capacity::Vector{PSY.Generator}`: (default: `Vector()`) List of individual units to map to a specific SupplyTechnology
 """
 mutable struct ExistingCapacity <: IS.SupplementalAttribute
     "Internal field"
     internal::InfrastructureSystemsInternal
     "Option for providing additional data"
     ext::Dict
-    "Map SupplyTechnologies to individual units in a zone and their existing capacity"
-    existing_capacity::Dict{String, Dict{String, Float64}}
+    "List of individual units to map to a specific SupplyTechnology"
+    existing_capacity::Vector{PSY.Generator}
 end
 
 
-function ExistingCapacity(; internal=InfrastructureSystemsInternal(), ext=Dict(), existing_capacity=Dict(), )
+function ExistingCapacity(; internal=InfrastructureSystemsInternal(), ext=Dict(), existing_capacity=Vector(), )
     ExistingCapacity(internal, ext, existing_capacity, )
 end
 
 # Constructor for demo purposes; non-functional.
 function ExistingCapacity(::Nothing)
     ExistingCapacity(;
-        internal=Dict(),
-        ext=Dict(),
-        existing_capacity=Dict(),
+        internal=Vector(),
+        ext=Vector(),
+        existing_capacity=Vector(),
     )
 end
 
