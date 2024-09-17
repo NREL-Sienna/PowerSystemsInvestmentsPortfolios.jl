@@ -4,7 +4,6 @@ include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
 include("RetirementPotential.jl")
 include("ExistingCapacity.jl")
-include("CoLocatedSupplyStorageTechnology.jl")
 include("AggregateRetrofitPotential.jl")
 include("DemandSideTechnology.jl")
 include("AggregateRetirementPotential.jl")
@@ -19,13 +18,7 @@ export get_angle_limit
 export get_available
 export get_balancing_topology
 export get_base_power
-export get_cap_size
-export get_capacity_factor
 export get_capital_cost
-export get_capital_cost_energy
-export get_capital_cost_gen
-export get_capital_cost_inv
-export get_capital_cost_power
 export get_capital_costs
 export get_capital_costs_energy
 export get_capital_costs_power
@@ -45,10 +38,6 @@ export get_demand_mw
 export get_down_time
 export get_eff_down
 export get_eff_up
-export get_efficiency_down_ac
-export get_efficiency_down_dc
-export get_efficiency_up_ac
-export get_efficiency_up_dc
 export get_eligible_resources
 export get_eligible_zones
 export get_end_region
@@ -62,16 +51,8 @@ export get_gen_ID
 export get_heat_rate_mmbtu_per_mwh
 export get_id
 export get_initial_capacity
-export get_initial_capacity_energy
-export get_initial_capacity_inverter
-export get_initial_capacity_power
-export get_initial_gen_capacity
-export get_inverter_ratio
 export get_line_loss
 export get_losses
-export get_maintenance_begin_cadence
-export get_maintenance_cycle_length_years
-export get_maintenance_duration
 export get_max_cap_energy
 export get_max_cap_power
 export get_max_demand_advance
@@ -79,33 +60,20 @@ export get_max_demand_curtailment
 export get_max_demand_delay
 export get_max_duration
 export get_maximum_capacity
-export get_maximum_capacity_energy
-export get_maximum_capacity_power
-export get_maximum_duration
-export get_maximum_flow
-export get_maximum_gen_capacity
-export get_maximum_inverter_capacity
 export get_maximum_new_capacity
 export get_min_cap_energy
 export get_min_cap_power
 export get_min_duration
+export get_min_generation_percentage
 export get_min_mw
 export get_min_power
-export get_minimum_duration
-export get_minimum_inverter_capacity
 export get_minimum_required_capacity
-export get_minimum_required_capacity_energy
-export get_minimum_required_capacity_gen
-export get_minimum_required_capacity_power
 export get_name
-export get_network_lines
+export get_network_id
 export get_om_costs_energy
 export get_om_costs_power
 export get_operation_costs
-export get_operations_cost_energy
-export get_operations_cost_gen
-export get_operations_cost_inv
-export get_operations_cost_power
+export get_outage_factor
 export get_power_systems_type
 export get_price_per_unit
 export get_pricecap
@@ -123,7 +91,6 @@ export get_retrofit_potential
 export get_rsv_cost
 export get_rsv_max
 export get_segments
-export get_self_discharge
 export get_start_cost_per_mw
 export get_start_fuel_mmbtu_per_mw
 export get_start_region
@@ -139,13 +106,7 @@ export set_angle_limit!
 export set_available!
 export set_balancing_topology!
 export set_base_power!
-export set_cap_size!
-export set_capacity_factor!
 export set_capital_cost!
-export set_capital_cost_energy!
-export set_capital_cost_gen!
-export set_capital_cost_inv!
-export set_capital_cost_power!
 export set_capital_costs!
 export set_capital_costs_energy!
 export set_capital_costs_power!
@@ -165,10 +126,6 @@ export set_demand_mw!
 export set_down_time!
 export set_eff_down!
 export set_eff_up!
-export set_efficiency_down_ac!
-export set_efficiency_down_dc!
-export set_efficiency_up_ac!
-export set_efficiency_up_dc!
 export set_eligible_resources!
 export set_eligible_zones!
 export set_end_region!
@@ -182,16 +139,8 @@ export set_gen_ID!
 export set_heat_rate_mmbtu_per_mwh!
 export set_id!
 export set_initial_capacity!
-export set_initial_capacity_energy!
-export set_initial_capacity_inverter!
-export set_initial_capacity_power!
-export set_initial_gen_capacity!
-export set_inverter_ratio!
 export set_line_loss!
 export set_losses!
-export set_maintenance_begin_cadence!
-export set_maintenance_cycle_length_years!
-export set_maintenance_duration!
 export set_max_cap_energy!
 export set_max_cap_power!
 export set_max_demand_advance!
@@ -199,33 +148,20 @@ export set_max_demand_curtailment!
 export set_max_demand_delay!
 export set_max_duration!
 export set_maximum_capacity!
-export set_maximum_capacity_energy!
-export set_maximum_capacity_power!
-export set_maximum_duration!
-export set_maximum_flow!
-export set_maximum_gen_capacity!
-export set_maximum_inverter_capacity!
 export set_maximum_new_capacity!
 export set_min_cap_energy!
 export set_min_cap_power!
 export set_min_duration!
+export set_min_generation_percentage!
 export set_min_mw!
 export set_min_power!
-export set_minimum_duration!
-export set_minimum_inverter_capacity!
 export set_minimum_required_capacity!
-export set_minimum_required_capacity_energy!
-export set_minimum_required_capacity_gen!
-export set_minimum_required_capacity_power!
 export set_name!
-export set_network_lines!
+export set_network_id!
 export set_om_costs_energy!
 export set_om_costs_power!
 export set_operation_costs!
-export set_operations_cost_energy!
-export set_operations_cost_gen!
-export set_operations_cost_inv!
-export set_operations_cost_power!
+export set_outage_factor!
 export set_power_systems_type!
 export set_price_per_unit!
 export set_pricecap!
@@ -243,7 +179,6 @@ export set_retrofit_potential!
 export set_rsv_cost!
 export set_rsv_max!
 export set_segments!
-export set_self_discharge!
 export set_start_cost_per_mw!
 export set_start_fuel_mmbtu_per_mw!
 export set_start_region!

@@ -33,7 +33,6 @@ This file is auto-generated. Do not edit.
         region::String
         eff_up::Float64
         ext::Dict
-        cluster::Int64
         reg_cost::Float64
         min_duration::Float64
         max_cap_energy::Float64
@@ -58,7 +57,7 @@ This file is auto-generated. Do not edit.
 - `id::Int64`: ID for individual generator
 - `min_cap_power::Float64`: (default: `0.0`) Minimum required power capacity for a storage technology
 - `capital_costs_energy::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
-- `losses::Float64`: (default: `1.0`) Efficiency of discharging storage
+- `losses::Float64`: (default: `1.0`) Power loss (pct per hour)
 - `eff_down::Float64`: (default: `1.0`) Efficiency of discharging storage
 - `rsv_max::Float64`: (default: `0.0`) Fraction of nameplate capacity that can committed to provided upwards spinning or contingency reserves.
 - `max_cap_power::Float64`: (default: `-1`) Maximum allowable installed power capacity for a storage technology
@@ -70,7 +69,6 @@ This file is auto-generated. Do not edit.
 - `region::String`: Region/zone technology operates in
 - `eff_up::Float64`: (default: `1.0`) Efficiency of charging storage
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `cluster::Int64`: (default: `0`) Cluster
 - `reg_cost::Float64`: (default: `0.0`) Cost of providing regulation reserves 
 - `min_duration::Float64`: (default: `0.0`) Minimum required durection for a storage technology
 - `max_cap_energy::Float64`: (default: `-1`) Maximum allowable installed energy capacity for a storage technology
@@ -107,7 +105,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     min_cap_power::Float64
     "Capital costs for investing in a technology."
     capital_costs_energy::PSY.ValueCurve
-    "Efficiency of discharging storage"
+    "Power loss (pct per hour)"
     losses::Float64
     "Efficiency of discharging storage"
     eff_down::Float64
@@ -131,8 +129,6 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     eff_up::Float64
     "Option for providing additional data"
     ext::Dict
-    "Cluster"
-    cluster::Int64
     "Cost of providing regulation reserves "
     reg_cost::Float64
     "Minimum required durection for a storage technology"
@@ -144,8 +140,8 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
 end
 
 
-function StorageTechnology{T}(; base_power, om_costs_energy=StorageCost(), zone, prime_mover_type=PrimeMovers.OT, existing_cap_energy, rsv_cost=0.0, available, existing_cap_power, name, storage_tech, capital_costs_power=LinearCurve(0.0), max_duration=1000.0, id, min_cap_power=0.0, capital_costs_energy=LinearCurve(0.0), losses=1.0, eff_down=1.0, rsv_max=0.0, max_cap_power=-1, power_systems_type, internal=InfrastructureSystemsInternal(), om_costs_power=StorageCost(), balancing_topology, min_cap_energy=0.0, region, eff_up=1.0, ext=Dict(), cluster=0, reg_cost=0.0, min_duration=0.0, max_cap_energy=-1, reg_max=0.0, ) where T <: PSY.Storage
-    StorageTechnology{T}(base_power, om_costs_energy, zone, prime_mover_type, existing_cap_energy, rsv_cost, available, existing_cap_power, name, storage_tech, capital_costs_power, max_duration, id, min_cap_power, capital_costs_energy, losses, eff_down, rsv_max, max_cap_power, power_systems_type, internal, om_costs_power, balancing_topology, min_cap_energy, region, eff_up, ext, cluster, reg_cost, min_duration, max_cap_energy, reg_max, )
+function StorageTechnology{T}(; base_power, om_costs_energy=StorageCost(), zone, prime_mover_type=PrimeMovers.OT, existing_cap_energy, rsv_cost=0.0, available, existing_cap_power, name, storage_tech, capital_costs_power=LinearCurve(0.0), max_duration=1000.0, id, min_cap_power=0.0, capital_costs_energy=LinearCurve(0.0), losses=1.0, eff_down=1.0, rsv_max=0.0, max_cap_power=-1, power_systems_type, internal=InfrastructureSystemsInternal(), om_costs_power=StorageCost(), balancing_topology, min_cap_energy=0.0, region, eff_up=1.0, ext=Dict(), reg_cost=0.0, min_duration=0.0, max_cap_energy=-1, reg_max=0.0, ) where T <: PSY.Storage
+    StorageTechnology{T}(base_power, om_costs_energy, zone, prime_mover_type, existing_cap_energy, rsv_cost, available, existing_cap_power, name, storage_tech, capital_costs_power, max_duration, id, min_cap_power, capital_costs_energy, losses, eff_down, rsv_max, max_cap_power, power_systems_type, internal, om_costs_power, balancing_topology, min_cap_energy, region, eff_up, ext, reg_cost, min_duration, max_cap_energy, reg_max, )
 end
 
 """Get [`StorageTechnology`](@ref) `base_power`."""
@@ -202,8 +198,6 @@ get_region(value::StorageTechnology) = value.region
 get_eff_up(value::StorageTechnology) = value.eff_up
 """Get [`StorageTechnology`](@ref) `ext`."""
 get_ext(value::StorageTechnology) = value.ext
-"""Get [`StorageTechnology`](@ref) `cluster`."""
-get_cluster(value::StorageTechnology) = value.cluster
 """Get [`StorageTechnology`](@ref) `reg_cost`."""
 get_reg_cost(value::StorageTechnology) = value.reg_cost
 """Get [`StorageTechnology`](@ref) `min_duration`."""
@@ -267,8 +261,6 @@ set_region!(value::StorageTechnology, val) = value.region = val
 set_eff_up!(value::StorageTechnology, val) = value.eff_up = val
 """Set [`StorageTechnology`](@ref) `ext`."""
 set_ext!(value::StorageTechnology, val) = value.ext = val
-"""Set [`StorageTechnology`](@ref) `cluster`."""
-set_cluster!(value::StorageTechnology, val) = value.cluster = val
 """Set [`StorageTechnology`](@ref) `reg_cost`."""
 set_reg_cost!(value::StorageTechnology, val) = value.reg_cost = val
 """Set [`StorageTechnology`](@ref) `min_duration`."""

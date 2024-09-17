@@ -13,6 +13,7 @@ This file is auto-generated. Do not edit.
         minimum_required_capacity::Float64
         cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}
         capital_costs::PSY.ValueCurve
+        outage_factor::Float64
         rsv_cost::Float64
         cofire_start_max::Union{Nothing, Dict{ThermalFuels, Float64}}
         gen_ID::Int64
@@ -34,18 +35,13 @@ This file is auto-generated. Do not edit.
         balancing_topology::String
         region::String
         maximum_capacity::Float64
-        min_power::Float64
         cluster::Int64
-        maintenance_duration::Int64
         ramp_up_percentage::Float64
-        maintenance_cycle_length_years::Int64
         reg_cost::Float64
+        min_generation_percentage::Float64
         start_cost_per_mw::Float64
-        cap_size::Float64
-        capacity_factor::Float64
-        up_time::Float64
         reg_max::Float64
-        maintenance_begin_cadence::Int64
+        up_time::Float64
     end
 
 
@@ -58,6 +54,7 @@ This file is auto-generated. Do not edit.
 - `minimum_required_capacity::Float64`: (default: `0.0`) Minimum required capacity for a technology
 - `cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Minimum blending level of each fuel during normal generation process for multi-fuel generator
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
+- `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology
 - `rsv_cost::Float64`: (default: `0.0`) Cost of providing upwards spinning or contingency reserves
 - `cofire_start_max::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Maximum blending level of each fuel during start-up process for multi-fuel generator
 - `gen_ID::Int64`: ID for individual generator
@@ -79,18 +76,13 @@ This file is auto-generated. Do not edit.
 - `balancing_topology::String`: Set of balancing nodes
 - `region::String`: Region/zone technology operates in
 - `maximum_capacity::Float64`: (default: `Inf`) Maximum allowable installed capacity for a technology
-- `min_power::Float64`: (default: `0.0`) Minimum generation as a fraction of total capacity
 - `cluster::Int64`: (default: `1`) Number of the cluster when representing multiple clusters of a given technology in a given region.
-- `maintenance_duration::Int64`: (default: `0`) Duration of the maintenance period, in number of timesteps.
 - `ramp_up_percentage::Float64`: (default: `100.0`) Maximum increase in output between operation periods. Fraction of total capacity
-- `maintenance_cycle_length_years::Int64`: (default: `0`) Length of scheduled maintenance cycle, in years.
 - `reg_cost::Float64`: (default: `0.0`) Cost of providing regulation reserves 
+- `min_generation_percentage::Float64`: (default: `0.0`) Minimum generation as a fraction of total capacity
 - `start_cost_per_mw::Float64`: (default: `0.0`) Cost per MW of nameplate capacity to start a generator (/MW per start).
-- `cap_size::Float64`: (default: `1.0`) Cap_size
-- `capacity_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology
-- `up_time::Float64`: (default: `0.0`) Minimum amount of time a resource has to stay in the committed state.
 - `reg_max::Float64`: (default: `0.0`) Fraction of nameplate capacity that can committed to provided regulation reserves
-- `maintenance_begin_cadence::Int64`: (default: `1`) Cadence of timesteps in which scheduled maintenance can begin.
+- `up_time::Float64`: (default: `0.0`) Minimum amount of time a resource has to stay in the committed state.
 """
 mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     "Base power"
@@ -107,6 +99,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}
     "Capital costs for investing in a technology."
     capital_costs::PSY.ValueCurve
+    "Derating factor to account for planned or forced outages of a technology"
+    outage_factor::Float64
     "Cost of providing upwards spinning or contingency reserves"
     rsv_cost::Float64
     "Maximum blending level of each fuel during start-up process for multi-fuel generator"
@@ -149,35 +143,25 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     region::String
     "Maximum allowable installed capacity for a technology"
     maximum_capacity::Float64
-    "Minimum generation as a fraction of total capacity"
-    min_power::Float64
     "Number of the cluster when representing multiple clusters of a given technology in a given region."
     cluster::Int64
-    "Duration of the maintenance period, in number of timesteps."
-    maintenance_duration::Int64
     "Maximum increase in output between operation periods. Fraction of total capacity"
     ramp_up_percentage::Float64
-    "Length of scheduled maintenance cycle, in years."
-    maintenance_cycle_length_years::Int64
     "Cost of providing regulation reserves "
     reg_cost::Float64
+    "Minimum generation as a fraction of total capacity"
+    min_generation_percentage::Float64
     "Cost per MW of nameplate capacity to start a generator (/MW per start)."
     start_cost_per_mw::Float64
-    "Cap_size"
-    cap_size::Float64
-    "Derating factor to account for planned or forced outages of a technology"
-    capacity_factor::Float64
-    "Minimum amount of time a resource has to stay in the committed state."
-    up_time::Float64
     "Fraction of nameplate capacity that can committed to provided regulation reserves"
     reg_max::Float64
-    "Cadence of timesteps in which scheduled maintenance can begin."
-    maintenance_begin_cadence::Int64
+    "Minimum amount of time a resource has to stay in the committed state."
+    up_time::Float64
 end
 
 
-function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, zone=nothing, prime_mover_type=PrimeMovers.OT, minimum_required_capacity=0.0, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), rsv_cost=0.0, cofire_start_max=nothing, gen_ID, available=True, co2=0.0, name, cofire_start_min=nothing, ramp_dn_percentage=100.0, down_time=0.0, initial_capacity=0.0, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), rsv_max=0.0, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region, maximum_capacity=Inf, min_power=0.0, cluster=1, maintenance_duration=0, ramp_up_percentage=100.0, maintenance_cycle_length_years=0, reg_cost=0.0, start_cost_per_mw=0.0, cap_size=1.0, capacity_factor=1.0, up_time=0.0, reg_max=0.0, maintenance_begin_cadence=1, ) where T <: PSY.Generator
-    SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, zone, prime_mover_type, minimum_required_capacity, cofire_level_min, capital_costs, rsv_cost, cofire_start_max, gen_ID, available, co2, name, cofire_start_min, ramp_dn_percentage, down_time, initial_capacity, start_fuel_mmbtu_per_mw, operation_costs, rsv_max, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, region, maximum_capacity, min_power, cluster, maintenance_duration, ramp_up_percentage, maintenance_cycle_length_years, reg_cost, start_cost_per_mw, cap_size, capacity_factor, up_time, reg_max, maintenance_begin_cadence, )
+function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, zone=nothing, prime_mover_type=PrimeMovers.OT, minimum_required_capacity=0.0, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), outage_factor=1.0, rsv_cost=0.0, cofire_start_max=nothing, gen_ID, available=True, co2=0.0, name, cofire_start_min=nothing, ramp_dn_percentage=100.0, down_time=0.0, initial_capacity=0.0, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), rsv_max=0.0, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region, maximum_capacity=Inf, cluster=1, ramp_up_percentage=100.0, reg_cost=0.0, min_generation_percentage=0.0, start_cost_per_mw=0.0, reg_max=0.0, up_time=0.0, ) where T <: PSY.Generator
+    SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, zone, prime_mover_type, minimum_required_capacity, cofire_level_min, capital_costs, outage_factor, rsv_cost, cofire_start_max, gen_ID, available, co2, name, cofire_start_min, ramp_dn_percentage, down_time, initial_capacity, start_fuel_mmbtu_per_mw, operation_costs, rsv_max, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, region, maximum_capacity, cluster, ramp_up_percentage, reg_cost, min_generation_percentage, start_cost_per_mw, reg_max, up_time, )
 end
 
 """Get [`SupplyTechnology`](@ref) `base_power`."""
@@ -194,6 +178,8 @@ get_minimum_required_capacity(value::SupplyTechnology) = value.minimum_required_
 get_cofire_level_min(value::SupplyTechnology) = value.cofire_level_min
 """Get [`SupplyTechnology`](@ref) `capital_costs`."""
 get_capital_costs(value::SupplyTechnology) = value.capital_costs
+"""Get [`SupplyTechnology`](@ref) `outage_factor`."""
+get_outage_factor(value::SupplyTechnology) = value.outage_factor
 """Get [`SupplyTechnology`](@ref) `rsv_cost`."""
 get_rsv_cost(value::SupplyTechnology) = value.rsv_cost
 """Get [`SupplyTechnology`](@ref) `cofire_start_max`."""
@@ -236,30 +222,20 @@ get_balancing_topology(value::SupplyTechnology) = value.balancing_topology
 get_region(value::SupplyTechnology) = value.region
 """Get [`SupplyTechnology`](@ref) `maximum_capacity`."""
 get_maximum_capacity(value::SupplyTechnology) = value.maximum_capacity
-"""Get [`SupplyTechnology`](@ref) `min_power`."""
-get_min_power(value::SupplyTechnology) = value.min_power
 """Get [`SupplyTechnology`](@ref) `cluster`."""
 get_cluster(value::SupplyTechnology) = value.cluster
-"""Get [`SupplyTechnology`](@ref) `maintenance_duration`."""
-get_maintenance_duration(value::SupplyTechnology) = value.maintenance_duration
 """Get [`SupplyTechnology`](@ref) `ramp_up_percentage`."""
 get_ramp_up_percentage(value::SupplyTechnology) = value.ramp_up_percentage
-"""Get [`SupplyTechnology`](@ref) `maintenance_cycle_length_years`."""
-get_maintenance_cycle_length_years(value::SupplyTechnology) = value.maintenance_cycle_length_years
 """Get [`SupplyTechnology`](@ref) `reg_cost`."""
 get_reg_cost(value::SupplyTechnology) = value.reg_cost
+"""Get [`SupplyTechnology`](@ref) `min_generation_percentage`."""
+get_min_generation_percentage(value::SupplyTechnology) = value.min_generation_percentage
 """Get [`SupplyTechnology`](@ref) `start_cost_per_mw`."""
 get_start_cost_per_mw(value::SupplyTechnology) = value.start_cost_per_mw
-"""Get [`SupplyTechnology`](@ref) `cap_size`."""
-get_cap_size(value::SupplyTechnology) = value.cap_size
-"""Get [`SupplyTechnology`](@ref) `capacity_factor`."""
-get_capacity_factor(value::SupplyTechnology) = value.capacity_factor
-"""Get [`SupplyTechnology`](@ref) `up_time`."""
-get_up_time(value::SupplyTechnology) = value.up_time
 """Get [`SupplyTechnology`](@ref) `reg_max`."""
 get_reg_max(value::SupplyTechnology) = value.reg_max
-"""Get [`SupplyTechnology`](@ref) `maintenance_begin_cadence`."""
-get_maintenance_begin_cadence(value::SupplyTechnology) = value.maintenance_begin_cadence
+"""Get [`SupplyTechnology`](@ref) `up_time`."""
+get_up_time(value::SupplyTechnology) = value.up_time
 
 """Set [`SupplyTechnology`](@ref) `base_power`."""
 set_base_power!(value::SupplyTechnology, val) = value.base_power = val
@@ -275,6 +251,8 @@ set_minimum_required_capacity!(value::SupplyTechnology, val) = value.minimum_req
 set_cofire_level_min!(value::SupplyTechnology, val) = value.cofire_level_min = val
 """Set [`SupplyTechnology`](@ref) `capital_costs`."""
 set_capital_costs!(value::SupplyTechnology, val) = value.capital_costs = val
+"""Set [`SupplyTechnology`](@ref) `outage_factor`."""
+set_outage_factor!(value::SupplyTechnology, val) = value.outage_factor = val
 """Set [`SupplyTechnology`](@ref) `rsv_cost`."""
 set_rsv_cost!(value::SupplyTechnology, val) = value.rsv_cost = val
 """Set [`SupplyTechnology`](@ref) `cofire_start_max`."""
@@ -317,27 +295,17 @@ set_balancing_topology!(value::SupplyTechnology, val) = value.balancing_topology
 set_region!(value::SupplyTechnology, val) = value.region = val
 """Set [`SupplyTechnology`](@ref) `maximum_capacity`."""
 set_maximum_capacity!(value::SupplyTechnology, val) = value.maximum_capacity = val
-"""Set [`SupplyTechnology`](@ref) `min_power`."""
-set_min_power!(value::SupplyTechnology, val) = value.min_power = val
 """Set [`SupplyTechnology`](@ref) `cluster`."""
 set_cluster!(value::SupplyTechnology, val) = value.cluster = val
-"""Set [`SupplyTechnology`](@ref) `maintenance_duration`."""
-set_maintenance_duration!(value::SupplyTechnology, val) = value.maintenance_duration = val
 """Set [`SupplyTechnology`](@ref) `ramp_up_percentage`."""
 set_ramp_up_percentage!(value::SupplyTechnology, val) = value.ramp_up_percentage = val
-"""Set [`SupplyTechnology`](@ref) `maintenance_cycle_length_years`."""
-set_maintenance_cycle_length_years!(value::SupplyTechnology, val) = value.maintenance_cycle_length_years = val
 """Set [`SupplyTechnology`](@ref) `reg_cost`."""
 set_reg_cost!(value::SupplyTechnology, val) = value.reg_cost = val
+"""Set [`SupplyTechnology`](@ref) `min_generation_percentage`."""
+set_min_generation_percentage!(value::SupplyTechnology, val) = value.min_generation_percentage = val
 """Set [`SupplyTechnology`](@ref) `start_cost_per_mw`."""
 set_start_cost_per_mw!(value::SupplyTechnology, val) = value.start_cost_per_mw = val
-"""Set [`SupplyTechnology`](@ref) `cap_size`."""
-set_cap_size!(value::SupplyTechnology, val) = value.cap_size = val
-"""Set [`SupplyTechnology`](@ref) `capacity_factor`."""
-set_capacity_factor!(value::SupplyTechnology, val) = value.capacity_factor = val
-"""Set [`SupplyTechnology`](@ref) `up_time`."""
-set_up_time!(value::SupplyTechnology, val) = value.up_time = val
 """Set [`SupplyTechnology`](@ref) `reg_max`."""
 set_reg_max!(value::SupplyTechnology, val) = value.reg_max = val
-"""Set [`SupplyTechnology`](@ref) `maintenance_begin_cadence`."""
-set_maintenance_begin_cadence!(value::SupplyTechnology, val) = value.maintenance_begin_cadence = val
+"""Set [`SupplyTechnology`](@ref) `up_time`."""
+set_up_time!(value::SupplyTechnology, val) = value.up_time = val
