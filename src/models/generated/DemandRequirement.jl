@@ -10,8 +10,8 @@ This file is auto-generated. Do not edit.
         zone::Int64
         power_systems_type::String
         internal::InfrastructureSystemsInternal
-        demand_mw_z::Float64
         ext::Dict
+        demand_mw::Float64
         region::String
         available::Bool
     end
@@ -23,8 +23,8 @@ This file is auto-generated. Do not edit.
 - `zone::Int64`: Zone Number
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `demand_mw_z::Float64`: (default: `0.0`) Demand profile in MW
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `demand_mw::Float64`: (default: `0.0`) Demand profile in MW
 - `region::String`: Corresponding region for peak demand
 - `available::Bool`: (default: `true`) identifies whether the technology is available
 """
@@ -37,10 +37,10 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     power_systems_type::String
     "Internal field"
     internal::InfrastructureSystemsInternal
-    "Demand profile in MW"
-    demand_mw_z::Float64
     "Option for providing additional data"
     ext::Dict
+    "Demand profile in MW"
+    demand_mw::Float64
     "Corresponding region for peak demand"
     region::String
     "identifies whether the technology is available"
@@ -48,8 +48,8 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
 end
 
 
-function DemandRequirement{T}(; name, zone, power_systems_type, internal=InfrastructureSystemsInternal(), demand_mw_z=0.0, ext=Dict(), region, available=true, ) where T <: PSY.StaticInjection
-    DemandRequirement{T}(name, zone, power_systems_type, internal, demand_mw_z, ext, region, available, )
+function DemandRequirement{T}(; name, zone, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), demand_mw=0.0, region, available=true, ) where T <: PSY.StaticInjection
+    DemandRequirement{T}(name, zone, power_systems_type, internal, ext, demand_mw, region, available, )
 end
 
 """Get [`DemandRequirement`](@ref) `name`."""
@@ -60,10 +60,10 @@ get_zone(value::DemandRequirement) = value.zone
 get_power_systems_type(value::DemandRequirement) = value.power_systems_type
 """Get [`DemandRequirement`](@ref) `internal`."""
 get_internal(value::DemandRequirement) = value.internal
-"""Get [`DemandRequirement`](@ref) `demand_mw_z`."""
-get_demand_mw_z(value::DemandRequirement) = value.demand_mw_z
 """Get [`DemandRequirement`](@ref) `ext`."""
 get_ext(value::DemandRequirement) = value.ext
+"""Get [`DemandRequirement`](@ref) `demand_mw`."""
+get_demand_mw(value::DemandRequirement) = value.demand_mw
 """Get [`DemandRequirement`](@ref) `region`."""
 get_region(value::DemandRequirement) = value.region
 """Get [`DemandRequirement`](@ref) `available`."""
@@ -77,10 +77,10 @@ set_zone!(value::DemandRequirement, val) = value.zone = val
 set_power_systems_type!(value::DemandRequirement, val) = value.power_systems_type = val
 """Set [`DemandRequirement`](@ref) `internal`."""
 set_internal!(value::DemandRequirement, val) = value.internal = val
-"""Set [`DemandRequirement`](@ref) `demand_mw_z`."""
-set_demand_mw_z!(value::DemandRequirement, val) = value.demand_mw_z = val
 """Set [`DemandRequirement`](@ref) `ext`."""
 set_ext!(value::DemandRequirement, val) = value.ext = val
+"""Set [`DemandRequirement`](@ref) `demand_mw`."""
+set_demand_mw!(value::DemandRequirement, val) = value.demand_mw = val
 """Set [`DemandRequirement`](@ref) `region`."""
 set_region!(value::DemandRequirement, val) = value.region = val
 """Set [`DemandRequirement`](@ref) `available`."""
