@@ -8,7 +8,7 @@ This file is auto-generated. Do not edit.
     mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
         base_power::Float64
         heat_rate_mmbtu_per_mwh::Union{Float64, PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}
-        zone::Zone
+        zone::Union{Nothing, Zone}
         prime_mover_type::PrimeMovers
         minimum_required_capacity::Float64
         cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}
@@ -49,7 +49,7 @@ This file is auto-generated. Do not edit.
 # Arguments
 - `base_power::Float64`: Base power
 - `heat_rate_mmbtu_per_mwh::Union{Float64, PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}`: (default: `0.0`) Heat rate of generator, MMBTU/MWh
-- `zone::Zone`: (default: `nothing`) Zone where tech operates in
+- `zone::Union{Nothing, Zone}`: (default: `nothing`) Zone where tech operates in
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `minimum_required_capacity::Float64`: (default: `0.0`) Minimum required capacity for a technology
 - `cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Minimum blending level of each fuel during normal generation process for multi-fuel generator
@@ -90,7 +90,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     "Heat rate of generator, MMBTU/MWh"
     heat_rate_mmbtu_per_mwh::Union{Float64, PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}
     "Zone where tech operates in"
-    zone::Zone
+    zone::Union{Nothing, Zone}
     "Prime mover for generator"
     prime_mover_type::PrimeMovers
     "Minimum required capacity for a technology"
