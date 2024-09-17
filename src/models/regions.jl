@@ -16,6 +16,5 @@ get_id(val::Region) = val.id
 get_internal(val::Region) = val.internal
 get_ext(val::Region) = get_ext(get_internal(val))
 get_time_series_container(val::Region) = val.time_series_container
-get_supplemental_attributes_container(val::Region) =
-    val.supplemental_attributes_container
+get_supplemental_attributes_container(val::Region) = val.supplemental_attributes_container
 supports_time_series(::Region) = true

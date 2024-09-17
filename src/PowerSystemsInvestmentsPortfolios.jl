@@ -23,9 +23,7 @@ import InfrastructureSystems:
     InfrastructureSystemsComponent
 
 import PowerSystems
-import PowerSystems:
-    StorageCost,
-    ThermalGenerationCost
+import PowerSystems: StorageCost, ThermalGenerationCost
 
 import JSONSchema
 import JSON3

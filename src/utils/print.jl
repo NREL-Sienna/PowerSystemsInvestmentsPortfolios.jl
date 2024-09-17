@@ -66,7 +66,8 @@ function Base.show(io::IO, ::MIME"text/plain", ist::PSY.Component)
                    obj isa Vector{<:IS.InfrastructureSystemsComponent}
                 val = summary(getproperty(ist, name))
             elseif PSY.hasproperty(PowerSystemsInvestmentsPortfolios, getter_name)
-                getter_func = PSY.getproperty(PowerSystemsInvestmentsPortfolios, getter_name)
+                getter_func =
+                    PSY.getproperty(PowerSystemsInvestmentsPortfolios, getter_name)
                 #print(getter_func)
                 val = getter_func(ist)
             else
@@ -89,7 +90,6 @@ function Base.show(io::IO, ::MIME"text/plain", ist::PSY.Component)
     end
     return
 end
-
 
 function show_portfolio_table(io::IO, p::Portfolio; kwargs...)
     header = ["Property", "Value"]

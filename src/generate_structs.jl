@@ -289,7 +289,7 @@ function parse_timestamps_and_values(json_str::String)
     for item in data
         # Append the timestamp to the timestamps array
         push!(timestamps, item["timestamp"])
-        
+
         # Append the value to the values array
         push!(values, item["value"])
     end
@@ -303,12 +303,12 @@ function parse_json_to_arrays(json_str::String)
 
     # Initialize array to store x and y values
     xy_values = []
-    
+
     # Iterate over each dictionary in the parsed JSON data
     for item in data
         # Append the x values to x_values array as vector of named tuples
-        push!(xy_values, IS.XY_COORDS((Float64(item["from_x"]),Float64(item["from_y"]))))
-        push!(xy_values, IS.XY_COORDS((Float64(item["to_x"]),Float64(item["to_y"]))))
+        push!(xy_values, IS.XY_COORDS((Float64(item["from_x"]), Float64(item["from_y"]))))
+        push!(xy_values, IS.XY_COORDS((Float64(item["to_x"]), Float64(item["to_y"]))))
     end
 
     return unique(xy_values)
@@ -329,13 +329,19 @@ function dataframe_to_structs(df_dict::Dict)
         supply_curve = row_pw["piecewise_linear_blob"]
         supply_curve_parsed = parse_json_to_arrays(supply_curve)
 
-        id = df_dict["attributes"][df_dict["attributes"][!, "entity_attribute_id"] .== eaid, "entity_id"]
-        
+        id = df_dict["attributes"][
+            df_dict["attributes"][!, "entity_attribute_id"] .== eaid,
+            "entity_id",
+        ]
+
         # Find corresponding supply technology for that supply curve
-        row = df_dict["supply_technologies"][df_dict["supply_technologies"][!, "technology_id"] .== id, :]
-        
+        row = df_dict["supply_technologies"][
+            df_dict["supply_technologies"][!, "technology_id"] .== id,
+            :,
+        ]
+
         #extract area
-        area = topologies[topologies.name .== row[!,"balancing_topology"][1], "area"][1]
+        area = topologies[topologies.name .== row[!, "balancing_topology"][1], "area"][1]
         area_int = parse(Int64, area)
 
         #extract supply curve, does every supply_technology have a supply curve?
@@ -347,40 +353,45 @@ function dataframe_to_structs(df_dict::Dict)
         parametric = map_prime_mover_to_parametric(row[!, "prime_mover"][1])
         t = SupplyTechnology{parametric}(;
             #Data pulled from DB
-            name=string(row[!,"technology_id"][1]),
-            id=row[!,"technology_id"][1],
+            name=string(row[!, "technology_id"][1]),
+            id=row[!, "technology_id"][1],
             inv_cost_per_mwyr=InputOutputCurve(PiecewiseLinearData(supply_curve_parsed)),
-            om_costs=ThermalGenerationCost(variable=CostCurve(LinearCurve(row[!,"vom_cost"][1])), fixed=row[!,"fom_cost"][1], start_up=0.0, shut_down=0.0),
-            balancing_topology=string(row[!,"balancing_topology"][1]),
-            prime_mover_type=map_prime_mover(row[!,"prime_mover"][1]),
-            fuel=row[!,"fuel_type"][1],
-            zone = area_int,
+            om_costs=ThermalGenerationCost(
+                variable=CostCurve(LinearCurve(row[!, "vom_cost"][1])),
+                fixed=row[!, "fom_cost"][1],
+                start_up=0.0,
+                shut_down=0.0,
+            ),
+            balancing_topology=string(row[!, "balancing_topology"][1]),
+            prime_mover_type=map_prime_mover(row[!, "prime_mover"][1]),
+            fuel=row[!, "fuel_type"][1],
+            zone=area_int,
 
             #Problem ones, need to write functions to extract
             base_power=100.0,
-            existing_cap_mw = 0.0,
+            existing_cap_mw=0.0,
             cap_size=250.0,
-            
+
             # Data we should have but dont currently
-            start_fuel_mmbtu_per_mw = 2.0,
-            start_cost_per_mw = 91.0,
-            up_time = 6.0,
-            down_time = 6.0,
-            heat_rate_mmbtu_per_mwh = 7.43,
-            co2 = 0.05306,
-            ramp_dn_percentage = 0.64,
-            ramp_up_percentage = 0.64,
+            start_fuel_mmbtu_per_mw=2.0,
+            start_cost_per_mw=91.0,
+            up_time=6.0,
+            down_time=6.0,
+            heat_rate_mmbtu_per_mwh=7.43,
+            co2=0.05306,
+            ramp_dn_percentage=0.64,
+            ramp_up_percentage=0.64,
 
             #Placeholder or default values (modeling assumptions)
-            region = "MA", #this one can probably just be removed from the structs, just descriptor for GenX
+            region="MA", #this one can probably just be removed from the structs, just descriptor for GenX
             available=true,
             min_cap_mw=0.0,
-            min_power = 0.0,
-            max_cap_mw = -1,
+            min_power=0.0,
+            max_cap_mw=-1,
             power_systems_type=string(parametric),
-            cluster = 1,
-            reg_max = 0.25,
-            rsv_max = 0.5,
+            cluster=1,
+            reg_max=0.25,
+            rsv_max=0.5,
             #new_build = 1
         )
         add_technology!(p, t)
@@ -402,34 +413,39 @@ function dataframe_to_structs(df_dict::Dict)
             balancing_topology=string(row["balancing_topology"]),
             prime_mover_type=map_prime_mover(row["prime_mover"]),
             fuel=row["fuel_type"],
-            zone = area_int,
+            zone=area_int,
             base_power=row["base_power"],
-            existing_cap_mw = row["rating"],
+            existing_cap_mw=row["rating"],
 
             # Problem ones, need to write functions to extract         
             cap_size=250.0,
-            
+
             # Data we should have but dont currently
-            om_costs=ThermalGenerationCost(variable=CostCurve(LinearCurve(0.0)), fixed=0.0, start_up=0.0, shut_down=0.0),
-            start_fuel_mmbtu_per_mw = 2.0,
-            start_cost_per_mw = 91.0,
-            up_time = 6.0,
-            down_time = 6.0,
-            heat_rate_mmbtu_per_mwh = 7.43,
-            co2 = 0.05306,
-            ramp_dn_percentage = 0.64,
-            ramp_up_percentage = 0.64,
+            om_costs=ThermalGenerationCost(
+                variable=CostCurve(LinearCurve(0.0)),
+                fixed=0.0,
+                start_up=0.0,
+                shut_down=0.0,
+            ),
+            start_fuel_mmbtu_per_mw=2.0,
+            start_cost_per_mw=91.0,
+            up_time=6.0,
+            down_time=6.0,
+            heat_rate_mmbtu_per_mwh=7.43,
+            co2=0.05306,
+            ramp_dn_percentage=0.64,
+            ramp_up_percentage=0.64,
 
             #Placeholder or default values (modeling assumptions)
-            region = "MA",
+            region="MA",
             available=true,
             min_cap_mw=0.0,
-            min_power = 0.0,
-            max_cap_mw = -1,
+            min_power=0.0,
+            max_cap_mw=-1,
             power_systems_type=string(parametric),
-            cluster = 1,
-            reg_max = 0.25,
-            rsv_max = 0.5,
+            cluster=1,
+            reg_max=0.25,
+            rsv_max=0.5,
             #new_build =  0#0 for existing builds
         )
         add_technology!(p, t)
@@ -437,7 +453,7 @@ function dataframe_to_structs(df_dict::Dict)
 
     # Get storage units
     for row in eachrow(df_dict["storage_units"])
-        
+
         #extract area
         area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
         area_int = parse(Int64, area)
@@ -447,36 +463,42 @@ function dataframe_to_structs(df_dict::Dict)
             name=row["name"],
             base_power=row["base_power"], # Natural Units
             id=row["storage_unit_id"],
-            zone = area_int,
+            zone=area_int,
             prime_mover_type=map_prime_mover(row["prime_mover"]),
             balancing_topology=row["balancing_topology"],
-            existing_cap_mw = row["rating"],
-            existing_cap_mwh = row["max_capacity"],
-            
+            existing_cap_mw=row["rating"],
+            existing_cap_mwh=row["max_capacity"],
+
             #stuff we dont have but probably should
-            om_costs = StorageCost(charge_variable_cost=CostCurve(LinearCurve(0.0)), discharge_variable_cost=CostCurve(LinearCurve(0.0)), fixed=0.0, start_up=0.0, shut_down=0.0),
-            fixed_om_cost_per_mwhyr = LinearCurve(0.0),
-            eff_up = 0.92,
-            eff_down = 0.92,
-            storage_tech = StorageTech.LIB,
-            
+            om_costs=StorageCost(
+                charge_variable_cost=CostCurve(LinearCurve(0.0)),
+                discharge_variable_cost=CostCurve(LinearCurve(0.0)),
+                fixed=0.0,
+                start_up=0.0,
+                shut_down=0.0,
+            ),
+            fixed_om_cost_per_mwhyr=LinearCurve(0.0),
+            eff_up=0.92,
+            eff_down=0.92,
+            storage_tech=StorageTech.LIB,
+
             #Default or placeholder values
             inv_cost_per_mwyr=LinearCurve(0.0),
             inv_cost_charge_per_mwyr=LinearCurve(0.0),
             inv_cost_per_mwhyr=LinearCurve(0.0),
             available=true,
-            region = "ME",
-            cluster = 0,
-            self_disch = 0.0,
-            min_duration = 1.0,
-            max_duration = 10.0,
+            region="ME",
+            cluster=0,
+            self_disch=0.0,
+            min_duration=1.0,
+            max_duration=10.0,
             min_cap_mwh=0.0,
             min_cap_mw=0.0,
             min_charge_cap_mw=-1,
-            max_cap_mw = -1,
-            max_charge_cap_mw = -1,
-            max_cap_mwh = -1,
-            power_systems_type = "Test",
+            max_cap_mw=-1,
+            max_charge_cap_mw=-1,
+            max_cap_mwh=-1,
+            power_systems_type="Test",
         )
         add_technology!(p, s)
     end
@@ -484,8 +506,11 @@ function dataframe_to_structs(df_dict::Dict)
     #Populate DemandRequirement structs from database
     for row in eachrow(df_dict["demand_requirements"])
         #start in time_series
-        eaid = row["entity_attribute_id"] 
-        ts_blob = filter("entity_attribute_id" => isequal(eaid), df_dict["time_series"])[!,"time_series_blob"][1]
+        eaid = row["entity_attribute_id"]
+        ts_blob = filter("entity_attribute_id" => isequal(eaid), df_dict["time_series"])[
+            !,
+            "time_series_blob",
+        ][1]
         ts_parsed = parse_timestamps_and_values(ts_blob)
         dates = ts_parsed[1] #fix this later, dates syntax is inconsistent so hard to parse
         dates = DateTime("2020-01-01T00:00:00"):Hour(1):DateTime("2020-12-31T23:00:00")
@@ -493,13 +518,13 @@ function dataframe_to_structs(df_dict::Dict)
         demand_array = TimeArray(dates, demand)
         ts = SingleTimeSeries(string(row["entity_attribute_id"]), demand_array)
         #How to parse this timestamp stuff??
-    
+
         d = DemandRequirement{ElectricLoad}(
             #Data pulled from DB
             name=string(row["entity_attribute_id"]),
             region=row["area"],
-            zone = parse(Int64, row["area"]),
-    
+            zone=parse(Int64, row["area"]),
+
             #Placeholder/default values
             available=true,
             power_systems_type="ElectricLoad",
@@ -511,35 +536,41 @@ function dataframe_to_structs(df_dict::Dict)
     #Transmission Lines
     lines = df_dict["transmission_lines"]
     for row in eachrow(df_dict["transmission_interchange"])
-    
+
         # get list of balancing topologies that correspond to the areas for line tx
         topologies_from = filter("area" => isequal(row["area_from"]), topologies)[!, "name"]
         topologies_to = filter("area" => isequal(row["area_to"]), topologies)[!, "name"]
-    
+
         existing_capacity = 0.0
         for from in topologies_from
             for to in topologies_to
-                line_cap = lines[(lines[!,"balancing_topology_from"] .== from) .& (lines[!,"balancing_topology_to"] .== to), "continuous_rating"]
+                line_cap = lines[
+                    (lines[
+                        !,
+                        "balancing_topology_from",
+                    ] .== from) .& (lines[!, "balancing_topology_to"] .== to),
+                    "continuous_rating",
+                ]
                 if length(line_cap) == 1
                     existing_capacity += line_cap[1]
                 end
             end
         end
-    
+
         tx = TransportTechnology{Branch}(;
-            name = string(rownumber(row)),
-            network_lines = rownumber(row),
+            name=string(rownumber(row)),
+            network_lines=rownumber(row),
             available=true,
-            start_region = parse(Int64, row["area_from"]),
-            end_region = parse(Int64, row["area_to"]),
-            maximum_new_capacity = row["max_flow_from"],
-            maximum_flow = row["max_flow_from"],
-            existing_line_capacity = existing_capacity,
-        
+            start_region=parse(Int64, row["area_from"]),
+            end_region=parse(Int64, row["area_to"]),
+            maximum_new_capacity=row["max_flow_from"],
+            maximum_flow=row["max_flow_from"],
+            existing_line_capacity=existing_capacity,
+
             #stuff we don't have, but probably should
-            capital_cost = LinearCurve(19261),
-            line_loss = 0.019653847,
-            power_systems_type = "Branch"
+            capital_cost=LinearCurve(19261),
+            line_loss=0.019653847,
+            power_systems_type="Branch",
         )
         add_technology!(p, tx)
     end
