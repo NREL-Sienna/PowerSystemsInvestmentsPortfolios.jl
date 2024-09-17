@@ -33,7 +33,6 @@ This file is auto-generated. Do not edit.
         internal::InfrastructureSystemsInternal
         ext::Dict
         balancing_topology::String
-        region::String
         maximum_capacity::Float64
         cluster::Int64
         ramp_up_percentage::Float64
@@ -74,7 +73,6 @@ This file is auto-generated. Do not edit.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `balancing_topology::String`: Set of balancing nodes
-- `region::String`: Region/zone technology operates in
 - `maximum_capacity::Float64`: (default: `Inf`) Maximum allowable installed capacity for a technology
 - `cluster::Int64`: (default: `1`) Number of the cluster when representing multiple clusters of a given technology in a given region.
 - `ramp_up_percentage::Float64`: (default: `100.0`) Maximum increase in output between operation periods. Fraction of total capacity
@@ -139,8 +137,6 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     ext::Dict
     "Set of balancing nodes"
     balancing_topology::String
-    "Region/zone technology operates in"
-    region::String
     "Maximum allowable installed capacity for a technology"
     maximum_capacity::Float64
     "Number of the cluster when representing multiple clusters of a given technology in a given region."
@@ -160,8 +156,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
 end
 
 
-function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, zone=nothing, prime_mover_type=PrimeMovers.OT, minimum_required_capacity=0.0, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), outage_factor=1.0, rsv_cost=0.0, cofire_start_max=nothing, gen_ID, available=True, co2=0.0, name, cofire_start_min=nothing, ramp_dn_percentage=100.0, down_time=0.0, initial_capacity=0.0, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), rsv_max=0.0, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region, maximum_capacity=Inf, cluster=1, ramp_up_percentage=100.0, reg_cost=0.0, min_generation_percentage=0.0, start_cost_per_mw=0.0, reg_max=0.0, up_time=0.0, ) where T <: PSY.Generator
-    SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, zone, prime_mover_type, minimum_required_capacity, cofire_level_min, capital_costs, outage_factor, rsv_cost, cofire_start_max, gen_ID, available, co2, name, cofire_start_min, ramp_dn_percentage, down_time, initial_capacity, start_fuel_mmbtu_per_mw, operation_costs, rsv_max, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, region, maximum_capacity, cluster, ramp_up_percentage, reg_cost, min_generation_percentage, start_cost_per_mw, reg_max, up_time, )
+function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, zone=nothing, prime_mover_type=PrimeMovers.OT, minimum_required_capacity=0.0, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), outage_factor=1.0, rsv_cost=0.0, cofire_start_max=nothing, gen_ID, available=True, co2=0.0, name, cofire_start_min=nothing, ramp_dn_percentage=100.0, down_time=0.0, initial_capacity=0.0, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), rsv_max=0.0, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, maximum_capacity=Inf, cluster=1, ramp_up_percentage=100.0, reg_cost=0.0, min_generation_percentage=0.0, start_cost_per_mw=0.0, reg_max=0.0, up_time=0.0, ) where T <: PSY.Generator
+    SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, zone, prime_mover_type, minimum_required_capacity, cofire_level_min, capital_costs, outage_factor, rsv_cost, cofire_start_max, gen_ID, available, co2, name, cofire_start_min, ramp_dn_percentage, down_time, initial_capacity, start_fuel_mmbtu_per_mw, operation_costs, rsv_max, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, maximum_capacity, cluster, ramp_up_percentage, reg_cost, min_generation_percentage, start_cost_per_mw, reg_max, up_time, )
 end
 
 """Get [`SupplyTechnology`](@ref) `base_power`."""
@@ -218,8 +214,6 @@ get_internal(value::SupplyTechnology) = value.internal
 get_ext(value::SupplyTechnology) = value.ext
 """Get [`SupplyTechnology`](@ref) `balancing_topology`."""
 get_balancing_topology(value::SupplyTechnology) = value.balancing_topology
-"""Get [`SupplyTechnology`](@ref) `region`."""
-get_region(value::SupplyTechnology) = value.region
 """Get [`SupplyTechnology`](@ref) `maximum_capacity`."""
 get_maximum_capacity(value::SupplyTechnology) = value.maximum_capacity
 """Get [`SupplyTechnology`](@ref) `cluster`."""
@@ -291,8 +285,6 @@ set_internal!(value::SupplyTechnology, val) = value.internal = val
 set_ext!(value::SupplyTechnology, val) = value.ext = val
 """Set [`SupplyTechnology`](@ref) `balancing_topology`."""
 set_balancing_topology!(value::SupplyTechnology, val) = value.balancing_topology = val
-"""Set [`SupplyTechnology`](@ref) `region`."""
-set_region!(value::SupplyTechnology, val) = value.region = val
 """Set [`SupplyTechnology`](@ref) `maximum_capacity`."""
 set_maximum_capacity!(value::SupplyTechnology, val) = value.maximum_capacity = val
 """Set [`SupplyTechnology`](@ref) `cluster`."""
