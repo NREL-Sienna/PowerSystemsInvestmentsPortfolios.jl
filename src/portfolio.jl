@@ -17,13 +17,15 @@ mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
 end
 
 #TODO: Define if we are going to support unit systems
-struct Portfolio <: IS.InfrastructureSystemsType
+#TODO: Make immutable
+mutable struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     discount_rate::Float64
     data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     #units_settings::IS.SystemUnitsSettings
     time_series_directory::Union{Nothing, String}
+    base_system::Union{Nothing, System}
     metadata::PortfolioMetadata
     internal::IS.InfrastructureSystemsInternal
 
@@ -38,6 +40,7 @@ struct Portfolio <: IS.InfrastructureSystemsType
         name=nothing,
         description=nothing,
         data_source=nothing,
+        base_system=nothing,
         kwargs...,
     )
         #TODO: Provide support to kwargs
@@ -57,6 +60,7 @@ struct Portfolio <: IS.InfrastructureSystemsType
             investment_schedule,
             #units_settings,
             time_series_directory,
+            base_system,
             PortfolioMetadata(name, description, data_source),
             internal,
         )
@@ -169,8 +173,26 @@ function add_technology!(
     return
 end
 
+function add_region!(
+    portfolio::Portfolio,
+    zone::T;
+    skip_validation=false,
+    kwargs...,
+) where {T <: Region}
+    #deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+    IS.add_component!(
+        portfolio.data,
+        zone;
+        #allow_existing_time_series=deserialization_in_progress,
+        skip_validation=skip_validation,
+        kwargs...,
+    )
+
+    return
+end
+
 """
-Add many technologies to the portfoliotem at once.
+Add many technologies to the portfolio at once.
 
 Throws ArgumentError if the technology's name is already stored for its concrete type.
 Throws ArgumentError if any Technology-specific rule is violated.
@@ -577,3 +599,80 @@ function Portfolio(file_path::AbstractString; assign_new_uuids=false, kwargs...)
         throw(DataFormatError("$file_path is not a supported file type"))
     end
 end
+
+################################
+######### Requirements #########
+################################
+
+"""
+Add policy requirement to portfolio
+"""
+function add_requirement!(portfolio::Portfolio, req::Requirements)
+    #return PSY.add_service!(portfolio.data, req)
+    #skip_validation = false
+    #skip_validation = _validate_or_skip!(sys, service, skip_validation)
+    return IS.add_component!(portfolio.data, req, skip_validation=false)
+end
+
+function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirements}
+    return IS.get_components(T, portfolio.data)
+end
+
+###########################################
+######### Supplemental Attributes #########
+###########################################
+
+"""
+Add a supplemental attribute to a technology. The attribute may already be attached to a
+different component.
+"""
+function add_supplemental_attribute!(
+    p::Portfolio,
+    component::IS.InfrastructureSystemsComponent,
+    attribute::IS.SupplementalAttribute,
+)
+    return IS.add_supplemental_attribute!(p.data, component, attribute)
+end
+
+"""
+Remove the supplemental attribute from the component. The attribute will be removed from the
+system if it is not attached to any other component.
+"""
+function remove_supplemental_attribute!(
+    p::Portfolio,
+    component::IS.InfrastructureSystemsComponent,
+    attribute::IS.SupplementalAttribute,
+)
+    return IS.remove_supplemental_attribute!(p.data, component, attribute)
+end
+
+"""
+Remove the supplemental attribute from the system and all attached components.
+"""
+function remove_supplemental_attribute!(p::Portfolio, attribute::IS.SupplementalAttribute)
+    return IS.remove_supplemental_attribute!(p.data, attribute)
+end
+
+"""
+Remove all supplemental attributes with the given type from the system.
+"""
+function remove_supplemental_attributes!(
+    ::Type{T},
+    p::Portfolio,
+) where {T <: IS.SupplementalAttribute}
+    return IS.remove_supplemental_attributes!(T, p.data)
+end
+
+"""
+Return the supplemental attribute with the given uuid.
+
+Throws ArgumentError if the attribute is not stored.
+"""
+function get_supplemental_attribute(p::Portfolio, uuid::Base.UUID)
+    return IS.get_supplemental_attribute(p.data, uuid)
+end
+
+"""
+Return the internal of a supplemental attribute, required to add to IS for SupplementalAttributes to work
+"""
+IS.get_internal(val::IS.SupplementalAttribute) = val.internal
