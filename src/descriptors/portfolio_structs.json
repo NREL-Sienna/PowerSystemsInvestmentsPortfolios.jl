@@ -1,0 +1,1051 @@
+{
+    "auto_generated_structs": [
+        {
+            "name": "MinimumCapacityRequirements",
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "power_systems_type",
+                    "type": "String"
+                },
+                {
+                    "name": "pricecap",
+                    "default": "Inf",
+                    "type": "Float64"
+                },
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                },
+                {
+                    "name": "min_mw",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "eligible_resources",
+                    "default": "Vector{String}()",
+                    "type": "Vector{String}"
+                },
+                {
+                    "name": "available",
+                    "type": "Bool"
+                }
+            ]
+        },
+        {
+            "name": "SupplyTechnology",
+            "fields": [
+                {
+                    "name": "base_power",
+                    "type": "Float64"
+                },
+                {
+                    "name": "heat_rate_mmbtu_per_mwh",
+                    "default": "0.0",
+                    "type": "Union{Float64, PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}"
+                },
+                {
+                    "name": "zone",
+                    "default": "nothing",
+                    "type": "Zone"
+                },
+                {
+                    "name": "prime_mover_type",
+                    "default": "PrimeMovers.OT",
+                    "type": "PrimeMovers"
+                },
+                {
+                    "name": "outage_factor",
+                    "default": "1.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "cofire_level_min",
+                    "default": "nothing",
+                    "type": "Union{Nothing, Dict{ThermalFuels, Float64}}"
+                },
+                {
+                    "name": "rsv_cost",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "cofire_start_max",
+                    "default": "nothing",
+                    "type": "Union{Nothing, Dict{ThermalFuels, Float64}}"
+                },
+                {
+                    "name": "available",
+                    "default": "True",
+                    "type": "Bool"
+                },
+                {
+                    "name": "cofire_start_min",
+                    "default": "nothing",
+                    "type": "Union{Nothing, Dict{ThermalFuels, Float64}}"
+                },
+                {
+                    "name": "co2",
+                    "default": "0.0",
+                    "type": "Union{Float64, Dict{String, Float64}, Dict{ThermalFuels, Float64}}"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "ramp_dn_percentage",
+                    "default": "100.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "max_cap_mw",
+                    "default": "Inf",
+                    "type": "Float64"
+                },
+                {
+                    "name": "id",
+                    "type": "Int64"
+                },
+                {
+                    "name": "existing_cap_mw",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "down_time",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "start_fuel_mmbtu_per_mw",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "rsv_max",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "fuel",
+                    "default": "ThermalFuels.OTHER",
+                    "type": "Union{String, ThermalFuels, Vector{ThermalFuels}, Vector{String}}"
+                },
+                {
+                    "name": "power_systems_type",
+                    "type": "String"
+                },
+                {
+                    "name": "cofire_level_max",
+                    "default": "nothing",
+                    "type": "Union{Nothing, Dict{ThermalFuels, Float64}}"
+                },
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                },
+                {
+                    "name": "balancing_topology",
+                    "type": "String"
+                },
+                {
+                    "name": "region",
+                    "type": "String"
+                },
+                {
+                    "name": "min_power",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "cluster",
+                    "default": "1",
+                    "type": "Int64"
+                },
+                {
+                    "name": "inv_cost_per_mwyr",
+                    "default": "LinearCurve(0.0)",
+                    "type": "PSY.ValueCurve"
+                },
+                {
+                    "name": "min_cap_mw",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "ramp_up_percentage",
+                    "default": "100.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "maintenance_duration",
+                    "default": "0",
+                    "type": "Int64"
+                },
+                {
+                    "name": "maintenance_cycle_length_years",
+                    "default": "0",
+                    "type": "Int64"
+                },
+                {
+                    "name": "reg_cost",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "start_cost_per_mw",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "cap_size",
+                    "default": "1.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "reg_max",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "up_time",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "om_costs",
+                    "default": "ThermalGenerationCost()",
+                    "type": "PSY.OperationalCost"
+                },
+                {
+                    "name": "maintenance_begin_cadence",
+                    "default": "1",
+                    "type": "Int64"
+                }
+            ]
+        },
+        {
+            "name": "DemandRequirement",
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "zone",
+                    "type": "Int64"
+                },
+                {
+                    "name": "power_systems_type",
+                    "type": "String"
+                },
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "demand_mw_z",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                },
+                {
+                    "name": "region",
+                    "type": "String"
+                },
+                {
+                    "name": "available",
+                    "default": "true",
+                    "type": "Bool"
+                }
+            ]
+        },
+        {
+            "name": "RetirementPotential",
+            "fields": [
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                },
+                {
+                    "name": "retirement_potential",
+                    "default": "Vector()",
+                    "type": "Vector{PSY.Generator}"
+                }
+            ]
+        },
+        {
+            "name": "ExistingCapacity",
+            "fields": [
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                },
+                {
+                    "name": "existing_capacity",
+                    "default": "Vector()",
+                    "type": "Vector{PSY.Generator}"
+                }
+            ]
+        },
+        {
+            "name": "CoLocatedSupplyStorageTechnology",
+            "fields": [
+                {
+                    "name": "base_power",
+                    "type": "Float64"
+                },
+                {
+                    "name": "capital_cost_energy",
+                    "default": "0.0",
+                    "type": "PSY.ValueCurve"
+                },
+                {
+                    "name": "initial_capacity_power",
+                    "type": "Float64"
+                },
+                {
+                    "name": "prime_mover_type",
+                    "default": "PrimeMovers.OT",
+                    "type": "PrimeMovers"
+                },
+                {
+                    "name": "capital_cost_gen",
+                    "default": "0.0",
+                    "type": "PSY.ValueCurve"
+                },
+                {
+                    "name": "efficiency_up_dc",
+                    "default": "1.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "capital_cost_inv",
+                    "default": "0.0",
+                    "type": "PSY.ValueCurve"
+                },
+                {
+                    "name": "capital_cost_power",
+                    "default": "0.0",
+                    "type": "PSY.ValueCurve"
+                },
+                {
+                    "name": "maximum_capacity_power",
+                    "default": "-1",
+                    "type": "Float64"
+                },
+                {
+                    "name": "operations_cost_inv",
+                    "type": "PSY.OperationalCost"
+                },
+                {
+                    "name": "efficiency_up_ac",
+                    "default": "1.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "efficiency_down_dc",
+                    "default": "1.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "gen_ID",
+                    "type": "String"
+                },
+                {
+                    "name": "available",
+                    "type": "Bool"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "storage_tech",
+                    "type": "StorageTech"
+                },
+                {
+                    "name": "minimum_required_capacity_gen",
+                    "default": "-1",
+                    "type": "Float64"
+                },
+                {
+                    "name": "self_discharge",
+                    "default": "1.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "initial_gen_capacity",
+                    "type": "Float64"
+                },
+                {
+                    "name": "minimum_inverter_capacity",
+                    "default": "-1",
+                    "type": "Float64"
+                },
+                {
+                    "name": "minimum_required_capacity_power",
+                    "default": "-1",
+                    "type": "Float64"
+                },
+                {
+                    "name": "operations_cost_gen",
+                    "type": "PSY.OperationalCost"
+                },
+                {
+                    "name": "minimum_duration",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "inverter_ratio",
+                    "default": "-1.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "power_systems_type",
+                    "type": "String"
+                },
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                },
+                {
+                    "name": "balancing_topology",
+                    "type": "String"
+                },
+                {
+                    "name": "initial_capacity_inverter",
+                    "type": "Float64"
+                },
+                {
+                    "name": "region",
+                    "default": "1.0",
+                    "type": "String"
+                },
+                {
+                    "name": "maximum_inverter_capacity",
+                    "default": "-1",
+                    "type": "Float64"
+                },
+                {
+                    "name": "maximum_duration",
+                    "default": "1000.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "initial_capacity_energy",
+                    "type": "Float64"
+                },
+                {
+                    "name": "operations_cost_power",
+                    "type": "PSY.OperationalCost"
+                },
+                {
+                    "name": "maximum_capacity_energy",
+                    "default": "-1",
+                    "type": "Float64"
+                },
+                {
+                    "name": "operations_cost_energy",
+                    "type": "PSY.OperationalCost"
+                },
+                {
+                    "name": "minimum_required_capacity_energy",
+                    "default": "-1",
+                    "type": "Float64"
+                },
+                {
+                    "name": "maximum_gen_capacity",
+                    "default": "-1",
+                    "type": "Float64"
+                },
+                {
+                    "name": "efficiency_down_ac",
+                    "default": "1.0",
+                    "type": "Float64"
+                }
+            ]
+        },
+        {
+            "name": "AggregateRetrofitPotential",
+            "fields": [
+                {
+                    "name": "retrofit_id",
+                    "default": "0",
+                    "type": "Int64"
+                },
+                {
+                    "name": "retrofit_fraction",
+                    "default": "Dict()",
+                    "type": "Float64"
+                },
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "retrofit_potential",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                }
+            ]
+        },
+        {
+            "name": "DemandSideTechnology",
+            "fields": [
+                {
+                    "name": "min_power",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "ramp_up_percentage",
+                    "default": "1.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "power_systems_type",
+                    "type": "String"
+                },
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "price_per_unit",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                },
+                {
+                    "name": "technology_efficiency",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "ramp_dn_percentage",
+                    "default": "1.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "available",
+                    "type": "Bool"
+                }
+            ]
+        },
+        {
+            "name": "AggregateRetirementPotential",
+            "fields": [
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                },
+                {
+                    "name": "retirement_potential",
+                    "default": "0.0",
+                    "type": "Float64"
+                }
+            ]
+        },
+        {
+            "name": "Zone",
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "id",
+                    "type": "Int64"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                }
+            ]
+        },
+        {
+            "name": "StorageTechnology",
+            "fields": [
+                {
+                    "name": "base_power",
+                    "type": "Float64"
+                },
+                {
+                    "name": "om_costs_charge",
+                    "default": "StorageCost()",
+                    "type": "PSY.OperationalCost"
+                },
+                {
+                    "name": "zone",
+                    "type": "Int64"
+                },
+                {
+                    "name": "prime_mover_type",
+                    "default": "PrimeMovers.OT",
+                    "type": "PrimeMovers"
+                },
+                {
+                    "name": "rsv_cost",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "available",
+                    "type": "Bool"
+                },
+                {
+                    "name": "fixed_om_cost_per_mwhyr",
+                    "default": "LinearCurve(0.0)",
+                    "type": "PSY.ValueCurve"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "storage_tech",
+                    "type": "StorageTech"
+                },
+                {
+                    "name": "max_duration",
+                    "default": "1000.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "max_cap_mw",
+                    "default": "-1",
+                    "type": "Float64"
+                },
+                {
+                    "name": "inv_cost_charge_per_mwyr",
+                    "default": "LinearCurve(0.0)",
+                    "type": "PSY.ValueCurve"
+                },
+                {
+                    "name": "id",
+                    "type": "Int64"
+                },
+                {
+                    "name": "existing_cap_mw",
+                    "type": "Float64"
+                },
+                {
+                    "name": "existing_cap_mwh",
+                    "type": "Float64"
+                },
+                {
+                    "name": "self_disch",
+                    "default": "1.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "eff_down",
+                    "default": "1.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "max_cap_mwh",
+                    "default": "-1",
+                    "type": "Float64"
+                },
+                {
+                    "name": "rsv_max",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "inv_cost_per_mwhyr",
+                    "default": "LinearCurve(0.0)",
+                    "type": "PSY.ValueCurve"
+                },
+                {
+                    "name": "power_systems_type",
+                    "type": "String"
+                },
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "min_charge_cap_mw",
+                    "default": "-1",
+                    "type": "Float64"
+                },
+                {
+                    "name": "balancing_topology",
+                    "type": "String"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                },
+                {
+                    "name": "region",
+                    "type": "String"
+                },
+                {
+                    "name": "eff_up",
+                    "default": "1.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "max_charge_cap_mw",
+                    "default": "-1",
+                    "type": "Float64"
+                },
+                {
+                    "name": "min_cap_mw",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "inv_cost_per_mwyr",
+                    "default": "LinearCurve(0.0)",
+                    "type": "PSY.ValueCurve"
+                },
+                {
+                    "name": "cluster",
+                    "default": "0",
+                    "type": "Int64"
+                },
+                {
+                    "name": "reg_cost",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "min_duration",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "min_cap_mwh",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "reg_max",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "om_costs",
+                    "default": "StorageCost()",
+                    "type": "PSY.OperationalCost"
+                }
+            ]
+        },
+        {
+            "name": "CarbonCaps",
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "power_systems_type",
+                    "type": "String"
+                },
+                {
+                    "name": "pricecap",
+                    "default": "Inf",
+                    "type": "Float64"
+                },
+                {
+                    "name": "eligible_zones",
+                    "default": "Vector{Int64}()",
+                    "type": "Vector{Int64}"
+                },
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "co_2_max_tons_mwh",
+                    "default": "1",
+                    "type": "Float64"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                },
+                {
+                    "name": "co_2_max_mtons",
+                    "default": "Vector{Int64}()",
+                    "type": "Float64"
+                },
+                {
+                    "name": "available",
+                    "type": "Bool"
+                }
+            ]
+        },
+        {
+            "name": "TransportTechnology",
+            "fields": [
+                {
+                    "name": "capital_cost",
+                    "type": "PSY.ValueCurve"
+                },
+                {
+                    "name": "start_region",
+                    "type": "Int64"
+                },
+                {
+                    "name": "available",
+                    "type": "Bool"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "capital_recovery_factor",
+                    "default": "0",
+                    "type": "Int64"
+                },
+                {
+                    "name": "end_region",
+                    "type": "Int64"
+                },
+                {
+                    "name": "power_systems_type",
+                    "type": "String"
+                },
+                {
+                    "name": "angle_limit",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "network_lines",
+                    "type": "Int64"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                },
+                {
+                    "name": "resistance",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "voltage",
+                    "default": "0.0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "maximum_new_capacity",
+                    "type": "Float64"
+                },
+                {
+                    "name": "existing_line_capacity",
+                    "type": "Float64"
+                },
+                {
+                    "name": "wacc",
+                    "default": "0",
+                    "type": "Float64"
+                },
+                {
+                    "name": "line_loss",
+                    "type": "Float64"
+                },
+                {
+                    "name": "maximum_flow",
+                    "type": "Float64"
+                }
+            ]
+        },
+        {
+            "name": "RetrofitPotential",
+            "fields": [
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "retrofit_potential",
+                    "default": "Vector()",
+                    "type": "Vector{PSY.Generator}"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                }
+            ]
+        },
+        {
+            "name": "CurtailableDemandSideTechnology",
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "power_systems_type",
+                    "type": "String"
+                },
+                {
+                    "name": "curtailment_cost_mwh",
+                    "type": "Vector{Float64}"
+                },
+                {
+                    "name": "segments",
+                    "type": "Vector{Int64}"
+                },
+                {
+                    "name": "curtailment_cost",
+                    "type": "Vector{Float64}"
+                },
+                {
+                    "name": "voll",
+                    "type": "Float64"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                },
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "max_demand_curtailment",
+                    "type": "Vector{Float64}"
+                },
+                {
+                    "name": "available",
+                    "type": "Bool"
+                }
+            ]
+        },
+        {
+            "name": "FlexibleDemandTechnology",
+            "fields": [
+                {
+                    "name": "max_demand_delay",
+                    "type": "Float64"
+                },
+                {
+                    "name": "name",
+                    "type": "String"
+                },
+                {
+                    "name": "power_systems_type",
+                    "type": "String"
+                },
+                {
+                    "name": "var_cost_per_mwh",
+                    "type": "PSY.ValueCurve"
+                },
+                {
+                    "name": "internal",
+                    "default": "InfrastructureSystemsInternal()",
+                    "type": "InfrastructureSystemsInternal"
+                },
+                {
+                    "name": "ext",
+                    "default": "Dict()",
+                    "type": "Dict"
+                },
+                {
+                    "name": "max_demand_advance",
+                    "type": "Float64"
+                },
+                {
+                    "name": "demand_energy_efficiency",
+                    "type": "Float64"
+                },
+                {
+                    "name": "available",
+                    "type": "Bool"
+                }
+            ]
+        }
+    ]
+}
