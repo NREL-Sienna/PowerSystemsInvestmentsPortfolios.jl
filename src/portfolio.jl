@@ -1,6 +1,8 @@
 const PORTFOLIO_KWARGS =
     Set((:name, :description, :data_source, :run_checks, :unit_portfolio))
 
+const DATA_FORMAT_VERSION = "0.1.0"
+
 const DEFAULT_DISCOUNT_RATE = 0.07
 const DEFAULT_AGGREGATION = PSY.ACBus
 
@@ -433,7 +435,7 @@ get_compression_settings(portfolio::Portfolio) = IS.get_compression_settings(por
 """
 Return the resolution for all time series.
 """
-get_time_series_resolution(portfolio::Portfolio) =
+get_time_series_resolution(portfolio::Portfolio) = 
     IS.get_time_series_resolution(portfolio.data)
 
 """
@@ -540,7 +542,7 @@ function remove_technology!(
 end
 
 """
-Throws ArgumentError if a PowerSystemsInvestmentPorfol rule blocks removal from the system.
+Throws ArgumentError if a PowerSystemsInvestmentPorfolio rule blocks removal from the system.
 """
 function check_technology_removal(
     portfolio::Portfolio,
