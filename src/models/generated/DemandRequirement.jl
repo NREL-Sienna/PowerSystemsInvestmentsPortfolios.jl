@@ -7,11 +7,11 @@ This file is auto-generated. Do not edit.
 """
     mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
         name::String
-        zone::Int64
+        zone::Union{Nothing, Zone}
         power_systems_type::String
         internal::InfrastructureSystemsInternal
         ext::Dict
-        demand_mw::Float64
+        demand_mw::Union{Nothing, Zone}
         available::Bool
     end
 
@@ -19,18 +19,18 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `name::String`: The technology name
-- `zone::Int64`: Zone Number
+- `zone::Union{Nothing, Zone}`: Zone Number
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `demand_mw::Float64`: (default: `0.0`) Demand profile in MW
+- `demand_mw::Union{Nothing, Zone}`: (default: `0.0`) Demand profile in MW
 - `available::Bool`: (default: `true`) identifies whether the technology is available
 """
 mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     "The technology name"
     name::String
     "Zone Number"
-    zone::Int64
+    zone::Union{Nothing, Zone}
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
     "Internal field"
@@ -38,7 +38,7 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     "Option for providing additional data"
     ext::Dict
     "Demand profile in MW"
-    demand_mw::Float64
+    demand_mw::Union{Nothing, Zone}
     "identifies whether the technology is available"
     available::Bool
 end

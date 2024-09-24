@@ -8,7 +8,7 @@ This file is auto-generated. Do not edit.
     mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
         base_power::Float64
         om_costs_energy::PSY.OperationalCost
-        zone::Int64
+        zone::Union{Nothing, Zone}
         prime_mover_type::PrimeMovers
         existing_cap_energy::Float64
         rsv_cost::Float64
@@ -43,7 +43,7 @@ This file is auto-generated. Do not edit.
 # Arguments
 - `base_power::Float64`: Base power
 - `om_costs_energy::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a technology
-- `zone::Int64`: Zone number
+- `zone::Union{Nothing, Zone}`: Zone number
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `existing_cap_energy::Float64`: (default: `0.0`) Pre-existing energy capacity for a technology (MWh)
 - `rsv_cost::Float64`: (default: `0.0`) Cost of providing upwards spinning or contingency reserves
@@ -78,7 +78,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     "Fixed and variable O&M costs for a technology"
     om_costs_energy::PSY.OperationalCost
     "Zone number"
-    zone::Int64
+    zone::Union{Nothing, Zone}
     "Prime mover for generator"
     prime_mover_type::PrimeMovers
     "Pre-existing energy capacity for a technology (MWh)"
