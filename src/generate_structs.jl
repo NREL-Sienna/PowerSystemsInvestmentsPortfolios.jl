@@ -358,12 +358,6 @@ function dataframe_to_structs(df_dict::Dict)
             name=string(row[!, "technology_id"][1]),
             gen_ID=row[!, "technology_id"][1],
             capital_costs=InputOutputCurve(PiecewiseLinearData(supply_curve_parsed)),
-            operation_costs=ThermalGenerationCost(
-                variable=CostCurve(LinearCurve(row[!, "vom_cost"][1])),
-                fixed=row[!, "fom_cost"][1],
-                start_up=0.0,
-                shut_down=0.0,
-            ),
             balancing_topology=string(row[!, "balancing_topology"][1]),
             prime_mover_type=map_prime_mover(row[!, "prime_mover"][1]),
             fuel=row[!, "fuel_type"][1],
@@ -374,6 +368,12 @@ function dataframe_to_structs(df_dict::Dict)
             initial_capacity=0.0,
 
             # Data we should have but dont currently
+            operation_costs=ThermalGenerationCost(
+                variable=CostCurve(LinearCurve(0.0)),
+                fixed=0.0,
+                start_up=0.0,
+                shut_down=0.0,
+            ),
             start_fuel_mmbtu_per_mw=2.0,
             start_cost_per_mw=91.0,
             up_time=6.0,
@@ -392,7 +392,6 @@ function dataframe_to_structs(df_dict::Dict)
             cluster=1,
             reg_max=0.25,
             rsv_max=0.5,
-            #new_build = 1
         )
         add_technology!(p, t)
     end
