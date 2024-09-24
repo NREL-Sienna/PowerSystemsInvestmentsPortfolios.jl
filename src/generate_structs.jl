@@ -319,8 +319,13 @@ function dataframe_to_structs(df_dict::Dict)
     #Initialize Portfolio
     p = Portfolio(0.07)
 
-    test_zone = Zone(name="test", id=1)
-
+    #initialize Zone structs
+    zones = []
+    for row_zone in eachrow(df_dict["areas"])
+        z = Zone(name = string("zone_", row_zone["name"]), id=parse(Int64, row_zone["name"]))
+        push!(zones, z)
+    end
+    @show zones 
     #Populate SupplyTechnology structs from database (new builds)
     topologies = df_dict["balancing_topologies"]
     supply_curves = filter("description" => contains("Supply"), df_dict["piecewise_linear"])
@@ -361,7 +366,7 @@ function dataframe_to_structs(df_dict::Dict)
             balancing_topology=string(row[!, "balancing_topology"][1]),
             prime_mover_type=map_prime_mover(row[!, "prime_mover"][1]),
             fuel=row[!, "fuel_type"][1],
-            zone=test_zone,
+            zone=zones[area_int],
 
             #Problem ones, need to write functions to extract
             base_power=100.0,
@@ -412,7 +417,7 @@ function dataframe_to_structs(df_dict::Dict)
             balancing_topology=string(row["balancing_topology"]),
             prime_mover_type=map_prime_mover(row["prime_mover"]),
             fuel=row["fuel_type"],
-            zone=test_zone,
+            zone=zones[area_int],
             base_power=row["base_power"],
             initial_capacity=row["rating"],
 
@@ -458,7 +463,7 @@ function dataframe_to_structs(df_dict::Dict)
             name=row["name"],
             base_power=row["base_power"], # Natural Units
             id=row["storage_unit_id"],
-            zone=test_zone,
+            zone=zones[area_int],
             prime_mover_type=map_prime_mover(row["prime_mover"]),
             balancing_topology=row["balancing_topology"],
             existing_cap_power=row["rating"],
@@ -513,12 +518,15 @@ function dataframe_to_structs(df_dict::Dict)
         demand = ts_parsed[2]
         demand_array = TimeArray(dates, demand)
         ts = SingleTimeSeries(string(row["entity_attribute_id"]), demand_array)
+
+        area_int = parse(Int64, row["area"])
+
         #How to parse this timestamp stuff??
-        @show test_zone
+
         d = DemandRequirement{ElectricLoad}(
             #Data pulled from DB
             name=string(row["entity_attribute_id"]),
-            zone=test_zone,#parse(Int64, row["area"]),
+            zone=zones[area_int],#parse(Int64, row["area"]),
 
             #Placeholder/default values
             available=true,
