@@ -11,7 +11,7 @@ This file is auto-generated. Do not edit.
         power_systems_type::String
         internal::InfrastructureSystemsInternal
         ext::Dict
-        demand_mw::Union{Nothing, Zone}
+        demand_mw::Float64
         available::Bool
     end
 
@@ -23,7 +23,7 @@ This file is auto-generated. Do not edit.
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `demand_mw::Union{Nothing, Zone}`: (default: `0.0`) Demand profile in MW
+- `demand_mw::Float64`: (default: `0.0`) Demand profile in MW
 - `available::Bool`: (default: `true`) identifies whether the technology is available
 """
 mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
@@ -38,7 +38,7 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     "Option for providing additional data"
     ext::Dict
     "Demand profile in MW"
-    demand_mw::Union{Nothing, Zone}
+    demand_mw::Float64
     "identifies whether the technology is available"
     available::Bool
 end
