@@ -554,12 +554,11 @@ function dataframe_to_structs(df_dict::Dict)
 
         tx = TransportTechnology{Branch}(;
             name=string(rownumber(row)),
-            network_lines=rownumber(row),
+            network_id = rownumber(row),
             available=true,
             start_region=parse(Int64, row["area_from"]),
             end_region=parse(Int64, row["area_to"]),
             maximum_new_capacity=row["max_flow_from"],
-            maximum_flow=row["max_flow_from"],
             existing_line_capacity=existing_capacity,
 
             #stuff we don't have, but probably should
