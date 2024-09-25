@@ -8,7 +8,7 @@ This file is auto-generated. Do not edit.
     mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
         base_power::Float64
         om_costs_energy::PSY.OperationalCost
-        zone::Int64
+        zone::Union{Nothing, Zone}
         prime_mover_type::PrimeMovers
         existing_cap_energy::Float64
         rsv_cost::Float64
@@ -18,6 +18,7 @@ This file is auto-generated. Do not edit.
         storage_tech::StorageTech
         capital_costs_power::PSY.ValueCurve
         max_duration::Float64
+        unit_size_power::Float64
         id::Int64
         min_cap_power::Float64
         capital_costs_energy::PSY.ValueCurve
@@ -30,8 +31,10 @@ This file is auto-generated. Do not edit.
         om_costs_power::PSY.OperationalCost
         balancing_topology::String
         min_cap_energy::Float64
-        ext::Dict
+        initial_state_of_charge::Float64
         eff_up::Float64
+        unit_size_energy::Float64
+        ext::Dict
         reg_cost::Float64
         min_duration::Float64
         max_cap_energy::Float64
@@ -43,7 +46,7 @@ This file is auto-generated. Do not edit.
 # Arguments
 - `base_power::Float64`: Base power
 - `om_costs_energy::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a technology
-- `zone::Int64`: Zone number
+- `zone::Union{Nothing, Zone}`: Zone number
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `existing_cap_energy::Float64`: (default: `0.0`) Pre-existing energy capacity for a technology (MWh)
 - `rsv_cost::Float64`: (default: `0.0`) Cost of providing upwards spinning or contingency reserves
@@ -53,6 +56,7 @@ This file is auto-generated. Do not edit.
 - `storage_tech::StorageTech`: Storage Technology Type
 - `capital_costs_power::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
 - `max_duration::Float64`: (default: `1000.0`) Maximum allowable durection for a storage technology
+- `unit_size_power::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
 - `id::Int64`: ID for individual generator
 - `min_cap_power::Float64`: (default: `0.0`) Minimum required power capacity for a storage technology
 - `capital_costs_energy::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
@@ -65,8 +69,10 @@ This file is auto-generated. Do not edit.
 - `om_costs_power::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a technology
 - `balancing_topology::String`: Set of balancing nodes
 - `min_cap_energy::Float64`: (default: `0.0`) Minimum required energy capacity for a storage technology
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `initial_state_of_charge::Float64`: (default: `0.0`) State of charge for storage technology in the first timepoint (MWh).
 - `eff_up::Float64`: (default: `1.0`) Efficiency of charging storage
+- `unit_size_energy::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
+- `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `reg_cost::Float64`: (default: `0.0`) Cost of providing regulation reserves 
 - `min_duration::Float64`: (default: `0.0`) Minimum required durection for a storage technology
 - `max_cap_energy::Float64`: (default: `1e8`) Maximum allowable installed energy capacity for a storage technology
@@ -78,7 +84,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     "Fixed and variable O&M costs for a technology"
     om_costs_energy::PSY.OperationalCost
     "Zone number"
-    zone::Int64
+    zone::Union{Nothing, Zone}
     "Prime mover for generator"
     prime_mover_type::PrimeMovers
     "Pre-existing energy capacity for a technology (MWh)"
@@ -97,6 +103,8 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     capital_costs_power::PSY.ValueCurve
     "Maximum allowable durection for a storage technology"
     max_duration::Float64
+    "Used for discrete investment decisions. Size of each unit being built (MW)"
+    unit_size_power::Float64
     "ID for individual generator"
     id::Int64
     "Minimum required power capacity for a storage technology"
@@ -121,10 +129,14 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     balancing_topology::String
     "Minimum required energy capacity for a storage technology"
     min_cap_energy::Float64
-    "Option for providing additional data"
-    ext::Dict
+    "State of charge for storage technology in the first timepoint (MWh)."
+    initial_state_of_charge::Float64
     "Efficiency of charging storage"
     eff_up::Float64
+    "Used for discrete investment decisions. Size of each unit being built (MW)"
+    unit_size_energy::Float64
+    "Option for providing additional data"
+    ext::Dict
     "Cost of providing regulation reserves "
     reg_cost::Float64
     "Minimum required durection for a storage technology"
@@ -136,8 +148,8 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
 end
 
 
-function StorageTechnology{T}(; base_power, om_costs_energy=StorageCost(), zone, prime_mover_type=PrimeMovers.OT, existing_cap_energy=0.0, rsv_cost=0.0, available, existing_cap_power=0.0, name, storage_tech, capital_costs_power=LinearCurve(0.0), max_duration=1000.0, id, min_cap_power=0.0, capital_costs_energy=LinearCurve(0.0), losses=1.0, eff_down=1.0, rsv_max=0.0, max_cap_power=1e8, power_systems_type, internal=InfrastructureSystemsInternal(), om_costs_power=StorageCost(), balancing_topology, min_cap_energy=0.0, ext=Dict(), eff_up=1.0, reg_cost=0.0, min_duration=0.0, max_cap_energy=1e8, reg_max=0.0, ) where T <: PSY.Storage
-    StorageTechnology{T}(base_power, om_costs_energy, zone, prime_mover_type, existing_cap_energy, rsv_cost, available, existing_cap_power, name, storage_tech, capital_costs_power, max_duration, id, min_cap_power, capital_costs_energy, losses, eff_down, rsv_max, max_cap_power, power_systems_type, internal, om_costs_power, balancing_topology, min_cap_energy, ext, eff_up, reg_cost, min_duration, max_cap_energy, reg_max, )
+function StorageTechnology{T}(; base_power, om_costs_energy=StorageCost(), zone, prime_mover_type=PrimeMovers.OT, existing_cap_energy=0.0, rsv_cost=0.0, available, existing_cap_power=0.0, name, storage_tech, capital_costs_power=LinearCurve(0.0), max_duration=1000.0, unit_size_power=0.0, id, min_cap_power=0.0, capital_costs_energy=LinearCurve(0.0), losses=1.0, eff_down=1.0, rsv_max=0.0, max_cap_power=1e8, power_systems_type, internal=InfrastructureSystemsInternal(), om_costs_power=StorageCost(), balancing_topology, min_cap_energy=0.0, initial_state_of_charge=0.0, eff_up=1.0, unit_size_energy=0.0, ext=Dict(), reg_cost=0.0, min_duration=0.0, max_cap_energy=1e8, reg_max=0.0, ) where T <: PSY.Storage
+    StorageTechnology{T}(base_power, om_costs_energy, zone, prime_mover_type, existing_cap_energy, rsv_cost, available, existing_cap_power, name, storage_tech, capital_costs_power, max_duration, unit_size_power, id, min_cap_power, capital_costs_energy, losses, eff_down, rsv_max, max_cap_power, power_systems_type, internal, om_costs_power, balancing_topology, min_cap_energy, initial_state_of_charge, eff_up, unit_size_energy, ext, reg_cost, min_duration, max_cap_energy, reg_max, )
 end
 
 """Get [`StorageTechnology`](@ref) `base_power`."""
@@ -164,6 +176,8 @@ get_storage_tech(value::StorageTechnology) = value.storage_tech
 get_capital_costs_power(value::StorageTechnology) = value.capital_costs_power
 """Get [`StorageTechnology`](@ref) `max_duration`."""
 get_max_duration(value::StorageTechnology) = value.max_duration
+"""Get [`StorageTechnology`](@ref) `unit_size_power`."""
+get_unit_size_power(value::StorageTechnology) = value.unit_size_power
 """Get [`StorageTechnology`](@ref) `id`."""
 get_id(value::StorageTechnology) = value.id
 """Get [`StorageTechnology`](@ref) `min_cap_power`."""
@@ -188,10 +202,14 @@ get_om_costs_power(value::StorageTechnology) = value.om_costs_power
 get_balancing_topology(value::StorageTechnology) = value.balancing_topology
 """Get [`StorageTechnology`](@ref) `min_cap_energy`."""
 get_min_cap_energy(value::StorageTechnology) = value.min_cap_energy
-"""Get [`StorageTechnology`](@ref) `ext`."""
-get_ext(value::StorageTechnology) = value.ext
+"""Get [`StorageTechnology`](@ref) `initial_state_of_charge`."""
+get_initial_state_of_charge(value::StorageTechnology) = value.initial_state_of_charge
 """Get [`StorageTechnology`](@ref) `eff_up`."""
 get_eff_up(value::StorageTechnology) = value.eff_up
+"""Get [`StorageTechnology`](@ref) `unit_size_energy`."""
+get_unit_size_energy(value::StorageTechnology) = value.unit_size_energy
+"""Get [`StorageTechnology`](@ref) `ext`."""
+get_ext(value::StorageTechnology) = value.ext
 """Get [`StorageTechnology`](@ref) `reg_cost`."""
 get_reg_cost(value::StorageTechnology) = value.reg_cost
 """Get [`StorageTechnology`](@ref) `min_duration`."""
@@ -225,6 +243,8 @@ set_storage_tech!(value::StorageTechnology, val) = value.storage_tech = val
 set_capital_costs_power!(value::StorageTechnology, val) = value.capital_costs_power = val
 """Set [`StorageTechnology`](@ref) `max_duration`."""
 set_max_duration!(value::StorageTechnology, val) = value.max_duration = val
+"""Set [`StorageTechnology`](@ref) `unit_size_power`."""
+set_unit_size_power!(value::StorageTechnology, val) = value.unit_size_power = val
 """Set [`StorageTechnology`](@ref) `id`."""
 set_id!(value::StorageTechnology, val) = value.id = val
 """Set [`StorageTechnology`](@ref) `min_cap_power`."""
@@ -249,10 +269,14 @@ set_om_costs_power!(value::StorageTechnology, val) = value.om_costs_power = val
 set_balancing_topology!(value::StorageTechnology, val) = value.balancing_topology = val
 """Set [`StorageTechnology`](@ref) `min_cap_energy`."""
 set_min_cap_energy!(value::StorageTechnology, val) = value.min_cap_energy = val
-"""Set [`StorageTechnology`](@ref) `ext`."""
-set_ext!(value::StorageTechnology, val) = value.ext = val
+"""Set [`StorageTechnology`](@ref) `initial_state_of_charge`."""
+set_initial_state_of_charge!(value::StorageTechnology, val) = value.initial_state_of_charge = val
 """Set [`StorageTechnology`](@ref) `eff_up`."""
 set_eff_up!(value::StorageTechnology, val) = value.eff_up = val
+"""Set [`StorageTechnology`](@ref) `unit_size_energy`."""
+set_unit_size_energy!(value::StorageTechnology, val) = value.unit_size_energy = val
+"""Set [`StorageTechnology`](@ref) `ext`."""
+set_ext!(value::StorageTechnology, val) = value.ext = val
 """Set [`StorageTechnology`](@ref) `reg_cost`."""
 set_reg_cost!(value::StorageTechnology, val) = value.reg_cost = val
 """Set [`StorageTechnology`](@ref) `min_duration`."""

@@ -36,6 +36,7 @@ This file is auto-generated. Do not edit.
         maximum_capacity::Float64
         cluster::Int64
         ramp_up_percentage::Float64
+        unit_size::Float64
         reg_cost::Float64
         min_generation_percentage::Float64
         start_cost_per_mw::Float64
@@ -76,6 +77,7 @@ This file is auto-generated. Do not edit.
 - `maximum_capacity::Float64`: (default: `Inf`) Maximum allowable installed capacity for a technology
 - `cluster::Int64`: (default: `1`) Number of the cluster when representing multiple clusters of a given technology in a given region.
 - `ramp_up_percentage::Float64`: (default: `100.0`) Maximum increase in output between operation periods. Fraction of total capacity
+- `unit_size::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
 - `reg_cost::Float64`: (default: `0.0`) Cost of providing regulation reserves 
 - `min_generation_percentage::Float64`: (default: `0.0`) Minimum generation as a fraction of total capacity
 - `start_cost_per_mw::Float64`: (default: `0.0`) Cost per MW of nameplate capacity to start a generator (/MW per start).
@@ -143,6 +145,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     cluster::Int64
     "Maximum increase in output between operation periods. Fraction of total capacity"
     ramp_up_percentage::Float64
+    "Used for discrete investment decisions. Size of each unit being built (MW)"
+    unit_size::Float64
     "Cost of providing regulation reserves "
     reg_cost::Float64
     "Minimum generation as a fraction of total capacity"
@@ -156,8 +160,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
 end
 
 
-function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, zone=nothing, prime_mover_type=PrimeMovers.OT, minimum_required_capacity=0.0, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), outage_factor=1.0, rsv_cost=0.0, cofire_start_max=nothing, gen_ID, available=True, co2=0.0, name, cofire_start_min=nothing, ramp_dn_percentage=100.0, down_time=0.0, initial_capacity=0.0, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), rsv_max=0.0, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, maximum_capacity=Inf, cluster=1, ramp_up_percentage=100.0, reg_cost=0.0, min_generation_percentage=0.0, start_cost_per_mw=0.0, reg_max=0.0, up_time=0.0, ) where T <: PSY.Generator
-    SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, zone, prime_mover_type, minimum_required_capacity, cofire_level_min, capital_costs, outage_factor, rsv_cost, cofire_start_max, gen_ID, available, co2, name, cofire_start_min, ramp_dn_percentage, down_time, initial_capacity, start_fuel_mmbtu_per_mw, operation_costs, rsv_max, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, maximum_capacity, cluster, ramp_up_percentage, reg_cost, min_generation_percentage, start_cost_per_mw, reg_max, up_time, )
+function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, zone=nothing, prime_mover_type=PrimeMovers.OT, minimum_required_capacity=0.0, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), outage_factor=1.0, rsv_cost=0.0, cofire_start_max=nothing, gen_ID, available=True, co2=0.0, name, cofire_start_min=nothing, ramp_dn_percentage=100.0, down_time=0.0, initial_capacity=0.0, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), rsv_max=0.0, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, maximum_capacity=Inf, cluster=1, ramp_up_percentage=100.0, unit_size=0.0, reg_cost=0.0, min_generation_percentage=0.0, start_cost_per_mw=0.0, reg_max=0.0, up_time=0.0, ) where T <: PSY.Generator
+    SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, zone, prime_mover_type, minimum_required_capacity, cofire_level_min, capital_costs, outage_factor, rsv_cost, cofire_start_max, gen_ID, available, co2, name, cofire_start_min, ramp_dn_percentage, down_time, initial_capacity, start_fuel_mmbtu_per_mw, operation_costs, rsv_max, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, maximum_capacity, cluster, ramp_up_percentage, unit_size, reg_cost, min_generation_percentage, start_cost_per_mw, reg_max, up_time, )
 end
 
 """Get [`SupplyTechnology`](@ref) `base_power`."""
@@ -220,6 +224,8 @@ get_maximum_capacity(value::SupplyTechnology) = value.maximum_capacity
 get_cluster(value::SupplyTechnology) = value.cluster
 """Get [`SupplyTechnology`](@ref) `ramp_up_percentage`."""
 get_ramp_up_percentage(value::SupplyTechnology) = value.ramp_up_percentage
+"""Get [`SupplyTechnology`](@ref) `unit_size`."""
+get_unit_size(value::SupplyTechnology) = value.unit_size
 """Get [`SupplyTechnology`](@ref) `reg_cost`."""
 get_reg_cost(value::SupplyTechnology) = value.reg_cost
 """Get [`SupplyTechnology`](@ref) `min_generation_percentage`."""
@@ -291,6 +297,8 @@ set_maximum_capacity!(value::SupplyTechnology, val) = value.maximum_capacity = v
 set_cluster!(value::SupplyTechnology, val) = value.cluster = val
 """Set [`SupplyTechnology`](@ref) `ramp_up_percentage`."""
 set_ramp_up_percentage!(value::SupplyTechnology, val) = value.ramp_up_percentage = val
+"""Set [`SupplyTechnology`](@ref) `unit_size`."""
+set_unit_size!(value::SupplyTechnology, val) = value.unit_size = val
 """Set [`SupplyTechnology`](@ref) `reg_cost`."""
 set_reg_cost!(value::SupplyTechnology, val) = value.reg_cost = val
 """Set [`SupplyTechnology`](@ref) `min_generation_percentage`."""
