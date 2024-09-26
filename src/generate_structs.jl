@@ -411,7 +411,7 @@ function dataframe_to_structs(df_dict::Dict)
         tech_id = row["unit_id"]
         result = filter(row -> row[:entity_id] in tech_id, df_dict["attributes"])
 
-
+        @show result[occursin.("Startup Cost", result[!, :name]), :value][1]
         parametric = map_prime_mover_to_parametric(row["prime_mover"])
         t = SupplyTechnology{parametric}(;
             # Data pulled from DB
@@ -428,23 +428,22 @@ function dataframe_to_structs(df_dict::Dict)
             # Data we should have but dont currently
             operation_costs=ThermalGenerationCost(
                 variable=CostCurve(LinearCurve(0.0)),
-                fixed=result[occursin.("FOM", result[!, :name]), :value]
-                ,
+                fixed=result[occursin.("FOM", result[!, :name]), :value][1],
                 start_up=0.0,
                 shut_down=0.0,
             ),
             start_fuel_mmbtu_per_mw=2.0,
-            start_cost_per_mw=result[occursin.("Startup Cost", result[!, :name]), :value],
-            up_time=result[occursin.("Uptime", result[!, :name]), :value],
-            down_time=result[occursin.("Downtime", result[!, :name]), :value],
-            heat_rate_mmbtu_per_mwh=rresult[occursin.("Heat Rate", result[!, :name]), :value],
-            co2=result[occursin.("CO2", result[!, :name]), :value],
+            start_cost_per_mw=result[occursin.("Startup Cost", result[!, :name]), :value][1],
+            up_time=result[occursin.("Uptime", result[!, :name]), :value][1],
+            down_time=result[occursin.("Downtime", result[!, :name]), :value][1],
+            heat_rate_mmbtu_per_mwh=result[occursin.("Heat Rate", result[!, :name]), :value][1],
+            co2=result[occursin.("CO2", result[!, :name]), :value][1],
             ramp_dn_percentage=0.64,
             ramp_up_percentage=0.64,
 
             #Placeholder or default values (modeling assumptions)
             available=true,
-            minimum_required_capacity=result[occursin.("Minimum Stable", result[!, :name]), :value],
+            minimum_required_capacity=result[occursin.("Minimum Stable", result[!, :name]), :value][1],
             min_generation_percentage=0.0,
             maximum_capacity=1e8,
             power_systems_type=string(parametric),
