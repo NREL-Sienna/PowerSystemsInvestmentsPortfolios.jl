@@ -407,6 +407,11 @@ function dataframe_to_structs(df_dict::Dict)
         area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
         area_int = parse(Int64, area)
 
+        # This will return all rows where entity_id matches any value in the tech_id vector
+        tech_id = row["unit_id"]
+        result = filter(row -> row[:entity_id] in tech_id, df_dict["attributes"])
+
+
         parametric = map_prime_mover_to_parametric(row["prime_mover"])
         t = SupplyTechnology{parametric}(;
             # Data pulled from DB
@@ -423,22 +428,22 @@ function dataframe_to_structs(df_dict::Dict)
             # Data we should have but dont currently
             operation_costs=ThermalGenerationCost(
                 variable=CostCurve(LinearCurve(0.0)),
-                fixed=0.0,
+                fixed=filter(row -> occursin("FOM", row[:name]), result),
                 start_up=0.0,
                 shut_down=0.0,
             ),
             start_fuel_mmbtu_per_mw=2.0,
-            start_cost_per_mw=91.0,
-            up_time=6.0,
-            down_time=6.0,
-            heat_rate_mmbtu_per_mwh=7.43,
-            co2=0.05306,
+            start_cost_per_mw=filter(row -> occursin("Startup Cost", row[:name]), result),
+            up_time=filter(row -> occursin("Uptime", row[:name]), result),
+            down_time=filter(row -> occursin("Downtime", row[:name]), result),
+            heat_rate_mmbtu_per_mwh=filter(row -> occursin("Heat Rate", row[:name]), result),
+            co2=filter(row -> occursin("CO2", row[:name]), result),
             ramp_dn_percentage=0.64,
             ramp_up_percentage=0.64,
 
             #Placeholder or default values (modeling assumptions)
             available=true,
-            minimum_required_capacity=0.0,
+            minimum_required_capacity=filter(row -> occursin("Minimum Stable", row[:name]), result),
             min_generation_percentage=0.0,
             maximum_capacity=1e8,
             power_systems_type=string(parametric),
