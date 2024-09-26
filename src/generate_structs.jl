@@ -410,8 +410,7 @@ function dataframe_to_structs(df_dict::Dict)
         # This will return all rows where entity_id matches any value in the tech_id vector
         tech_id = row["unit_id"]
         result = filter(row -> row[:entity_id] in tech_id, df_dict["attributes"])
-        heat_rate_piecewise_lin = df_dict["piecewise_linear"][df_dict["piecewise_linear"][!, :entity_attribute_id] .== tech_id, :]["piecewise_linear_blob"]
-        parse_json_to_arrays(heat_rate_piecewise_lin)
+        heat_rate_piecewise_lin = df_dict["piecewise_linear"][df_dict["piecewise_linear"][!, :entity_attribute_id] .== tech_id, :][:, "piecewise_linear_blob"]
         
 
         @show result[occursin.("Startup Cost", result[!, :name]), :value][1]
