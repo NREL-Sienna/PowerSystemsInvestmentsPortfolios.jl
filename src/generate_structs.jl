@@ -410,6 +410,9 @@ function dataframe_to_structs(df_dict::Dict)
         # This will return all rows where entity_id matches any value in the tech_id vector
         tech_id = row["unit_id"]
         result = filter(row -> row[:entity_id] in tech_id, df_dict["attributes"])
+        heat_rate_piecewise_lin = df_dict["piecewise_linear"][df_dict["piecewise_linear"][!, :entity_attribute_id] .== tech_id, :]["piecewise_linear_blob"]
+        parse_json_to_arrays(heat_rate_piecewise_lin)
+        
 
         @show result[occursin.("Startup Cost", result[!, :name]), :value][1]
         parametric = map_prime_mover_to_parametric(row["prime_mover"])
@@ -436,8 +439,9 @@ function dataframe_to_structs(df_dict::Dict)
             start_cost_per_mw=result[occursin.("Startup Cost", result[!, :name]), :value][1],
             up_time=result[occursin.("Uptime", result[!, :name]), :value][1],
             down_time=result[occursin.("Downtime", result[!, :name]), :value][1],
-            heat_rate_mmbtu_per_mwh=result[occursin.("Heat Rate", result[!, :name]), :value][1],
-            co2=result[occursin.("CO2", result[!, :name]), :value][1],
+            heat_rate_mmbtu_per_mwh=parse_json_to_arrays(heat_rate_piecewise_lin),
+            co2=length(result[occursin.("CO2", result[!, :name]), :value]) > 0 ? 
+                    coalesce(result[occursin.("CO2", result[!, :name]), :value][1], 0.0) : 0.0,
             ramp_dn_percentage=0.64,
             ramp_up_percentage=0.64,
 
