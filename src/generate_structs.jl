@@ -325,7 +325,6 @@ function dataframe_to_structs(df_dict::Dict)
         z = Zone(name = string("zone_", row_zone["name"]), id=parse(Int64, row_zone["name"]))
         push!(zones, z)
     end
-    @show zones 
     #Populate SupplyTechnology structs from database (new builds)
     topologies = df_dict["balancing_topologies"]
     supply_curves = filter("description" => contains("Supply"), df_dict["piecewise_linear"])
