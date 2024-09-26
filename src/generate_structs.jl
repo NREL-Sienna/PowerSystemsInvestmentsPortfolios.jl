@@ -428,22 +428,23 @@ function dataframe_to_structs(df_dict::Dict)
             # Data we should have but dont currently
             operation_costs=ThermalGenerationCost(
                 variable=CostCurve(LinearCurve(0.0)),
-                fixed=filter(row -> occursin("FOM", row[:name]), result),
+                fixed=result[occursin("FOM", result[:name]), :value][1]
+                ,
                 start_up=0.0,
                 shut_down=0.0,
             ),
             start_fuel_mmbtu_per_mw=2.0,
-            start_cost_per_mw=filter(row -> occursin("Startup Cost", row[:name]), result),
-            up_time=filter(row -> occursin("Uptime", row[:name]), result),
-            down_time=filter(row -> occursin("Downtime", row[:name]), result),
-            heat_rate_mmbtu_per_mwh=filter(row -> occursin("Heat Rate", row[:name]), result),
-            co2=filter(row -> occursin("CO2", row[:name]), result),
+            start_cost_per_mw=result[occursin("Startup Cost", result[:name]), :value][1],
+            up_time=result[occursin("Uptime", result[:name]), :value][1], 
+            down_time=result[occursin("Downtime", result[:name]), :value][1],
+            heat_rate_mmbtu_per_mwh=result[occursin("Heat Rate", result[:name]), :value][1],
+            co2=result[occursin("CO2", result[:name]), :value][1],
             ramp_dn_percentage=0.64,
             ramp_up_percentage=0.64,
 
             #Placeholder or default values (modeling assumptions)
             available=true,
-            minimum_required_capacity=filter(row -> occursin("Minimum Stable", row[:name]), result),
+            minimum_required_capacity=result[occursin("Minimum Stable", result[:name]), :value][1],
             min_generation_percentage=0.0,
             maximum_capacity=1e8,
             power_systems_type=string(parametric),
