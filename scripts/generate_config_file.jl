@@ -46,4 +46,4 @@ function generate_file(output_file, input_file)
 
 end
 
-generate_file("C:/Users/jpotts/Documents/test_json.json", "C:/Users/jpotts/Documents/SiennaInvestSchema_openapi.json")
+generate_file("src/descriptors/portfolio_structs.json", "C:/Users/jpotts/Documents/SiennaInvestSchema_openapi.json")
