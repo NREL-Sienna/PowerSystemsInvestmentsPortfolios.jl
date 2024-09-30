@@ -20,7 +20,8 @@ import InfrastructureSystems:
     StructField,
     CostCurve,
     LinearCurve,
-    InfrastructureSystemsComponent
+    InfrastructureSystemsComponent,
+    InfrastructureSystemsType
 
 import PowerSystems
 import PowerSystems:
@@ -35,6 +36,7 @@ import DataFrames
 import DBInterface
 import TimeSeries
 import Dates
+import DataStructures: OrderedDict
 
 # Temporary, imports not working properly for some reason?
 using DataFrames
