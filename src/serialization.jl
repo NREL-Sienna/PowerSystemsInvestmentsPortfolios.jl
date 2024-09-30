@@ -48,7 +48,7 @@ function from_dict(
 )
     # Read any field that is defined in Portfolio but optional for the constructors and not
     # already handled here.
-
+    #@show raw
     handled = (
         "aggregation",
         "discount_rate",
@@ -173,6 +173,88 @@ function deserialize_components!(sys::Portfolio, raw)
     deserialize_and_add!()
 end
 
+const _CONTAINS_SHOULD_ENCODE = Technology  # PSY types with fields that we should_encode_as_uuid
+
+function IS.deserialize(
+    ::Type{T},
+    data::Dict,
+    component_cache::Dict,
+) where {T <: _CONTAINS_SHOULD_ENCODE}
+    @debug "deserialize Component" _group = IS.LOG_GROUP_SERIALIZATION T data
+    vals = Dict{Symbol, Any}()
+    for (name, type) in zip(fieldnames(T), fieldtypes(T))
+        field_name = string(name)
+        if haskey(data, field_name)
+            val = data[field_name]
+        else
+            continue
+        end
+        if val isa Dict && haskey(val, IS.METADATA_KEY)
+            vals[name] = deserialize_uuid_handling(
+                IS.get_type_from_serialization_metadata(IS.get_serialization_metadata(val)),
+                val,
+                component_cache,
+            )
+        else
+            vals[name] = deserialize_uuid_handling(type, val, component_cache)
+        end
+    end
+
+    type = IS.get_type_from_serialization_metadata(data[IS.METADATA_KEY])
+    @show type
+    return type(; vals...)
+end
+
+"""
+Deserialize the value, converting UUIDs to components where necessary.
+"""
+function deserialize_uuid_handling(field_type, val, component_cache)
+    @debug "deserialize_uuid_handling" _group = IS.LOG_GROUP_SERIALIZATION field_type val
+    if val === nothing
+        value = val
+    elseif should_encode_as_uuid(field_type)
+        if field_type <: Vector
+            _vals = field_type()
+            for _val in val
+                uuid = deserialize(Base.UUID, _val)
+                component = component_cache[uuid]
+                push!(_vals, component)
+            end
+            value = _vals
+        else
+            @show val
+            uuid = deserialize(Base.UUID, val["internal"]["uuid"])
+            component = component_cache[uuid]
+            value = component
+        end
+    elseif field_type <: _CONTAINS_SHOULD_ENCODE
+        value = IS.deserialize(field_type, val, component_cache)
+    elseif field_type <: Union{Nothing, _CONTAINS_SHOULD_ENCODE}
+        value = IS.deserialize(field_type.b, val, component_cache)
+    elseif field_type <: InfrastructureSystemsType
+        value = deserialize(field_type, val)
+    elseif field_type isa Union && field_type.a <: Nothing && !(field_type.b <: Union)
+        # Nothing has already been handled. Apply the second type as long as there isn't a
+        # third. Julia appears to always put the Nothing in field a.
+        value = deserialize(field_type.b, val)
+    else
+        value = deserialize(field_type, val)
+    end
+
+    return value
+end
+
+const _ENCODE_AS_UUID = (
+    Union{Nothing, SupplyTechnology},
+    Union{Nothing, StorageTechnology},
+    Union{Nothing, DemandRequirement},
+    Union{Nothing, Zone},
+    Union{Nothing, TransportTechnology},
+    Vector{Service},
+)
+should_encode_as_uuid(::Type{T}) where {T} = any(x -> T <: x, _ENCODE_AS_UUID)
+
+
 """
 Allow types to implement handling of special cases during deserialization.
 
@@ -235,7 +317,7 @@ end
 function _serialize_portfolio_metadata_to_file(portfolio::Portfolio, filename, user_data)
     name = get_name(portfolio)
     description = get_description(portfolio)
-    resolution = get_time_series_resolution(portfolio).value
+    resolution = get_time_series_resolution(portfolio)[1]
     metadata = OrderedDict(
         "name" => isnothing(name) ? "" : name,
         "description" => isnothing(description) ? "" : description,

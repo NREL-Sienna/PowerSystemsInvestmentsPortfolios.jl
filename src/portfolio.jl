@@ -436,7 +436,7 @@ get_compression_settings(portfolio::Portfolio) = IS.get_compression_settings(por
 Return the resolution for all time series.
 """
 get_time_series_resolution(portfolio::Portfolio) = 
-    IS.get_time_series_resolution(portfolio.data)
+    IS.get_time_series_resolutions(portfolio.data)
 
 """
 Remove all time series data from the system.
