@@ -101,3 +101,7 @@ set_internal!(value::CurtailableDemandSideTechnology, val) = value.internal = va
 set_max_demand_curtailment!(value::CurtailableDemandSideTechnology, val) = value.max_demand_curtailment = val
 """Set [`CurtailableDemandSideTechnology`](@ref) `available`."""
 set_available!(value::CurtailableDemandSideTechnology, val) = value.available = val
+
+IS.serialize(val::CurtailableDemandSideTechnology) = IS.serialize_struct(val)
+
+IS.deserialize(T::Type{<:CurtailableDemandSideTechnology}, val::Dict) = IS.deserialize_struct(T, val)

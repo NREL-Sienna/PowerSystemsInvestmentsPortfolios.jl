@@ -173,7 +173,7 @@ function deserialize_components!(sys::Portfolio, raw)
     deserialize_and_add!()
 end
 
-const _CONTAINS_SHOULD_ENCODE = Technology  # PSY types with fields that we should_encode_as_uuid
+const _CONTAINS_SHOULD_ENCODE = Technology  # PSIP types with fields that we should_encode_as_uuid
 
 function IS.deserialize(
     ::Type{T},

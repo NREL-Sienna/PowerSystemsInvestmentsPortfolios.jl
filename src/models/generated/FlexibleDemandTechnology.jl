@@ -93,3 +93,7 @@ set_max_demand_advance!(value::FlexibleDemandTechnology, val) = value.max_demand
 set_demand_energy_efficiency!(value::FlexibleDemandTechnology, val) = value.demand_energy_efficiency = val
 """Set [`FlexibleDemandTechnology`](@ref) `available`."""
 set_available!(value::FlexibleDemandTechnology, val) = value.available = val
+
+IS.serialize(val::FlexibleDemandTechnology) = IS.serialize_struct(val)
+
+IS.deserialize(T::Type{<:FlexibleDemandTechnology}, val::Dict) = IS.deserialize_struct(T, val)

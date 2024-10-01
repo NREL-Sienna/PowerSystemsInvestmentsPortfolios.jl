@@ -101,3 +101,7 @@ set_technology_efficiency!(value::DemandSideTechnology, val) = value.technology_
 set_ramp_dn_percentage!(value::DemandSideTechnology, val) = value.ramp_dn_percentage = val
 """Set [`DemandSideTechnology`](@ref) `available`."""
 set_available!(value::DemandSideTechnology, val) = value.available = val
+
+IS.serialize(val::DemandSideTechnology) = IS.serialize_struct(val)
+
+IS.deserialize(T::Type{<:DemandSideTechnology}, val::Dict) = IS.deserialize_struct(T, val)

@@ -1,3 +1,10 @@
+import Mustache
+
+const SERIALIZATION_TEMPLATE = """
+IS.serialize(val::{{struct_name}}) = IS.serialize_struct(val)
+IS.deserialize(T::Type{<:{{struct_name}}}, val::Dict) = IS.deserialize_struct(T, val)
+"""
+
 function read_json_data(filename::String)
     try
         return JSONSchema.Schema(JSON3.read(filename))
@@ -11,7 +18,7 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
     unique_accessor_functions = Set{String}()
     unique_setter_functions = Set{String}()
 
-    for (struct_name, input) in data.data["\$defs"]
+    for (struct_name, input) in data.data["x-\$defs"]
         properties = input["properties"]
         item = Dict{String, Any}()
         item["has_internal"] = false
@@ -136,7 +143,11 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
 
         open(filename, "w") do io
             write(io, strip(MU.render(IS.STRUCT_TEMPLATE, item)))
+            write(io, "\n\n")
+
+            write(io, strip(MU.render(SERIALIZATION_TEMPLATE, item)))
             write(io, "\n")
+
             push!(struct_names, item["struct_name"])
         end
 

@@ -77,3 +77,7 @@ set_ext!(value::DemandRequirement, val) = value.ext = val
 set_demand_mw!(value::DemandRequirement, val) = value.demand_mw = val
 """Set [`DemandRequirement`](@ref) `available`."""
 set_available!(value::DemandRequirement, val) = value.available = val
+
+IS.serialize(val::DemandRequirement) = IS.serialize_struct(val)
+
+IS.deserialize(T::Type{<:DemandRequirement}, val::Dict) = IS.deserialize_struct(T, val)

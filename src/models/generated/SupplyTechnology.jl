@@ -309,3 +309,7 @@ set_start_cost_per_mw!(value::SupplyTechnology, val) = value.start_cost_per_mw =
 set_reg_max!(value::SupplyTechnology, val) = value.reg_max = val
 """Set [`SupplyTechnology`](@ref) `up_time`."""
 set_up_time!(value::SupplyTechnology, val) = value.up_time = val
+
+IS.serialize(val::SupplyTechnology) = IS.serialize_struct(val)
+
+IS.deserialize(T::Type{<:SupplyTechnology}, val::Dict) = IS.deserialize_struct(T, val)

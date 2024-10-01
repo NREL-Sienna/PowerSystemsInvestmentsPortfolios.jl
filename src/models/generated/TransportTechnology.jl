@@ -157,3 +157,7 @@ set_existing_line_capacity!(value::TransportTechnology, val) = value.existing_li
 set_wacc!(value::TransportTechnology, val) = value.wacc = val
 """Set [`TransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::TransportTechnology, val) = value.line_loss = val
+
+IS.serialize(val::TransportTechnology) = IS.serialize_struct(val)
+
+IS.deserialize(T::Type{<:TransportTechnology}, val::Dict) = IS.deserialize_struct(T, val)

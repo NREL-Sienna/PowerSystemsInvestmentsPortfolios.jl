@@ -54,3 +54,7 @@ set_internal!(value::RetrofitPotential, val) = value.internal = val
 set_retrofit_potential!(value::RetrofitPotential, val) = value.retrofit_potential = val
 """Set [`RetrofitPotential`](@ref) `ext`."""
 set_ext!(value::RetrofitPotential, val) = value.ext = val
+
+IS.serialize(val::RetrofitPotential) = IS.serialize_struct(val)
+
+IS.deserialize(T::Type{<:RetrofitPotential}, val::Dict) = IS.deserialize_struct(T, val)

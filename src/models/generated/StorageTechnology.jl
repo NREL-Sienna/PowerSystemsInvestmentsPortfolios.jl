@@ -285,3 +285,7 @@ set_min_duration!(value::StorageTechnology, val) = value.min_duration = val
 set_max_cap_energy!(value::StorageTechnology, val) = value.max_cap_energy = val
 """Set [`StorageTechnology`](@ref) `reg_max`."""
 set_reg_max!(value::StorageTechnology, val) = value.reg_max = val
+
+IS.serialize(val::StorageTechnology) = IS.serialize_struct(val)
+
+IS.deserialize(T::Type{<:StorageTechnology}, val::Dict) = IS.deserialize_struct(T, val)

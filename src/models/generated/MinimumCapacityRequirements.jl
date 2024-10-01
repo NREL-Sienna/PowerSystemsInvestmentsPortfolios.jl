@@ -85,3 +85,7 @@ set_min_mw!(value::MinimumCapacityRequirements, val) = value.min_mw = val
 set_eligible_resources!(value::MinimumCapacityRequirements, val) = value.eligible_resources = val
 """Set [`MinimumCapacityRequirements`](@ref) `available`."""
 set_available!(value::MinimumCapacityRequirements, val) = value.available = val
+
+IS.serialize(val::MinimumCapacityRequirements) = IS.serialize_struct(val)
+
+IS.deserialize(T::Type{<:MinimumCapacityRequirements}, val::Dict) = IS.deserialize_struct(T, val)
