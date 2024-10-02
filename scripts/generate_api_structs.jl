@@ -1,4 +1,3 @@
-using PowerSystemsInvestmentsPortfolios
 using OpenAPI
 using JSON3
 using JSONSchema
@@ -16,8 +15,7 @@ spec = read_json_data("C:/Users/jpotts/Documents/psip_dev/SiennaInvestSchema_ope
 
 OpenAPI.openapi_generator()
 
-path = OpenAPI.generate(spec.data; output_dir="C:/Users/jpotts/Documents/psip_dev/generated_code")
+path = OpenAPI.generate(spec.data; output_dir="C:/Users/jpotts/.julia/dev/PowerSystemsInvestmentsPortfolios/src/models/generated/open_api_models")
 
 OpenAPI.stop_openapi_generator()
 
-@__DIR__
