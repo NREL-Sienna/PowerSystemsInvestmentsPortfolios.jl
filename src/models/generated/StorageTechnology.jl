@@ -286,6 +286,25 @@ set_max_cap_energy!(value::StorageTechnology, val) = value.max_cap_energy = val
 """Set [`StorageTechnology`](@ref) `reg_max`."""
 set_reg_max!(value::StorageTechnology, val) = value.reg_max = val
 
-IS.serialize(val::StorageTechnology) = IS.serialize_struct(val)
+function IS.serialize(technology::StorageTechnology{T}) where T <: PSY.Storage
+    data = Dict{String, Any}()
+    for name in fieldnames(StorageTechnology{T})
+        val = serialize_uuid_handling(getfield(technology, name))
+        if name == :ext
+            if !IS.is_ext_valid_for_serialization(val)
+                error(
+                    "component type=$technology name=$(get_name(technology)) has a value in its " *
+                    "ext field that cannot be serialized.",
+                )
+            end
+        end
+        data[string(name)] = val
+    end
+
+    IS.add_serialization_metadata!(data, T)
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
+
+    return data
+end
 
 IS.deserialize(T::Type{<:StorageTechnology}, val::Dict) = IS.deserialize_struct(T, val)

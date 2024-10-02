@@ -74,5 +74,4 @@ set_retrofit_potential!(value::AggregateRetrofitPotential, val) = value.retrofit
 set_ext!(value::AggregateRetrofitPotential, val) = value.ext = val
 
 IS.serialize(val::AggregateRetrofitPotential) = IS.serialize_struct(val)
-
 IS.deserialize(T::Type{<:AggregateRetrofitPotential}, val::Dict) = IS.deserialize_struct(T, val)

@@ -95,5 +95,4 @@ set_co_2_max_mtons!(value::CarbonCaps, val) = value.co_2_max_mtons = val
 set_available!(value::CarbonCaps, val) = value.available = val
 
 IS.serialize(val::CarbonCaps) = IS.serialize_struct(val)
-
 IS.deserialize(T::Type{<:CarbonCaps}, val::Dict) = IS.deserialize_struct(T, val)

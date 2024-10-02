@@ -220,7 +220,8 @@
                     "default": "0.0",
                     "type": "Float64"
                 }
-            ]
+            ],
+            "parametric": "PSY.Generator"
         },
         {
             "name": "DemandRequirement",
@@ -257,7 +258,8 @@
                     "default": "true",
                     "type": "Bool"
                 }
-            ]
+            ],
+            "parametric": "PSY.StaticInjection"
         },
         {
             "name": "RetirementPotential",
@@ -379,7 +381,8 @@
                     "name": "available",
                     "type": "Bool"
                 }
-            ]
+            ],
+            "parametric": "PSY.StaticInjection"
         },
         {
             "name": "AggregateRetirementPotential",
@@ -584,7 +587,8 @@
                     "default": "0.0",
                     "type": "Float64"
                 }
-            ]
+            ],
+            "parametric": "PSY.Storage"
         },
         {
             "name": "CarbonCaps",
@@ -711,7 +715,8 @@
                     "name": "line_loss",
                     "type": "Float64"
                 }
-            ]
+            ],
+            "parametric": "PSY.Device"
         },
         {
             "name": "RetrofitPotential",
@@ -778,7 +783,8 @@
                     "name": "available",
                     "type": "Bool"
                 }
-            ]
+            ],
+            "parametric": "PSY.StaticInjection"
         },
         {
             "name": "FlexibleDemandTechnology",
@@ -821,7 +827,8 @@
                     "name": "available",
                     "type": "Bool"
                 }
-            ]
+            ],
+            "parametric": "PSY.StaticInjection"
         }
     ]
 }

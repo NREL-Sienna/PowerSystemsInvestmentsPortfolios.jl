@@ -158,6 +158,25 @@ set_wacc!(value::TransportTechnology, val) = value.wacc = val
 """Set [`TransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::TransportTechnology, val) = value.line_loss = val
 
-IS.serialize(val::TransportTechnology) = IS.serialize_struct(val)
+function IS.serialize(technology::TransportTechnology{T}) where T <: PSY.Device
+    data = Dict{String, Any}()
+    for name in fieldnames(TransportTechnology{T})
+        val = serialize_uuid_handling(getfield(technology, name))
+        if name == :ext
+            if !IS.is_ext_valid_for_serialization(val)
+                error(
+                    "component type=$technology name=$(get_name(technology)) has a value in its " *
+                    "ext field that cannot be serialized.",
+                )
+            end
+        end
+        data[string(name)] = val
+    end
+
+    IS.add_serialization_metadata!(data, T)
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
+
+    return data
+end
 
 IS.deserialize(T::Type{<:TransportTechnology}, val::Dict) = IS.deserialize_struct(T, val)

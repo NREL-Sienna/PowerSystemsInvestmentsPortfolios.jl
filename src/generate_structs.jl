@@ -1,10 +1,39 @@
 import Mustache
 
 const SERIALIZATION_TEMPLATE = """
+{{#has_parametric}}
+function IS.serialize(technology::{{struct_name}}{T}) where T <: {{parametric}}
+    data = Dict{String, Any}()
+    for name in fieldnames({{struct_name}}{T})
+        val = serialize_uuid_handling(getfield(technology, name))
+        if name == :ext
+            if !IS.is_ext_valid_for_serialization(val)
+                error(
+                    "component type=\$technology name=\$(get_name(technology)) has a value in its " *
+                    "ext field that cannot be serialized.",
+                )
+            end
+        end
+        data[string(name)] = val
+    end
+
+    IS.add_serialization_metadata!(data, T)
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
+
+    return data
+end
+
+IS.deserialize(T::Type{<:{{struct_name}}}, val::Dict) = IS.deserialize_struct(T, val)
+{{/has_parametric}}
+
+{{^has_parametric}}
 IS.serialize(val::{{struct_name}}) = IS.serialize_struct(val)
 IS.deserialize(T::Type{<:{{struct_name}}}, val::Dict) = IS.deserialize_struct(T, val)
+{{/has_parametric}}
 """
 
+#=
+=#
 function read_json_data(filename::String)
     try
         return JSONSchema.Schema(JSON3.read(filename))
@@ -34,10 +63,12 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
         item["struct_name"] = struct_name
         item["closing_constructor_text"] = ""
 
+        item["has_parametric"] = false
         if haskey(input, "parametric")
             item["parametric"] = input["parametric"]
             item["constructor_func"] *= "{T}"
             item["closing_constructor_text"] = " where T <: $(item["parametric"])"
+            item["has_parametric"] = true
         end
 
         parameters = Vector{Dict}()

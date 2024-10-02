@@ -8,7 +8,7 @@ function generate_config(schema_file)
 
     schema = read_json_data(schema_file)
     data = schema.data
-
+    @show data
     items = []
 
     #return data
@@ -16,6 +16,9 @@ function generate_config(schema_file)
         #return data_struct
         new_struct = Dict()
         new_struct["name"] = data_struct.first
+        if haskey(data_struct.second, "parametric")
+            new_struct["parametric"] = data_struct.second["parametric"]
+        end
         new_struct["fields"] = []
         for field in data_struct.second["properties"]
             new_field = Dict()

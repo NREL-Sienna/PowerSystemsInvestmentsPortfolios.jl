@@ -310,6 +310,25 @@ set_reg_max!(value::SupplyTechnology, val) = value.reg_max = val
 """Set [`SupplyTechnology`](@ref) `up_time`."""
 set_up_time!(value::SupplyTechnology, val) = value.up_time = val
 
-IS.serialize(val::SupplyTechnology) = IS.serialize_struct(val)
+function IS.serialize(technology::SupplyTechnology{T}) where T <: PSY.Generator
+    data = Dict{String, Any}()
+    for name in fieldnames(SupplyTechnology{T})
+        val = serialize_uuid_handling(getfield(technology, name))
+        if name == :ext
+            if !IS.is_ext_valid_for_serialization(val)
+                error(
+                    "component type=$technology name=$(get_name(technology)) has a value in its " *
+                    "ext field that cannot be serialized.",
+                )
+            end
+        end
+        data[string(name)] = val
+    end
+
+    IS.add_serialization_metadata!(data, T)
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
+
+    return data
+end
 
 IS.deserialize(T::Type{<:SupplyTechnology}, val::Dict) = IS.deserialize_struct(T, val)

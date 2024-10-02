@@ -1,3 +1,11 @@
+# These will get encoded into each dictionary when a struct is serialized.
+const METADATA_KEY = "__metadata__"
+const TYPE_KEY = "type"
+const MODULE_KEY = "module"
+const PARAMETERS_KEY = "parameters"
+const CONSTRUCT_WITH_PARAMETERS_KEY = "construct_with_parameters"
+const FUNCTION_KEY = "function"
+
 function IS.serialize(portfolio::T) where {T <: Portfolio}
     data = Dict{String, Any}()
     data["data_format_version"] = DATA_FORMAT_VERSION
@@ -31,6 +39,25 @@ function IS.deserialize(::Type{Portfolio}, filename::AbstractString, kwargs...)
     end
     # return raw
     return from_dict(Portfolio, raw; kwargs...)
+end
+
+"""
+Serialize the value, encoding as UUIDs where necessary.
+"""
+function serialize_uuid_handling(val)
+    if should_encode_as_uuid(val)
+        if val isa Array
+            value = IS.get_uuid.(val)
+        elseif val === nothing
+            value = nothing
+        else
+            value = IS.get_uuid(val)
+        end
+    else
+        value = val
+    end
+
+    return serialize(value)
 end
 
 """
@@ -204,7 +231,22 @@ function IS.deserialize(
     @show type
     return type(; vals...)
 end
+#=
+function IS.get_type_from_serialization_metadata(metadata::Dict)
+    _module = IS.get_module(metadata[MODULE_KEY])
+    base_type = IS.getproperty(_module, Symbol(metadata[TYPE_KEY]))
+    if !get(metadata, CONSTRUCT_WITH_PARAMETERS_KEY, false)
+        return base_type
+    end
 
+    # This has several limitations and is only a workaround for PSY.Reserve subtypes.
+    # - each parameter must be in _module
+    # - does not support nested parametrics.
+    # Reserves should be fixed and then we can remove this hack.
+    parameters = [getproperty(_module, Symbol(x)) for x in metadata[PARAMETERS_KEY]]
+    return base_type{parameters...}
+end
+=#
 """
 Deserialize the value, converting UUIDs to components where necessary.
 """
@@ -244,15 +286,19 @@ function deserialize_uuid_handling(field_type, val, component_cache)
     return value
 end
 
-const _ENCODE_AS_UUID = (
-    Union{Nothing, SupplyTechnology},
-    Union{Nothing, StorageTechnology},
-    Union{Nothing, DemandRequirement},
+const _ENCODE_AS_UUID_A = (
+#    Union{Nothing, SupplyTechnology},
+#    Union{Nothing, StorageTechnology},
+#    Union{Nothing, DemandRequirement},
     Union{Nothing, Zone},
     Union{Nothing, TransportTechnology},
     Vector{Service},
 )
-should_encode_as_uuid(::Type{T}) where {T} = any(x -> T <: x, _ENCODE_AS_UUID)
+const _ENCODE_AS_UUID_B = 
+    (Zone, TransportTechnology, Vector{Service})
+    
+should_encode_as_uuid(val) = any(x -> val isa x, _ENCODE_AS_UUID_B)
+should_encode_as_uuid(::Type{T}) where {T} = any(x -> T <: x, _ENCODE_AS_UUID_A)
 
 
 """

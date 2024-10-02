@@ -78,6 +78,25 @@ set_demand_mw!(value::DemandRequirement, val) = value.demand_mw = val
 """Set [`DemandRequirement`](@ref) `available`."""
 set_available!(value::DemandRequirement, val) = value.available = val
 
-IS.serialize(val::DemandRequirement) = IS.serialize_struct(val)
+function IS.serialize(technology::DemandRequirement{T}) where T <: PSY.StaticInjection
+    data = Dict{String, Any}()
+    for name in fieldnames(DemandRequirement{T})
+        val = serialize_uuid_handling(getfield(technology, name))
+        if name == :ext
+            if !IS.is_ext_valid_for_serialization(val)
+                error(
+                    "component type=$technology name=$(get_name(technology)) has a value in its " *
+                    "ext field that cannot be serialized.",
+                )
+            end
+        end
+        data[string(name)] = val
+    end
+
+    IS.add_serialization_metadata!(data, T)
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
+
+    return data
+end
 
 IS.deserialize(T::Type{<:DemandRequirement}, val::Dict) = IS.deserialize_struct(T, val)

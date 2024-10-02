@@ -87,5 +87,4 @@ set_eligible_resources!(value::MinimumCapacityRequirements, val) = value.eligibl
 set_available!(value::MinimumCapacityRequirements, val) = value.available = val
 
 IS.serialize(val::MinimumCapacityRequirements) = IS.serialize_struct(val)
-
 IS.deserialize(T::Type{<:MinimumCapacityRequirements}, val::Dict) = IS.deserialize_struct(T, val)
