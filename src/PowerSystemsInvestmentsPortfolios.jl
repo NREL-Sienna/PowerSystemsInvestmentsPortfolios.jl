@@ -37,6 +37,7 @@ import DBInterface
 import TimeSeries
 import Dates
 import DataStructures: OrderedDict
+import OpenAPI
 
 # Temporary, imports not working properly for some reason?
 using DataFrames
