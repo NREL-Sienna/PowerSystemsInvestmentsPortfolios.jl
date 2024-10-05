@@ -97,11 +97,15 @@ export ThermalFuels
 export PrimeMovers
 export StorageTech
 
+module deserialization
+import OpenAPI
+include("models/generated/open_api_models/src/modelincludes.jl")
+end
+
 include("models/technologies.jl")
 include("models/regions.jl")
 include("models/requirements.jl")
 include("models/generated/includes.jl")
-include("models/generated/open_api_models/src/modelincludes.jl")
 include("portfolio.jl")
 include("serialization.jl")
 include("generate_structs.jl")
