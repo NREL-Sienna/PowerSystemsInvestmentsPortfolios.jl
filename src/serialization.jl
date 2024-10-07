@@ -14,6 +14,7 @@ function IS.serialize(portfolio::T) where {T <: Portfolio}
         # Exclude time_series_directory because the portfolio may get deserialized on a
         # different portfolio.
         if field != :bus_numbers && field != :time_series_directory
+            @show getfield(portfolio, field)
             data[string(field)] = serialize(getfield(portfolio, field))
         end
     end
@@ -59,6 +60,32 @@ function serialize_uuid_handling(val)
 
     return serialize(value)
 end
+
+function serialize_struct(val::T) where {T}
+    @debug "serialize_struct" _group = LOG_GROUP_SERIALIZATION val T
+    data = Dict{String, Any}(
+        string(name) => serialize(getproperty(val, name)) for name in fieldnames(T)
+    )
+    add_serialization_metadata!(data, T)
+    return data
+end
+
+"""
+Add type information to the dictionary that can be used to deserialize the value.
+"""
+function add_serialization_metadata!(data::Dict, ::Type{T}) where {T}
+    @show T
+    data[METADATA_KEY] = Dict{String, Any}(
+        TYPE_KEY => string(nameof(T)),
+        MODULE_KEY => string(parentmodule(T)),
+    )
+    if !isempty(T.parameters)
+        data[METADATA_KEY][PARAMETERS_KEY] = [string(nameof(x)) for x in T.parameters]
+    end
+
+    return
+end
+
 
 """
 Clear any value stored in ext.
@@ -149,8 +176,8 @@ end
 function deserialize_components!(sys::Portfolio, raw)
     # Convert the array of components into type-specific arrays to allow addition by type.
     data = Dict{Any, Vector{Dict}}()
-
     for component in raw["components"]
+        #@show component
         type = IS.get_type_from_serialization_data(component)
         components = get(data, type, nothing)
         if components === nothing
@@ -264,7 +291,7 @@ function deserialize_uuid_handling(field_type, val, component_cache)
             end
             value = _vals
         else
-            @show val
+            #@show val
             uuid = deserialize(Base.UUID, val["internal"]["uuid"])
             component = component_cache[uuid]
             value = component

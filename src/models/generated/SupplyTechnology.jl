@@ -325,8 +325,8 @@ function IS.serialize(technology::SupplyTechnology{T}) where T <: PSY.Generator
         data[string(name)] = val
     end
 
-    IS.add_serialization_metadata!(data, T)
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
+    add_serialization_metadata!(data, SupplyTechnology{T})
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = false
 
     return data
 end

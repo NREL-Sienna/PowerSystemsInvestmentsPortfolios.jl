@@ -1,5 +1,11 @@
 module PowerSystemsInvestmentsPortfolios
 
+#submodule for OpenAPI structs 
+module deserialization
+import OpenAPI
+include("models/generated/open_api_models/src/modelincludes.jl")
+end
+
 import InfrastructureSystems
 # TODO: Some of these re-exports may cause name collisions with PowerSystems
 import InfrastructureSystems:
@@ -96,11 +102,6 @@ import PowerSystems: ThermalFuels, PrimeMovers, StorageTech
 export ThermalFuels
 export PrimeMovers
 export StorageTech
-
-module deserialization
-import OpenAPI
-include("models/generated/open_api_models/src/modelincludes.jl")
-end
 
 include("models/technologies.jl")
 include("models/regions.jl")

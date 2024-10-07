@@ -55,5 +55,5 @@ set_ext!(value::ExistingCapacity, val) = value.ext = val
 """Set [`ExistingCapacity`](@ref) `existing_capacity`."""
 set_existing_capacity!(value::ExistingCapacity, val) = value.existing_capacity = val
 
-IS.serialize(val::ExistingCapacity) = IS.serialize_struct(val)
+serialize(val::ExistingCapacity) = serialize_struct(val)
 IS.deserialize(T::Type{<:ExistingCapacity}, val::Dict) = IS.deserialize_struct(T, val)

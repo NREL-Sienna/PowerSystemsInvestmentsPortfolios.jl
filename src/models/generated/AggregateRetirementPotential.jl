@@ -55,5 +55,5 @@ set_ext!(value::AggregateRetirementPotential, val) = value.ext = val
 """Set [`AggregateRetirementPotential`](@ref) `retirement_potential`."""
 set_retirement_potential!(value::AggregateRetirementPotential, val) = value.retirement_potential = val
 
-IS.serialize(val::AggregateRetirementPotential) = IS.serialize_struct(val)
+serialize(val::AggregateRetirementPotential) = serialize_struct(val)
 IS.deserialize(T::Type{<:AggregateRetirementPotential}, val::Dict) = IS.deserialize_struct(T, val)

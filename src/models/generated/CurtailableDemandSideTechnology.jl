@@ -117,8 +117,8 @@ function IS.serialize(technology::CurtailableDemandSideTechnology{T}) where T <:
         data[string(name)] = val
     end
 
-    IS.add_serialization_metadata!(data, T)
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
+    add_serialization_metadata!(data, CurtailableDemandSideTechnology{T})
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = false
 
     return data
 end

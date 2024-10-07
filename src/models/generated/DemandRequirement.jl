@@ -93,8 +93,8 @@ function IS.serialize(technology::DemandRequirement{T}) where T <: PSY.StaticInj
         data[string(name)] = val
     end
 
-    IS.add_serialization_metadata!(data, T)
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
+    add_serialization_metadata!(data, DemandRequirement{T})
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = false
 
     return data
 end

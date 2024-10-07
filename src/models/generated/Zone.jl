@@ -54,5 +54,5 @@ set_id!(value::Zone, val) = value.id = val
 """Set [`Zone`](@ref) `ext`."""
 set_ext!(value::Zone, val) = value.ext = val
 
-IS.serialize(val::Zone) = IS.serialize_struct(val)
+serialize(val::Zone) = serialize_struct(val)
 IS.deserialize(T::Type{<:Zone}, val::Dict) = IS.deserialize_struct(T, val)

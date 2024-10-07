@@ -8,7 +8,7 @@ function generate_config(schema_file)
 
     schema = read_json_data(schema_file)
     data = schema.data
-    @show data
+    #@show data
     items = []
 
     #return data

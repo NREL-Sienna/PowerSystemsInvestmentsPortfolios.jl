@@ -17,8 +17,8 @@ function IS.serialize(technology::{{struct_name}}{T}) where T <: {{parametric}}
         data[string(name)] = val
     end
 
-    IS.add_serialization_metadata!(data, T)
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
+    add_serialization_metadata!(data, {{struct_name}}{T})
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = false
 
     return data
 end
@@ -27,7 +27,7 @@ IS.deserialize(T::Type{<:{{struct_name}}}, val::Dict) = IS.deserialize_struct(T,
 {{/has_parametric}}
 
 {{^has_parametric}}
-IS.serialize(val::{{struct_name}}) = IS.serialize_struct(val)
+serialize(val::{{struct_name}}) = serialize_struct(val)
 IS.deserialize(T::Type{<:{{struct_name}}}, val::Dict) = IS.deserialize_struct(T, val)
 {{/has_parametric}}
 """

@@ -22,7 +22,7 @@ end
 main_paths = ["./docs/src"]
 for main_path in main_paths
     for folder in readdir(main_path)
-        @show folder_path = joinpath(main_path, folder)
+        #@show folder_path = joinpath(main_path, folder)
         if isfile(folder_path)
             !occursin(".md", folder_path) && continue
         end
