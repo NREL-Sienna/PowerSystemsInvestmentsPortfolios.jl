@@ -10,7 +10,6 @@ function read_json_data(filename::String)
     end
 end
 
-
 spec = read_json_data("C:/Users/jpotts/Documents/psip_dev/SiennaInvestSchema_openapi.json")
 
 OpenAPI.openapi_generator()

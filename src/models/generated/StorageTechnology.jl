@@ -308,3 +308,9 @@ function IS.serialize(technology::StorageTechnology{T}) where T <: PSY.Storage
 end
 
 IS.deserialize(T::Type{<:StorageTechnology}, val::Dict) = IS.deserialize_struct(T, val)
+
+
+function openapi_struct(::Type{<:StorageTechnology}, vals...)
+    base_struct = APIClient.StorageTechnology(; vals...)
+    return base_struct
+end

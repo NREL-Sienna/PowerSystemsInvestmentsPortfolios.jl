@@ -159,9 +159,9 @@ end
 
 function OpenAPI.validate_property(::Type{ StorageTechnology }, name::Symbol, val)
     if name === Symbol("prime_mover_type")
-        OpenAPI.validate_param(name, "StorageTechnology", :enum, val, [BT, CA, CC, CS, CT, FC, GT, HA, HB, HK, HY, IC, OT, ST, PVe, WT, WS])
+        OpenAPI.validate_param(name, "StorageTechnology", :enum, val, [PrimeMovers.BT, PrimeMovers.CA, PrimeMovers.CC, PrimeMovers.CS, PrimeMovers.CT, PrimeMovers.FC, PrimeMovers.GT, PrimeMovers.HA, PrimeMovers.HB, PrimeMovers.HK, PrimeMovers.HY, PrimeMovers.IC, PrimeMovers.OT, PrimeMovers.ST, PrimeMovers.PVe, PrimeMovers.WT, PrimeMovers.WS])
     end
     if name === Symbol("storage_tech")
-        OpenAPI.validate_param(name, "StorageTechnology", :enum, val, [PTES, LIB, LAB, FLWB, SIB, ZIB, HGS, LAES, OTHER_CHEM, OTHER_MECH, OTHER_THERM])
+        OpenAPI.validate_param(name, "StorageTechnology", :enum, val, [StorageTech.PTES, StorageTech.LIB, StorageTech.LAB, StorageTech.FLWB, StorageTech.SIB, StorageTech.ZIB, StorageTech.HGS, StorageTech.LAES, StorageTech.OTHER_CHEM, StorageTech.OTHER_MECH, StorageTech.OTHER_THERM])
     end
 end

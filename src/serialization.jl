@@ -255,9 +255,14 @@ function IS.deserialize(
     end
 
     type = IS.get_type_from_serialization_metadata(data[IS.METADATA_KEY])
-    @show deserialization.type(; vals...)
+
+    base_struct = openapi_struct(type, vals...)
+
+    @show base_struct.cluster
+    # call IS.deserialize function with type. Populate the openAPI version of the struct, then convert to 
+    #@show APIClient.SupplyTechnology(; vals...)
     #return deserialization.(type(; vals...))
-    return deserialization.SupplyTechnology(; vals...)
+    return base_struct #APIClient.SupplyTechnology(; vals...)
 end
 #=
 function IS.get_type_from_serialization_metadata(metadata::Dict)

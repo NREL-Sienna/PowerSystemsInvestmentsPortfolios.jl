@@ -170,10 +170,10 @@ function check_required(o::SupplyTechnology)
 end
 
 function OpenAPI.validate_property(::Type{ SupplyTechnology }, name::Symbol, val)
-    if name === Symbol("prime_mover_type")
-        OpenAPI.validate_param(name, "SupplyTechnology", :enum, val, [BT, CA, CC, CS, CT, FC, GT, HA, HB, HK, HY, IC, OT, ST, PVe, WT, WS])
-    end
-    if name === Symbol("fuel")
-        OpenAPI.validate_param(name, "SupplyTechnology", :enum, val, [COAL, WASTE_COAL, DISTILLATE_FUEL_OIL, WASTE_OIL, PETROLEUM_COKE, RESIDUAL_FUEL_OIL, NATURAL_GAS, OTHER_GAS, NUCLEAR, AG_BIPRODUCT, MUNICIPAL_WASTE, WOOD_WASTE, GEOTHERMAL, OTHER])
-    end
+    #if name === Symbol("prime_mover_type")
+    #    OpenAPI.validate_param(name, "SupplyTechnology", :enum, val, [PrimeMovers.BT, PrimeMovers.CA, PrimeMovers.CC, PrimeMovers.CS, PrimeMovers.CT, PrimeMovers.FC, PrimeMovers.GT, PrimeMovers.HA, PrimeMovers.HB, PrimeMovers.HK, PrimeMovers.HY, PrimeMovers.IC, PrimeMovers.OT, PrimeMovers.ST, PrimeMovers.PVe, PrimeMovers.WT, PrimeMovers.WS])
+    #end
+    #if name === Symbol("fuel")
+    #    OpenAPI.validate_param(name, "SupplyTechnology", :enum, val, [ThermalFuels.COAL, ThermalFuels.WASTE_COAL, ThermalFuels.DISTILLATE_FUEL_OIL, ThermalFuels.WASTE_OIL, ThermalFuels.PETROLEUM_COKE, ThermalFuels.RESIDUAL_FUEL_OIL, ThermalFuels.NATURAL_GAS, ThermalFuels.OTHER_GAS, ThermalFuels.NUCLEAR, ThermalFuels.AG_BIPRODUCT, ThermalFuels.MUNICIPAL_WASTE, ThermalFuels.WOOD_WASTE, ThermalFuels.GEOTHERMAL, ThermalFuels.OTHER])
+    #end
 end

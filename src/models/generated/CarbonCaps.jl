@@ -96,3 +96,8 @@ set_available!(value::CarbonCaps, val) = value.available = val
 
 serialize(val::CarbonCaps) = serialize_struct(val)
 IS.deserialize(T::Type{<:CarbonCaps}, val::Dict) = IS.deserialize_struct(T, val)
+
+function openapi_struct(::Type{<:CarbonCaps}, vals...)
+    base_struct = APIClient.CarbonCaps(; vals...)
+    return base_struct
+end

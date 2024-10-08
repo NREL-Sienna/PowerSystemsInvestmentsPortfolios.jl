@@ -124,3 +124,9 @@ function IS.serialize(technology::DemandSideTechnology{T}) where T <: PSY.Static
 end
 
 IS.deserialize(T::Type{<:DemandSideTechnology}, val::Dict) = IS.deserialize_struct(T, val)
+
+
+function openapi_struct(::Type{<:DemandSideTechnology}, vals...)
+    base_struct = APIClient.DemandSideTechnology(; vals...)
+    return base_struct
+end

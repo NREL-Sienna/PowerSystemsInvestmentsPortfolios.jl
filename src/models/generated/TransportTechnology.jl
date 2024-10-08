@@ -180,3 +180,9 @@ function IS.serialize(technology::TransportTechnology{T}) where T <: PSY.Device
 end
 
 IS.deserialize(T::Type{<:TransportTechnology}, val::Dict) = IS.deserialize_struct(T, val)
+
+
+function openapi_struct(::Type{<:TransportTechnology}, vals...)
+    base_struct = APIClient.TransportTechnology(; vals...)
+    return base_struct
+end

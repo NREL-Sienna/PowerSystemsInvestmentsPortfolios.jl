@@ -1,11 +1,6 @@
 module PowerSystemsInvestmentsPortfolios
 
-#submodule for OpenAPI structs 
-module deserialization
-import OpenAPI
-include("models/generated/open_api_models/src/APIclient.jl")
-end
-using deserialization
+
 
 import InfrastructureSystems
 # TODO: Some of these re-exports may cause name collisions with PowerSystems
@@ -103,6 +98,10 @@ import PowerSystems: ThermalFuels, PrimeMovers, StorageTech
 export ThermalFuels
 export PrimeMovers
 export StorageTech
+
+#submodule for OpenAPI structs 
+include("models/generated/open_api_models/src/APIClient.jl")
+using .APIClient
 
 include("models/technologies.jl")
 include("models/regions.jl")

@@ -30,6 +30,12 @@ IS.deserialize(T::Type{<:{{struct_name}}}, val::Dict) = IS.deserialize_struct(T,
 serialize(val::{{struct_name}}) = serialize_struct(val)
 IS.deserialize(T::Type{<:{{struct_name}}}, val::Dict) = IS.deserialize_struct(T, val)
 {{/has_parametric}}
+
+function openapi_struct(::Type{<:{{struct_name}}}, vals...)
+    base_struct = APIClient.{{struct_name}}(; vals...)
+    return base_struct
+end
+
 """
 
 #=

@@ -332,3 +332,9 @@ function IS.serialize(technology::SupplyTechnology{T}) where T <: PSY.Generator
 end
 
 IS.deserialize(T::Type{<:SupplyTechnology}, val::Dict) = IS.deserialize_struct(T, val)
+
+
+function openapi_struct(::Type{<:SupplyTechnology}, vals...)
+    base_struct = APIClient.SupplyTechnology(; vals...)
+    return base_struct
+end

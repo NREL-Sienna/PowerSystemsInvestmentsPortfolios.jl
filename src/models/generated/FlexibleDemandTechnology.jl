@@ -116,3 +116,9 @@ function IS.serialize(technology::FlexibleDemandTechnology{T}) where T <: PSY.St
 end
 
 IS.deserialize(T::Type{<:FlexibleDemandTechnology}, val::Dict) = IS.deserialize_struct(T, val)
+
+
+function openapi_struct(::Type{<:FlexibleDemandTechnology}, vals...)
+    base_struct = APIClient.FlexibleDemandTechnology(; vals...)
+    return base_struct
+end

@@ -100,3 +100,9 @@ function IS.serialize(technology::DemandRequirement{T}) where T <: PSY.StaticInj
 end
 
 IS.deserialize(T::Type{<:DemandRequirement}, val::Dict) = IS.deserialize_struct(T, val)
+
+
+function openapi_struct(::Type{<:DemandRequirement}, vals...)
+    base_struct = APIClient.DemandRequirement(; vals...)
+    return base_struct
+end
