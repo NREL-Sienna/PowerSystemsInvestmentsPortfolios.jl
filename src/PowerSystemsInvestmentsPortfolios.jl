@@ -3,8 +3,9 @@ module PowerSystemsInvestmentsPortfolios
 #submodule for OpenAPI structs 
 module deserialization
 import OpenAPI
-include("models/generated/open_api_models/src/modelincludes.jl")
+include("models/generated/open_api_models/src/APIclient.jl")
 end
+using deserialization
 
 import InfrastructureSystems
 # TODO: Some of these re-exports may cause name collisions with PowerSystems

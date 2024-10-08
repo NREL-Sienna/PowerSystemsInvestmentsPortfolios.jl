@@ -14,7 +14,7 @@ function IS.serialize(portfolio::T) where {T <: Portfolio}
         # Exclude time_series_directory because the portfolio may get deserialized on a
         # different portfolio.
         if field != :bus_numbers && field != :time_series_directory
-            @show getfield(portfolio, field)
+            #@show getfield(portfolio, field)
             data[string(field)] = serialize(getfield(portfolio, field))
         end
     end
@@ -74,7 +74,7 @@ end
 Add type information to the dictionary that can be used to deserialize the value.
 """
 function add_serialization_metadata!(data::Dict, ::Type{T}) where {T}
-    @show T
+    #@show T
     data[METADATA_KEY] = Dict{String, Any}(
         TYPE_KEY => string(nameof(T)),
         MODULE_KEY => string(parentmodule(T)),
@@ -255,8 +255,9 @@ function IS.deserialize(
     end
 
     type = IS.get_type_from_serialization_metadata(data[IS.METADATA_KEY])
-    @show type
-    return type(; vals...)
+    @show deserialization.type(; vals...)
+    #return deserialization.(type(; vals...))
+    return deserialization.SupplyTechnology(; vals...)
 end
 #=
 function IS.get_type_from_serialization_metadata(metadata::Dict)
