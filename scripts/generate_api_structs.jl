@@ -14,7 +14,10 @@ spec = read_json_data("C:/Users/jpotts/Documents/psip_dev/SiennaInvestSchema_ope
 
 OpenAPI.openapi_generator()
 
-path = OpenAPI.generate(spec.data; output_dir="C:/Users/jpotts/.julia/dev/PowerSystemsInvestmentsPortfolios/src/models/generated/open_api_models", export_models=true)
+path = OpenAPI.generate(
+    spec.data;
+    output_dir="C:/Users/jpotts/.julia/dev/PowerSystemsInvestmentsPortfolios/src/models/generated/open_api_models",
+    export_models=true,
+)
 
 OpenAPI.stop_openapi_generator()
-

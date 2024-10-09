@@ -173,8 +173,6 @@ within the instance.
 """
 validate_component_with_system(technology::Technology, port::Portfolio) = true
 
-
-
 """
 Add a technology to the portfoliotem.
 
@@ -212,7 +210,7 @@ function add_technology!(
     deserialization_in_progress = _is_deserialization_in_progress(portfolio)
     # TODO: Attach requirements to technologies or other structs
     #if !deserialization_in_progress
-        # Services are attached to devices at deserialization time.
+    # Services are attached to devices at deserialization time.
     #    check_for_services_on_addition(portfolio, technology)
     #end
 
@@ -491,7 +489,7 @@ get_compression_settings(portfolio::Portfolio) = IS.get_compression_settings(por
 """
 Return the resolution for all time series.
 """
-get_time_series_resolution(portfolio::Portfolio) = 
+get_time_series_resolution(portfolio::Portfolio) =
     IS.get_time_series_resolutions(portfolio.data)
 
 """
@@ -663,13 +661,13 @@ end
 ################################
 
 """
-Add policy requirement to portfolio 
+Add policy requirement to portfolio
 """
 function add_requirement!(portfolio::Portfolio, req::Requirements)
     #return PSY.add_service!(portfolio.data, req)
     #skip_validation = false
     #skip_validation = _validate_or_skip!(sys, service, skip_validation)
-    return IS.add_component!(portfolio.data, req, skip_validation = false)
+    return IS.add_component!(portfolio.data, req, skip_validation=false)
 end
 
 function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirements}

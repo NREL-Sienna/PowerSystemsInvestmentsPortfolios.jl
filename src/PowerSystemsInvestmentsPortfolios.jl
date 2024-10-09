@@ -1,7 +1,5 @@
 module PowerSystemsInvestmentsPortfolios
 
-
-
 import InfrastructureSystems
 # TODO: Some of these re-exports may cause name collisions with PowerSystems
 import InfrastructureSystems:
@@ -26,9 +24,7 @@ import InfrastructureSystems:
     InfrastructureSystemsType
 
 import PowerSystems
-import PowerSystems:
-    StorageCost,
-    ThermalGenerationCost
+import PowerSystems: StorageCost, ThermalGenerationCost
 
 import JSONSchema
 import JSON3

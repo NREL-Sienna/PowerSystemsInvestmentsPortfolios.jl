@@ -11,7 +11,6 @@ const API_VERSION = "0.0.1"
 
 include("modelincludes.jl")
 
-
 # export models
 export AggregateRetirementPotential
 export AggregateRetrofitPotential

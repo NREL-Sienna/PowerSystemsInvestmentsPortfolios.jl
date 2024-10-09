@@ -86,7 +86,6 @@ function add_serialization_metadata!(data::Dict, ::Type{T}) where {T}
     return
 end
 
-
 """
 Clear any value stored in ext.
 """
@@ -229,7 +228,6 @@ function deserialize_components!(sys::Portfolio, raw)
 end
 
 function build_model_struct(base_struct, metadata::Dict{String, Any})
-    
     vals = Dict{Symbol, Any}()
     struct_type = typeof(base_struct)
     for (name, type) in zip(fieldnames(struct_type), fieldtypes(struct_type))
@@ -281,8 +279,8 @@ function IS.deserialize(
     type = IS.get_type_from_serialization_metadata(data[IS.METADATA_KEY])
 
     base_struct = build_openapi_struct(type, vals...)
- 
-    return base_struct 
+
+    return base_struct
 end
 #=
 function IS.get_type_from_serialization_metadata(metadata::Dict)
@@ -340,19 +338,17 @@ function deserialize_uuid_handling(field_type, val, component_cache)
 end
 
 const _ENCODE_AS_UUID_A = (
-#    Union{Nothing, SupplyTechnology},
-#    Union{Nothing, StorageTechnology},
-#    Union{Nothing, DemandRequirement},
+    #    Union{Nothing, SupplyTechnology},
+    #    Union{Nothing, StorageTechnology},
+    #    Union{Nothing, DemandRequirement},
     Union{Nothing, Zone},
     Union{Nothing, TransportTechnology},
     Vector{Service},
 )
-const _ENCODE_AS_UUID_B = 
-    (Zone, TransportTechnology, Vector{Service})
-    
+const _ENCODE_AS_UUID_B = (Zone, TransportTechnology, Vector{Service})
+
 should_encode_as_uuid(val) = any(x -> val isa x, _ENCODE_AS_UUID_B)
 should_encode_as_uuid(::Type{T}) where {T} = any(x -> T <: x, _ENCODE_AS_UUID_A)
-
 
 """
 Allow types to implement handling of special cases during deserialization.

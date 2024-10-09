@@ -228,4 +228,3 @@ function generate_structs(
     generate_invest_structs(output_directory, data; print_results=print_results)
     return
 end
-
