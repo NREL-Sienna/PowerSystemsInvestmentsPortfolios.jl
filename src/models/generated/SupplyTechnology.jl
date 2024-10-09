@@ -326,7 +326,7 @@ function IS.serialize(technology::SupplyTechnology{T}) where T <: PSY.Generator
     end
 
     add_serialization_metadata!(data, SupplyTechnology{T})
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = false
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
 
     return data
 end
@@ -334,7 +334,7 @@ end
 IS.deserialize(T::Type{<:SupplyTechnology}, val::Dict) = IS.deserialize_struct(T, val)
 
 
-function openapi_struct(::Type{<:SupplyTechnology}, vals...)
+function build_openapi_struct(::Type{<:SupplyTechnology}, vals...)
     base_struct = APIClient.SupplyTechnology(; vals...)
     return base_struct
 end

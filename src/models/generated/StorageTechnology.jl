@@ -302,7 +302,7 @@ function IS.serialize(technology::StorageTechnology{T}) where T <: PSY.Storage
     end
 
     add_serialization_metadata!(data, StorageTechnology{T})
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = false
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
 
     return data
 end
@@ -310,7 +310,7 @@ end
 IS.deserialize(T::Type{<:StorageTechnology}, val::Dict) = IS.deserialize_struct(T, val)
 
 
-function openapi_struct(::Type{<:StorageTechnology}, vals...)
+function build_openapi_struct(::Type{<:StorageTechnology}, vals...)
     base_struct = APIClient.StorageTechnology(; vals...)
     return base_struct
 end

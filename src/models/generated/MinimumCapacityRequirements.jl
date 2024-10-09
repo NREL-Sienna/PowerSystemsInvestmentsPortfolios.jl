@@ -89,7 +89,7 @@ set_available!(value::MinimumCapacityRequirements, val) = value.available = val
 serialize(val::MinimumCapacityRequirements) = serialize_struct(val)
 IS.deserialize(T::Type{<:MinimumCapacityRequirements}, val::Dict) = IS.deserialize_struct(T, val)
 
-function openapi_struct(::Type{<:MinimumCapacityRequirements}, vals...)
+function build_openapi_struct(::Type{<:MinimumCapacityRequirements}, vals...)
     base_struct = APIClient.MinimumCapacityRequirements(; vals...)
     return base_struct
 end

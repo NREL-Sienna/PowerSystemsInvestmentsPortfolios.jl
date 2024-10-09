@@ -118,7 +118,7 @@ function IS.serialize(technology::CurtailableDemandSideTechnology{T}) where T <:
     end
 
     add_serialization_metadata!(data, CurtailableDemandSideTechnology{T})
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = false
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
 
     return data
 end
@@ -126,7 +126,7 @@ end
 IS.deserialize(T::Type{<:CurtailableDemandSideTechnology}, val::Dict) = IS.deserialize_struct(T, val)
 
 
-function openapi_struct(::Type{<:CurtailableDemandSideTechnology}, vals...)
+function build_openapi_struct(::Type{<:CurtailableDemandSideTechnology}, vals...)
     base_struct = APIClient.CurtailableDemandSideTechnology(; vals...)
     return base_struct
 end

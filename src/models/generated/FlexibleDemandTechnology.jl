@@ -110,7 +110,7 @@ function IS.serialize(technology::FlexibleDemandTechnology{T}) where T <: PSY.St
     end
 
     add_serialization_metadata!(data, FlexibleDemandTechnology{T})
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = false
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
 
     return data
 end
@@ -118,7 +118,7 @@ end
 IS.deserialize(T::Type{<:FlexibleDemandTechnology}, val::Dict) = IS.deserialize_struct(T, val)
 
 
-function openapi_struct(::Type{<:FlexibleDemandTechnology}, vals...)
+function build_openapi_struct(::Type{<:FlexibleDemandTechnology}, vals...)
     base_struct = APIClient.FlexibleDemandTechnology(; vals...)
     return base_struct
 end

@@ -94,7 +94,7 @@ function IS.serialize(technology::DemandRequirement{T}) where T <: PSY.StaticInj
     end
 
     add_serialization_metadata!(data, DemandRequirement{T})
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = false
+    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
 
     return data
 end
@@ -102,7 +102,7 @@ end
 IS.deserialize(T::Type{<:DemandRequirement}, val::Dict) = IS.deserialize_struct(T, val)
 
 
-function openapi_struct(::Type{<:DemandRequirement}, vals...)
+function build_openapi_struct(::Type{<:DemandRequirement}, vals...)
     base_struct = APIClient.DemandRequirement(; vals...)
     return base_struct
 end

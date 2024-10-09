@@ -58,7 +58,7 @@ set_retirement_potential!(value::AggregateRetirementPotential, val) = value.reti
 serialize(val::AggregateRetirementPotential) = serialize_struct(val)
 IS.deserialize(T::Type{<:AggregateRetirementPotential}, val::Dict) = IS.deserialize_struct(T, val)
 
-function openapi_struct(::Type{<:AggregateRetirementPotential}, vals...)
+function build_openapi_struct(::Type{<:AggregateRetirementPotential}, vals...)
     base_struct = APIClient.AggregateRetirementPotential(; vals...)
     return base_struct
 end
