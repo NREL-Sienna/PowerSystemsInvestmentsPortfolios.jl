@@ -138,6 +138,44 @@ Get the description of the portfolio.
 get_description(val::Portfolio) = val.metadata.description
 
 """
+Return true if checks are enabled on the system.
+"""
+get_runchecks(val::Portfolio) = val.runchecks[]
+
+function _validate_or_skip!(sys, component, skip_validation)
+    if skip_validation && get_runchecks(sys)
+        @warn(
+            "skip_validation is deprecated; construct System with runchecks = true or call set_runchecks!. Disabling System.runchecks"
+        )
+        set_runchecks!(sys, false)
+    end
+
+    # Always skip if system checks are disabled.
+    if !skip_validation && !get_runchecks(sys)
+        skip_validation = true
+    end
+
+    if !skip_validation
+        sanitize_component!(component, sys)
+        if !validate_component_with_system(component, sys)
+            throw(IS.InvalidValue("Invalid value for $component"))
+        end
+    end
+
+    return skip_validation
+end
+
+"""
+Validate a component against System data. Return true if the instance is valid.
+
+Refer to [`validate_component`](@ref) if the validation logic only requires data contained
+within the instance.
+"""
+validate_component_with_system(technology::Technology, port::Portfolio) = true
+
+
+
+"""
 Add a technology to the portfoliotem.
 
 Throws ArgumentError if the technology's name is already stored for its concrete type.
@@ -164,6 +202,24 @@ function add_technology!(
     kwargs...,
 ) where {T <: Technology}
     #deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+
+    #set_units_setting!(technology, portfolio.data.units_settings)
+    #@assert has_units_setting(technology)
+
+    #check_topology(portfolio.data, component)
+    #check_component_addition(portfolio.data, technology; kwargs...)
+
+    deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+    # TODO: Attach requirements to technologies or other structs
+    #if !deserialization_in_progress
+        # Services are attached to devices at deserialization time.
+    #    check_for_services_on_addition(portfolio, technology)
+    #end
+
+    # TODO: Fix/add validation
+    skip_validation = true #_validate_or_skip!(portfolio, technology, skip_validation)
+    _kwargs = Dict(k => v for (k, v) in kwargs if k !== :static_injector)
+
     IS.add_component!(
         portfolio.data,
         technology;

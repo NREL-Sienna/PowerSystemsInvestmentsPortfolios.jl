@@ -215,7 +215,6 @@ function deserialize_components!(sys::Portfolio, raw)
                 handle_deserialization_special_cases!(component, type)
                 api_comp = deserialize(type, component, component_cache)
                 comp = build_model_struct(api_comp, component["__metadata__"])
-                @show sys
                 add_technology!(sys, comp)
                 component_cache[IS.get_uuid(comp)] = comp
                 if !isnothing(post_add_func)
@@ -232,7 +231,8 @@ end
 function build_model_struct(base_struct, metadata::Dict{String, Any})
     
     vals = Dict{Symbol, Any}()
-    for name in fieldnames(typeof(base_struct))
+    struct_type = typeof(base_struct)
+    for (name, type) in zip(fieldnames(struct_type), fieldtypes(struct_type))
         vals[name] = getfield(base_struct, name)
     end
 
@@ -247,8 +247,7 @@ function build_model_struct(base_struct, metadata::Dict{String, Any})
     else
         model_struct = struct_type(; vals...)
     end
-    #base_struct.fiel
-    @show model_struct.base_power
+
     return model_struct
 end
 
