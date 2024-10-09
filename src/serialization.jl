@@ -213,7 +213,9 @@ function deserialize_components!(sys::Portfolio, raw)
             end
             for component in components
                 handle_deserialization_special_cases!(component, type)
-                comp = deserialize(type, component, component_cache)
+                api_comp = deserialize(type, component, component_cache)
+                comp = build_model_struct(api_comp, component["__metadata__"])
+                @show sys
                 add_technology!(sys, comp)
                 component_cache[IS.get_uuid(comp)] = comp
                 if !isnothing(post_add_func)
@@ -225,6 +227,29 @@ function deserialize_components!(sys::Portfolio, raw)
     end
 
     deserialize_and_add!()
+end
+
+function build_model_struct(base_struct, metadata::Dict{String, Any})
+    
+    vals = Dict{Symbol, Any}()
+    for name in fieldnames(typeof(base_struct))
+        vals[name] = getfield(base_struct, name)
+    end
+
+    struct_type_string = metadata["type"]
+    struct_type = getproperty(PowerSystemsInvestmentsPortfolios, Symbol(struct_type_string))
+    if haskey(metadata, "parameters")
+        # = [getproperty(_module, Symbol(x)) for x in metadata[PARAMETERS_KEY]]
+        parameter_string = metadata["parameters"][1]
+        #TODO: Generalize this later. Will all future parameterizing be with PSY structs?
+        parameter = getproperty(PowerSystems, Symbol(parameter_string))
+        model_struct = struct_type{parameter}(; vals...)
+    else
+        model_struct = struct_type(; vals...)
+    end
+    #base_struct.fiel
+    @show model_struct.base_power
+    return model_struct
 end
 
 const _CONTAINS_SHOULD_ENCODE = Technology  # PSIP types with fields that we should_encode_as_uuid
@@ -256,13 +281,9 @@ function IS.deserialize(
 
     type = IS.get_type_from_serialization_metadata(data[IS.METADATA_KEY])
 
-    base_struct = openapi_struct(type, vals...)
-
-    @show base_struct.cluster
-    # call IS.deserialize function with type. Populate the openAPI version of the struct, then convert to 
-    #@show APIClient.SupplyTechnology(; vals...)
-    #return deserialization.(type(; vals...))
-    return base_struct #APIClient.SupplyTechnology(; vals...)
+    base_struct = build_openapi_struct(type, vals...)
+ 
+    return base_struct 
 end
 #=
 function IS.get_type_from_serialization_metadata(metadata::Dict)
