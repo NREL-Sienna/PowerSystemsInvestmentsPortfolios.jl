@@ -7,11 +7,11 @@ This file is auto-generated. Do not edit.
 """
     mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
         capital_cost::PSY.ValueCurve
-        start_region::Int64
+        start_region::Region
         available::Bool
         name::String
         capital_recovery_factor::Int64
-        end_region::Int64
+        end_region::Region
         power_systems_type::String
         angle_limit::Float64
         internal::InfrastructureSystemsInternal
@@ -29,11 +29,11 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `capital_cost::PSY.ValueCurve`: Cost of adding new capacity to the inter-regional transmission line.
-- `start_region::Int64`: Start region for transport technology
+- `start_region::Region`: Start region for transport technology
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: Name
 - `capital_recovery_factor::Int64`: (default: `0`) Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion.
-- `end_region::Int64`: End region for transport technology
+- `end_region::Region`: End region for transport technology
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `angle_limit::Float64`: (default: `0.0`) Votlage angle limit (radians)
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
@@ -50,7 +50,7 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     "Cost of adding new capacity to the inter-regional transmission line."
     capital_cost::PSY.ValueCurve
     "Start region for transport technology"
-    start_region::Int64
+    start_region::Region
     "identifies whether the technology is available"
     available::Bool
     "Name"
@@ -58,7 +58,7 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     "Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion."
     capital_recovery_factor::Int64
     "End region for transport technology"
-    end_region::Int64
+    end_region::Region
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
     "Votlage angle limit (radians)"

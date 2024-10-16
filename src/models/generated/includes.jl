@@ -85,6 +85,7 @@ export get_ramp_dn_percentage
 export get_ramp_up_percentage
 export get_reg_cost
 export get_reg_max
+export get_region
 export get_resistance
 export get_retirement_potential
 export get_retrofit_fraction
@@ -106,7 +107,6 @@ export get_var_cost_per_mwh
 export get_voll
 export get_voltage
 export get_wacc
-export get_zone
 export set_angle_limit!
 export set_available!
 export set_balancing_topology!
@@ -176,6 +176,7 @@ export set_ramp_dn_percentage!
 export set_ramp_up_percentage!
 export set_reg_cost!
 export set_reg_max!
+export set_region!
 export set_resistance!
 export set_retirement_potential!
 export set_retrofit_fraction!
@@ -197,4 +198,3 @@ export set_var_cost_per_mwh!
 export set_voll!
 export set_voltage!
 export set_wacc!
-export set_zone!
