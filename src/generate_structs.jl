@@ -11,7 +11,7 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
     unique_accessor_functions = Set{String}()
     unique_setter_functions = Set{String}()
 
-    for (struct_name, input) in data.data["\$defs"]
+    for (struct_name, input) in data.data["components"]["schemas"]
         properties = input["properties"]
         item = Dict{String, Any}()
         item["has_internal"] = false
