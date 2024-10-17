@@ -68,7 +68,7 @@ This file is auto-generated. Do not edit.
 - `om_costs_power::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a technology
 - `balancing_topology::String`: Set of balancing nodes
 - `min_cap_energy::Float64`: (default: `0.0`) Minimum required energy capacity for a storage technology
-- `region::Union{Nothing, Region}`: Region
+- `region::Union{Nothing, Region}`: (default: `nothing`) Region
 - `initial_state_of_charge::Float64`: (default: `0.0`) State of charge for storage technology in the first timepoint (MWh).
 - `unit_size_energy::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
 - `eff_up::Float64`: (default: `1.0`) Efficiency of charging storage
@@ -148,7 +148,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
 end
 
 
-function StorageTechnology{T}(; base_power, om_costs_energy=StorageCost(), existing_cap_energy=0.0, prime_mover_type=PrimeMovers.OT, rsv_cost=0.0, available, existing_cap_power=0.0, name, storage_tech, capital_costs_power=LinearCurve(0.0), max_duration=1000.0, unit_size_power=0.0, id, min_cap_power=0.0, capital_costs_energy=LinearCurve(0.0), losses=1.0, eff_down=1.0, rsv_max=0.0, max_cap_power=1e8, power_systems_type, internal=InfrastructureSystemsInternal(), om_costs_power=StorageCost(), balancing_topology, min_cap_energy=0.0, region, initial_state_of_charge=0.0, unit_size_energy=0.0, eff_up=1.0, ext=Dict(), reg_cost=0.0, min_duration=0.0, max_cap_energy=1e8, reg_max=0.0, ) where T <: PSY.Storage
+function StorageTechnology{T}(; base_power, om_costs_energy=StorageCost(), existing_cap_energy=0.0, prime_mover_type=PrimeMovers.OT, rsv_cost=0.0, available, existing_cap_power=0.0, name, storage_tech, capital_costs_power=LinearCurve(0.0), max_duration=1000.0, unit_size_power=0.0, id, min_cap_power=0.0, capital_costs_energy=LinearCurve(0.0), losses=1.0, eff_down=1.0, rsv_max=0.0, max_cap_power=1e8, power_systems_type, internal=InfrastructureSystemsInternal(), om_costs_power=StorageCost(), balancing_topology, min_cap_energy=0.0, region=nothing, initial_state_of_charge=0.0, unit_size_energy=0.0, eff_up=1.0, ext=Dict(), reg_cost=0.0, min_duration=0.0, max_cap_energy=1e8, reg_max=0.0, ) where T <: PSY.Storage
     StorageTechnology{T}(base_power, om_costs_energy, existing_cap_energy, prime_mover_type, rsv_cost, available, existing_cap_power, name, storage_tech, capital_costs_power, max_duration, unit_size_power, id, min_cap_power, capital_costs_energy, losses, eff_down, rsv_max, max_cap_power, power_systems_type, internal, om_costs_power, balancing_topology, min_cap_energy, region, initial_state_of_charge, unit_size_energy, eff_up, ext, reg_cost, min_duration, max_cap_energy, reg_max, )
 end
 
