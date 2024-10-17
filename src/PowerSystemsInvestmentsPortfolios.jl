@@ -59,6 +59,7 @@ export MinimumCapacityRequirements
 export Region
 export Zone
 
+export get_regions
 export get_technologies
 export get_technology
 export get_requirements

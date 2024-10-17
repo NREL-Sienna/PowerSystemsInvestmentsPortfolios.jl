@@ -191,6 +191,10 @@ function add_region!(
     return
 end
 
+function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: Region}
+    return IS.get_components(T, portfolio.data)
+end
+
 """
 Add many technologies to the portfolio at once.
 
