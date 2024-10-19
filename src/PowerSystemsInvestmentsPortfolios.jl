@@ -44,7 +44,9 @@ export Portfolio
 export Technology
 export Requirements
 export SupplyTechnology
-export TransportTechnology
+export ACTransportTechnology
+export HVDCTransportTechnology
+export ExistingTransportTechnology
 export StorageTechnology
 export DemandRequirement
 export DemandsideTechnology
