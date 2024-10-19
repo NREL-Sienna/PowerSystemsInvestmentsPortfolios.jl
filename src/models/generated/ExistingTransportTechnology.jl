@@ -6,6 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct ExistingTransportTechnology{T <: PSY.Device} <: Technology
+        base_power::Float64
         capital_cost::PSY.ValueCurve
         start_region::Region
         available::Bool
@@ -28,6 +29,7 @@ This file is auto-generated. Do not edit.
 
 
 # Arguments
+- `base_power::Float64`: Base power
 - `capital_cost::PSY.ValueCurve`: Cost of adding new capacity to the inter-regional transmission line.
 - `start_region::Region`: Start region for transport technology
 - `available::Bool`: identifies whether the technology is available
@@ -47,6 +49,8 @@ This file is auto-generated. Do not edit.
 - `line_loss::Float64`: Transmission loss for each transport technology (%)
 """
 mutable struct ExistingTransportTechnology{T <: PSY.Device} <: Technology
+    "Base power"
+    base_power::Float64
     "Cost of adding new capacity to the inter-regional transmission line."
     capital_cost::PSY.ValueCurve
     "Start region for transport technology"
@@ -84,10 +88,12 @@ mutable struct ExistingTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function ExistingTransportTechnology{T}(; capital_cost, start_region, available, name, capital_recovery_factor=0, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, existing_line_capacity, wacc=0, line_loss, ) where T <: PSY.Device
-    ExistingTransportTechnology{T}(capital_cost, start_region, available, name, capital_recovery_factor, end_region, power_systems_type, angle_limit, internal, ext, resistance, voltage, network_id, maximum_new_capacity, existing_line_capacity, wacc, line_loss, )
+function ExistingTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, capital_recovery_factor=0, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, existing_line_capacity, wacc=0, line_loss, ) where T <: PSY.Device
+    ExistingTransportTechnology{T}(base_power, capital_cost, start_region, available, name, capital_recovery_factor, end_region, power_systems_type, angle_limit, internal, ext, resistance, voltage, network_id, maximum_new_capacity, existing_line_capacity, wacc, line_loss, )
 end
 
+"""Get [`ExistingTransportTechnology`](@ref) `base_power`."""
+get_base_power(value::ExistingTransportTechnology) = value.base_power
 """Get [`ExistingTransportTechnology`](@ref) `capital_cost`."""
 get_capital_cost(value::ExistingTransportTechnology) = value.capital_cost
 """Get [`ExistingTransportTechnology`](@ref) `start_region`."""
@@ -123,6 +129,8 @@ get_wacc(value::ExistingTransportTechnology) = value.wacc
 """Get [`ExistingTransportTechnology`](@ref) `line_loss`."""
 get_line_loss(value::ExistingTransportTechnology) = value.line_loss
 
+"""Set [`ExistingTransportTechnology`](@ref) `base_power`."""
+set_base_power!(value::ExistingTransportTechnology, val) = value.base_power = val
 """Set [`ExistingTransportTechnology`](@ref) `capital_cost`."""
 set_capital_cost!(value::ExistingTransportTechnology, val) = value.capital_cost = val
 """Set [`ExistingTransportTechnology`](@ref) `start_region`."""

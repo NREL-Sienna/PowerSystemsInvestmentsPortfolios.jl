@@ -6,6 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
+        base_power::Float64
         capital_cost::PSY.ValueCurve
         start_region::Region
         available::Bool
@@ -28,6 +29,7 @@ This file is auto-generated. Do not edit.
 
 
 # Arguments
+- `base_power::Float64`: Base power
 - `capital_cost::PSY.ValueCurve`: Cost of adding new capacity to the inter-regional transmission line.
 - `start_region::Region`: Start region for transport technology
 - `available::Bool`: identifies whether the technology is available
@@ -47,6 +49,8 @@ This file is auto-generated. Do not edit.
 - `line_loss::Float64`: Transmission loss for each transport technology (%)
 """
 mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
+    "Base power"
+    base_power::Float64
     "Cost of adding new capacity to the inter-regional transmission line."
     capital_cost::PSY.ValueCurve
     "Start region for transport technology"
@@ -84,10 +88,12 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function HVDCTransportTechnology{T}(; capital_cost, start_region, available, name, capital_recovery_factor=0, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, existing_line_capacity, wacc=0, line_loss, ) where T <: PSY.Device
-    HVDCTransportTechnology{T}(capital_cost, start_region, available, name, capital_recovery_factor, end_region, power_systems_type, angle_limit, internal, ext, resistance, voltage, network_id, maximum_new_capacity, existing_line_capacity, wacc, line_loss, )
+function HVDCTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, capital_recovery_factor=0, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, existing_line_capacity, wacc=0, line_loss, ) where T <: PSY.Device
+    HVDCTransportTechnology{T}(base_power, capital_cost, start_region, available, name, capital_recovery_factor, end_region, power_systems_type, angle_limit, internal, ext, resistance, voltage, network_id, maximum_new_capacity, existing_line_capacity, wacc, line_loss, )
 end
 
+"""Get [`HVDCTransportTechnology`](@ref) `base_power`."""
+get_base_power(value::HVDCTransportTechnology) = value.base_power
 """Get [`HVDCTransportTechnology`](@ref) `capital_cost`."""
 get_capital_cost(value::HVDCTransportTechnology) = value.capital_cost
 """Get [`HVDCTransportTechnology`](@ref) `start_region`."""
@@ -123,6 +129,8 @@ get_wacc(value::HVDCTransportTechnology) = value.wacc
 """Get [`HVDCTransportTechnology`](@ref) `line_loss`."""
 get_line_loss(value::HVDCTransportTechnology) = value.line_loss
 
+"""Set [`HVDCTransportTechnology`](@ref) `base_power`."""
+set_base_power!(value::HVDCTransportTechnology, val) = value.base_power = val
 """Set [`HVDCTransportTechnology`](@ref) `capital_cost`."""
 set_capital_cost!(value::HVDCTransportTechnology, val) = value.capital_cost = val
 """Set [`HVDCTransportTechnology`](@ref) `start_region`."""
