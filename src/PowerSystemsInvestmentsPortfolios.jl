@@ -53,14 +53,17 @@ export DemandsideTechnology
 export FlexibleDemandTechnology
 export Electrolyzers
 export CurtailableDemandSideTechnology
-export RetireableCapacity
-export RetrofitCapacity
+export RetirementPotential
+export AggregateRetirementPotential
+export RetrofitPotential
+export AggregateRetrofitPotential
 export ExistingCapacity
 export CarbonCaps
 export MinimumCapacityRequirements
 export Region
 export Zone
 
+export get_name
 export get_regions
 export get_technologies
 export get_technology
