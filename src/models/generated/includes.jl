@@ -49,7 +49,6 @@ export get_existing_capacity
 export get_existing_line_capacity
 export get_ext
 export get_fuel
-export get_gen_ID
 export get_heat_rate_mmbtu_per_mwh
 export get_id
 export get_initial_capacity
@@ -140,7 +139,6 @@ export set_existing_capacity!
 export set_existing_line_capacity!
 export set_ext!
 export set_fuel!
-export set_gen_ID!
 export set_heat_rate_mmbtu_per_mwh!
 export set_id!
 export set_initial_capacity!

@@ -15,12 +15,12 @@ This file is auto-generated. Do not edit.
         capital_costs::PSY.ValueCurve
         rsv_cost::Float64
         cofire_start_max::Union{Nothing, Dict{ThermalFuels, Float64}}
-        gen_ID::Int64
         available::Bool
         co2::Union{Float64, Dict{String, Float64}, Dict{ThermalFuels, Float64}}
-        name::String
         cofire_start_min::Union{Nothing, Dict{ThermalFuels, Float64}}
+        name::String
         ramp_dn_percentage::Float64
+        id::Int64
         down_time::Float64
         initial_capacity::Float64
         start_fuel_mmbtu_per_mw::Float64
@@ -56,12 +56,12 @@ This file is auto-generated. Do not edit.
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
 - `rsv_cost::Float64`: (default: `0.0`) Cost of providing upwards spinning or contingency reserves
 - `cofire_start_max::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Maximum blending level of each fuel during start-up process for multi-fuel generator
-- `gen_ID::Int64`: ID for individual generator
 - `available::Bool`: (default: `True`) identifies whether the technology is available
 - `co2::Union{Float64, Dict{String, Float64}, Dict{ThermalFuels, Float64}}`: (default: `0.0`) Carbon Intensity of fuel
-- `name::String`: The technology name
 - `cofire_start_min::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Minimum blending level of each fuel during start-up process for multi-fuel generator
+- `name::String`: The technology name
 - `ramp_dn_percentage::Float64`: (default: `100.0`) Maximum decrease in output between operation periods. Fraction of total capacity
+- `id::Int64`: ID for individual generator
 - `down_time::Float64`: (default: `0.0`) Minimum amount of time a resource has to remain in the shutdown state.
 - `initial_capacity::Float64`: (default: `0.0`) Pre-existing capacity for a technology
 - `start_fuel_mmbtu_per_mw::Float64`: (default: `0.0`) Startup fuel use per MW of nameplate capacity of each generator (MMBtu/MW per start)
@@ -103,18 +103,18 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     rsv_cost::Float64
     "Maximum blending level of each fuel during start-up process for multi-fuel generator"
     cofire_start_max::Union{Nothing, Dict{ThermalFuels, Float64}}
-    "ID for individual generator"
-    gen_ID::Int64
     "identifies whether the technology is available"
     available::Bool
     "Carbon Intensity of fuel"
     co2::Union{Float64, Dict{String, Float64}, Dict{ThermalFuels, Float64}}
-    "The technology name"
-    name::String
     "Minimum blending level of each fuel during start-up process for multi-fuel generator"
     cofire_start_min::Union{Nothing, Dict{ThermalFuels, Float64}}
+    "The technology name"
+    name::String
     "Maximum decrease in output between operation periods. Fraction of total capacity"
     ramp_dn_percentage::Float64
+    "ID for individual generator"
+    id::Int64
     "Minimum amount of time a resource has to remain in the shutdown state."
     down_time::Float64
     "Pre-existing capacity for a technology"
@@ -160,8 +160,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
 end
 
 
-function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, minimum_required_capacity=0.0, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), rsv_cost=0.0, cofire_start_max=nothing, gen_ID, available=True, co2=0.0, name, cofire_start_min=nothing, ramp_dn_percentage=100.0, down_time=0.0, initial_capacity=0.0, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), rsv_max=0.0, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=nothing, maximum_capacity=Inf, cluster=1, ramp_up_percentage=100.0, unit_size=0.0, reg_cost=0.0, min_generation_percentage=0.0, start_cost_per_mw=0.0, reg_max=0.0, up_time=0.0, ) where T <: PSY.Generator
-    SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, outage_factor, prime_mover_type, minimum_required_capacity, cofire_level_min, capital_costs, rsv_cost, cofire_start_max, gen_ID, available, co2, name, cofire_start_min, ramp_dn_percentage, down_time, initial_capacity, start_fuel_mmbtu_per_mw, operation_costs, rsv_max, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, region, maximum_capacity, cluster, ramp_up_percentage, unit_size, reg_cost, min_generation_percentage, start_cost_per_mw, reg_max, up_time, )
+function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, minimum_required_capacity=0.0, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), rsv_cost=0.0, cofire_start_max=nothing, available=True, co2=0.0, cofire_start_min=nothing, name, ramp_dn_percentage=100.0, id, down_time=0.0, initial_capacity=0.0, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), rsv_max=0.0, fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=nothing, maximum_capacity=Inf, cluster=1, ramp_up_percentage=100.0, unit_size=0.0, reg_cost=0.0, min_generation_percentage=0.0, start_cost_per_mw=0.0, reg_max=0.0, up_time=0.0, ) where T <: PSY.Generator
+    SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, outage_factor, prime_mover_type, minimum_required_capacity, cofire_level_min, capital_costs, rsv_cost, cofire_start_max, available, co2, cofire_start_min, name, ramp_dn_percentage, id, down_time, initial_capacity, start_fuel_mmbtu_per_mw, operation_costs, rsv_max, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, region, maximum_capacity, cluster, ramp_up_percentage, unit_size, reg_cost, min_generation_percentage, start_cost_per_mw, reg_max, up_time, )
 end
 
 """Get [`SupplyTechnology`](@ref) `base_power`."""
@@ -182,18 +182,18 @@ get_capital_costs(value::SupplyTechnology) = value.capital_costs
 get_rsv_cost(value::SupplyTechnology) = value.rsv_cost
 """Get [`SupplyTechnology`](@ref) `cofire_start_max`."""
 get_cofire_start_max(value::SupplyTechnology) = value.cofire_start_max
-"""Get [`SupplyTechnology`](@ref) `gen_ID`."""
-get_gen_ID(value::SupplyTechnology) = value.gen_ID
 """Get [`SupplyTechnology`](@ref) `available`."""
 get_available(value::SupplyTechnology) = value.available
 """Get [`SupplyTechnology`](@ref) `co2`."""
 get_co2(value::SupplyTechnology) = value.co2
-"""Get [`SupplyTechnology`](@ref) `name`."""
-get_name(value::SupplyTechnology) = value.name
 """Get [`SupplyTechnology`](@ref) `cofire_start_min`."""
 get_cofire_start_min(value::SupplyTechnology) = value.cofire_start_min
+"""Get [`SupplyTechnology`](@ref) `name`."""
+get_name(value::SupplyTechnology) = value.name
 """Get [`SupplyTechnology`](@ref) `ramp_dn_percentage`."""
 get_ramp_dn_percentage(value::SupplyTechnology) = value.ramp_dn_percentage
+"""Get [`SupplyTechnology`](@ref) `id`."""
+get_id(value::SupplyTechnology) = value.id
 """Get [`SupplyTechnology`](@ref) `down_time`."""
 get_down_time(value::SupplyTechnology) = value.down_time
 """Get [`SupplyTechnology`](@ref) `initial_capacity`."""
@@ -255,18 +255,18 @@ set_capital_costs!(value::SupplyTechnology, val) = value.capital_costs = val
 set_rsv_cost!(value::SupplyTechnology, val) = value.rsv_cost = val
 """Set [`SupplyTechnology`](@ref) `cofire_start_max`."""
 set_cofire_start_max!(value::SupplyTechnology, val) = value.cofire_start_max = val
-"""Set [`SupplyTechnology`](@ref) `gen_ID`."""
-set_gen_ID!(value::SupplyTechnology, val) = value.gen_ID = val
 """Set [`SupplyTechnology`](@ref) `available`."""
 set_available!(value::SupplyTechnology, val) = value.available = val
 """Set [`SupplyTechnology`](@ref) `co2`."""
 set_co2!(value::SupplyTechnology, val) = value.co2 = val
-"""Set [`SupplyTechnology`](@ref) `name`."""
-set_name!(value::SupplyTechnology, val) = value.name = val
 """Set [`SupplyTechnology`](@ref) `cofire_start_min`."""
 set_cofire_start_min!(value::SupplyTechnology, val) = value.cofire_start_min = val
+"""Set [`SupplyTechnology`](@ref) `name`."""
+set_name!(value::SupplyTechnology, val) = value.name = val
 """Set [`SupplyTechnology`](@ref) `ramp_dn_percentage`."""
 set_ramp_dn_percentage!(value::SupplyTechnology, val) = value.ramp_dn_percentage = val
+"""Set [`SupplyTechnology`](@ref) `id`."""
+set_id!(value::SupplyTechnology, val) = value.id = val
 """Set [`SupplyTechnology`](@ref) `down_time`."""
 set_down_time!(value::SupplyTechnology, val) = value.down_time = val
 """Set [`SupplyTechnology`](@ref) `initial_capacity`."""
