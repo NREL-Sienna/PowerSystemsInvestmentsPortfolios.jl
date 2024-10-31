@@ -333,20 +333,26 @@ function dataframe_to_structs(df_dict::Dict)
         # Extract supply curves and IDs
         eaid = row_pw["entity_attribute_id"]
         supply_curve = row_pw["value"]
+        supply_curve = decode(supply_curve, "UTF-8")
         supply_curve_parsed = parse_json_to_arrays(supply_curve)
 
         id = eaid
 
         # Find corresponding supply technology for that supply curve
+        # TODO: Add check to only do the rest of this is this returns a real (and not an empty dataframe)
         row = df_dict["supply_technologies"][
             df_dict["supply_technologies"][!, "technology_id"] .== id,
             :,
         ]
 
         #extract area
-        area = topologies[topologies.name .== row[!, "balancing_topology"][1], "area"][1]
-        area_int = parse(Int64, area)
-
+        if !isempty(row)
+            area = topologies[topologies.name .== row[!, "balancing_topology"][1], "area"][1]
+            area_int = parse(Int64, area)
+        
+        else    
+            continue
+        end
         #extract supply curve, does every supply_technology have a supply curve?
         #id = row["technology_id"]
         #eaid = df_dict["attributes"][df_dict["attributes"] .== id, "entity_attribute_id"][1]
@@ -409,13 +415,15 @@ function dataframe_to_structs(df_dict::Dict)
         result = isempty(filter(row -> row[:entity_id] == tech_id, df_dict["attributes"])) ? 0 : filter(row -> row[:entity_id] == tech_id, df_dict["attributes"])
 
         # Extract the blob from the heat rate data
+        #TODO: Fix this please
         if result != 0
             heat_rate_unparsed = row["value"]
             heat_rate_piecewise_lin = parse_json_to_arrays(heat_rate_unparsed)
         else
             heat_rate_piecewise_lin = 0.0
         end
-        
+        #heat_rate_piecewise_lin = 0.0
+
         if row["fuel_type"] == "Solar" || row["fuel_type"] == "Wind"
             # Put in time series for the solar and Wind
             eaid = row["unit_id"]
