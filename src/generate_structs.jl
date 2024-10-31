@@ -327,18 +327,15 @@ function dataframe_to_structs(df_dict::Dict)
     end
     #Populate SupplyTechnology structs from database (new builds)
     topologies = df_dict["balancing_topologies"]
-    supply_curves = filter("description" => contains("Supply"), df_dict["piecewise_linear"])
+    supply_curves = filter("entity_type" => contains("supply_technologies"), df_dict["attributes"])
     for row_pw in eachrow(supply_curves)
 
         # Extract supply curves and IDs
         eaid = row_pw["entity_attribute_id"]
-        supply_curve = row_pw["piecewise_linear_blob"]
+        supply_curve = row_pw["value"]
         supply_curve_parsed = parse_json_to_arrays(supply_curve)
 
-        id = df_dict["attributes"][
-            df_dict["attributes"][!, "entity_attribute_id"] .== eaid,
-            "entity_id",
-        ]
+        id = eaid
 
         # Find corresponding supply technology for that supply curve
         row = df_dict["supply_technologies"][
