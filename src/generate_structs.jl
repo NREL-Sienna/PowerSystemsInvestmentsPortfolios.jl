@@ -530,10 +530,13 @@ function dataframe_to_structs(df_dict::Dict)
 
         # Collect all rows in the time_series table that match the entity_id
         ts = filter("entity_id" => isequal(ts_index), df_dict["time_series"])
+        ts_parsed = collect(ts[:, :value])
+
+        # Parsing the timestamps into Dates
+        timestamps = DateTime.(ts[!, :timestamp], "yyyy-m-d-H")
         
-        dates = ts_parsed[1] #fix this later, dates syntax is inconsistent so hard to parse
-        dates = DateTime("2020-01-01T00:00:00"):Hour(1):DateTime("2020-12-31T23:00:00")
-        demand = ts_parsed[2]
+        dates = timestamps[1]:Hour(1):timestamps[end]
+        demand = ts_parsed
         demand_array = TimeArray(dates, demand)
         ts = SingleTimeSeries(string(row["entity_attribute_id"]), demand_array)
 
