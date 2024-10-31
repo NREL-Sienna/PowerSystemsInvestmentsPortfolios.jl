@@ -416,6 +416,13 @@ function dataframe_to_structs(df_dict::Dict)
             heat_rate_piecewise_lin = 0.0
         end
         
+        if row["fuel_type"] == "Solar" || row["fuel_type"] == "Wind"
+            # Put in time series for the solar and Wind
+            eaid = row["unit_id"]
+            ts_index = filter("entity_id" => isequal(eaid), df_dict["entities"])["entity_id"]
+            ts = filter("entity_id" => isequal(ts_index), df_dict["time_series"])
+            # TODO: Need to figure out how to parse the timestamp and values and add to the time series
+        end
 
         @show heat_rate_piecewise_lin
         parametric = map_prime_mover_to_parametric(row["prime_mover"])
@@ -519,11 +526,11 @@ function dataframe_to_structs(df_dict::Dict)
     for row in eachrow(df_dict["demand_requirements"])
         #start in time_series
         eaid = row["entity_attribute_id"]
-        ts_blob = filter("entity_id" => isequal(eaid), df_dict["entities"])[
-            !,
-            "time_series_blob",
-        ][1]
-        ts_parsed = parse_timestamps_and_values(ts_blob)
+        ts_index = filter("entity_id" => isequal(eaid), df_dict["entities"])["entity_id"]
+
+        # Collect all rows in the time_series table that match the entity_id
+        ts = filter("entity_id" => isequal(ts_index), df_dict["time_series"])
+        
         dates = ts_parsed[1] #fix this later, dates syntax is inconsistent so hard to parse
         dates = DateTime("2020-01-01T00:00:00"):Hour(1):DateTime("2020-12-31T23:00:00")
         demand = ts_parsed[2]
