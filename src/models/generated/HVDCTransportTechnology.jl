@@ -34,7 +34,7 @@ This file is auto-generated. Do not edit.
 - `start_region::Region`: Start region for transport technology
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: Name
-- `capital_recovery_factor::Int64`: (default: `0`) Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion.
+- `capital_recovery_factor::Int64`: (default: `30`) Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion.
 - `end_region::Region`: End region for transport technology
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `angle_limit::Float64`: (default: `0.0`) Votlage angle limit (radians)
@@ -88,7 +88,7 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function HVDCTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, capital_recovery_factor=0, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, existing_line_capacity, wacc=0, line_loss, ) where T <: PSY.Device
+function HVDCTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, capital_recovery_factor=30, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, existing_line_capacity, wacc=0, line_loss, ) where T <: PSY.Device
     HVDCTransportTechnology{T}(base_power, capital_cost, start_region, available, name, capital_recovery_factor, end_region, power_systems_type, angle_limit, internal, ext, resistance, voltage, network_id, maximum_new_capacity, existing_line_capacity, wacc, line_loss, )
 end
 

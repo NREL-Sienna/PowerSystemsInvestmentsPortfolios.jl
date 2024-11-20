@@ -53,6 +53,7 @@ export get_heat_rate_mmbtu_per_mwh
 export get_id
 export get_initial_capacity
 export get_initial_state_of_charge
+export get_lifetime
 export get_line_loss
 export get_losses
 export get_max_cap_energy
@@ -143,6 +144,7 @@ export set_heat_rate_mmbtu_per_mwh!
 export set_id!
 export set_initial_capacity!
 export set_initial_state_of_charge!
+export set_lifetime!
 export set_line_loss!
 export set_losses!
 export set_max_cap_energy!
