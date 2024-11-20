@@ -21,6 +21,7 @@ end
 mutable struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     discount_rate::Float64
+    inflation_rate::Float
     base_year::Int
     data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
@@ -33,6 +34,7 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
     function Portfolio(
         aggregation,
         discount_rate::Float64,
+        inflation_rate::Float64,
         base_year::Int,
         data,
         investment_schedule::Dict,
@@ -58,6 +60,7 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
         return new(
             aggregation,
             discount_rate,
+            inflation_rate,
             base_year,
             data,
             investment_schedule,
@@ -82,11 +85,13 @@ end
 """
 Construct an empty `Portfolio`. Useful for building a Portfolio from scratch.
 """
-function Portfolio(discount_rate; kwargs...)
+function Portfolio(discount_rate, inflation_rate, base_year; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
     return Portfolio(
         DEFAULT_AGGREGATION,
         discount_rate,
+        inflation_rate,
+        base_year,
         data,
         Dict(),
         IS.InfrastructureSystemsInternal(),
@@ -96,11 +101,13 @@ end
 """
 Construct an empty `Portfolio` specifying aggregation. Useful for building a Portfolio from scratch.
 """
-function Portfolio(aggregation, discount_rate; kwargs...)
+function Portfolio(aggregation, discount_rate, inflation_rate, base_year; kwargs...)
     data = _create_system_data_from_kwargs(; kwargs...)
     return Portfolio(
         aggregation,
         discount_rate,
+        inflation_rate,
+        base_year,
         data,
         Dict(),
         IS.InfrastructureSystemsInternal(),
