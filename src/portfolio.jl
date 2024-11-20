@@ -33,6 +33,7 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
     function Portfolio(
         aggregation,
         discount_rate::Float64,
+        base_year::Int,
         data,
         investment_schedule::Dict,
         #units_settings::IS.SystemUnitsSettings,
@@ -57,6 +58,7 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
         return new(
             aggregation,
             discount_rate,
+            base_year,
             data,
             investment_schedule,
             #units_settings,
@@ -124,6 +126,16 @@ set_name!(val::Portfolio, name::AbstractString) = val.metadata.name = name
 Get the name of the portfolio.
 """
 get_name(val::Portfolio) = val.metadata.name
+
+"""
+Set the base year of the portfolio.
+"""
+set_base_year!(val::Portfolio, year::Int) = val.base_year = year
+
+"""
+Get the base year of the portfolio.
+"""
+get_base_year(val::Portfolio) = val.base_year
 
 """
 Set the description of the portfolio.
