@@ -38,6 +38,7 @@ This file is auto-generated. Do not edit.
         eff_up::Float64
         cluster::Int64
         ext::Dict
+        base_year::Int
         reg_cost::Float64
         min_duration::Float64
         max_cap_energy::Float64
@@ -79,6 +80,7 @@ This file is auto-generated. Do not edit.
 - `eff_up::Float64`: (default: `1.0`) Efficiency of charging storage
 - `cluster::Int64`: (default: `1`) Number of the cluster when representing multiple clusters of a given technology in a given region.
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `base_year::Int`: (default: `2020`) Reference year for technology data
 - `reg_cost::Float64`: (default: `0.0`) Cost of providing regulation reserves 
 - `min_duration::Float64`: (default: `0.0`) Minimum required durection for a storage technology
 - `max_cap_energy::Float64`: (default: `1e8`) Maximum allowable installed energy capacity for a storage technology
@@ -149,6 +151,8 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     cluster::Int64
     "Option for providing additional data"
     ext::Dict
+    "Reference year for technology data"
+    base_year::Int
     "Cost of providing regulation reserves "
     reg_cost::Float64
     "Minimum required durection for a storage technology"
@@ -160,8 +164,8 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
 end
 
 
-function StorageTechnology{T}(; base_power, om_costs_energy=StorageCost(), existing_cap_energy=0.0, prime_mover_type=PrimeMovers.OT, lifetime=100, rsv_cost=0.0, available, existing_cap_power=0.0, name, storage_tech, capital_costs_power=LinearCurve(0.0), max_duration=1000.0, unit_size_power=0.0, capital_recovery_factor=30, id, min_cap_power=0.0, capital_costs_energy=LinearCurve(0.0), losses=1.0, eff_down=1.0, rsv_max=0.0, max_cap_power=1e8, power_systems_type, internal=InfrastructureSystemsInternal(), om_costs_power=StorageCost(), balancing_topology, min_cap_energy=0.0, region=nothing, initial_state_of_charge=0.0, unit_size_energy=0.0, eff_up=1.0, cluster=1, ext=Dict(), reg_cost=0.0, min_duration=0.0, max_cap_energy=1e8, reg_max=0.0, ) where T <: PSY.Storage
-    StorageTechnology{T}(base_power, om_costs_energy, existing_cap_energy, prime_mover_type, lifetime, rsv_cost, available, existing_cap_power, name, storage_tech, capital_costs_power, max_duration, unit_size_power, capital_recovery_factor, id, min_cap_power, capital_costs_energy, losses, eff_down, rsv_max, max_cap_power, power_systems_type, internal, om_costs_power, balancing_topology, min_cap_energy, region, initial_state_of_charge, unit_size_energy, eff_up, cluster, ext, reg_cost, min_duration, max_cap_energy, reg_max, )
+function StorageTechnology{T}(; base_power, om_costs_energy=StorageCost(), existing_cap_energy=0.0, prime_mover_type=PrimeMovers.OT, lifetime=100, rsv_cost=0.0, available, existing_cap_power=0.0, name, storage_tech, capital_costs_power=LinearCurve(0.0), max_duration=1000.0, unit_size_power=0.0, capital_recovery_factor=30, id, min_cap_power=0.0, capital_costs_energy=LinearCurve(0.0), losses=1.0, eff_down=1.0, rsv_max=0.0, max_cap_power=1e8, power_systems_type, internal=InfrastructureSystemsInternal(), om_costs_power=StorageCost(), balancing_topology, min_cap_energy=0.0, region=nothing, initial_state_of_charge=0.0, unit_size_energy=0.0, eff_up=1.0, cluster=1, ext=Dict(), base_year=2020, reg_cost=0.0, min_duration=0.0, max_cap_energy=1e8, reg_max=0.0, ) where T <: PSY.Storage
+    StorageTechnology{T}(base_power, om_costs_energy, existing_cap_energy, prime_mover_type, lifetime, rsv_cost, available, existing_cap_power, name, storage_tech, capital_costs_power, max_duration, unit_size_power, capital_recovery_factor, id, min_cap_power, capital_costs_energy, losses, eff_down, rsv_max, max_cap_power, power_systems_type, internal, om_costs_power, balancing_topology, min_cap_energy, region, initial_state_of_charge, unit_size_energy, eff_up, cluster, ext, base_year, reg_cost, min_duration, max_cap_energy, reg_max, )
 end
 
 """Get [`StorageTechnology`](@ref) `base_power`."""
@@ -228,6 +232,8 @@ get_eff_up(value::StorageTechnology) = value.eff_up
 get_cluster(value::StorageTechnology) = value.cluster
 """Get [`StorageTechnology`](@ref) `ext`."""
 get_ext(value::StorageTechnology) = value.ext
+"""Get [`StorageTechnology`](@ref) `base_year`."""
+get_base_year(value::StorageTechnology) = value.base_year
 """Get [`StorageTechnology`](@ref) `reg_cost`."""
 get_reg_cost(value::StorageTechnology) = value.reg_cost
 """Get [`StorageTechnology`](@ref) `min_duration`."""
@@ -301,6 +307,8 @@ set_eff_up!(value::StorageTechnology, val) = value.eff_up = val
 set_cluster!(value::StorageTechnology, val) = value.cluster = val
 """Set [`StorageTechnology`](@ref) `ext`."""
 set_ext!(value::StorageTechnology, val) = value.ext = val
+"""Set [`StorageTechnology`](@ref) `base_year`."""
+set_base_year!(value::StorageTechnology, val) = value.base_year = val
 """Set [`StorageTechnology`](@ref) `reg_cost`."""
 set_reg_cost!(value::StorageTechnology, val) = value.reg_cost = val
 """Set [`StorageTechnology`](@ref) `min_duration`."""

@@ -21,6 +21,7 @@ This file is auto-generated. Do not edit.
         voltage::Float64
         network_id::Int64
         maximum_new_capacity::Float64
+        base_year::Int
         existing_line_capacity::Float64
         wacc::Float64
         line_loss::Float64
@@ -44,6 +45,7 @@ This file is auto-generated. Do not edit.
 - `voltage::Float64`: (default: `0.0`) Technology resistance in Ohms
 - `network_id::Int64`: Numerical Index
 - `maximum_new_capacity::Float64`: Maximum capacity that can be added to transmission line (MW)
+- `base_year::Int`: (default: `2020`) Reference year for technology data
 - `existing_line_capacity::Float64`: Existing capacity of transport technology (MW)
 - `wacc::Float64`: (default: `0`) Weighted average cost of capital
 - `line_loss::Float64`: Transmission loss for each transport technology (%)
@@ -79,6 +81,8 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     network_id::Int64
     "Maximum capacity that can be added to transmission line (MW)"
     maximum_new_capacity::Float64
+    "Reference year for technology data"
+    base_year::Int
     "Existing capacity of transport technology (MW)"
     existing_line_capacity::Float64
     "Weighted average cost of capital"
@@ -88,8 +92,8 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function ACTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, capital_recovery_factor=30, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, existing_line_capacity, wacc=0, line_loss, ) where T <: PSY.Device
-    ACTransportTechnology{T}(base_power, capital_cost, start_region, available, name, capital_recovery_factor, end_region, power_systems_type, angle_limit, internal, ext, resistance, voltage, network_id, maximum_new_capacity, existing_line_capacity, wacc, line_loss, )
+function ACTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, capital_recovery_factor=30, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, base_year=2020, existing_line_capacity, wacc=0, line_loss, ) where T <: PSY.Device
+    ACTransportTechnology{T}(base_power, capital_cost, start_region, available, name, capital_recovery_factor, end_region, power_systems_type, angle_limit, internal, ext, resistance, voltage, network_id, maximum_new_capacity, base_year, existing_line_capacity, wacc, line_loss, )
 end
 
 """Get [`ACTransportTechnology`](@ref) `base_power`."""
@@ -122,6 +126,8 @@ get_voltage(value::ACTransportTechnology) = value.voltage
 get_network_id(value::ACTransportTechnology) = value.network_id
 """Get [`ACTransportTechnology`](@ref) `maximum_new_capacity`."""
 get_maximum_new_capacity(value::ACTransportTechnology) = value.maximum_new_capacity
+"""Get [`ACTransportTechnology`](@ref) `base_year`."""
+get_base_year(value::ACTransportTechnology) = value.base_year
 """Get [`ACTransportTechnology`](@ref) `existing_line_capacity`."""
 get_existing_line_capacity(value::ACTransportTechnology) = value.existing_line_capacity
 """Get [`ACTransportTechnology`](@ref) `wacc`."""
@@ -159,6 +165,8 @@ set_voltage!(value::ACTransportTechnology, val) = value.voltage = val
 set_network_id!(value::ACTransportTechnology, val) = value.network_id = val
 """Set [`ACTransportTechnology`](@ref) `maximum_new_capacity`."""
 set_maximum_new_capacity!(value::ACTransportTechnology, val) = value.maximum_new_capacity = val
+"""Set [`ACTransportTechnology`](@ref) `base_year`."""
+set_base_year!(value::ACTransportTechnology, val) = value.base_year = val
 """Set [`ACTransportTechnology`](@ref) `existing_line_capacity`."""
 set_existing_line_capacity!(value::ACTransportTechnology, val) = value.existing_line_capacity = val
 """Set [`ACTransportTechnology`](@ref) `wacc`."""

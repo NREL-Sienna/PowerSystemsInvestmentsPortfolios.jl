@@ -20,6 +20,7 @@ export get_angle_limit
 export get_available
 export get_balancing_topology
 export get_base_power
+export get_base_year
 export get_capital_cost
 export get_capital_costs
 export get_capital_costs_energy
@@ -111,6 +112,7 @@ export set_angle_limit!
 export set_available!
 export set_balancing_topology!
 export set_base_power!
+export set_base_year!
 export set_capital_cost!
 export set_capital_costs!
 export set_capital_costs_energy!

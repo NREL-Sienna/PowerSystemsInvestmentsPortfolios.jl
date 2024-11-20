@@ -21,6 +21,7 @@ This file is auto-generated. Do not edit.
         voltage::Float64
         network_id::Int64
         maximum_new_capacity::Float64
+        base_year::Int
         existing_line_capacity::Float64
         wacc::Float64
         line_loss::Float64
@@ -44,6 +45,7 @@ This file is auto-generated. Do not edit.
 - `voltage::Float64`: (default: `0.0`) Technology resistance in Ohms
 - `network_id::Int64`: Numerical Index
 - `maximum_new_capacity::Float64`: Maximum capacity that can be added to transmission line (MW)
+- `base_year::Int`: (default: `2020`) Reference year for technology data
 - `existing_line_capacity::Float64`: Existing capacity of transport technology (MW)
 - `wacc::Float64`: (default: `0`) Weighted average cost of capital
 - `line_loss::Float64`: Transmission loss for each transport technology (%)
@@ -79,6 +81,8 @@ mutable struct ExistingTransportTechnology{T <: PSY.Device} <: Technology
     network_id::Int64
     "Maximum capacity that can be added to transmission line (MW)"
     maximum_new_capacity::Float64
+    "Reference year for technology data"
+    base_year::Int
     "Existing capacity of transport technology (MW)"
     existing_line_capacity::Float64
     "Weighted average cost of capital"
@@ -88,8 +92,8 @@ mutable struct ExistingTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function ExistingTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, capital_recovery_factor=30, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, existing_line_capacity, wacc=0, line_loss, ) where T <: PSY.Device
-    ExistingTransportTechnology{T}(base_power, capital_cost, start_region, available, name, capital_recovery_factor, end_region, power_systems_type, angle_limit, internal, ext, resistance, voltage, network_id, maximum_new_capacity, existing_line_capacity, wacc, line_loss, )
+function ExistingTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, capital_recovery_factor=30, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, base_year=2020, existing_line_capacity, wacc=0, line_loss, ) where T <: PSY.Device
+    ExistingTransportTechnology{T}(base_power, capital_cost, start_region, available, name, capital_recovery_factor, end_region, power_systems_type, angle_limit, internal, ext, resistance, voltage, network_id, maximum_new_capacity, base_year, existing_line_capacity, wacc, line_loss, )
 end
 
 """Get [`ExistingTransportTechnology`](@ref) `base_power`."""
@@ -122,6 +126,8 @@ get_voltage(value::ExistingTransportTechnology) = value.voltage
 get_network_id(value::ExistingTransportTechnology) = value.network_id
 """Get [`ExistingTransportTechnology`](@ref) `maximum_new_capacity`."""
 get_maximum_new_capacity(value::ExistingTransportTechnology) = value.maximum_new_capacity
+"""Get [`ExistingTransportTechnology`](@ref) `base_year`."""
+get_base_year(value::ExistingTransportTechnology) = value.base_year
 """Get [`ExistingTransportTechnology`](@ref) `existing_line_capacity`."""
 get_existing_line_capacity(value::ExistingTransportTechnology) = value.existing_line_capacity
 """Get [`ExistingTransportTechnology`](@ref) `wacc`."""
@@ -159,6 +165,8 @@ set_voltage!(value::ExistingTransportTechnology, val) = value.voltage = val
 set_network_id!(value::ExistingTransportTechnology, val) = value.network_id = val
 """Set [`ExistingTransportTechnology`](@ref) `maximum_new_capacity`."""
 set_maximum_new_capacity!(value::ExistingTransportTechnology, val) = value.maximum_new_capacity = val
+"""Set [`ExistingTransportTechnology`](@ref) `base_year`."""
+set_base_year!(value::ExistingTransportTechnology, val) = value.base_year = val
 """Set [`ExistingTransportTechnology`](@ref) `existing_line_capacity`."""
 set_existing_line_capacity!(value::ExistingTransportTechnology, val) = value.existing_line_capacity = val
 """Set [`ExistingTransportTechnology`](@ref) `wacc`."""
