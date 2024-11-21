@@ -25,7 +25,7 @@ export get_capital_cost
 export get_capital_costs
 export get_capital_costs_energy
 export get_capital_costs_power
-export get_capital_recovery_factor
+export get_capital_recovery_period
 export get_cluster
 export get_co2
 export get_co_2_max_mtons
@@ -54,6 +54,7 @@ export get_heat_rate_mmbtu_per_mwh
 export get_id
 export get_initial_capacity
 export get_initial_state_of_charge
+export get_interest_rate
 export get_lifetime
 export get_line_loss
 export get_losses
@@ -117,7 +118,7 @@ export set_capital_cost!
 export set_capital_costs!
 export set_capital_costs_energy!
 export set_capital_costs_power!
-export set_capital_recovery_factor!
+export set_capital_recovery_period!
 export set_cluster!
 export set_co2!
 export set_co_2_max_mtons!
@@ -146,6 +147,7 @@ export set_heat_rate_mmbtu_per_mwh!
 export set_id!
 export set_initial_capacity!
 export set_initial_state_of_charge!
+export set_interest_rate!
 export set_lifetime!
 export set_line_loss!
 export set_losses!

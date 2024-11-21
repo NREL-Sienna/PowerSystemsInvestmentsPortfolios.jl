@@ -11,7 +11,6 @@ This file is auto-generated. Do not edit.
         start_region::Region
         available::Bool
         name::String
-        capital_recovery_factor::Int64
         end_region::Region
         power_systems_type::String
         angle_limit::Float64
@@ -25,6 +24,7 @@ This file is auto-generated. Do not edit.
         existing_line_capacity::Float64
         wacc::Float64
         line_loss::Float64
+        capital_recovery_period::Int64
     end
 
 
@@ -35,7 +35,6 @@ This file is auto-generated. Do not edit.
 - `start_region::Region`: Start region for transport technology
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: Name
-- `capital_recovery_factor::Int64`: (default: `30`) Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion.
 - `end_region::Region`: End region for transport technology
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `angle_limit::Float64`: (default: `0.0`) Votlage angle limit (radians)
@@ -49,6 +48,7 @@ This file is auto-generated. Do not edit.
 - `existing_line_capacity::Float64`: Existing capacity of transport technology (MW)
 - `wacc::Float64`: (default: `0`) Weighted average cost of capital
 - `line_loss::Float64`: Transmission loss for each transport technology (%)
+- `capital_recovery_period::Int64`: (default: `30`) Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion.
 """
 mutable struct ExistingTransportTechnology{T <: PSY.Device} <: Technology
     "Base power"
@@ -61,8 +61,6 @@ mutable struct ExistingTransportTechnology{T <: PSY.Device} <: Technology
     available::Bool
     "Name"
     name::String
-    "Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion."
-    capital_recovery_factor::Int64
     "End region for transport technology"
     end_region::Region
     "maps to a valid PowerSystems.jl for PCM modeling"
@@ -89,11 +87,13 @@ mutable struct ExistingTransportTechnology{T <: PSY.Device} <: Technology
     wacc::Float64
     "Transmission loss for each transport technology (%)"
     line_loss::Float64
+    "Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion."
+    capital_recovery_period::Int64
 end
 
 
-function ExistingTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, capital_recovery_factor=30, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, base_year=2020, existing_line_capacity, wacc=0, line_loss, ) where T <: PSY.Device
-    ExistingTransportTechnology{T}(base_power, capital_cost, start_region, available, name, capital_recovery_factor, end_region, power_systems_type, angle_limit, internal, ext, resistance, voltage, network_id, maximum_new_capacity, base_year, existing_line_capacity, wacc, line_loss, )
+function ExistingTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, base_year=2020, existing_line_capacity, wacc=0, line_loss, capital_recovery_period=30, ) where T <: PSY.Device
+    ExistingTransportTechnology{T}(base_power, capital_cost, start_region, available, name, end_region, power_systems_type, angle_limit, internal, ext, resistance, voltage, network_id, maximum_new_capacity, base_year, existing_line_capacity, wacc, line_loss, capital_recovery_period, )
 end
 
 """Get [`ExistingTransportTechnology`](@ref) `base_power`."""
@@ -106,8 +106,6 @@ get_start_region(value::ExistingTransportTechnology) = value.start_region
 get_available(value::ExistingTransportTechnology) = value.available
 """Get [`ExistingTransportTechnology`](@ref) `name`."""
 get_name(value::ExistingTransportTechnology) = value.name
-"""Get [`ExistingTransportTechnology`](@ref) `capital_recovery_factor`."""
-get_capital_recovery_factor(value::ExistingTransportTechnology) = value.capital_recovery_factor
 """Get [`ExistingTransportTechnology`](@ref) `end_region`."""
 get_end_region(value::ExistingTransportTechnology) = value.end_region
 """Get [`ExistingTransportTechnology`](@ref) `power_systems_type`."""
@@ -134,6 +132,8 @@ get_existing_line_capacity(value::ExistingTransportTechnology) = value.existing_
 get_wacc(value::ExistingTransportTechnology) = value.wacc
 """Get [`ExistingTransportTechnology`](@ref) `line_loss`."""
 get_line_loss(value::ExistingTransportTechnology) = value.line_loss
+"""Get [`ExistingTransportTechnology`](@ref) `capital_recovery_period`."""
+get_capital_recovery_period(value::ExistingTransportTechnology) = value.capital_recovery_period
 
 """Set [`ExistingTransportTechnology`](@ref) `base_power`."""
 set_base_power!(value::ExistingTransportTechnology, val) = value.base_power = val
@@ -145,8 +145,6 @@ set_start_region!(value::ExistingTransportTechnology, val) = value.start_region 
 set_available!(value::ExistingTransportTechnology, val) = value.available = val
 """Set [`ExistingTransportTechnology`](@ref) `name`."""
 set_name!(value::ExistingTransportTechnology, val) = value.name = val
-"""Set [`ExistingTransportTechnology`](@ref) `capital_recovery_factor`."""
-set_capital_recovery_factor!(value::ExistingTransportTechnology, val) = value.capital_recovery_factor = val
 """Set [`ExistingTransportTechnology`](@ref) `end_region`."""
 set_end_region!(value::ExistingTransportTechnology, val) = value.end_region = val
 """Set [`ExistingTransportTechnology`](@ref) `power_systems_type`."""
@@ -173,3 +171,5 @@ set_existing_line_capacity!(value::ExistingTransportTechnology, val) = value.exi
 set_wacc!(value::ExistingTransportTechnology, val) = value.wacc = val
 """Set [`ExistingTransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::ExistingTransportTechnology, val) = value.line_loss = val
+"""Set [`ExistingTransportTechnology`](@ref) `capital_recovery_period`."""
+set_capital_recovery_period!(value::ExistingTransportTechnology, val) = value.capital_recovery_period = val

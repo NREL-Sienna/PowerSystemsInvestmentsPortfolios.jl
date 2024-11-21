@@ -11,11 +11,11 @@ This file is auto-generated. Do not edit.
         start_region::Region
         available::Bool
         name::String
-        capital_recovery_factor::Int64
         end_region::Region
         power_systems_type::String
         angle_limit::Float64
         internal::InfrastructureSystemsInternal
+        interest_rate::Float64
         ext::Dict
         resistance::Float64
         voltage::Float64
@@ -25,6 +25,7 @@ This file is auto-generated. Do not edit.
         existing_line_capacity::Float64
         wacc::Float64
         line_loss::Float64
+        capital_recovery_period::Int64
     end
 
 
@@ -35,11 +36,11 @@ This file is auto-generated. Do not edit.
 - `start_region::Region`: Start region for transport technology
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: Name
-- `capital_recovery_factor::Int64`: (default: `30`) Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion.
 - `end_region::Region`: End region for transport technology
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `angle_limit::Float64`: (default: `0.0`) Votlage angle limit (radians)
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `interest_rate::Float64`: (default: `0.07`) Interest rate for technology
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `resistance::Float64`: (default: `0.0`) Technology resistance in Ohms
 - `voltage::Float64`: (default: `0.0`) Technology resistance in Ohms
@@ -49,6 +50,7 @@ This file is auto-generated. Do not edit.
 - `existing_line_capacity::Float64`: Existing capacity of transport technology (MW)
 - `wacc::Float64`: (default: `0`) Weighted average cost of capital
 - `line_loss::Float64`: Transmission loss for each transport technology (%)
+- `capital_recovery_period::Int64`: (default: `30`) Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion.
 """
 mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     "Base power"
@@ -61,8 +63,6 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     available::Bool
     "Name"
     name::String
-    "Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion."
-    capital_recovery_factor::Int64
     "End region for transport technology"
     end_region::Region
     "maps to a valid PowerSystems.jl for PCM modeling"
@@ -71,6 +71,8 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     angle_limit::Float64
     "Internal field"
     internal::InfrastructureSystemsInternal
+    "Interest rate for technology"
+    interest_rate::Float64
     "Option for providing additional data"
     ext::Dict
     "Technology resistance in Ohms"
@@ -89,11 +91,13 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     wacc::Float64
     "Transmission loss for each transport technology (%)"
     line_loss::Float64
+    "Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion."
+    capital_recovery_period::Int64
 end
 
 
-function ACTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, capital_recovery_factor=30, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, base_year=2020, existing_line_capacity, wacc=0, line_loss, ) where T <: PSY.Device
-    ACTransportTechnology{T}(base_power, capital_cost, start_region, available, name, capital_recovery_factor, end_region, power_systems_type, angle_limit, internal, ext, resistance, voltage, network_id, maximum_new_capacity, base_year, existing_line_capacity, wacc, line_loss, )
+function ACTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), interest_rate=0.07, ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, base_year=2020, existing_line_capacity, wacc=0, line_loss, capital_recovery_period=30, ) where T <: PSY.Device
+    ACTransportTechnology{T}(base_power, capital_cost, start_region, available, name, end_region, power_systems_type, angle_limit, internal, interest_rate, ext, resistance, voltage, network_id, maximum_new_capacity, base_year, existing_line_capacity, wacc, line_loss, capital_recovery_period, )
 end
 
 """Get [`ACTransportTechnology`](@ref) `base_power`."""
@@ -106,8 +110,6 @@ get_start_region(value::ACTransportTechnology) = value.start_region
 get_available(value::ACTransportTechnology) = value.available
 """Get [`ACTransportTechnology`](@ref) `name`."""
 get_name(value::ACTransportTechnology) = value.name
-"""Get [`ACTransportTechnology`](@ref) `capital_recovery_factor`."""
-get_capital_recovery_factor(value::ACTransportTechnology) = value.capital_recovery_factor
 """Get [`ACTransportTechnology`](@ref) `end_region`."""
 get_end_region(value::ACTransportTechnology) = value.end_region
 """Get [`ACTransportTechnology`](@ref) `power_systems_type`."""
@@ -116,6 +118,8 @@ get_power_systems_type(value::ACTransportTechnology) = value.power_systems_type
 get_angle_limit(value::ACTransportTechnology) = value.angle_limit
 """Get [`ACTransportTechnology`](@ref) `internal`."""
 get_internal(value::ACTransportTechnology) = value.internal
+"""Get [`ACTransportTechnology`](@ref) `interest_rate`."""
+get_interest_rate(value::ACTransportTechnology) = value.interest_rate
 """Get [`ACTransportTechnology`](@ref) `ext`."""
 get_ext(value::ACTransportTechnology) = value.ext
 """Get [`ACTransportTechnology`](@ref) `resistance`."""
@@ -134,6 +138,8 @@ get_existing_line_capacity(value::ACTransportTechnology) = value.existing_line_c
 get_wacc(value::ACTransportTechnology) = value.wacc
 """Get [`ACTransportTechnology`](@ref) `line_loss`."""
 get_line_loss(value::ACTransportTechnology) = value.line_loss
+"""Get [`ACTransportTechnology`](@ref) `capital_recovery_period`."""
+get_capital_recovery_period(value::ACTransportTechnology) = value.capital_recovery_period
 
 """Set [`ACTransportTechnology`](@ref) `base_power`."""
 set_base_power!(value::ACTransportTechnology, val) = value.base_power = val
@@ -145,8 +151,6 @@ set_start_region!(value::ACTransportTechnology, val) = value.start_region = val
 set_available!(value::ACTransportTechnology, val) = value.available = val
 """Set [`ACTransportTechnology`](@ref) `name`."""
 set_name!(value::ACTransportTechnology, val) = value.name = val
-"""Set [`ACTransportTechnology`](@ref) `capital_recovery_factor`."""
-set_capital_recovery_factor!(value::ACTransportTechnology, val) = value.capital_recovery_factor = val
 """Set [`ACTransportTechnology`](@ref) `end_region`."""
 set_end_region!(value::ACTransportTechnology, val) = value.end_region = val
 """Set [`ACTransportTechnology`](@ref) `power_systems_type`."""
@@ -155,6 +159,8 @@ set_power_systems_type!(value::ACTransportTechnology, val) = value.power_systems
 set_angle_limit!(value::ACTransportTechnology, val) = value.angle_limit = val
 """Set [`ACTransportTechnology`](@ref) `internal`."""
 set_internal!(value::ACTransportTechnology, val) = value.internal = val
+"""Set [`ACTransportTechnology`](@ref) `interest_rate`."""
+set_interest_rate!(value::ACTransportTechnology, val) = value.interest_rate = val
 """Set [`ACTransportTechnology`](@ref) `ext`."""
 set_ext!(value::ACTransportTechnology, val) = value.ext = val
 """Set [`ACTransportTechnology`](@ref) `resistance`."""
@@ -173,3 +179,5 @@ set_existing_line_capacity!(value::ACTransportTechnology, val) = value.existing_
 set_wacc!(value::ACTransportTechnology, val) = value.wacc = val
 """Set [`ACTransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::ACTransportTechnology, val) = value.line_loss = val
+"""Set [`ACTransportTechnology`](@ref) `capital_recovery_period`."""
+set_capital_recovery_period!(value::ACTransportTechnology, val) = value.capital_recovery_period = val
