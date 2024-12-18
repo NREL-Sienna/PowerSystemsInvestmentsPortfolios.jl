@@ -23,7 +23,6 @@ This file is auto-generated. Do not edit.
         maximum_new_capacity::Float64
         base_year::Int
         existing_line_capacity::Float64
-        wacc::Float64
         line_loss::Float64
         capital_recovery_period::Int64
     end
@@ -48,7 +47,6 @@ This file is auto-generated. Do not edit.
 - `maximum_new_capacity::Float64`: Maximum capacity that can be added to transmission line (MW)
 - `base_year::Int`: (default: `2020`) Reference year for technology data
 - `existing_line_capacity::Float64`: Existing capacity of transport technology (MW)
-- `wacc::Float64`: (default: `0`) Weighted average cost of capital
 - `line_loss::Float64`: Transmission loss for each transport technology (%)
 - `capital_recovery_period::Int64`: (default: `30`) Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion.
 """
@@ -87,8 +85,6 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
     base_year::Int
     "Existing capacity of transport technology (MW)"
     existing_line_capacity::Float64
-    "Weighted average cost of capital"
-    wacc::Float64
     "Transmission loss for each transport technology (%)"
     line_loss::Float64
     "Capital recovery period (in years) used for determining overnight capital costs from annualized investment costs for network transmission line expansion."
@@ -96,8 +92,8 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function HVDCTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), interest_rate=0.07, ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, base_year=2020, existing_line_capacity, wacc=0, line_loss, capital_recovery_period=30, ) where T <: PSY.Device
-    HVDCTransportTechnology{T}(base_power, capital_cost, start_region, available, name, end_region, power_systems_type, angle_limit, internal, interest_rate, ext, resistance, voltage, network_id, maximum_new_capacity, base_year, existing_line_capacity, wacc, line_loss, capital_recovery_period, )
+function HVDCTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), interest_rate=0.07, ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, base_year=2020, existing_line_capacity, line_loss, capital_recovery_period=30, ) where T <: PSY.Device
+    HVDCTransportTechnology{T}(base_power, capital_cost, start_region, available, name, end_region, power_systems_type, angle_limit, internal, interest_rate, ext, resistance, voltage, network_id, maximum_new_capacity, base_year, existing_line_capacity, line_loss, capital_recovery_period, )
 end
 
 """Get [`HVDCTransportTechnology`](@ref) `base_power`."""
@@ -134,8 +130,6 @@ get_maximum_new_capacity(value::HVDCTransportTechnology) = value.maximum_new_cap
 get_base_year(value::HVDCTransportTechnology) = value.base_year
 """Get [`HVDCTransportTechnology`](@ref) `existing_line_capacity`."""
 get_existing_line_capacity(value::HVDCTransportTechnology) = value.existing_line_capacity
-"""Get [`HVDCTransportTechnology`](@ref) `wacc`."""
-get_wacc(value::HVDCTransportTechnology) = value.wacc
 """Get [`HVDCTransportTechnology`](@ref) `line_loss`."""
 get_line_loss(value::HVDCTransportTechnology) = value.line_loss
 """Get [`HVDCTransportTechnology`](@ref) `capital_recovery_period`."""
@@ -175,8 +169,6 @@ set_maximum_new_capacity!(value::HVDCTransportTechnology, val) = value.maximum_n
 set_base_year!(value::HVDCTransportTechnology, val) = value.base_year = val
 """Set [`HVDCTransportTechnology`](@ref) `existing_line_capacity`."""
 set_existing_line_capacity!(value::HVDCTransportTechnology, val) = value.existing_line_capacity = val
-"""Set [`HVDCTransportTechnology`](@ref) `wacc`."""
-set_wacc!(value::HVDCTransportTechnology, val) = value.wacc = val
 """Set [`HVDCTransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::HVDCTransportTechnology, val) = value.line_loss = val
 """Set [`HVDCTransportTechnology`](@ref) `capital_recovery_period`."""

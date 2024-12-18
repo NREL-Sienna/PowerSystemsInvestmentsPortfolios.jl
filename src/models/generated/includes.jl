@@ -108,7 +108,6 @@ export get_up_time
 export get_var_cost_per_mwh
 export get_voll
 export get_voltage
-export get_wacc
 export set_angle_limit!
 export set_available!
 export set_balancing_topology!
@@ -201,4 +200,3 @@ export set_up_time!
 export set_var_cost_per_mwh!
 export set_voll!
 export set_voltage!
-export set_wacc!
