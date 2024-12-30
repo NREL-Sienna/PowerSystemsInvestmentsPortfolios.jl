@@ -21,6 +21,8 @@ end
 mutable struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     discount_rate::Float64
+    inflation_rate::Float64
+    base_year::Int
     data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     #units_settings::IS.SystemUnitsSettings
@@ -32,6 +34,8 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
     function Portfolio(
         aggregation,
         discount_rate::Float64,
+        inflation_rate::Float64,
+        base_year::Int,
         data,
         investment_schedule::Dict,
         #units_settings::IS.SystemUnitsSettings,
@@ -56,6 +60,8 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
         return new(
             aggregation,
             discount_rate,
+            inflation_rate,
+            base_year,
             data,
             investment_schedule,
             #units_settings,
@@ -79,11 +85,13 @@ end
 """
 Construct an empty `Portfolio`. Useful for building a Portfolio from scratch.
 """
-function Portfolio(discount_rate; kwargs...)
+function Portfolio(discount_rate, inflation_rate, base_year; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
     return Portfolio(
         DEFAULT_AGGREGATION,
         discount_rate,
+        inflation_rate,
+        base_year,
         data,
         Dict(),
         IS.InfrastructureSystemsInternal(),
@@ -93,11 +101,13 @@ end
 """
 Construct an empty `Portfolio` specifying aggregation. Useful for building a Portfolio from scratch.
 """
-function Portfolio(aggregation, discount_rate; kwargs...)
+function Portfolio(aggregation, discount_rate, inflation_rate, base_year; kwargs...)
     data = _create_system_data_from_kwargs(; kwargs...)
     return Portfolio(
         aggregation,
         discount_rate,
+        inflation_rate,
+        base_year,
         data,
         Dict(),
         IS.InfrastructureSystemsInternal(),
@@ -123,6 +133,16 @@ set_name!(val::Portfolio, name::AbstractString) = val.metadata.name = name
 Get the name of the portfolio.
 """
 get_name(val::Portfolio) = val.metadata.name
+
+"""
+Set the base year of the portfolio.
+"""
+set_base_year!(val::Portfolio, year::Int) = val.base_year = year
+
+"""
+Get the base year of the portfolio.
+"""
+get_base_year(val::Portfolio) = val.base_year
 
 """
 Set the description of the portfolio.
@@ -189,6 +209,10 @@ function add_region!(
     )
 
     return
+end
+
+function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: Region}
+    return IS.get_components(T, portfolio.data)
 end
 
 """

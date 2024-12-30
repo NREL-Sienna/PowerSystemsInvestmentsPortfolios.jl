@@ -4,12 +4,14 @@ include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
 include("RetirementPotential.jl")
 include("ExistingCapacity.jl")
+include("ACTransportTechnology.jl")
 include("AggregateRetrofitPotential.jl")
 include("DemandSideTechnology.jl")
 include("AggregateRetirementPotential.jl")
+include("ExistingTransportTechnology.jl")
+include("HVDCTransportTechnology.jl")
 include("StorageTechnology.jl")
 include("CarbonCaps.jl")
-include("TransportTechnology.jl")
 include("RetrofitPotential.jl")
 include("CurtailableDemandSideTechnology.jl")
 include("FlexibleDemandTechnology.jl")
@@ -18,11 +20,12 @@ export get_angle_limit
 export get_available
 export get_balancing_topology
 export get_base_power
+export get_base_year
 export get_capital_cost
 export get_capital_costs
 export get_capital_costs_energy
 export get_capital_costs_power
-export get_capital_recovery_factor
+export get_capital_recovery_period
 export get_cluster
 export get_co2
 export get_co_2_max_mtons
@@ -47,10 +50,12 @@ export get_existing_capacity
 export get_existing_line_capacity
 export get_ext
 export get_fuel
-export get_gen_ID
 export get_heat_rate_mmbtu_per_mwh
 export get_id
 export get_initial_capacity
+export get_initial_state_of_charge
+export get_interest_rate
+export get_lifetime
 export get_line_loss
 export get_losses
 export get_max_cap_energy
@@ -82,6 +87,7 @@ export get_ramp_dn_percentage
 export get_ramp_up_percentage
 export get_reg_cost
 export get_reg_max
+export get_region
 export get_resistance
 export get_retirement_potential
 export get_retrofit_fraction
@@ -95,21 +101,23 @@ export get_start_fuel_mmbtu_per_mw
 export get_start_region
 export get_storage_tech
 export get_technology_efficiency
+export get_unit_size
+export get_unit_size_energy
+export get_unit_size_power
 export get_up_time
 export get_var_cost_per_mwh
 export get_voll
 export get_voltage
-export get_wacc
-export get_zone
 export set_angle_limit!
 export set_available!
 export set_balancing_topology!
 export set_base_power!
+export set_base_year!
 export set_capital_cost!
 export set_capital_costs!
 export set_capital_costs_energy!
 export set_capital_costs_power!
-export set_capital_recovery_factor!
+export set_capital_recovery_period!
 export set_cluster!
 export set_co2!
 export set_co_2_max_mtons!
@@ -134,10 +142,12 @@ export set_existing_capacity!
 export set_existing_line_capacity!
 export set_ext!
 export set_fuel!
-export set_gen_ID!
 export set_heat_rate_mmbtu_per_mwh!
 export set_id!
 export set_initial_capacity!
+export set_initial_state_of_charge!
+export set_interest_rate!
+export set_lifetime!
 export set_line_loss!
 export set_losses!
 export set_max_cap_energy!
@@ -169,6 +179,7 @@ export set_ramp_dn_percentage!
 export set_ramp_up_percentage!
 export set_reg_cost!
 export set_reg_max!
+export set_region!
 export set_resistance!
 export set_retirement_potential!
 export set_retrofit_fraction!
@@ -182,9 +193,10 @@ export set_start_fuel_mmbtu_per_mw!
 export set_start_region!
 export set_storage_tech!
 export set_technology_efficiency!
+export set_unit_size!
+export set_unit_size_energy!
+export set_unit_size_power!
 export set_up_time!
 export set_var_cost_per_mwh!
 export set_voll!
 export set_voltage!
-export set_wacc!
-export set_zone!
