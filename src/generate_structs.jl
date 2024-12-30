@@ -297,53 +297,159 @@ function parse_timestamps_and_values(json_str::String)
     return timestamps, values
 end
 
+function parse_timestamps_and_values(df::DataFrame)
+    # Initialize arrays to store timestamps and values
+    timestamps = String[]
+    values = Float64[]
+    type = ""
+
+    # Check if the timestamps are within the hours of the day
+    is_within_hours = all(row -> parse(Int, split(row["timestamp"], "-")[end]) in 1:24, eachrow(df))
+
+    if is_within_hours
+        type = "Real Time"
+        # Iterate over each row in the DataFrame
+        for row in eachrow(df)
+            # Append the timestamp to the timestamps array
+            push!(timestamps, row["timestamp"])
+
+            # Append the value to the values array
+            push!(values, row["value"])
+        end
+    else
+        type = "Forecast"
+        # Create a dictionary to store daily values
+        daily_values = Dict{String, Vector{Float64}}()
+
+        # Iterate over each row in the DataFrame
+        for row in eachrow(df)
+            # Extract the date part of the timestamp
+            date_part = join(split(row["timestamp"], "-")[1:3], "-")
+
+            # Initialize the daily values array if not already present
+            if !haskey(daily_values, date_part)
+                daily_values[date_part] = Float64[]
+            end
+
+            # Append the value to the daily values array
+            push!(daily_values[date_part], row["value"])
+        end
+
+        # Calculate the average values for each day and create 24-hour profiles
+        for (date, vals) in daily_values
+            avg_value = sum(vals) / length(vals)
+            for hour in 1:24
+                push!(timestamps, "$date-$hour")
+                push!(values, avg_value)
+            end
+        end
+    end
+
+    # Parse timestamps into DateTime objects
+    parsed_timestamps = DateTime.(timestamps, "yyyy-m-d-H")
+
+    # Sort the parsed timestamps and values
+    sorted_indices = sortperm(parsed_timestamps)
+    sorted_timestamps = parsed_timestamps[sorted_indices]
+    sorted_values = values[sorted_indices]
+
+    return sorted_timestamps, sorted_values, type
+end
+
 function parse_json_to_arrays(json_str::String)
-    # Parse the JSON string into a Julia object
-    data = JSON3.read(json_str)
+    # Replace invalid JSON values
+    cleaned_str = replace(json_str, "NaN" => "null")
+
+    # Parse the cleaned JSON string into a Julia object
+    data = JSON3.read(cleaned_str)
 
     # Initialize array to store x and y values
     xy_values = []
 
+    # Initialize previous values
+    prev_to_x = 0.0
+    prev_to_y = 0.0
+
     # Iterate over each dictionary in the parsed JSON data
     for item in data
-        # Append the x values to x_values array as vector of named tuples
-        push!(xy_values, IS.XY_COORDS((Float64(item["from_x"]), Float64(item["from_y"]))))
-        push!(xy_values, IS.XY_COORDS((Float64(item["to_x"]), Float64(item["to_y"]))))
+        # Handle from_x and from_y replacements
+        from_x = isnothing(item["from_x"]) ? prev_to_x : Float64(item["from_x"])
+        from_y = isnothing(item["from_y"]) ? prev_to_y : Float64(item["from_y"])
+
+        # Handle to_x and to_y replacements
+        to_x = isnothing(item["to_x"]) ? prev_to_x : Float64(item["to_x"])
+        to_y = isnothing(item["to_y"]) ? prev_to_y : Float64(item["to_y"])
+
+        # Append corrected values to the array
+        push!(xy_values, IS.XY_COORDS((from_x, from_y)))
+        push!(xy_values, IS.XY_COORDS((to_x, to_y)))
+
+        # Update previous values
+        prev_to_x = to_x
+        prev_to_y = to_y
     end
 
     return unique(xy_values)
 end
+
+
+function parse_heatrate_to_array(json_str::String)
+    xy_vector = parse_json_to_arrays(json_str)
+    
+    # Validation: Check if there are at least two distinct x-coordinates
+    if length(unique(getfield.(xy_vector, :x))) < 2
+        return 0.0
+    end
+    
+    # If valid, return the InputOutputCurve
+    return InputOutputCurve(function_data=PiecewiseLinearData(points=xy_vector))
+end
+
 
 function dataframe_to_structs(df_dict::Dict)
 
     #Initialize Portfolio
     p = Portfolio(0.07)
 
+    #initialize Zone structs
+    zones = []
+    for row_zone in eachrow(df_dict["areas"])
+        z = Zone(name = string("zone_", row_zone["name"]), id=parse(Int64, row_zone["name"]))
+        push!(zones, z)
+    end
     #Populate SupplyTechnology structs from database (new builds)
     topologies = df_dict["balancing_topologies"]
-    supply_curves = filter("description" => contains("Supply"), df_dict["piecewise_linear"])
+    supply_curves_full = filter("entity_type" => contains("supply_technologies"), df_dict["attributes"])
+    supply_curves = filter("name" => contains("supply"), supply_curves_full)
+
+    # TODO: Add fields for reinforcement distances
+    reinforcement_distances = filter("name" => contains("reinforcement"), supply_curves_full)
     for row_pw in eachrow(supply_curves)
 
         # Extract supply curves and IDs
         eaid = row_pw["entity_attribute_id"]
-        supply_curve = row_pw["piecewise_linear_blob"]
-        supply_curve_parsed = parse_json_to_arrays(supply_curve)
+        supply_curve = row_pw["value"]
+        supply_curve = decode(supply_curve, "UTF-8")
 
-        id = df_dict["attributes"][
-            df_dict["attributes"][!, "entity_attribute_id"] .== eaid,
-            "entity_id",
-        ]
+        id = eaid
 
         # Find corresponding supply technology for that supply curve
+        # TODO: Add check to only do the rest of this is this returns a real (and not an empty dataframe)
         row = df_dict["supply_technologies"][
             df_dict["supply_technologies"][!, "technology_id"] .== id,
             :,
         ]
 
+        # @show eaid, row_pw, supply_curve, topologies[topologies.name .== row[!, "balancing_topology"][1], "area"][1]
+        supply_curve_parsed = parse_json_to_arrays(supply_curve)
         #extract area
-        area = topologies[topologies.name .== row[!, "balancing_topology"][1], "area"][1]
-        area_int = parse(Int64, area)
-
+        if !isempty(row)
+            area = topologies[topologies.name .== row[!, "balancing_topology"][1], "area"][1]
+            area_int = parse(Int64, area)
+        
+        else    
+            continue
+        end
         #extract supply curve, does every supply_technology have a supply curve?
         #id = row["technology_id"]
         #eaid = df_dict["attributes"][df_dict["attributes"] .== id, "entity_attribute_id"][1]
@@ -354,74 +460,19 @@ function dataframe_to_structs(df_dict::Dict)
         t = SupplyTechnology{parametric}(;
             #Data pulled from DB
             name=string(row[!, "technology_id"][1]),
-            id=row[!, "technology_id"][1],
-            inv_cost_per_mwyr=InputOutputCurve(PiecewiseLinearData(supply_curve_parsed)),
-            om_costs=ThermalGenerationCost(
-                variable=CostCurve(LinearCurve(row[!, "vom_cost"][1])),
-                fixed=row[!, "fom_cost"][1],
-                start_up=0.0,
-                shut_down=0.0,
-            ),
+            gen_ID=row[!, "technology_id"][1],
+            capital_costs=InputOutputCurve(PiecewiseLinearData(supply_curve_parsed)),
             balancing_topology=string(row[!, "balancing_topology"][1]),
             prime_mover_type=map_prime_mover(row[!, "prime_mover"][1]),
             fuel=row[!, "fuel_type"][1],
-            zone=area_int,
+            zone=zones[area_int],
 
             #Problem ones, need to write functions to extract
             base_power=100.0,
-            existing_cap_mw=0.0,
-            cap_size=250.0,
+            initial_capacity=0.0,
 
             # Data we should have but dont currently
-            start_fuel_mmbtu_per_mw=2.0,
-            start_cost_per_mw=91.0,
-            up_time=6.0,
-            down_time=6.0,
-            heat_rate_mmbtu_per_mwh=7.43,
-            co2=0.05306,
-            ramp_dn_percentage=0.64,
-            ramp_up_percentage=0.64,
-
-            #Placeholder or default values (modeling assumptions)
-            region="MA", #this one can probably just be removed from the structs, just descriptor for GenX
-            available=true,
-            min_cap_mw=0.0,
-            min_power=0.0,
-            max_cap_mw=-1,
-            power_systems_type=string(parametric),
-            cluster=1,
-            reg_max=0.25,
-            rsv_max=0.5,
-            #new_build = 1
-        )
-        add_technology!(p, t)
-    end
-
-    # Get existing generation units
-    for row in eachrow(df_dict["generation_units"])
-
-        #extract area
-        area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
-        area_int = parse(Int64, area)
-
-        parametric = map_prime_mover_to_parametric(row["prime_mover"])
-        t = SupplyTechnology{parametric}(;
-            # Data pulled from DB
-            name=row["name"],
-            id=row["unit_id"],
-            inv_cost_per_mwyr=LinearCurve(0.0), #just assume zero since pre-existing?
-            balancing_topology=string(row["balancing_topology"]),
-            prime_mover_type=map_prime_mover(row["prime_mover"]),
-            fuel=row["fuel_type"],
-            zone=area_int,
-            base_power=row["base_power"],
-            existing_cap_mw=row["rating"],
-
-            # Problem ones, need to write functions to extract         
-            cap_size=250.0,
-
-            # Data we should have but dont currently
-            om_costs=ThermalGenerationCost(
+            operation_costs=ThermalGenerationCost(
                 variable=CostCurve(LinearCurve(0.0)),
                 fixed=0.0,
                 start_up=0.0,
@@ -437,11 +488,88 @@ function dataframe_to_structs(df_dict::Dict)
             ramp_up_percentage=0.64,
 
             #Placeholder or default values (modeling assumptions)
-            region="MA",
             available=true,
-            min_cap_mw=0.0,
-            min_power=0.0,
-            max_cap_mw=-1,
+            minimum_required_capacity=0.0,
+            min_generation_percentage=0.0,
+            maximum_capacity=1e8,
+            power_systems_type=string(parametric),
+            cluster=1,
+            reg_max=0.25,
+            rsv_max=0.5,
+        )
+        add_technology!(p, t)
+    end
+
+    # Get existing generation units
+    for row in eachrow(df_dict["generation_units"])
+
+        #extract area
+        area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
+        area_int = parse(Int64, area)
+
+        # This will return all rows where entity_id matches any value in the tech_id vector
+        tech_id = row["unit_id"]
+        result_all = isempty(filter(row -> row[:entity_id] == tech_id && row[:entity_type] == "generation_units", df_dict["attributes"])) ? 0 : filter(row -> row[:entity_id] == tech_id && row[:entity_type] == "generation_units", df_dict["attributes"])
+        result = filter(row -> contains(row[:name], "Heat Rate"), result_all)
+        # Check if result exists and contains the expected field
+        if result != 0 
+            if !isempty(result[!, :value])
+                first_value = result[!, :value][1]
+                # Ensure it's decoded properly
+                heat_rate_unparsed = decode(first_value, "UTF-8")
+                heat_rate_piecewise_lin = parse_heatrate_to_array(heat_rate_unparsed)
+            else
+                @warn "Result value field is empty"
+                heat_rate_piecewise_lin = 0.0
+            end
+        else
+            @warn "Result DataFrame is empty or zero"
+            heat_rate_piecewise_lin = 0.0
+        end
+
+        co2_data = filter(row -> contains(row[:name], "CO2"), result_all)
+        co2_value = isempty(co2_data) ? 0.0 : Float64(co2_data[!, "value"][1])
+
+        op_data = filter(row -> row[:unit_id] == tech_id, df_dict["operational_data"])
+        variable_om = op_data[!, "vom_cost"][1] 
+        
+
+        parametric = map_prime_mover_to_parametric(row["prime_mover"])
+        t = SupplyTechnology{parametric}(;
+            # Data pulled from DB
+            name=row["name"],
+            gen_ID=row["unit_id"],
+            capital_costs=LinearCurve(0.0), #just assume zero since pre-existing?
+            balancing_topology=string(row["balancing_topology"]),
+            prime_mover_type=map_prime_mover(row["prime_mover"]),
+            fuel=row["fuel_type"],
+            zone=zones[area_int],
+            base_power=row["base_power"],
+            initial_capacity=row["rating"],
+
+            # Data we should have but dont currently
+            operation_costs=ThermalGenerationCost(
+                variable=CostCurve(LinearCurve(variable_om)),
+                fixed=op_data[!, "fom_cost"][1],
+                start_up=0.0,
+                shut_down=0.0,
+            ),
+            start_fuel_mmbtu_per_mw=op_data[!, "startup_fuel_mmbtu_per_mw"][1],
+            start_cost_per_mw=op_data[!, "startup_cost"][1],
+            up_time=op_data[!, "uptime"][1],
+            down_time=op_data[!, "downtime"][1],
+            heat_rate_mmbtu_per_mwh=heat_rate_piecewise_lin,
+            co2=co2_value,
+            
+            ## TODO: Need to add ramping capabilities to the schema
+            ramp_dn_percentage=0.64,
+            ramp_up_percentage=0.64,
+
+            #Placeholder or default values (modeling assumptions)
+            available=true,
+            minimum_required_capacity=op_data[!, "min_stable_level"][1],
+            min_generation_percentage=0.0,
+            maximum_capacity=1e8,
             power_systems_type=string(parametric),
             cluster=1,
             reg_max=0.25,
@@ -449,6 +577,37 @@ function dataframe_to_structs(df_dict::Dict)
             #new_build =  0#0 for existing builds
         )
         add_technology!(p, t)
+        if row["fuel_type"] == "Solar" || row["fuel_type"] == "Wind"
+            # Put in time series for the solar and Wind
+            eaid = row["unit_id"]
+            ts_index = filter("entity_id" => isequal(eaid), df_dict["entities"])[!, "entity_id"]
+            if length(ts_index) == 0
+                continue
+            else
+                for time_series in ts_index
+                    ts = filter("entity_id" => isequal(time_series), df_dict["time_series"])
+                    # TODO: Remove this hacky fix once database has been corrected to have unique timestamps
+                    # ts = unique(ts,:timestamp)
+                    timestamps, values, type = parse_timestamps_and_values(ts)
+                    # dates = DateTime.(timestamps, "yyyy-m-d-H")
+                    time_series_array = TimeArray(timestamps, values)
+                    if type == "Forecast"
+                        ts = SingleTimeSeries(string(eaid), time_series_array)
+                        IS.add_time_series!(p.data, t, ts)
+                        # TODO: Remove once we have decided real time data handling
+                        break
+                    elseif type == "Real Time"
+                        # TODO: For now, skipping this. But need to add later for real-time data
+                        # ts = SingleTimeSeries(string(time_series), time_series_array)
+                        # IS.add_time_series!(p.data, t, ts)
+                    end
+                    # ts = SingleTimeSeries(string(time_series), time_series_array)
+                    # IS.add_time_series!(p.data, t, ts)
+
+                end
+                @warn "Only day ahead added for unit_id: $eaid"
+            end
+        end
     end
 
     # Get storage units
@@ -463,41 +622,42 @@ function dataframe_to_structs(df_dict::Dict)
             name=row["name"],
             base_power=row["base_power"], # Natural Units
             id=row["storage_unit_id"],
-            zone=area_int,
+            zone=zones[area_int],
             prime_mover_type=map_prime_mover(row["prime_mover"]),
             balancing_topology=row["balancing_topology"],
-            existing_cap_mw=row["rating"],
-            existing_cap_mwh=row["max_capacity"],
+            existing_cap_power=row["rating"],
+            existing_cap_energy=row["max_capacity"],
 
             #stuff we dont have but probably should
-            om_costs=StorageCost(
+            om_costs_energy=StorageCost(
                 charge_variable_cost=CostCurve(LinearCurve(0.0)),
                 discharge_variable_cost=CostCurve(LinearCurve(0.0)),
                 fixed=0.0,
                 start_up=0.0,
                 shut_down=0.0,
             ),
-            fixed_om_cost_per_mwhyr=LinearCurve(0.0),
-            eff_up=0.92,
-            eff_down=0.92,
+            om_costs_power=StorageCost(
+                charge_variable_cost=CostCurve(LinearCurve(0.0)),
+                discharge_variable_cost=CostCurve(LinearCurve(0.0)),
+                fixed=0.0,
+                start_up=0.0,
+                shut_down=0.0,
+            ),
+            eff_up=row["charging_efficiency"],
+            eff_down=row["discharge_efficiency"],
             storage_tech=StorageTech.LIB,
 
             #Default or placeholder values
-            inv_cost_per_mwyr=LinearCurve(0.0),
-            inv_cost_charge_per_mwyr=LinearCurve(0.0),
-            inv_cost_per_mwhyr=LinearCurve(0.0),
+            capital_costs_power=LinearCurve(0.0),
+            capital_costs_energy=LinearCurve(0.0),
             available=true,
-            region="ME",
-            cluster=0,
-            self_disch=0.0,
+            losses=0.0,
             min_duration=1.0,
             max_duration=10.0,
-            min_cap_mwh=0.0,
-            min_cap_mw=0.0,
-            min_charge_cap_mw=-1,
-            max_cap_mw=-1,
-            max_charge_cap_mw=-1,
-            max_cap_mwh=-1,
+            min_cap_energy=0.0,
+            min_cap_power=0.0,
+            max_cap_energy=1e8,
+            max_cap_power=1e8,
             power_systems_type="Test",
         )
         add_technology!(p, s)
@@ -507,23 +667,29 @@ function dataframe_to_structs(df_dict::Dict)
     for row in eachrow(df_dict["demand_requirements"])
         #start in time_series
         eaid = row["entity_attribute_id"]
-        ts_blob = filter("entity_attribute_id" => isequal(eaid), df_dict["time_series"])[
-            !,
-            "time_series_blob",
-        ][1]
-        ts_parsed = parse_timestamps_and_values(ts_blob)
-        dates = ts_parsed[1] #fix this later, dates syntax is inconsistent so hard to parse
-        dates = DateTime("2020-01-01T00:00:00"):Hour(1):DateTime("2020-12-31T23:00:00")
-        demand = ts_parsed[2]
+        # ts_index = filter("entity_id" => isequal(eaid), df_dict["entities"])[!, "entity_id"]
+        ts_index = filter(row -> row["entity_id"] == eaid && row["entity_type"] == "demand_requirements", df_dict["entities"])[!, "entity_id"]
+
+        # Collect all rows in the time_series table that match the entity_id
+        ts = filter("entity_id" => isequal(ts_index[1]), df_dict["time_series"])
+        ts_parsed = collect(ts[:, :value])
+
+        # Parsing the timestamps into Dates
+        timestamps = DateTime.(ts[!, :timestamp], "yyyy-m-d-H")
+        
+        dates = timestamps[1]:Hour(1):timestamps[end]
+        demand = ts_parsed
         demand_array = TimeArray(dates, demand)
         ts = SingleTimeSeries(string(row["entity_attribute_id"]), demand_array)
+
+        area_int = parse(Int64, row["area"])
+
         #How to parse this timestamp stuff??
 
         d = DemandRequirement{ElectricLoad}(
             #Data pulled from DB
             name=string(row["entity_attribute_id"]),
-            region=row["area"],
-            zone=parse(Int64, row["area"]),
+            zone=zones[area_int],#parse(Int64, row["area"]),
 
             #Placeholder/default values
             available=true,
@@ -559,12 +725,11 @@ function dataframe_to_structs(df_dict::Dict)
 
         tx = TransportTechnology{Branch}(;
             name=string(rownumber(row)),
-            network_lines=rownumber(row),
+            network_id = rownumber(row),
             available=true,
             start_region=parse(Int64, row["area_from"]),
             end_region=parse(Int64, row["area_to"]),
             maximum_new_capacity=row["max_flow_from"],
-            maximum_flow=row["max_flow_from"],
             existing_line_capacity=existing_capacity,
 
             #stuff we don't have, but probably should

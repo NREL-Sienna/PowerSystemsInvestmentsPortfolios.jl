@@ -39,6 +39,7 @@ using DataFrames
 using PowerSystems
 using Dates
 using TimeSeries
+using StringEncodings
 
 export Portfolio
 export Technology
