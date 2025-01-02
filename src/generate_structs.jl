@@ -409,7 +409,7 @@ end
 function dataframe_to_structs(df_dict::Dict)
 
     #Initialize Portfolio
-    p = Portfolio(0.07)
+    p = Portfolio(0.07, 0.05, 2025)
 
     #initialize Zone structs
     zones = []
@@ -460,12 +460,12 @@ function dataframe_to_structs(df_dict::Dict)
         t = SupplyTechnology{parametric}(;
             #Data pulled from DB
             name=string(row[!, "technology_id"][1]),
-            gen_ID=row[!, "technology_id"][1],
+            id=row[!, "technology_id"][1],
             capital_costs=InputOutputCurve(PiecewiseLinearData(supply_curve_parsed)),
             balancing_topology=string(row[!, "balancing_topology"][1]),
             prime_mover_type=map_prime_mover(row[!, "prime_mover"][1]),
             fuel=row[!, "fuel_type"][1],
-            zone=zones[area_int],
+            region=zones[area_int],
 
             #Problem ones, need to write functions to extract
             base_power=100.0,
@@ -538,12 +538,12 @@ function dataframe_to_structs(df_dict::Dict)
         t = SupplyTechnology{parametric}(;
             # Data pulled from DB
             name=row["name"],
-            gen_ID=row["unit_id"],
+            id=row["unit_id"],
             capital_costs=LinearCurve(0.0), #just assume zero since pre-existing?
             balancing_topology=string(row["balancing_topology"]),
             prime_mover_type=map_prime_mover(row["prime_mover"]),
             fuel=row["fuel_type"],
-            zone=zones[area_int],
+            region=zones[area_int],
             base_power=row["base_power"],
             initial_capacity=row["rating"],
 
@@ -622,7 +622,7 @@ function dataframe_to_structs(df_dict::Dict)
             name=row["name"],
             base_power=row["base_power"], # Natural Units
             id=row["storage_unit_id"],
-            zone=zones[area_int],
+            region=zones[area_int],
             prime_mover_type=map_prime_mover(row["prime_mover"]),
             balancing_topology=row["balancing_topology"],
             existing_cap_power=row["rating"],
@@ -689,7 +689,7 @@ function dataframe_to_structs(df_dict::Dict)
         d = DemandRequirement{ElectricLoad}(
             #Data pulled from DB
             name=string(row["entity_attribute_id"]),
-            zone=zones[area_int],#parse(Int64, row["area"]),
+            region=zones[area_int],#parse(Int64, row["area"]),
 
             #Placeholder/default values
             available=true,
@@ -723,12 +723,13 @@ function dataframe_to_structs(df_dict::Dict)
             end
         end
 
-        tx = TransportTechnology{Branch}(;
+        tx = ExistingTransportTechnology{Branch}(;
             name=string(rownumber(row)),
             network_id = rownumber(row),
+            base_power = 100.0,
             available=true,
-            start_region=parse(Int64, row["area_from"]),
-            end_region=parse(Int64, row["area_to"]),
+            start_region=zones[parse(Int64, row["area_from"])],
+            end_region=zones[parse(Int64, row["area_to"])],
             maximum_new_capacity=row["max_flow_from"],
             existing_line_capacity=existing_capacity,
 

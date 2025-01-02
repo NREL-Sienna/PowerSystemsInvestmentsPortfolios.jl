@@ -7,7 +7,6 @@ This file is auto-generated. Do not edit.
 """
     mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
         name::String
-        zone::Union{Nothing, Zone}
         power_systems_type::String
         internal::InfrastructureSystemsInternal
         ext::Dict
@@ -20,7 +19,6 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `name::String`: The technology name
-- `zone::Union{Nothing, Zone}`: Zone Number
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
@@ -31,8 +29,6 @@ This file is auto-generated. Do not edit.
 mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     "The technology name"
     name::String
-    "Zone Number"
-    zone::Union{Nothing, Zone}
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
     "Internal field"
