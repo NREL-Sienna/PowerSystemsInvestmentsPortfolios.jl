@@ -304,7 +304,8 @@ function parse_timestamps_and_values(df::DataFrame)
     type = ""
 
     # Check if the timestamps are within the hours of the day
-    is_within_hours = all(row -> parse(Int, split(row["timestamp"], "-")[end]) in 1:24, eachrow(df))
+    is_within_hours =
+        all(row -> parse(Int, split(row["timestamp"], "-")[end]) in 1:24, eachrow(df))
 
     if is_within_hours
         type = "Real Time"
@@ -392,19 +393,17 @@ function parse_json_to_arrays(json_str::String)
     return unique(xy_values)
 end
 
-
 function parse_heatrate_to_array(json_str::String)
     xy_vector = parse_json_to_arrays(json_str)
-    
+
     # Validation: Check if there are at least two distinct x-coordinates
     if length(unique(getfield.(xy_vector, :x))) < 2
         return 0.0
     end
-    
+
     # If valid, return the InputOutputCurve
     return InputOutputCurve(function_data=PiecewiseLinearData(points=xy_vector))
 end
-
 
 function dataframe_to_structs(df_dict::Dict)
 
@@ -414,16 +413,18 @@ function dataframe_to_structs(df_dict::Dict)
     #initialize Zone structs
     zones = []
     for row_zone in eachrow(df_dict["areas"])
-        z = Zone(name = string("zone_", row_zone["name"]), id=parse(Int64, row_zone["name"]))
+        z = Zone(name=string("zone_", row_zone["name"]), id=parse(Int64, row_zone["name"]))
         push!(zones, z)
     end
     #Populate SupplyTechnology structs from database (new builds)
     topologies = df_dict["balancing_topologies"]
-    supply_curves_full = filter("entity_type" => contains("supply_technologies"), df_dict["attributes"])
+    supply_curves_full =
+        filter("entity_type" => contains("supply_technologies"), df_dict["attributes"])
     supply_curves = filter("name" => contains("supply"), supply_curves_full)
 
     # TODO: Add fields for reinforcement distances
-    reinforcement_distances = filter("name" => contains("reinforcement"), supply_curves_full)
+    reinforcement_distances =
+        filter("name" => contains("reinforcement"), supply_curves_full)
     for row_pw in eachrow(supply_curves)
 
         # Extract supply curves and IDs
@@ -444,10 +445,11 @@ function dataframe_to_structs(df_dict::Dict)
         supply_curve_parsed = parse_json_to_arrays(supply_curve)
         #extract area
         if !isempty(row)
-            area = topologies[topologies.name .== row[!, "balancing_topology"][1], "area"][1]
+            area =
+                topologies[topologies.name .== row[!, "balancing_topology"][1], "area"][1]
             area_int = parse(Int64, area)
-        
-        else    
+
+        else
             continue
         end
         #extract supply curve, does every supply_technology have a supply curve?
@@ -509,10 +511,23 @@ function dataframe_to_structs(df_dict::Dict)
 
         # This will return all rows where entity_id matches any value in the tech_id vector
         tech_id = row["unit_id"]
-        result_all = isempty(filter(row -> row[:entity_id] == tech_id && row[:entity_type] == "generation_units", df_dict["attributes"])) ? 0 : filter(row -> row[:entity_id] == tech_id && row[:entity_type] == "generation_units", df_dict["attributes"])
+        result_all =
+            isempty(
+                filter(
+                    row ->
+                        row[:entity_id] == tech_id &&
+                            row[:entity_type] == "generation_units",
+                    df_dict["attributes"],
+                ),
+            ) ? 0 :
+            filter(
+                row ->
+                    row[:entity_id] == tech_id && row[:entity_type] == "generation_units",
+                df_dict["attributes"],
+            )
         result = filter(row -> contains(row[:name], "Heat Rate"), result_all)
         # Check if result exists and contains the expected field
-        if result != 0 
+        if result != 0
             if !isempty(result[!, :value])
                 first_value = result[!, :value][1]
                 # Ensure it's decoded properly
@@ -531,8 +546,7 @@ function dataframe_to_structs(df_dict::Dict)
         co2_value = isempty(co2_data) ? 0.0 : Float64(co2_data[!, "value"][1])
 
         op_data = filter(row -> row[:unit_id] == tech_id, df_dict["operational_data"])
-        variable_om = op_data[!, "vom_cost"][1] 
-        
+        variable_om = op_data[!, "vom_cost"][1]
 
         parametric = map_prime_mover_to_parametric(row["prime_mover"])
         t = SupplyTechnology{parametric}(;
@@ -560,7 +574,7 @@ function dataframe_to_structs(df_dict::Dict)
             down_time=op_data[!, "downtime"][1],
             heat_rate_mmbtu_per_mwh=heat_rate_piecewise_lin,
             co2=co2_value,
-            
+
             ## TODO: Need to add ramping capabilities to the schema
             ramp_dn_percentage=0.64,
             ramp_up_percentage=0.64,
@@ -580,7 +594,8 @@ function dataframe_to_structs(df_dict::Dict)
         if row["fuel_type"] == "Solar" || row["fuel_type"] == "Wind"
             # Put in time series for the solar and Wind
             eaid = row["unit_id"]
-            ts_index = filter("entity_id" => isequal(eaid), df_dict["entities"])[!, "entity_id"]
+            ts_index =
+                filter("entity_id" => isequal(eaid), df_dict["entities"])[!, "entity_id"]
             if length(ts_index) == 0
                 continue
             else
@@ -668,7 +683,14 @@ function dataframe_to_structs(df_dict::Dict)
         #start in time_series
         eaid = row["entity_attribute_id"]
         # ts_index = filter("entity_id" => isequal(eaid), df_dict["entities"])[!, "entity_id"]
-        ts_index = filter(row -> row["entity_id"] == eaid && row["entity_type"] == "demand_requirements", df_dict["entities"])[!, "entity_id"]
+        ts_index = filter(
+            row ->
+                row["entity_id"] == eaid && row["entity_type"] == "demand_requirements",
+            df_dict["entities"],
+        )[
+            !,
+            "entity_id",
+        ]
 
         # Collect all rows in the time_series table that match the entity_id
         ts = filter("entity_id" => isequal(ts_index[1]), df_dict["time_series"])
@@ -676,7 +698,7 @@ function dataframe_to_structs(df_dict::Dict)
 
         # Parsing the timestamps into Dates
         timestamps = DateTime.(ts[!, :timestamp], "yyyy-m-d-H")
-        
+
         dates = timestamps[1]:Hour(1):timestamps[end]
         demand = ts_parsed
         demand_array = TimeArray(dates, demand)
@@ -725,8 +747,8 @@ function dataframe_to_structs(df_dict::Dict)
 
         tx = ExistingTransportTechnology{Branch}(;
             name=string(rownumber(row)),
-            network_id = rownumber(row),
-            base_power = 100.0,
+            network_id=rownumber(row),
+            base_power=100.0,
             available=true,
             start_region=zones[parse(Int64, row["area_from"])],
             end_region=zones[parse(Int64, row["area_to"])],
