@@ -54,7 +54,6 @@ This file is auto-generated. Do not edit.
 - `zone::Union{Nothing, Zone}`: Zone number
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `existing_cap_energy::Float64`: (default: `0.0`) Pre-existing energy capacity for a technology (MWh)
-- `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed
 - `rsv_cost::Float64`: (default: `0.0`) Cost of providing upwards spinning or contingency reserves
 - `available::Bool`: identifies whether the technology is available
@@ -101,8 +100,6 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     prime_mover_type::PrimeMovers
     "Pre-existing energy capacity for a technology (MWh)"
     existing_cap_energy::Float64
-    "Prime mover for generator"
-    prime_mover_type::PrimeMovers
     "Maximum number of years a technology can be active once installed"
     lifetime::Int
     "Cost of providing upwards spinning or contingency reserves"
