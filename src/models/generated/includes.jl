@@ -100,6 +100,7 @@ export get_start_cost_per_mw
 export get_start_fuel_mmbtu_per_mw
 export get_start_region
 export get_storage_tech
+export get_susceptance
 export get_technology_efficiency
 export get_unit_size
 export get_unit_size_energy
@@ -192,6 +193,7 @@ export set_start_cost_per_mw!
 export set_start_fuel_mmbtu_per_mw!
 export set_start_region!
 export set_storage_tech!
+export set_susceptance!
 export set_technology_efficiency!
 export set_unit_size!
 export set_unit_size_energy!
