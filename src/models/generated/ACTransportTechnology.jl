@@ -14,7 +14,6 @@ This file is auto-generated. Do not edit.
         end_region::Region
         power_systems_type::String
         susceptance::Float64
-        angle_limit::Float64
         internal::InfrastructureSystemsInternal
         interest_rate::Float64
         ext::Dict
@@ -39,7 +38,6 @@ This file is auto-generated. Do not edit.
 - `end_region::Region`: End region for transport technology
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `susceptance::Float64`: (default: `0.0`) Technology susceptance
-- `angle_limit::Float64`: (default: `0.0`) Votlage angle limit (radians)
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `interest_rate::Float64`: (default: `0.07`) Interest rate for technology
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
@@ -69,8 +67,6 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     power_systems_type::String
     "Technology susceptance"
     susceptance::Float64
-    "Votlage angle limit (radians)"
-    angle_limit::Float64
     "Internal field"
     internal::InfrastructureSystemsInternal
     "Interest rate for technology"
@@ -96,8 +92,8 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function ACTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, end_region, power_systems_type, susceptance=0.0, angle_limit=0.0, internal=InfrastructureSystemsInternal(), interest_rate=0.07, ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, base_year=2020, existing_line_capacity, line_loss, capital_recovery_period=30, ) where T <: PSY.Device
-    ACTransportTechnology{T}(base_power, capital_cost, start_region, available, name, end_region, power_systems_type, susceptance, angle_limit, internal, interest_rate, ext, resistance, voltage, network_id, maximum_new_capacity, base_year, existing_line_capacity, line_loss, capital_recovery_period, )
+function ACTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, end_region, power_systems_type, susceptance=0.0, internal=InfrastructureSystemsInternal(), interest_rate=0.07, ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, base_year=2020, existing_line_capacity, line_loss, capital_recovery_period=30, ) where T <: PSY.Device
+    ACTransportTechnology{T}(base_power, capital_cost, start_region, available, name, end_region, power_systems_type, susceptance, internal, interest_rate, ext, resistance, voltage, network_id, maximum_new_capacity, base_year, existing_line_capacity, line_loss, capital_recovery_period, )
 end
 
 """Get [`ACTransportTechnology`](@ref) `base_power`."""
@@ -116,8 +112,6 @@ get_end_region(value::ACTransportTechnology) = value.end_region
 get_power_systems_type(value::ACTransportTechnology) = value.power_systems_type
 """Get [`ACTransportTechnology`](@ref) `susceptance`."""
 get_susceptance(value::ACTransportTechnology) = value.susceptance
-"""Get [`ACTransportTechnology`](@ref) `angle_limit`."""
-get_angle_limit(value::ACTransportTechnology) = value.angle_limit
 """Get [`ACTransportTechnology`](@ref) `internal`."""
 get_internal(value::ACTransportTechnology) = value.internal
 """Get [`ACTransportTechnology`](@ref) `interest_rate`."""
@@ -157,8 +151,6 @@ set_end_region!(value::ACTransportTechnology, val) = value.end_region = val
 set_power_systems_type!(value::ACTransportTechnology, val) = value.power_systems_type = val
 """Set [`ACTransportTechnology`](@ref) `susceptance`."""
 set_susceptance!(value::ACTransportTechnology, val) = value.susceptance = val
-"""Set [`ACTransportTechnology`](@ref) `angle_limit`."""
-set_angle_limit!(value::ACTransportTechnology, val) = value.angle_limit = val
 """Set [`ACTransportTechnology`](@ref) `internal`."""
 set_internal!(value::ACTransportTechnology, val) = value.internal = val
 """Set [`ACTransportTechnology`](@ref) `interest_rate`."""
