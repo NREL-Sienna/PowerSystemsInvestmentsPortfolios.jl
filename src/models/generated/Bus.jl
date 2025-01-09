@@ -10,6 +10,7 @@ This file is auto-generated. Do not edit.
         internal::InfrastructureSystemsInternal
         id::Int64
         ext::Dict
+        bustype::Union{Nothing, PSY.ACBusTypes}
     end
 
 
@@ -19,6 +20,7 @@ This file is auto-generated. Do not edit.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `id::Int64`: A unique zone identification number (positive integer)
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `bustype::Union{Nothing, PSY.ACBusTypes}`: (default: `nothing`) Used to describe the connectivity and behavior of this bus.
 """
 mutable struct Bus <: Region
     "Name of bus"
@@ -29,11 +31,13 @@ mutable struct Bus <: Region
     id::Int64
     "Option for providing additional data"
     ext::Dict
+    "Used to describe the connectivity and behavior of this bus."
+    bustype::Union{Nothing, PSY.ACBusTypes}
 end
 
 
-function Bus(; name, internal=InfrastructureSystemsInternal(), id, ext=Dict(), )
-    Bus(name, internal, id, ext, )
+function Bus(; name, internal=InfrastructureSystemsInternal(), id, ext=Dict(), bustype=nothing, )
+    Bus(name, internal, id, ext, bustype, )
 end
 
 """Get [`Bus`](@ref) `name`."""
@@ -44,6 +48,8 @@ get_internal(value::Bus) = value.internal
 get_id(value::Bus) = value.id
 """Get [`Bus`](@ref) `ext`."""
 get_ext(value::Bus) = value.ext
+"""Get [`Bus`](@ref) `bustype`."""
+get_bustype(value::Bus) = value.bustype
 
 """Set [`Bus`](@ref) `name`."""
 set_name!(value::Bus, val) = value.name = val
@@ -53,3 +59,5 @@ set_internal!(value::Bus, val) = value.internal = val
 set_id!(value::Bus, val) = value.id = val
 """Set [`Bus`](@ref) `ext`."""
 set_ext!(value::Bus, val) = value.ext = val
+"""Set [`Bus`](@ref) `bustype`."""
+set_bustype!(value::Bus, val) = value.bustype = val
