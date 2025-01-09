@@ -63,6 +63,7 @@ export CarbonCaps
 export MinimumCapacityRequirements
 export Region
 export Zone
+export Bus
 
 export get_name
 export get_regions
