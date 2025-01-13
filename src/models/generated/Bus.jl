@@ -18,7 +18,7 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `name::String`: Name of bus
-- `angle_limit::Float64`: (default: `0.0`) Votlage angle limit (radians)
+- `angle_limit::Float64`: (default: `10.0`) Votlage angle limit (radians)
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `id::Int64`: A unique zone identification number (positive integer)
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
@@ -40,7 +40,7 @@ mutable struct Bus <: Region
 end
 
 
-function Bus(; name, angle_limit=0.0, internal=InfrastructureSystemsInternal(), id, ext=Dict(), bustype=nothing, )
+function Bus(; name, angle_limit=10.0, internal=InfrastructureSystemsInternal(), id, ext=Dict(), bustype=nothing, )
     Bus(name, angle_limit, internal, id, ext, bustype, )
 end
 
