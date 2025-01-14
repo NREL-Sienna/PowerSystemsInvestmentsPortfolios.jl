@@ -37,7 +37,7 @@ This file is auto-generated. Do not edit.
 - `name::String`: Name
 - `end_region::Region`: End region for transport technology
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
-- `susceptance::Float64`: (default: `0.0`) Technology susceptance
+- `susceptance::Float64`: (default: `1.0`) Technology susceptance
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `interest_rate::Float64`: (default: `0.07`) Interest rate for technology
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
@@ -92,7 +92,7 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function ACTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, end_region, power_systems_type, susceptance=0.0, internal=InfrastructureSystemsInternal(), interest_rate=0.07, ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, base_year=2020, existing_line_capacity, line_loss, capital_recovery_period=30, ) where T <: PSY.Device
+function ACTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, end_region, power_systems_type, susceptance=1.0, internal=InfrastructureSystemsInternal(), interest_rate=0.07, ext=Dict(), resistance=0.0, voltage=0.0, network_id, maximum_new_capacity, base_year=2020, existing_line_capacity, line_loss, capital_recovery_period=30, ) where T <: PSY.Device
     ACTransportTechnology{T}(base_power, capital_cost, start_region, available, name, end_region, power_systems_type, susceptance, internal, interest_rate, ext, resistance, voltage, network_id, maximum_new_capacity, base_year, existing_line_capacity, line_loss, capital_recovery_period, )
 end
 
