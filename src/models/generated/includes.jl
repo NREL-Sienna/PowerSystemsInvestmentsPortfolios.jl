@@ -54,6 +54,7 @@ export get_heat_rate_mmbtu_per_mwh
 export get_id
 export get_inflation_rate
 export get_initial_capacity
+export get_interest_rate
 export get_lifetime
 export get_line_loss
 export get_losses
@@ -140,6 +141,7 @@ export set_heat_rate_mmbtu_per_mwh!
 export set_id!
 export set_inflation_rate!
 export set_initial_capacity!
+export set_interest_rate!
 export set_lifetime!
 export set_line_loss!
 export set_losses!
