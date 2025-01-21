@@ -1,7 +1,6 @@
 const PORTFOLIO_KWARGS =
     Set((:name, :description, :data_source, :run_checks, :unit_portfolio))
 
-const DEFAULT_DISCOUNT_RATE = 0.07
 const DEFAULT_AGGREGATION = PSY.ACBus
 
 const PORTFOLIO_STRUCT_DESCRIPTOR_FILE = joinpath(
@@ -20,9 +19,6 @@ end
 #TODO: Make immutable
 mutable struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
-    discount_rate::Float64
-    inflation_rate::Float64
-    base_year::Int
     data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     #units_settings::IS.SystemUnitsSettings
@@ -33,9 +29,6 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
 
     function Portfolio(
         aggregation,
-        discount_rate::Float64,
-        inflation_rate::Float64,
-        base_year::Int,
         data,
         investment_schedule::Dict,
         #units_settings::IS.SystemUnitsSettings,
@@ -59,9 +52,6 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
         =#
         return new(
             aggregation,
-            discount_rate,
-            inflation_rate,
-            base_year,
             data,
             investment_schedule,
             #units_settings,
@@ -85,13 +75,11 @@ end
 """
 Construct an empty `Portfolio`. Useful for building a Portfolio from scratch.
 """
-function Portfolio(discount_rate, inflation_rate, base_year; kwargs...)
+function Portfolio(; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
     return Portfolio(
         DEFAULT_AGGREGATION,
-        discount_rate,
-        inflation_rate,
-        base_year,
+
         data,
         Dict(),
         IS.InfrastructureSystemsInternal(),
@@ -101,13 +89,10 @@ end
 """
 Construct an empty `Portfolio` specifying aggregation. Useful for building a Portfolio from scratch.
 """
-function Portfolio(aggregation, discount_rate, inflation_rate, base_year; kwargs...)
+function Portfolio(aggregation; kwargs...)
     data = _create_system_data_from_kwargs(; kwargs...)
     return Portfolio(
         aggregation,
-        discount_rate,
-        inflation_rate,
-        base_year,
         data,
         Dict(),
         IS.InfrastructureSystemsInternal(),
@@ -135,16 +120,6 @@ Get the name of the portfolio.
 get_name(val::Portfolio) = val.metadata.name
 
 """
-Set the base year of the portfolio.
-"""
-set_base_year!(val::Portfolio, year::Int) = val.base_year = year
-
-"""
-Get the base year of the portfolio.
-"""
-get_base_year(val::Portfolio) = val.base_year
-
-"""
 Set the description of the portfolio.
 """
 set_description!(val::Portfolio, description::AbstractString) =
@@ -156,7 +131,7 @@ Get the description of the portfolio.
 get_description(val::Portfolio) = val.metadata.description
 
 """
-Add a technology to the portfoliotem.
+Add a technology to the portfolio.
 
 Throws ArgumentError if the technology's name is already stored for its concrete type.
 Throws ArgumentError if any Technology-specific rule is violated.
@@ -191,28 +166,6 @@ function add_technology!(
     )
 
     return
-end
-
-function add_region!(
-    portfolio::Portfolio,
-    zone::T;
-    skip_validation=false,
-    kwargs...,
-) where {T <: Region}
-    #deserialization_in_progress = _is_deserialization_in_progress(portfolio)
-    IS.add_component!(
-        portfolio.data,
-        zone;
-        #allow_existing_time_series=deserialization_in_progress,
-        skip_validation=skip_validation,
-        kwargs...,
-    )
-
-    return
-end
-
-function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: Region}
-    return IS.get_components(T, portfolio.data)
 end
 
 """
@@ -623,6 +576,68 @@ function Portfolio(file_path::AbstractString; assign_new_uuids=false, kwargs...)
         throw(DataFormatError("$file_path is not a supported file type"))
     end
 end
+
+################################
+######### Regions #########
+################################
+
+"""
+Add a region to the portfolio.
+
+Throws ArgumentError if the region's name is already stored for its concrete type.
+Throws ArgumentError if any region-specific rule is violated.
+Throws InvalidValue if any of the region's field values are outside of defined valid
+range.
+
+# Examples
+
+```julia
+portfolio = Portfolio(...)
+
+# Add a single technology.
+add_region!(portfolio, zone)
+
+# Add many at once.
+foreach(x -> add_region!(portfolio, x), Iterators.flatten((buses, generators)))
+```
+"""
+
+function add_region!(
+    portfolio::Portfolio,
+    zone::T;
+    skip_validation=false,
+    kwargs...,
+) where {T <: Region}
+    #deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+    IS.add_component!(
+        portfolio.data,
+        zone;
+        #allow_existing_time_series=deserialization_in_progress,
+        skip_validation=skip_validation,
+        kwargs...,
+    )
+
+    return
+end
+
+"""
+Returns an iterator of regions. T can be concrete or abstract.
+Call collect on the result if an array is desired.
+
+# Examples
+
+```julia
+iter = Portfolio.get_regions(Zone, portfolio)
+iter = Portfolio.get_regions(Region, portfolio)
+regions = collect(Portfolio.get_regions(Region, portfolio))
+```
+
+"""
+
+function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: Region}
+    return IS.get_components(T, portfolio.data)
+end
+
 
 ################################
 ######### Requirements #########
