@@ -20,6 +20,7 @@ This file is auto-generated. Do not edit.
         id::Int64
         losses::Float64
         capital_costs_energy::PSY.ValueCurve
+        financial_data::TechnologyFinancialData
         existing_capacity_power::Float64
         power_systems_type::String
         internal::InfrastructureSystemsInternal
@@ -55,6 +56,7 @@ This file is auto-generated. Do not edit.
 - `id::Int64`: ID for individual generator
 - `losses::Float64`: (default: `1.0`) Power loss (pct per hour)
 - `capital_costs_energy::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
+- `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `existing_capacity_power::Float64`: (default: `0.0`) Pre-existing power capacity for a technology (MW)
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
@@ -101,6 +103,8 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     losses::Float64
     "Capital costs for investing in a technology."
     capital_costs_energy::PSY.ValueCurve
+    "Struct containing relevant financial information for a technology"
+    financial_data::TechnologyFinancialData
     "Pre-existing power capacity for a technology (MW)"
     existing_capacity_power::Float64
     "maps to a valid PowerSystems.jl for PCM modeling"
@@ -136,8 +140,8 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
 end
 
 
-function StorageTechnology{T}(; base_power, prime_mover_type=PrimeMovers.OT, lifetime=100, min_capacity_energy=0.0, available, name, storage_tech, capital_costs_power=LinearCurve(0.0), max_duration=1000.0, operations_costs_power=StorageCost(), unit_size_power=0.0, id, losses=1.0, capital_costs_energy=LinearCurve(0.0), existing_capacity_power=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), min_capacity_power=0.0, max_capacity_power=1e8, balancing_topology, efficiency_out=1.0, region=nothing, ext=Dict(), unit_size_energy=0.0, max_capacity_energy=1e8, efficiency_in=1.0, base_year=2020, existing_capacity_energy=0.0, min_duration=0.0, operations_costs_energy=StorageCost(), ) where T <: PSY.Storage
-    StorageTechnology{T}(base_power, prime_mover_type, lifetime, min_capacity_energy, available, name, storage_tech, capital_costs_power, max_duration, operations_costs_power, unit_size_power, id, losses, capital_costs_energy, existing_capacity_power, power_systems_type, internal, min_capacity_power, max_capacity_power, balancing_topology, efficiency_out, region, ext, unit_size_energy, max_capacity_energy, efficiency_in, base_year, existing_capacity_energy, min_duration, operations_costs_energy, )
+function StorageTechnology{T}(; base_power, prime_mover_type=PrimeMovers.OT, lifetime=100, min_capacity_energy=0.0, available, name, storage_tech, capital_costs_power=LinearCurve(0.0), max_duration=1000.0, operations_costs_power=StorageCost(), unit_size_power=0.0, id, losses=1.0, capital_costs_energy=LinearCurve(0.0), financial_data, existing_capacity_power=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), min_capacity_power=0.0, max_capacity_power=1e8, balancing_topology, efficiency_out=1.0, region=nothing, ext=Dict(), unit_size_energy=0.0, max_capacity_energy=1e8, efficiency_in=1.0, base_year=2020, existing_capacity_energy=0.0, min_duration=0.0, operations_costs_energy=StorageCost(), ) where T <: PSY.Storage
+    StorageTechnology{T}(base_power, prime_mover_type, lifetime, min_capacity_energy, available, name, storage_tech, capital_costs_power, max_duration, operations_costs_power, unit_size_power, id, losses, capital_costs_energy, financial_data, existing_capacity_power, power_systems_type, internal, min_capacity_power, max_capacity_power, balancing_topology, efficiency_out, region, ext, unit_size_energy, max_capacity_energy, efficiency_in, base_year, existing_capacity_energy, min_duration, operations_costs_energy, )
 end
 
 """Get [`StorageTechnology`](@ref) `base_power`."""
@@ -168,6 +172,8 @@ get_id(value::StorageTechnology) = value.id
 get_losses(value::StorageTechnology) = value.losses
 """Get [`StorageTechnology`](@ref) `capital_costs_energy`."""
 get_capital_costs_energy(value::StorageTechnology) = value.capital_costs_energy
+"""Get [`StorageTechnology`](@ref) `financial_data`."""
+get_financial_data(value::StorageTechnology) = value.financial_data
 """Get [`StorageTechnology`](@ref) `existing_capacity_power`."""
 get_existing_capacity_power(value::StorageTechnology) = value.existing_capacity_power
 """Get [`StorageTechnology`](@ref) `power_systems_type`."""
@@ -229,6 +235,8 @@ set_id!(value::StorageTechnology, val) = value.id = val
 set_losses!(value::StorageTechnology, val) = value.losses = val
 """Set [`StorageTechnology`](@ref) `capital_costs_energy`."""
 set_capital_costs_energy!(value::StorageTechnology, val) = value.capital_costs_energy = val
+"""Set [`StorageTechnology`](@ref) `financial_data`."""
+set_financial_data!(value::StorageTechnology, val) = value.financial_data = val
 """Set [`StorageTechnology`](@ref) `existing_capacity_power`."""
 set_existing_capacity_power!(value::StorageTechnology, val) = value.existing_capacity_power = val
 """Set [`StorageTechnology`](@ref) `power_systems_type`."""

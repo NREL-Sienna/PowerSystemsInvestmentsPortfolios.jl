@@ -63,7 +63,8 @@ export CarbonCaps
 export MinimumCapacityRequirements
 export Region
 export Zone
-export FinancialData
+export PortfolioFinancialData
+export TechnologyFinancialData
 
 export get_name
 export get_regions

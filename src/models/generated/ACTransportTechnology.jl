@@ -13,6 +13,7 @@ This file is auto-generated. Do not edit.
         name::String
         id::Int64
         end_region::Region
+        financial_data::TechnologyFinancialData
         power_systems_type::String
         angle_limit::Float64
         internal::InfrastructureSystemsInternal
@@ -35,6 +36,7 @@ This file is auto-generated. Do not edit.
 - `name::String`: Name
 - `id::Int64`: Numerical Index
 - `end_region::Region`: End region for transport technology
+- `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `angle_limit::Float64`: (default: `0.0`) Votlage angle limit (radians)
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
@@ -61,6 +63,8 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     id::Int64
     "End region for transport technology"
     end_region::Region
+    "Struct containing relevant financial information for a technology"
+    financial_data::TechnologyFinancialData
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
     "Votlage angle limit (radians)"
@@ -84,8 +88,8 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function ACTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, id, end_region, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, maximum_new_capacity, base_year=2020, existing_line_capacity, line_loss, ) where T <: PSY.Device
-    ACTransportTechnology{T}(base_power, capital_cost, start_region, available, name, id, end_region, power_systems_type, angle_limit, internal, ext, resistance, voltage, maximum_new_capacity, base_year, existing_line_capacity, line_loss, )
+function ACTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, id, end_region, financial_data, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, maximum_new_capacity, base_year=2020, existing_line_capacity, line_loss, ) where T <: PSY.Device
+    ACTransportTechnology{T}(base_power, capital_cost, start_region, available, name, id, end_region, financial_data, power_systems_type, angle_limit, internal, ext, resistance, voltage, maximum_new_capacity, base_year, existing_line_capacity, line_loss, )
 end
 
 """Get [`ACTransportTechnology`](@ref) `base_power`."""
@@ -102,6 +106,8 @@ get_name(value::ACTransportTechnology) = value.name
 get_id(value::ACTransportTechnology) = value.id
 """Get [`ACTransportTechnology`](@ref) `end_region`."""
 get_end_region(value::ACTransportTechnology) = value.end_region
+"""Get [`ACTransportTechnology`](@ref) `financial_data`."""
+get_financial_data(value::ACTransportTechnology) = value.financial_data
 """Get [`ACTransportTechnology`](@ref) `power_systems_type`."""
 get_power_systems_type(value::ACTransportTechnology) = value.power_systems_type
 """Get [`ACTransportTechnology`](@ref) `angle_limit`."""
@@ -137,6 +143,8 @@ set_name!(value::ACTransportTechnology, val) = value.name = val
 set_id!(value::ACTransportTechnology, val) = value.id = val
 """Set [`ACTransportTechnology`](@ref) `end_region`."""
 set_end_region!(value::ACTransportTechnology, val) = value.end_region = val
+"""Set [`ACTransportTechnology`](@ref) `financial_data`."""
+set_financial_data!(value::ACTransportTechnology, val) = value.financial_data = val
 """Set [`ACTransportTechnology`](@ref) `power_systems_type`."""
 set_power_systems_type!(value::ACTransportTechnology, val) = value.power_systems_type = val
 """Set [`ACTransportTechnology`](@ref) `angle_limit`."""

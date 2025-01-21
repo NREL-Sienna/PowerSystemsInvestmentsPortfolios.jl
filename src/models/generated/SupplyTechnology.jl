@@ -24,6 +24,7 @@ This file is auto-generated. Do not edit.
         min_capacity::Float64
         id::Int64
         initial_capacity::Float64
+        financial_data::TechnologyFinancialData
         start_fuel_mmbtu_per_mw::Float64
         operation_costs::PSY.OperationalCost
         fuel::Union{String, ThermalFuels, Vector{ThermalFuels}, Vector{String}}
@@ -62,6 +63,7 @@ This file is auto-generated. Do not edit.
 - `min_capacity::Float64`: (default: `0.0`) Minimum required capacity for a technology
 - `id::Int64`: ID for individual generator
 - `initial_capacity::Float64`: (default: `0.0`) Pre-existing capacity for a technology
+- `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `start_fuel_mmbtu_per_mw::Float64`: (default: `0.0`) Startup fuel use per MW of nameplate capacity of each generator (MMBtu/MW per start)
 - `operation_costs::PSY.OperationalCost`: (default: `ThermalGenerationCost()`) Fixed and variable O&M costs for a technology
 - `fuel::Union{String, ThermalFuels, Vector{ThermalFuels}, Vector{String}}`: (default: `ThermalFuels.OTHER`) Fuel type according to IEA
@@ -115,6 +117,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     id::Int64
     "Pre-existing capacity for a technology"
     initial_capacity::Float64
+    "Struct containing relevant financial information for a technology"
+    financial_data::TechnologyFinancialData
     "Startup fuel use per MW of nameplate capacity of each generator (MMBtu/MW per start)"
     start_fuel_mmbtu_per_mw::Float64
     "Fixed and variable O&M costs for a technology"
@@ -148,8 +152,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
 end
 
 
-function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), max_capacity=Inf, dn_time=0.0, lifetime=100, cofire_start_max=nothing, available=True, co2=0.0, cofire_start_min=nothing, name, ramp_dn_percentage=100.0, min_capacity=0.0, id, initial_capacity=0.0, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=nothing, ramp_up_percentage=100.0, base_year=2020, unit_size=0.0, min_generation_percentage=0.0, start_cost_per_mw=0.0, up_time=0.0, ) where T <: PSY.Generator
-    SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, outage_factor, prime_mover_type, cofire_level_min, capital_costs, max_capacity, dn_time, lifetime, cofire_start_max, available, co2, cofire_start_min, name, ramp_dn_percentage, min_capacity, id, initial_capacity, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, region, ramp_up_percentage, base_year, unit_size, min_generation_percentage, start_cost_per_mw, up_time, )
+function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), max_capacity=Inf, dn_time=0.0, lifetime=100, cofire_start_max=nothing, available=True, co2=0.0, cofire_start_min=nothing, name, ramp_dn_percentage=100.0, min_capacity=0.0, id, initial_capacity=0.0, financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=nothing, ramp_up_percentage=100.0, base_year=2020, unit_size=0.0, min_generation_percentage=0.0, start_cost_per_mw=0.0, up_time=0.0, ) where T <: PSY.Generator
+    SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, outage_factor, prime_mover_type, cofire_level_min, capital_costs, max_capacity, dn_time, lifetime, cofire_start_max, available, co2, cofire_start_min, name, ramp_dn_percentage, min_capacity, id, initial_capacity, financial_data, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, region, ramp_up_percentage, base_year, unit_size, min_generation_percentage, start_cost_per_mw, up_time, )
 end
 
 """Get [`SupplyTechnology`](@ref) `base_power`."""
@@ -188,6 +192,8 @@ get_min_capacity(value::SupplyTechnology) = value.min_capacity
 get_id(value::SupplyTechnology) = value.id
 """Get [`SupplyTechnology`](@ref) `initial_capacity`."""
 get_initial_capacity(value::SupplyTechnology) = value.initial_capacity
+"""Get [`SupplyTechnology`](@ref) `financial_data`."""
+get_financial_data(value::SupplyTechnology) = value.financial_data
 """Get [`SupplyTechnology`](@ref) `start_fuel_mmbtu_per_mw`."""
 get_start_fuel_mmbtu_per_mw(value::SupplyTechnology) = value.start_fuel_mmbtu_per_mw
 """Get [`SupplyTechnology`](@ref) `operation_costs`."""
@@ -255,6 +261,8 @@ set_min_capacity!(value::SupplyTechnology, val) = value.min_capacity = val
 set_id!(value::SupplyTechnology, val) = value.id = val
 """Set [`SupplyTechnology`](@ref) `initial_capacity`."""
 set_initial_capacity!(value::SupplyTechnology, val) = value.initial_capacity = val
+"""Set [`SupplyTechnology`](@ref) `financial_data`."""
+set_financial_data!(value::SupplyTechnology, val) = value.financial_data = val
 """Set [`SupplyTechnology`](@ref) `start_fuel_mmbtu_per_mw`."""
 set_start_fuel_mmbtu_per_mw!(value::SupplyTechnology, val) = value.start_fuel_mmbtu_per_mw = val
 """Set [`SupplyTechnology`](@ref) `operation_costs`."""
