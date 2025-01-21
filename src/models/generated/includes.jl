@@ -11,6 +11,7 @@ include("AggregateRetirementPotential.jl")
 include("HVDCTransportTechnology.jl")
 include("StorageTechnology.jl")
 include("CarbonCaps.jl")
+include("FinancialData.jl")
 include("RetrofitPotential.jl")
 include("CurtailableDemandSideTechnology.jl")
 include("FlexibleDemandTechnology.jl")
@@ -24,6 +25,7 @@ export get_capital_cost
 export get_capital_costs
 export get_capital_costs_energy
 export get_capital_costs_power
+export get_capital_recovery_period
 export get_co2
 export get_co_2_max_mtons
 export get_co_2_max_tons_mwh
@@ -35,6 +37,7 @@ export get_curtailment_cost
 export get_curtailment_cost_mwh
 export get_demand_energy_efficiency
 export get_demand_mw
+export get_discount_rate
 export get_dn_time
 export get_efficiency_in
 export get_efficiency_out
@@ -49,6 +52,7 @@ export get_ext
 export get_fuel
 export get_heat_rate_mmbtu_per_mwh
 export get_id
+export get_inflation_rate
 export get_initial_capacity
 export get_lifetime
 export get_line_loss
@@ -107,6 +111,7 @@ export set_capital_cost!
 export set_capital_costs!
 export set_capital_costs_energy!
 export set_capital_costs_power!
+export set_capital_recovery_period!
 export set_co2!
 export set_co_2_max_mtons!
 export set_co_2_max_tons_mwh!
@@ -118,6 +123,7 @@ export set_curtailment_cost!
 export set_curtailment_cost_mwh!
 export set_demand_energy_efficiency!
 export set_demand_mw!
+export set_discount_rate!
 export set_dn_time!
 export set_efficiency_in!
 export set_efficiency_out!
@@ -132,6 +138,7 @@ export set_ext!
 export set_fuel!
 export set_heat_rate_mmbtu_per_mwh!
 export set_id!
+export set_inflation_rate!
 export set_initial_capacity!
 export set_lifetime!
 export set_line_loss!
