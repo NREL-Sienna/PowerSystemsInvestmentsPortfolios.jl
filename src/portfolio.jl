@@ -77,12 +77,7 @@ Construct an empty `Portfolio`. Useful for building a Portfolio from scratch.
 """
 function Portfolio(; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(
-        DEFAULT_AGGREGATION,
-        data,
-        Dict(),
-        IS.InfrastructureSystemsInternal(),
-    )
+    return Portfolio(DEFAULT_AGGREGATION, data, Dict(), IS.InfrastructureSystemsInternal())
 end
 
 """
@@ -90,12 +85,7 @@ Construct an empty `Portfolio` specifying aggregation. Useful for building a Por
 """
 function Portfolio(aggregation; kwargs...)
     data = _create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(
-        aggregation,
-        data,
-        Dict(),
-        IS.InfrastructureSystemsInternal(),
-    )
+    return Portfolio(aggregation, data, Dict(), IS.InfrastructureSystemsInternal())
 end
 
 """
@@ -636,7 +626,6 @@ regions = collect(Portfolio.get_regions(Region, portfolio))
 function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: Region}
     return IS.get_components(T, portfolio.data)
 end
-
 
 ################################
 ######### Requirements #########
