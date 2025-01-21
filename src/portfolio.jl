@@ -79,7 +79,6 @@ function Portfolio(; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
     return Portfolio(
         DEFAULT_AGGREGATION,
-
         data,
         Dict(),
         IS.InfrastructureSystemsInternal(),
