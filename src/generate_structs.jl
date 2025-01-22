@@ -405,10 +405,19 @@ function parse_heatrate_to_array(json_str::String)
     return InputOutputCurve(function_data=PiecewiseLinearData(points=xy_vector))
 end
 
+function dataframe_to_system(df_dict::Dict)
+    system = PSY.System(base_power=100)
+
+    return system
+end
+
+
 function dataframe_to_structs(df_dict::Dict)
 
     #Initialize Portfolio
-    p = Portfolio(0.07, 0.05, 2025)
+    p = Portfolio()
+    financials = PortfolioFinancialData(discount_rate=0.07, inflation_rate=0.05, interest_rate=0.02, base_year=2025)
+    add_financials!(p, financials)
 
     #initialize Zone structs
     zones = []
