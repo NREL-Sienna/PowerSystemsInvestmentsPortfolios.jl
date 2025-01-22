@@ -258,6 +258,20 @@ function map_prime_mover(prime_mover::String)
     return mapping_dict[prime_mover]
 end
 
+"""
+Function to map fuel string to ThermalFuels
+"""
+function map_fuel(fuel::String)
+    mapping_dict = Dict(
+        "NG" => ThermalFuels.NATURAL_GAS,
+        "Nuclear" => ThermalFuels.NUCLEAR,
+        "Coal" => ThermalFuels.COAL,
+        "Oil" => ThermalFuels.DISTILLATE_FUEL_OIL,
+    )
+
+    return mapping_dict[fuel]
+end
+
 function map_prime_mover_to_parametric(prime_mover::String)
     mapping_dict = Dict(
         "CT" => PSY.ThermalStandard,
@@ -406,18 +420,201 @@ function parse_heatrate_to_array(json_str::String)
 end
 
 function dataframe_to_system(df_dict::Dict)
-    system = PSY.System(base_power=100)
+    system = PSY.System(100.0)
+
+    buses = []
+    # TODO: Add angle, bustype, etc. to database
+    for row_bus in eachrow(df_dict["balancing_topologies"])
+        b = PSY.ACBus(;
+            name=string("bus_", row_bus["name"]),
+            number=parse(Int64, row_bus["name"]),
+            angle=0.1,
+            bustype=ACBusTypes.PQ,
+            magnitude=1.0,
+            voltage_limits=(0.0, 2.0),
+            base_voltage=100.0,
+        )
+        add_component!(system, b)
+        push!(buses, b)
+    end
+
+    #Transmission Lines
+    lines = df_dict["transmission_lines"]
+    for row in eachrow(lines)
+        arc = PSY.Arc(;
+            from=filter(b -> contains(b.name, row["balancing_topology_from"]), buses)[1],
+            to=filter(b -> contains(b.name, row["balancing_topology_to"]), buses)[1],
+        )
+
+        tx = Line(;
+            name=string("line_", rownumber(row)),
+            available=true,
+            active_power_flow=0.0,
+            reactive_power_flow=0.0,
+            arc=arc,
+            r=1.0,
+            x=1.0,
+            b=(from=1.0, to=1.0),
+            rating=row["continuous_rating"],
+            angle_limits=(-1.5, 1.5),
+        )
+        add_component!(system, tx)
+    end
+
+    # Get existing generation units
+    for row in eachrow(df_dict["generation_units"])
+
+        #extract area
+        #area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
+        #area_int = parse(Int64, area)
+
+        # This will return all rows where entity_id matches any value in the tech_id vector
+        tech_id = row["unit_id"]
+
+        op_data = filter(row -> row[:unit_id] == tech_id, df_dict["operational_data"])
+        variable_om = op_data[!, "vom_cost"][1]
+
+        parametric = map_prime_mover_to_parametric(row["prime_mover"])
+
+        if row["fuel_type"] == "Solar" || row["fuel_type"] == "Wind"
+            t = RenewableDispatch(;
+                name=row["name"],
+                available=true,
+                bus=filter(b -> contains(b.name, row["balancing_topology"]), buses)[1],
+                active_power=row["rating"],
+                reactive_power=0.0,
+                rating=row["rating"],
+                reactive_power_limits=nothing,
+                power_factor=0.5,
+                operation_cost=RenewableGenerationCost(
+                    variable=CostCurve(LinearCurve(variable_om)),
+                ),
+                base_power=row["base_power"],
+                prime_mover_type=map_prime_mover(row["prime_mover"]),
+            )
+            add_component!(system, t)
+            # Put in time series for the solar and Wind
+            eaid = row["unit_id"]
+            ts_index =
+                filter("entity_id" => isequal(eaid), df_dict["entities"])[!, "entity_id"]
+            if length(ts_index) == 0
+                continue
+            else
+                # TODO: All real-time timeseries
+                for time_series in ts_index
+                    ts = filter("entity_id" => isequal(time_series), df_dict["time_series"])
+                    # TODO: Remove this hacky fix once database has been corrected to have unique timestamps
+                    # ts = unique(ts,:timestamp)
+                    timestamps, values, type = parse_timestamps_and_values(ts)
+                    # dates = DateTime.(timestamps, "yyyy-m-d-H")
+                    time_series_array = TimeArray(timestamps, values)
+                    if type == "Forecast"
+                        ts = SingleTimeSeries(string(eaid), time_series_array)
+                        PSY.add_time_series!(system, t, ts)
+                        # TODO: Remove once we have decided real time data handling
+                        break
+                    elseif type == "Real Time"
+                        # TODO: For now, skipping this. But need to add later for real-time data
+                        # ts = SingleTimeSeries(string(time_series), time_series_array)
+                        # IS.add_time_series!(p.data, t, ts)
+                    end
+                    # ts = SingleTimeSeries(string(time_series), time_series_array)
+                    # IS.add_time_series!(p.data, t, ts)
+
+                end
+                @warn "Only day ahead added for unit_id: $eaid"
+            end
+        elseif row["fuel_type"] == "Hydro"
+            continue
+        else
+            t = ThermalStandard(;
+                name=row["name"],
+                available=true,
+                status=true,
+                bus=filter(b -> contains(b.name, row["balancing_topology"]), buses)[1],
+                active_power=row["rating"],
+                reactive_power=0.0,
+                rating=row["rating"],
+                active_power_limits=(0.0, row["rating"]),
+                reactive_power_limits=nothing,
+                ramp_limits=nothing,
+                operation_cost=ThermalGenerationCost(
+                    variable=CostCurve(LinearCurve(variable_om)),
+                    fixed=op_data[!, "fom_cost"][1],
+                    start_up=0.0,
+                    shut_down=0.0,
+                ),
+                base_power=row["base_power"],
+                prime_mover_type=map_prime_mover(row["prime_mover"]),
+                fuel=map_fuel(row["fuel_type"]),
+            )
+            add_component!(system, t)
+        end
+    end
+
+    # Get storage units
+    for row in eachrow(df_dict["storage_units"])
+
+        #extract area
+        #area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
+        #area_int = parse(Int64, area)
+
+        s = EnergyReservoirStorage(;
+            name=row["name"],
+            available=true,
+            bus=filter(b -> contains(b.name, row["balancing_topology"]), buses)[1],
+            prime_mover_type=map_prime_mover(row["prime_mover"]),
+            storage_technology_type=StorageTech.LIB,
+            storage_capacity=row["max_capacity"],
+            storage_level_limits=(0.0, 1.0),
+            initial_storage_capacity_level=0.0,
+            rating=row["rating"],
+            active_power=row["rating"],
+            input_active_power_limits=(0.0, row["rating"]),
+            output_active_power_limits=(0.0, row["rating"]),
+            efficiency=(
+                in=row["charging_efficiency"] / row[],
+                out=row["discharge_efficiency"],
+            ),
+            reactive_power=0.0,
+            reactive_power_limits=nothing,
+            base_power=row["base_power"],
+            operation_cost=StorageCost(
+                charge_variable_cost=CostCurve(LinearCurve(0.0)),
+                discharge_variable_cost=CostCurve(LinearCurve(0.0)),
+                fixed=0.0,
+                start_up=0.0,
+                shut_down=0.0,
+            ),
+        )
+        add_component!(system, s)
+    end
 
     return system
 end
-
 
 function dataframe_to_structs(df_dict::Dict)
 
     #Initialize Portfolio
     p = Portfolio()
-    financials = PortfolioFinancialData(discount_rate=0.07, inflation_rate=0.05, interest_rate=0.02, base_year=2025)
+
+    system = dataframe_to_system(df_dict)
+    p.base_system = system
+
+    financials = PortfolioFinancialData(;
+        name="test_name",
+        discount_rate=0.07,
+        inflation_rate=0.05,
+        interest_rate=0.02,
+        base_year=2025,
+    )
     add_financials!(p, financials)
+
+    tech_financials = TechnologyFinancialData(;
+        name="test_technology_financials",
+        capital_recovery_period=30,
+        technology_base_year=2025,
+    )
 
     #initialize Zone structs
     zones = []
@@ -477,6 +674,7 @@ function dataframe_to_structs(df_dict::Dict)
             prime_mover_type=map_prime_mover(row[!, "prime_mover"][1]),
             fuel=row[!, "fuel_type"][1],
             region=zones[area_int],
+            financial_data=tech_financials,
 
             #Problem ones, need to write functions to extract
             base_power=100.0,
@@ -492,7 +690,7 @@ function dataframe_to_structs(df_dict::Dict)
             start_fuel_mmbtu_per_mw=2.0,
             start_cost_per_mw=91.0,
             up_time=6.0,
-            down_time=6.0,
+            dn_time=6.0,
             heat_rate_mmbtu_per_mwh=7.43,
             co2=0.05306,
             ramp_dn_percentage=0.64,
@@ -500,191 +698,12 @@ function dataframe_to_structs(df_dict::Dict)
 
             #Placeholder or default values (modeling assumptions)
             available=true,
-            minimum_required_capacity=0.0,
+            min_capacity=0.0,
             min_generation_percentage=0.0,
-            maximum_capacity=1e8,
+            max_capacity=1e8,
             power_systems_type=string(parametric),
-            cluster=1,
-            reg_max=0.25,
-            rsv_max=0.5,
         )
         add_technology!(p, t)
-    end
-
-    # Get existing generation units
-    for row in eachrow(df_dict["generation_units"])
-
-        #extract area
-        area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
-        area_int = parse(Int64, area)
-
-        # This will return all rows where entity_id matches any value in the tech_id vector
-        tech_id = row["unit_id"]
-        result_all =
-            isempty(
-                filter(
-                    row ->
-                        row[:entity_id] == tech_id &&
-                            row[:entity_type] == "generation_units",
-                    df_dict["attributes"],
-                ),
-            ) ? 0 :
-            filter(
-                row ->
-                    row[:entity_id] == tech_id && row[:entity_type] == "generation_units",
-                df_dict["attributes"],
-            )
-        result = filter(row -> contains(row[:name], "Heat Rate"), result_all)
-        # Check if result exists and contains the expected field
-        if result != 0
-            if !isempty(result[!, :value])
-                first_value = result[!, :value][1]
-                # Ensure it's decoded properly
-                heat_rate_unparsed = decode(first_value, "UTF-8")
-                heat_rate_piecewise_lin = parse_heatrate_to_array(heat_rate_unparsed)
-            else
-                @warn "Result value field is empty"
-                heat_rate_piecewise_lin = 0.0
-            end
-        else
-            @warn "Result DataFrame is empty or zero"
-            heat_rate_piecewise_lin = 0.0
-        end
-
-        co2_data = filter(row -> contains(row[:name], "CO2"), result_all)
-        co2_value = isempty(co2_data) ? 0.0 : Float64(co2_data[!, "value"][1])
-
-        op_data = filter(row -> row[:unit_id] == tech_id, df_dict["operational_data"])
-        variable_om = op_data[!, "vom_cost"][1]
-
-        parametric = map_prime_mover_to_parametric(row["prime_mover"])
-        t = SupplyTechnology{parametric}(;
-            # Data pulled from DB
-            name=row["name"],
-            id=row["unit_id"],
-            capital_costs=LinearCurve(0.0), #just assume zero since pre-existing?
-            balancing_topology=string(row["balancing_topology"]),
-            prime_mover_type=map_prime_mover(row["prime_mover"]),
-            fuel=row["fuel_type"],
-            region=zones[area_int],
-            base_power=row["base_power"],
-            initial_capacity=row["rating"],
-
-            # Data we should have but dont currently
-            operation_costs=ThermalGenerationCost(
-                variable=CostCurve(LinearCurve(variable_om)),
-                fixed=op_data[!, "fom_cost"][1],
-                start_up=0.0,
-                shut_down=0.0,
-            ),
-            start_fuel_mmbtu_per_mw=op_data[!, "startup_fuel_mmbtu_per_mw"][1],
-            start_cost_per_mw=op_data[!, "startup_cost"][1],
-            up_time=op_data[!, "uptime"][1],
-            down_time=op_data[!, "downtime"][1],
-            heat_rate_mmbtu_per_mwh=heat_rate_piecewise_lin,
-            co2=co2_value,
-
-            ## TODO: Need to add ramping capabilities to the schema
-            ramp_dn_percentage=0.64,
-            ramp_up_percentage=0.64,
-
-            #Placeholder or default values (modeling assumptions)
-            available=true,
-            minimum_required_capacity=op_data[!, "min_stable_level"][1],
-            min_generation_percentage=0.0,
-            maximum_capacity=1e8,
-            power_systems_type=string(parametric),
-            cluster=1,
-            reg_max=0.25,
-            rsv_max=0.5,
-            #new_build =  0#0 for existing builds
-        )
-        add_technology!(p, t)
-        if row["fuel_type"] == "Solar" || row["fuel_type"] == "Wind"
-            # Put in time series for the solar and Wind
-            eaid = row["unit_id"]
-            ts_index =
-                filter("entity_id" => isequal(eaid), df_dict["entities"])[!, "entity_id"]
-            if length(ts_index) == 0
-                continue
-            else
-                for time_series in ts_index
-                    ts = filter("entity_id" => isequal(time_series), df_dict["time_series"])
-                    # TODO: Remove this hacky fix once database has been corrected to have unique timestamps
-                    # ts = unique(ts,:timestamp)
-                    timestamps, values, type = parse_timestamps_and_values(ts)
-                    # dates = DateTime.(timestamps, "yyyy-m-d-H")
-                    time_series_array = TimeArray(timestamps, values)
-                    if type == "Forecast"
-                        ts = SingleTimeSeries(string(eaid), time_series_array)
-                        IS.add_time_series!(p.data, t, ts)
-                        # TODO: Remove once we have decided real time data handling
-                        break
-                    elseif type == "Real Time"
-                        # TODO: For now, skipping this. But need to add later for real-time data
-                        # ts = SingleTimeSeries(string(time_series), time_series_array)
-                        # IS.add_time_series!(p.data, t, ts)
-                    end
-                    # ts = SingleTimeSeries(string(time_series), time_series_array)
-                    # IS.add_time_series!(p.data, t, ts)
-
-                end
-                @warn "Only day ahead added for unit_id: $eaid"
-            end
-        end
-    end
-
-    # Get storage units
-    for row in eachrow(df_dict["storage_units"])
-
-        #extract area
-        area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
-        area_int = parse(Int64, area)
-
-        s = StorageTechnology{Storage}(;
-            #Data pulled from DB
-            name=row["name"],
-            base_power=row["base_power"], # Natural Units
-            id=row["storage_unit_id"],
-            region=zones[area_int],
-            prime_mover_type=map_prime_mover(row["prime_mover"]),
-            balancing_topology=row["balancing_topology"],
-            existing_cap_power=row["rating"],
-            existing_cap_energy=row["max_capacity"],
-
-            #stuff we dont have but probably should
-            om_costs_energy=StorageCost(
-                charge_variable_cost=CostCurve(LinearCurve(0.0)),
-                discharge_variable_cost=CostCurve(LinearCurve(0.0)),
-                fixed=0.0,
-                start_up=0.0,
-                shut_down=0.0,
-            ),
-            om_costs_power=StorageCost(
-                charge_variable_cost=CostCurve(LinearCurve(0.0)),
-                discharge_variable_cost=CostCurve(LinearCurve(0.0)),
-                fixed=0.0,
-                start_up=0.0,
-                shut_down=0.0,
-            ),
-            eff_up=row["charging_efficiency"],
-            eff_down=row["discharge_efficiency"],
-            storage_tech=StorageTech.LIB,
-
-            #Default or placeholder values
-            capital_costs_power=LinearCurve(0.0),
-            capital_costs_energy=LinearCurve(0.0),
-            available=true,
-            losses=0.0,
-            min_duration=1.0,
-            max_duration=10.0,
-            min_cap_energy=0.0,
-            min_cap_power=0.0,
-            max_cap_energy=1e8,
-            max_cap_power=1e8,
-            power_systems_type="Test",
-        )
-        add_technology!(p, s)
     end
 
     #Populate DemandRequirement structs from database
@@ -754,9 +773,9 @@ function dataframe_to_structs(df_dict::Dict)
             end
         end
 
-        tx = ExistingTransportTechnology{Branch}(;
+        tx = ACTransportTechnology{Branch}(;
             name=string(rownumber(row)),
-            network_id=rownumber(row),
+            id=rownumber(row),
             base_power=100.0,
             available=true,
             start_region=zones[parse(Int64, row["area_from"])],
@@ -768,6 +787,7 @@ function dataframe_to_structs(df_dict::Dict)
             capital_cost=LinearCurve(19261),
             line_loss=0.019653847,
             power_systems_type="Branch",
+            financial_data=tech_financials,
         )
         add_technology!(p, tx)
     end

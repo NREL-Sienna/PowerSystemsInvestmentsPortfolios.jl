@@ -46,7 +46,7 @@ function show_portfolio_table(io::IO, p::Portfolio; kwargs...)
         "Name" isnothing(get_name(p)) ? "" : get_name(p)
         "Description" isnothing(get_description(p)) ? "" : get_description(p)
         "Aggregation" string(p.aggregation)
-        "Discount Rate" string(p.discount_rate)
+        #"Discount Rate" string(p.discount_rate)
     ]
     PrettyTables.pretty_table(
         io,
