@@ -573,7 +573,7 @@ function dataframe_to_system(df_dict::Dict)
             input_active_power_limits=(0.0, row["rating"]),
             output_active_power_limits=(0.0, row["rating"]),
             efficiency=(
-                in=row["charging_efficiency"] / row[],
+                in=row["charging_efficiency"],
                 out=row["discharge_efficiency"],
             ),
             reactive_power=0.0,
