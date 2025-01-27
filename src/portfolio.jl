@@ -1,6 +1,8 @@
 const PORTFOLIO_KWARGS =
     Set((:name, :description, :data_source, :run_checks, :unit_portfolio))
 
+const DATA_FORMAT_VERSION = "0.1.0"
+
 const DEFAULT_DISCOUNT_RATE = 0.07
 const DEFAULT_AGGREGATION = PSY.ACBus
 
@@ -20,7 +22,6 @@ end
 #TODO: Make immutable
 mutable struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
-    discount_rate::Float64
     data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     #units_settings::IS.SystemUnitsSettings
@@ -31,7 +32,6 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
 
     function Portfolio(
         aggregation,
-        discount_rate::Float64,
         data,
         investment_schedule::Dict,
         #units_settings::IS.SystemUnitsSettings,
@@ -55,7 +55,6 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
         =#
         return new(
             aggregation,
-            discount_rate,
             data,
             investment_schedule,
             #units_settings,
@@ -79,29 +78,17 @@ end
 """
 Construct an empty `Portfolio`. Useful for building a Portfolio from scratch.
 """
-function Portfolio(discount_rate; kwargs...)
+function Portfolio(; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(
-        DEFAULT_AGGREGATION,
-        discount_rate,
-        data,
-        Dict(),
-        IS.InfrastructureSystemsInternal(),
-    )
+    return Portfolio(DEFAULT_AGGREGATION, data, Dict(), IS.InfrastructureSystemsInternal())
 end
 
 """
 Construct an empty `Portfolio` specifying aggregation. Useful for building a Portfolio from scratch.
 """
-function Portfolio(aggregation, discount_rate; kwargs...)
+function Portfolio(aggregation; kwargs...)
     data = _create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(
-        aggregation,
-        discount_rate,
-        data,
-        Dict(),
-        IS.InfrastructureSystemsInternal(),
-    )
+    return Portfolio(aggregation, data, Dict(), IS.InfrastructureSystemsInternal())
 end
 
 """
@@ -136,7 +123,43 @@ Get the description of the portfolio.
 get_description(val::Portfolio) = val.metadata.description
 
 """
-Add a technology to the portfoliotem.
+Return true if checks are enabled on the system.
+"""
+get_runchecks(val::Portfolio) = val.runchecks[]
+
+function _validate_or_skip!(sys, component, skip_validation)
+    if skip_validation && get_runchecks(sys)
+        @warn(
+            "skip_validation is deprecated; construct System with runchecks = true or call set_runchecks!. Disabling System.runchecks"
+        )
+        set_runchecks!(sys, false)
+    end
+
+    # Always skip if system checks are disabled.
+    if !skip_validation && !get_runchecks(sys)
+        skip_validation = true
+    end
+
+    if !skip_validation
+        sanitize_component!(component, sys)
+        if !validate_component_with_system(component, sys)
+            throw(IS.InvalidValue("Invalid value for $component"))
+        end
+    end
+
+    return skip_validation
+end
+
+"""
+Validate a component against System data. Return true if the instance is valid.
+
+Refer to [`validate_component`](@ref) if the validation logic only requires data contained
+within the instance.
+"""
+validate_component_with_system(technology::Technology, port::Portfolio) = true
+
+"""
+Add a technology to the portfolio.
 
 Throws ArgumentError if the technology's name is already stored for its concrete type.
 Throws ArgumentError if any Technology-specific rule is violated.
@@ -162,6 +185,24 @@ function add_technology!(
     kwargs...,
 ) where {T <: Technology}
     #deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+
+    #set_units_setting!(technology, portfolio.data.units_settings)
+    #@assert has_units_setting(technology)
+
+    #check_topology(portfolio.data, component)
+    #check_component_addition(portfolio.data, technology; kwargs...)
+
+    deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+    # TODO: Attach requirements to technologies or other structs
+    #if !deserialization_in_progress
+    # Services are attached to devices at deserialization time.
+    #    check_for_services_on_addition(portfolio, technology)
+    #end
+
+    # TODO: Fix/add validation
+    skip_validation = true #_validate_or_skip!(portfolio, technology, skip_validation)
+    _kwargs = Dict(k => v for (k, v) in kwargs if k !== :static_injector)
+
     IS.add_component!(
         portfolio.data,
         technology;
@@ -434,7 +475,7 @@ get_compression_settings(portfolio::Portfolio) = IS.get_compression_settings(por
 Return the resolution for all time series.
 """
 get_time_series_resolution(portfolio::Portfolio) =
-    IS.get_time_series_resolution(portfolio.data)
+    IS.get_time_series_resolutions(portfolio.data)
 
 """
 Remove all time series data from the system.
@@ -540,7 +581,7 @@ function remove_technology!(
 end
 
 """
-Throws ArgumentError if a PowerSystemsInvestmentPorfol rule blocks removal from the system.
+Throws ArgumentError if a PowerSystemsInvestmentPorfolio rule blocks removal from the system.
 """
 function check_technology_removal(
     portfolio::Portfolio,
@@ -601,6 +642,67 @@ function Portfolio(file_path::AbstractString; assign_new_uuids=false, kwargs...)
 end
 
 ################################
+######### Regions #########
+################################
+
+"""
+Add a region to the portfolio.
+
+Throws ArgumentError if the region's name is already stored for its concrete type.
+Throws ArgumentError if any region-specific rule is violated.
+Throws InvalidValue if any of the region's field values are outside of defined valid
+range.
+
+# Examples
+
+```julia
+portfolio = Portfolio(...)
+
+# Add a single technology.
+add_region!(portfolio, zone)
+
+# Add many at once.
+foreach(x -> add_region!(portfolio, x), Iterators.flatten((buses, generators)))
+```
+"""
+
+function add_region!(
+    portfolio::Portfolio,
+    zone::T;
+    skip_validation=false,
+    kwargs...,
+) where {T <: Region}
+    #deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+    IS.add_component!(
+        portfolio.data,
+        zone;
+        #allow_existing_time_series=deserialization_in_progress,
+        skip_validation=skip_validation,
+        kwargs...,
+    )
+
+    return
+end
+
+"""
+Returns an iterator of regions. T can be concrete or abstract.
+Call collect on the result if an array is desired.
+
+# Examples
+
+```julia
+iter = Portfolio.get_regions(Zone, portfolio)
+iter = Portfolio.get_regions(Region, portfolio)
+regions = collect(Portfolio.get_regions(Region, portfolio))
+```
+
+"""
+
+function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: Region}
+    return IS.get_components(T, portfolio.data)
+end
+
+################################
 ######### Requirements #########
 ################################
 
@@ -615,6 +717,24 @@ function add_requirement!(portfolio::Portfolio, req::Requirements)
 end
 
 function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirements}
+    return IS.get_components(T, portfolio.data)
+end
+
+################################
+######### Financials #########
+################################
+
+"""
+Add financial data to portfolio
+"""
+function add_financials!(portfolio::Portfolio, fin::Financials)
+    #return PSY.add_service!(portfolio.data, req)
+    #skip_validation = false
+    #skip_validation = _validate_or_skip!(sys, service, skip_validation)
+    return IS.add_component!(portfolio.data, fin, skip_validation=false)
+end
+
+function get_financials(::Type{T}, portfolio::Portfolio;) where {T <: Financials}
     return IS.get_components(T, portfolio.data)
 end
 

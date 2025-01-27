@@ -20,7 +20,8 @@ import InfrastructureSystems:
     StructField,
     CostCurve,
     LinearCurve,
-    InfrastructureSystemsComponent
+    InfrastructureSystemsComponent,
+    InfrastructureSystemsType
 
 import PowerSystems
 import PowerSystems: StorageCost, ThermalGenerationCost
@@ -33,32 +34,43 @@ import DataFrames
 import DBInterface
 import TimeSeries
 import Dates
+import DataStructures: OrderedDict
+import OpenAPI
 
 # Temporary, imports not working properly for some reason?
 using DataFrames
 using PowerSystems
 using Dates
 using TimeSeries
+using StringEncodings
 
 export Portfolio
 export Technology
 export Requirements
 export SupplyTechnology
-export TransportTechnology
+export ACTransportTechnology
+export HVDCTransportTechnology
+export ExistingTransportTechnology
 export StorageTechnology
 export DemandRequirement
 export DemandsideTechnology
 export FlexibleDemandTechnology
 export Electrolyzers
 export CurtailableDemandSideTechnology
-export RetireableCapacity
-export RetrofitCapacity
+export RetirementPotential
+export AggregateRetirementPotential
+export RetrofitPotential
+export AggregateRetrofitPotential
 export ExistingCapacity
 export CarbonCaps
 export MinimumCapacityRequirements
 export Region
 export Zone
+export PortfolioFinancialData
+export TechnologyFinancialData
 
+export get_name
+export get_regions
 export get_technologies
 export get_technology
 export get_requirements
@@ -75,6 +87,7 @@ export db_to_portfolio_parser
 export add_supplemental_attribute!
 export remove_supplemental_attribute!
 export get_supplemental_attribute
+export to_json
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems
@@ -90,8 +103,13 @@ export ThermalFuels
 export PrimeMovers
 export StorageTech
 
+#submodule for OpenAPI structs 
+include("models/generated/open_api_models/src/APIClient.jl")
+using .APIClient
+
 include("models/technologies.jl")
 include("models/regions.jl")
+include("models/financials.jl")
 include("models/requirements.jl")
 include("models/generated/includes.jl")
 include("portfolio.jl")

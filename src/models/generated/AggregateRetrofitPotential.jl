@@ -72,3 +72,11 @@ set_internal!(value::AggregateRetrofitPotential, val) = value.internal = val
 set_retrofit_potential!(value::AggregateRetrofitPotential, val) = value.retrofit_potential = val
 """Set [`AggregateRetrofitPotential`](@ref) `ext`."""
 set_ext!(value::AggregateRetrofitPotential, val) = value.ext = val
+
+serialize(val::AggregateRetrofitPotential) = serialize_struct(val)
+IS.deserialize(T::Type{<:AggregateRetrofitPotential}, val::Dict) = IS.deserialize_struct(T, val)
+
+function build_openapi_struct(::Type{<:AggregateRetrofitPotential}, vals...)
+    base_struct = APIClient.AggregateRetrofitPotential(; vals...)
+    return base_struct
+end

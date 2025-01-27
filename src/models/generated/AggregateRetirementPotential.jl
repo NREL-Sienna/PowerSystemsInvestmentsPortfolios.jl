@@ -54,3 +54,11 @@ set_internal!(value::AggregateRetirementPotential, val) = value.internal = val
 set_ext!(value::AggregateRetirementPotential, val) = value.ext = val
 """Set [`AggregateRetirementPotential`](@ref) `retirement_potential`."""
 set_retirement_potential!(value::AggregateRetirementPotential, val) = value.retirement_potential = val
+
+serialize(val::AggregateRetirementPotential) = serialize_struct(val)
+IS.deserialize(T::Type{<:AggregateRetirementPotential}, val::Dict) = IS.deserialize_struct(T, val)
+
+function build_openapi_struct(::Type{<:AggregateRetirementPotential}, vals...)
+    base_struct = APIClient.AggregateRetirementPotential(; vals...)
+    return base_struct
+end
