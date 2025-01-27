@@ -345,7 +345,8 @@ const _ENCODE_AS_UUID_A = (
     Union{Nothing, ACTransportTechnology, HVDCTransportTechnology},
     Vector{Service},
 )
-const _ENCODE_AS_UUID_B = (Zone, ACTransportTechnology, HVDCTransportTechnology, Vector{Service})
+const _ENCODE_AS_UUID_B =
+    (Zone, ACTransportTechnology, HVDCTransportTechnology, Vector{Service})
 
 should_encode_as_uuid(val) = any(x -> val isa x, _ENCODE_AS_UUID_B)
 should_encode_as_uuid(::Type{T}) where {T} = any(x -> T <: x, _ENCODE_AS_UUID_A)

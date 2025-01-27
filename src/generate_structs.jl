@@ -620,10 +620,7 @@ function dataframe_to_system(df_dict::Dict)
             active_power=row["rating"],
             input_active_power_limits=(0.0, row["rating"]),
             output_active_power_limits=(0.0, row["rating"]),
-            efficiency=(
-                in=row["charging_efficiency"],
-                out=row["discharge_efficiency"],
-            ),
+            efficiency=(in=row["charging_efficiency"], out=row["discharge_efficiency"]),
             reactive_power=0.0,
             reactive_power_limits=nothing,
             base_power=row["base_power"],
@@ -635,7 +632,7 @@ function dataframe_to_system(df_dict::Dict)
                 shut_down=0.0,
             ),
         )
-        add_component!(system, s)
+        PSY.add_component!(system, s)
     end
 
     return system
