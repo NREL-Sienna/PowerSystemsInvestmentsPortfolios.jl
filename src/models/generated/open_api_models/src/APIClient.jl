@@ -11,7 +11,9 @@ const API_VERSION = "0.0.1"
 
 include("modelincludes.jl")
 
+
 # export models
+export ACTransportTechnology
 export AggregateRetirementPotential
 export AggregateRetrofitPotential
 export CarbonCaps
@@ -20,12 +22,14 @@ export DemandRequirement
 export DemandSideTechnology
 export ExistingCapacity
 export FlexibleDemandTechnology
+export HVDCTransportTechnology
 export MinimumCapacityRequirements
+export PortfolioFinancialData
 export RetirementPotential
 export RetrofitPotential
 export StorageTechnology
 export SupplyTechnology
-export TransportTechnology
+export TechnologyFinancialData
 export Zone
 
 end # module APIClient
