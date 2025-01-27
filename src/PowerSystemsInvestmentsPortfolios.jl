@@ -39,26 +39,35 @@ using DataFrames
 using PowerSystems
 using Dates
 using TimeSeries
+using StringEncodings
 
 export Portfolio
 export Technology
 export Requirements
 export SupplyTechnology
-export TransportTechnology
+export ACTransportTechnology
+export HVDCTransportTechnology
+export ExistingTransportTechnology
 export StorageTechnology
 export DemandRequirement
 export DemandsideTechnology
 export FlexibleDemandTechnology
 export Electrolyzers
 export CurtailableDemandSideTechnology
-export RetireableCapacity
-export RetrofitCapacity
+export RetirementPotential
+export AggregateRetirementPotential
+export RetrofitPotential
+export AggregateRetrofitPotential
 export ExistingCapacity
 export CarbonCaps
 export MinimumCapacityRequirements
 export Region
 export Zone
+export PortfolioFinancialData
+export TechnologyFinancialData
 
+export get_name
+export get_regions
 export get_technologies
 export get_technology
 export get_requirements
@@ -92,6 +101,7 @@ export StorageTech
 
 include("models/technologies.jl")
 include("models/regions.jl")
+include("models/financials.jl")
 include("models/requirements.jl")
 include("models/generated/includes.jl")
 include("portfolio.jl")

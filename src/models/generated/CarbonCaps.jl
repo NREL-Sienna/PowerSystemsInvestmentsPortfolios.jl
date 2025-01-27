@@ -9,7 +9,7 @@ This file is auto-generated. Do not edit.
         name::String
         power_systems_type::String
         pricecap::Float64
-        eligible_zones::Vector{Int64}
+        eligible_zones::Vector{Region}
         internal::InfrastructureSystemsInternal
         co_2_max_tons_mwh::Float64
         ext::Dict
@@ -23,7 +23,7 @@ This file is auto-generated. Do not edit.
 - `name::String`: The technology name
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `pricecap::Float64`: (default: `Inf`) pricecap value for carbon caps
-- `eligible_zones::Vector{Int64}`: (default: `Vector{Int64}()`) List of zones that contribute to the carbon cap constraint.
+- `eligible_zones::Vector{Region}`: (default: `Vector{Region}()`) List of regions that contribute to the carbon cap constraint.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `co_2_max_tons_mwh::Float64`: (default: `1`) Emission limit in terms of rate (tCO@/MWh)
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
@@ -37,8 +37,8 @@ mutable struct CarbonCaps <: Requirements
     power_systems_type::String
     "pricecap value for carbon caps"
     pricecap::Float64
-    "List of zones that contribute to the carbon cap constraint."
-    eligible_zones::Vector{Int64}
+    "List of regions that contribute to the carbon cap constraint."
+    eligible_zones::Vector{Region}
     "Internal field"
     internal::InfrastructureSystemsInternal
     "Emission limit in terms of rate (tCO@/MWh)"
@@ -52,7 +52,7 @@ mutable struct CarbonCaps <: Requirements
 end
 
 
-function CarbonCaps(; name, power_systems_type, pricecap=Inf, eligible_zones=Vector{Int64}(), internal=InfrastructureSystemsInternal(), co_2_max_tons_mwh=1, ext=Dict(), co_2_max_mtons=Vector{Int64}(), available, )
+function CarbonCaps(; name, power_systems_type, pricecap=Inf, eligible_zones=Vector{Region}(), internal=InfrastructureSystemsInternal(), co_2_max_tons_mwh=1, ext=Dict(), co_2_max_mtons=Vector{Int64}(), available, )
     CarbonCaps(name, power_systems_type, pricecap, eligible_zones, internal, co_2_max_tons_mwh, ext, co_2_max_mtons, available, )
 end
 
