@@ -599,7 +599,7 @@ function dataframe_to_structs(df_dict::Dict)
             eaid = row["unit_id"]
             ts_index =
                 filter("entity_id" => isequal(eaid), df_dict["entities"])[!, "entity_id"]
-            println("ts_index", ts_index)
+            # println("ts_index", ts_index)
 
             # if ts_index[1] == 5
             #     for time_series in ts_index
@@ -624,6 +624,7 @@ function dataframe_to_structs(df_dict::Dict)
                     timestamps, values, type = parse_timestamps_and_values(ts)
                     # dates = DateTime.(timestamps, "yyyy-m-d-H")
                     time_series_array = TimeArray(timestamps, values)
+                    println(time_series_array)
                     if type == "Forecast" && size(ts)[1] > 0
                         # ts = SingleTimeSeries(string(eaid), time_series_array)
                         ts = SingleTimeSeries(data=time_series_array,
@@ -729,23 +730,22 @@ function dataframe_to_structs(df_dict::Dict)
         dates = timestamps[1]:Hour(1):timestamps[end]
         demand = ts_parsed
         demand_array = TimeArray(dates, demand)
-        ts = SingleTimeSeries(string(row["entity_attribute_id"]), demand_array)
-
+        ts = SingleTimeSeries("ops_peak_load", demand_array)
         area_int = parse(Int64, row["area"])
 
         #How to parse this timestamp stuff??
 
-        d = DemandRequirement{ElectricLoad}(
+        d = DemandRequirement{PowerLoad}(
             #Data pulled from DB
             name="Demand" * string(row["entity_attribute_id"]),
             region=zones[area_int],#parse(Int64, row["area"]),
 
             #Placeholder/default values
             available=true,
-            power_systems_type="ElectricLoad",
+            power_systems_type="PowerLoad",
         )
         add_technology!(p, d)
-        IS.add_time_series!(p.data, d, ts; year=2020, rep_day=1)
+        IS.add_time_series!(p.data, d, ts; year="2020", rep_day=1)
     end
 
     #Transmission Lines
