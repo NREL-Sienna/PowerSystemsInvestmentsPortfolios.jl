@@ -74,6 +74,9 @@ export get_requirements
 export get_ext
 export add_technology!
 export add_technologies!
+export add_region!
+export add_requirement!
+export add_financial_data!
 export read_json_data
 export generate_invest_structs
 export generate_structs

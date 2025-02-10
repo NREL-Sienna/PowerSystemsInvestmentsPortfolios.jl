@@ -84,8 +84,25 @@ end
 Construct an empty `Portfolio` specifying aggregation. Useful for building a Portfolio from scratch.
 """
 function Portfolio(aggregation; kwargs...)
-    data = _create_system_data_from_kwargs(; kwargs...)
+    data = PSY._create_system_data_from_kwargs(; kwargs...)
     return Portfolio(aggregation, data, Dict(), IS.InfrastructureSystemsInternal())
+end
+
+"""
+Construct an empty `Portfolio` with specified financial data.
+"""
+function Portfolio(base_year::Int64, discount_rate::Float64, inflation_rate::Float64, interest_rate::Float64=0.0; kwargs...)
+    data = PSY._create_system_data_from_kwargs(; kwargs...)
+    portfolio = Portfolio(DEFAULT_AGGREGATION, data, Dict(), IS.InfrastructureSystemsInternal())
+    financials = PortfolioFinancialData(; 
+        name="PortfolioFinancials",
+        base_year=base_year, 
+        discount_rate=discount_rate,
+        interest_rate=interest_rate,
+        inflation_rate=inflation_rate
+    )
+    add_financial_data!(portfolio, financials)
+    return portfolio
 end
 
 """
@@ -652,10 +669,7 @@ end
 """
 Add financial data to portfolio
 """
-function add_financials!(portfolio::Portfolio, fin::Financials)
-    #return PSY.add_service!(portfolio.data, req)
-    #skip_validation = false
-    #skip_validation = _validate_or_skip!(sys, service, skip_validation)
+function add_financial_data!(portfolio::Portfolio, fin::Financials)
     return IS.add_component!(portfolio.data, fin, skip_validation=false)
 end
 
