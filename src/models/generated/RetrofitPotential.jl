@@ -57,8 +57,12 @@ set_ext!(value::RetrofitPotential, val) = value.ext = val
 
 serialize(val::RetrofitPotential) = serialize_struct(val)
 IS.deserialize(T::Type{<:RetrofitPotential}, val::Dict) = IS.deserialize_struct(T, val)
+function serialize_openapi_struct(technology::RetrofitPotential, vals...)
+    base_struct = APIServer.RetrofitPotential(; vals...)
+    return base_struct
+end
 
-function build_openapi_struct(::Type{<:RetrofitPotential}, vals...)
-    base_struct = APIClient.RetrofitPotential(; vals...)
+function deserialize_openapi_struct(::Type{<:RetrofitPotential}, vals...)
+    base_struct = APIServer.RetrofitPotential(; vals...)
     return base_struct
 end

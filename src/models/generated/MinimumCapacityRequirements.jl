@@ -21,7 +21,7 @@ This file is auto-generated. Do not edit.
 # Arguments
 - `name::String`: The technology name
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
-- `pricecap::Float64`: (default: `Inf`) price threshold for policy constraint, USD/MW
+- `pricecap::Float64`: (default: `1e8`) price threshold for policy constraint, USD/MW
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `min_mw::Float64`: (default: `0.0`) Minimum total capacity across all eligible resources
@@ -48,7 +48,7 @@ mutable struct MinimumCapacityRequirements <: Requirements
 end
 
 
-function MinimumCapacityRequirements(; name, power_systems_type, pricecap=Inf, internal=InfrastructureSystemsInternal(), ext=Dict(), min_mw=0.0, eligible_resources=Vector{String}(), available, )
+function MinimumCapacityRequirements(; name, power_systems_type, pricecap=1e8, internal=InfrastructureSystemsInternal(), ext=Dict(), min_mw=0.0, eligible_resources=Vector{String}(), available, )
     MinimumCapacityRequirements(name, power_systems_type, pricecap, internal, ext, min_mw, eligible_resources, available, )
 end
 
@@ -88,8 +88,12 @@ set_available!(value::MinimumCapacityRequirements, val) = value.available = val
 
 serialize(val::MinimumCapacityRequirements) = serialize_struct(val)
 IS.deserialize(T::Type{<:MinimumCapacityRequirements}, val::Dict) = IS.deserialize_struct(T, val)
+function serialize_openapi_struct(technology::MinimumCapacityRequirements, vals...)
+    base_struct = APIServer.MinimumCapacityRequirements(; vals...)
+    return base_struct
+end
 
-function build_openapi_struct(::Type{<:MinimumCapacityRequirements}, vals...)
-    base_struct = APIClient.MinimumCapacityRequirements(; vals...)
+function deserialize_openapi_struct(::Type{<:MinimumCapacityRequirements}, vals...)
+    base_struct = APIServer.MinimumCapacityRequirements(; vals...)
     return base_struct
 end

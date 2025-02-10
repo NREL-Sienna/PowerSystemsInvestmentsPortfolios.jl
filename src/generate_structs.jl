@@ -2,37 +2,23 @@ import Mustache
 
 const SERIALIZATION_TEMPLATE = """
 {{#has_parametric}}
-function IS.serialize(technology::{{struct_name}}{T}) where T <: {{parametric}}
-    data = Dict{String, Any}()
-    for name in fieldnames({{struct_name}}{T})
-        val = serialize_uuid_handling(getfield(technology, name))
-        if name == :ext
-            if !IS.is_ext_valid_for_serialization(val)
-                error(
-                    "component type=\$technology name=\$(get_name(technology)) has a value in its " *
-                    "ext field that cannot be serialized.",
-                )
-            end
-        end
-        data[string(name)] = val
-    end
-
-    add_serialization_metadata!(data, {{struct_name}}{T})
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
-
-    return data
+function serialize_openapi_struct(technology::{{struct_name}}{T}, vals...) where T <: {{parametric}}
+    base_struct = APIServer.{{struct_name}}(; vals...)
+    return base_struct
 end
-
-IS.deserialize(T::Type{<:{{struct_name}}}, val::Dict) = IS.deserialize_struct(T, val)
 {{/has_parametric}}
 
 {{^has_parametric}}
 serialize(val::{{struct_name}}) = serialize_struct(val)
 IS.deserialize(T::Type{<:{{struct_name}}}, val::Dict) = IS.deserialize_struct(T, val)
+function serialize_openapi_struct(technology::{{struct_name}}, vals...)
+    base_struct = APIServer.{{struct_name}}(; vals...)
+    return base_struct
+end
 {{/has_parametric}}
 
-function build_openapi_struct(::Type{<:{{struct_name}}}, vals...)
-    base_struct = APIClient.{{struct_name}}(; vals...)
+function deserialize_openapi_struct(::Type{<:{{struct_name}}}, vals...)
+    base_struct = APIServer.{{struct_name}}(; vals...)
     return base_struct
 end
 

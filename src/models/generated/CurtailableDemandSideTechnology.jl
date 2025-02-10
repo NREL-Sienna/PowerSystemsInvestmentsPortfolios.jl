@@ -102,31 +102,13 @@ set_max_demand_curtailment!(value::CurtailableDemandSideTechnology, val) = value
 """Set [`CurtailableDemandSideTechnology`](@ref) `available`."""
 set_available!(value::CurtailableDemandSideTechnology, val) = value.available = val
 
-function IS.serialize(technology::CurtailableDemandSideTechnology{T}) where T <: PSY.StaticInjection
-    data = Dict{String, Any}()
-    for name in fieldnames(CurtailableDemandSideTechnology{T})
-        val = serialize_uuid_handling(getfield(technology, name))
-        if name == :ext
-            if !IS.is_ext_valid_for_serialization(val)
-                error(
-                    "component type=$technology name=$(get_name(technology)) has a value in its " *
-                    "ext field that cannot be serialized.",
-                )
-            end
-        end
-        data[string(name)] = val
-    end
-
-    add_serialization_metadata!(data, CurtailableDemandSideTechnology{T})
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
-
-    return data
+function serialize_openapi_struct(technology::CurtailableDemandSideTechnology{T}, vals...) where T <: PSY.StaticInjection
+    base_struct = APIServer.CurtailableDemandSideTechnology(; vals...)
+    return base_struct
 end
 
-IS.deserialize(T::Type{<:CurtailableDemandSideTechnology}, val::Dict) = IS.deserialize_struct(T, val)
 
-
-function build_openapi_struct(::Type{<:CurtailableDemandSideTechnology}, vals...)
-    base_struct = APIClient.CurtailableDemandSideTechnology(; vals...)
+function deserialize_openapi_struct(::Type{<:CurtailableDemandSideTechnology}, vals...)
+    base_struct = APIServer.CurtailableDemandSideTechnology(; vals...)
     return base_struct
 end

@@ -94,31 +94,13 @@ set_demand_energy_efficiency!(value::FlexibleDemandTechnology, val) = value.dema
 """Set [`FlexibleDemandTechnology`](@ref) `available`."""
 set_available!(value::FlexibleDemandTechnology, val) = value.available = val
 
-function IS.serialize(technology::FlexibleDemandTechnology{T}) where T <: PSY.StaticInjection
-    data = Dict{String, Any}()
-    for name in fieldnames(FlexibleDemandTechnology{T})
-        val = serialize_uuid_handling(getfield(technology, name))
-        if name == :ext
-            if !IS.is_ext_valid_for_serialization(val)
-                error(
-                    "component type=$technology name=$(get_name(technology)) has a value in its " *
-                    "ext field that cannot be serialized.",
-                )
-            end
-        end
-        data[string(name)] = val
-    end
-
-    add_serialization_metadata!(data, FlexibleDemandTechnology{T})
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
-
-    return data
+function serialize_openapi_struct(technology::FlexibleDemandTechnology{T}, vals...) where T <: PSY.StaticInjection
+    base_struct = APIServer.FlexibleDemandTechnology(; vals...)
+    return base_struct
 end
 
-IS.deserialize(T::Type{<:FlexibleDemandTechnology}, val::Dict) = IS.deserialize_struct(T, val)
 
-
-function build_openapi_struct(::Type{<:FlexibleDemandTechnology}, vals...)
-    base_struct = APIClient.FlexibleDemandTechnology(; vals...)
+function deserialize_openapi_struct(::Type{<:FlexibleDemandTechnology}, vals...)
+    base_struct = APIServer.FlexibleDemandTechnology(; vals...)
     return base_struct
 end

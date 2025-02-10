@@ -72,8 +72,12 @@ set_interest_rate!(value::PortfolioFinancialData, val) = value.interest_rate = v
 
 serialize(val::PortfolioFinancialData) = serialize_struct(val)
 IS.deserialize(T::Type{<:PortfolioFinancialData}, val::Dict) = IS.deserialize_struct(T, val)
+function serialize_openapi_struct(technology::PortfolioFinancialData, vals...)
+    base_struct = APIServer.PortfolioFinancialData(; vals...)
+    return base_struct
+end
 
-function build_openapi_struct(::Type{<:PortfolioFinancialData}, vals...)
-    base_struct = APIClient.PortfolioFinancialData(; vals...)
+function deserialize_openapi_struct(::Type{<:PortfolioFinancialData}, vals...)
+    base_struct = APIServer.PortfolioFinancialData(; vals...)
     return base_struct
 end

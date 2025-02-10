@@ -51,7 +51,7 @@ This file is auto-generated. Do not edit.
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Minimum blending level of each fuel during normal generation process for multi-fuel generator
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
-- `max_capacity::Float64`: (default: `Inf`) Maximum allowable installed capacity for a technology
+- `max_capacity::Float64`: (default: `1e8`) Maximum allowable installed capacity for a technology
 - `dn_time::Float64`: (default: `0.0`) Minimum amount of time a resource has to remain in the shutdown state.
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed
 - `cofire_start_max::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Maximum blending level of each fuel during start-up process for multi-fuel generator
@@ -152,7 +152,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
 end
 
 
-function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), max_capacity=Inf, dn_time=0.0, lifetime=100, cofire_start_max=nothing, available=True, co2=0.0, cofire_start_min=nothing, name, ramp_dn_percentage=100.0, min_capacity=0.0, id, initial_capacity=0.0, financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=nothing, ramp_up_percentage=100.0, base_year=2020, unit_size=0.0, min_generation_percentage=0.0, start_cost_per_mw=0.0, up_time=0.0, ) where T <: PSY.Generator
+function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), max_capacity=1e8, dn_time=0.0, lifetime=100, cofire_start_max=nothing, available=True, co2=0.0, cofire_start_min=nothing, name, ramp_dn_percentage=100.0, min_capacity=0.0, id, initial_capacity=0.0, financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=nothing, ramp_up_percentage=100.0, base_year=2020, unit_size=0.0, min_generation_percentage=0.0, start_cost_per_mw=0.0, up_time=0.0, ) where T <: PSY.Generator
     SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, outage_factor, prime_mover_type, cofire_level_min, capital_costs, max_capacity, dn_time, lifetime, cofire_start_max, available, co2, cofire_start_min, name, ramp_dn_percentage, min_capacity, id, initial_capacity, financial_data, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, region, ramp_up_percentage, base_year, unit_size, min_generation_percentage, start_cost_per_mw, up_time, )
 end
 
@@ -294,31 +294,13 @@ set_start_cost_per_mw!(value::SupplyTechnology, val) = value.start_cost_per_mw =
 """Set [`SupplyTechnology`](@ref) `up_time`."""
 set_up_time!(value::SupplyTechnology, val) = value.up_time = val
 
-function IS.serialize(technology::SupplyTechnology{T}) where T <: PSY.Generator
-    data = Dict{String, Any}()
-    for name in fieldnames(SupplyTechnology{T})
-        val = serialize_uuid_handling(getfield(technology, name))
-        if name == :ext
-            if !IS.is_ext_valid_for_serialization(val)
-                error(
-                    "component type=$technology name=$(get_name(technology)) has a value in its " *
-                    "ext field that cannot be serialized.",
-                )
-            end
-        end
-        data[string(name)] = val
-    end
-
-    add_serialization_metadata!(data, SupplyTechnology{T})
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
-
-    return data
+function serialize_openapi_struct(technology::SupplyTechnology{T}, vals...) where T <: PSY.Generator
+    base_struct = APIServer.SupplyTechnology(; vals...)
+    return base_struct
 end
 
-IS.deserialize(T::Type{<:SupplyTechnology}, val::Dict) = IS.deserialize_struct(T, val)
 
-
-function build_openapi_struct(::Type{<:SupplyTechnology}, vals...)
-    base_struct = APIClient.SupplyTechnology(; vals...)
+function deserialize_openapi_struct(::Type{<:SupplyTechnology}, vals...)
+    base_struct = APIServer.SupplyTechnology(; vals...)
     return base_struct
 end

@@ -64,8 +64,12 @@ set_technology_base_year!(value::TechnologyFinancialData, val) = value.technolog
 
 serialize(val::TechnologyFinancialData) = serialize_struct(val)
 IS.deserialize(T::Type{<:TechnologyFinancialData}, val::Dict) = IS.deserialize_struct(T, val)
+function serialize_openapi_struct(technology::TechnologyFinancialData, vals...)
+    base_struct = APIServer.TechnologyFinancialData(; vals...)
+    return base_struct
+end
 
-function build_openapi_struct(::Type{<:TechnologyFinancialData}, vals...)
-    base_struct = APIClient.TechnologyFinancialData(; vals...)
+function deserialize_openapi_struct(::Type{<:TechnologyFinancialData}, vals...)
+    base_struct = APIServer.TechnologyFinancialData(; vals...)
     return base_struct
 end

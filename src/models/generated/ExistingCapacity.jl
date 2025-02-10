@@ -57,8 +57,12 @@ set_existing_capacity!(value::ExistingCapacity, val) = value.existing_capacity =
 
 serialize(val::ExistingCapacity) = serialize_struct(val)
 IS.deserialize(T::Type{<:ExistingCapacity}, val::Dict) = IS.deserialize_struct(T, val)
+function serialize_openapi_struct(technology::ExistingCapacity, vals...)
+    base_struct = APIServer.ExistingCapacity(; vals...)
+    return base_struct
+end
 
-function build_openapi_struct(::Type{<:ExistingCapacity}, vals...)
-    base_struct = APIClient.ExistingCapacity(; vals...)
+function deserialize_openapi_struct(::Type{<:ExistingCapacity}, vals...)
+    base_struct = APIServer.ExistingCapacity(; vals...)
     return base_struct
 end

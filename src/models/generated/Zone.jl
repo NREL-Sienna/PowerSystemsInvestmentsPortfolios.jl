@@ -56,8 +56,12 @@ set_ext!(value::Zone, val) = value.ext = val
 
 serialize(val::Zone) = serialize_struct(val)
 IS.deserialize(T::Type{<:Zone}, val::Dict) = IS.deserialize_struct(T, val)
+function serialize_openapi_struct(technology::Zone, vals...)
+    base_struct = APIServer.Zone(; vals...)
+    return base_struct
+end
 
-function build_openapi_struct(::Type{<:Zone}, vals...)
-    base_struct = APIClient.Zone(; vals...)
+function deserialize_openapi_struct(::Type{<:Zone}, vals...)
+    base_struct = APIServer.Zone(; vals...)
     return base_struct
 end

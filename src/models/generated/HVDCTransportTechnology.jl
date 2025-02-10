@@ -166,31 +166,13 @@ set_existing_line_capacity!(value::HVDCTransportTechnology, val) = value.existin
 """Set [`HVDCTransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::HVDCTransportTechnology, val) = value.line_loss = val
 
-function IS.serialize(technology::HVDCTransportTechnology{T}) where T <: PSY.Device
-    data = Dict{String, Any}()
-    for name in fieldnames(HVDCTransportTechnology{T})
-        val = serialize_uuid_handling(getfield(technology, name))
-        if name == :ext
-            if !IS.is_ext_valid_for_serialization(val)
-                error(
-                    "component type=$technology name=$(get_name(technology)) has a value in its " *
-                    "ext field that cannot be serialized.",
-                )
-            end
-        end
-        data[string(name)] = val
-    end
-
-    add_serialization_metadata!(data, HVDCTransportTechnology{T})
-    data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
-
-    return data
+function serialize_openapi_struct(technology::HVDCTransportTechnology{T}, vals...) where T <: PSY.Device
+    base_struct = APIServer.HVDCTransportTechnology(; vals...)
+    return base_struct
 end
 
-IS.deserialize(T::Type{<:HVDCTransportTechnology}, val::Dict) = IS.deserialize_struct(T, val)
 
-
-function build_openapi_struct(::Type{<:HVDCTransportTechnology}, vals...)
-    base_struct = APIClient.HVDCTransportTechnology(; vals...)
+function deserialize_openapi_struct(::Type{<:HVDCTransportTechnology}, vals...)
+    base_struct = APIServer.HVDCTransportTechnology(; vals...)
     return base_struct
 end
