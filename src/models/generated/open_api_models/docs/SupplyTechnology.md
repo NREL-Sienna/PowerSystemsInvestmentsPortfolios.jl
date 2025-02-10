@@ -24,7 +24,7 @@ Name | Type | Description | Notes
 **operation_costs** | [***SupplyTechnologyOperationCosts**](SupplyTechnologyOperationCosts.md) |  | [optional] [default to nothing]
 **initial_capacity** | **Float64** |  | [optional] [default to 0.0]
 **unit_size** | **Float64** |  | [optional] [default to 0.0]
-**max_capacity** | **Float64** |  | [optional] [default to Inf]
+**max_capacity** | **Float64** |  | [optional] [default to 1e8]
 **min_capacity** | **Float64** |  | [optional] [default to 0.0]
 **outage_factor** | **Float64** |  | [optional] [default to 1.0]
 **min_generation_percentage** | **Float64** |  | [optional] [default to 0.0]

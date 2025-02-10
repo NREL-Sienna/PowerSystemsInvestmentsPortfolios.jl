@@ -25,7 +25,7 @@
         operation_costs=nothing,
         initial_capacity=0.0,
         unit_size=0.0,
-        max_capacity=Inf,
+        max_capacity=1e8,
         min_capacity=0.0,
         outage_factor=1.0,
         min_generation_percentage=0.0,
@@ -95,7 +95,7 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     operation_costs = nothing # spec type: Union{ Nothing, SupplyTechnologyOperationCosts }
     initial_capacity::Union{Nothing, Float64} = 0.0
     unit_size::Union{Nothing, Float64} = 0.0
-    max_capacity::Union{Nothing, Float64} = Inf
+    max_capacity::Union{Nothing, Float64} = 1e8
     min_capacity::Union{Nothing, Float64} = 0.0
     outage_factor::Union{Nothing, Float64} = 1.0
     min_generation_percentage::Union{Nothing, Float64} = 0.0
