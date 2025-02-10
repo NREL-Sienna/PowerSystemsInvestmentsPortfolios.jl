@@ -27,14 +27,13 @@ This file is auto-generated. Do not edit.
         min_capacity_power::Float64
         max_capacity_power::Float64
         balancing_topology::String
-        efficiency_out::Float64
-        region::Union{Nothing, Region, Vector{Region}}
         ext::Dict
+        region::Union{Nothing, Region, Vector{Region}}
         unit_size_energy::Float64
         max_capacity_energy::Float64
-        efficiency_in::Float64
         base_year::Int
         existing_capacity_energy::Float64
+        efficiency::NamedTuple{(:in, :out), Tuple{Float64, Float64}}
         min_duration::Float64
         operations_costs_energy::PSY.OperationalCost
     end
@@ -63,14 +62,13 @@ This file is auto-generated. Do not edit.
 - `min_capacity_power::Float64`: (default: `0.0`) Minimum required power capacity for a storage technology
 - `max_capacity_power::Float64`: (default: `1e8`) Maximum allowable installed power capacity for a storage technology
 - `balancing_topology::String`: Set of balancing nodes
-- `efficiency_out::Float64`: (default: `1.0`) Efficiency of discharging storage
-- `region::Union{Nothing, Region, Vector{Region}}`: (default: `nothing`) Region
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `region::Union{Nothing, Region, Vector{Region}}`: (default: `nothing`) Region
 - `unit_size_energy::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
 - `max_capacity_energy::Float64`: (default: `1e8`) Maximum allowable installed energy capacity for a storage technology
-- `efficiency_in::Float64`: (default: `1.0`) Efficiency of charging storage
 - `base_year::Int`: (default: `2020`) Reference year for technology data
 - `existing_capacity_energy::Float64`: (default: `0.0`) Pre-existing energy capacity for a technology (MWh)
+- `efficiency::NamedTuple{(:in, :out), Tuple{Float64, Float64}}`: (default: `(in=1.0, out=1.0)`) Efficiency of charging and discharging storage
 - `min_duration::Float64`: (default: `0.0`) Minimum required durection for a storage technology
 - `operations_costs_energy::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a technology
 """
@@ -117,22 +115,20 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     max_capacity_power::Float64
     "Set of balancing nodes"
     balancing_topology::String
-    "Efficiency of discharging storage"
-    efficiency_out::Float64
-    "Region"
-    region::Union{Nothing, Region, Vector{Region}}
     "Option for providing additional data"
     ext::Dict
+    "Region"
+    region::Union{Nothing, Region, Vector{Region}}
     "Used for discrete investment decisions. Size of each unit being built (MW)"
     unit_size_energy::Float64
     "Maximum allowable installed energy capacity for a storage technology"
     max_capacity_energy::Float64
-    "Efficiency of charging storage"
-    efficiency_in::Float64
     "Reference year for technology data"
     base_year::Int
     "Pre-existing energy capacity for a technology (MWh)"
     existing_capacity_energy::Float64
+    "Efficiency of charging and discharging storage"
+    efficiency::NamedTuple{(:in, :out), Tuple{Float64, Float64}}
     "Minimum required durection for a storage technology"
     min_duration::Float64
     "Fixed and variable O&M costs for a technology"
@@ -140,8 +136,8 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
 end
 
 
-function StorageTechnology{T}(; base_power, prime_mover_type=PrimeMovers.OT, lifetime=100, min_capacity_energy=0.0, available, name, storage_tech, capital_costs_power=LinearCurve(0.0), max_duration=1000.0, operations_costs_power=StorageCost(), unit_size_power=0.0, id, losses=1.0, capital_costs_energy=LinearCurve(0.0), financial_data, existing_capacity_power=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), min_capacity_power=0.0, max_capacity_power=1e8, balancing_topology, efficiency_out=1.0, region=nothing, ext=Dict(), unit_size_energy=0.0, max_capacity_energy=1e8, efficiency_in=1.0, base_year=2020, existing_capacity_energy=0.0, min_duration=0.0, operations_costs_energy=StorageCost(), ) where T <: PSY.Storage
-    StorageTechnology{T}(base_power, prime_mover_type, lifetime, min_capacity_energy, available, name, storage_tech, capital_costs_power, max_duration, operations_costs_power, unit_size_power, id, losses, capital_costs_energy, financial_data, existing_capacity_power, power_systems_type, internal, min_capacity_power, max_capacity_power, balancing_topology, efficiency_out, region, ext, unit_size_energy, max_capacity_energy, efficiency_in, base_year, existing_capacity_energy, min_duration, operations_costs_energy, )
+function StorageTechnology{T}(; base_power, prime_mover_type=PrimeMovers.OT, lifetime=100, min_capacity_energy=0.0, available, name, storage_tech, capital_costs_power=LinearCurve(0.0), max_duration=1000.0, operations_costs_power=StorageCost(), unit_size_power=0.0, id, losses=1.0, capital_costs_energy=LinearCurve(0.0), financial_data, existing_capacity_power=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), min_capacity_power=0.0, max_capacity_power=1e8, balancing_topology, ext=Dict(), region=nothing, unit_size_energy=0.0, max_capacity_energy=1e8, base_year=2020, existing_capacity_energy=0.0, efficiency=(in=1.0, out=1.0), min_duration=0.0, operations_costs_energy=StorageCost(), ) where T <: PSY.Storage
+    StorageTechnology{T}(base_power, prime_mover_type, lifetime, min_capacity_energy, available, name, storage_tech, capital_costs_power, max_duration, operations_costs_power, unit_size_power, id, losses, capital_costs_energy, financial_data, existing_capacity_power, power_systems_type, internal, min_capacity_power, max_capacity_power, balancing_topology, ext, region, unit_size_energy, max_capacity_energy, base_year, existing_capacity_energy, efficiency, min_duration, operations_costs_energy, )
 end
 
 """Get [`StorageTechnology`](@ref) `base_power`."""
@@ -186,22 +182,20 @@ get_min_capacity_power(value::StorageTechnology) = value.min_capacity_power
 get_max_capacity_power(value::StorageTechnology) = value.max_capacity_power
 """Get [`StorageTechnology`](@ref) `balancing_topology`."""
 get_balancing_topology(value::StorageTechnology) = value.balancing_topology
-"""Get [`StorageTechnology`](@ref) `efficiency_out`."""
-get_efficiency_out(value::StorageTechnology) = value.efficiency_out
-"""Get [`StorageTechnology`](@ref) `region`."""
-get_region(value::StorageTechnology) = value.region
 """Get [`StorageTechnology`](@ref) `ext`."""
 get_ext(value::StorageTechnology) = value.ext
+"""Get [`StorageTechnology`](@ref) `region`."""
+get_region(value::StorageTechnology) = value.region
 """Get [`StorageTechnology`](@ref) `unit_size_energy`."""
 get_unit_size_energy(value::StorageTechnology) = value.unit_size_energy
 """Get [`StorageTechnology`](@ref) `max_capacity_energy`."""
 get_max_capacity_energy(value::StorageTechnology) = value.max_capacity_energy
-"""Get [`StorageTechnology`](@ref) `efficiency_in`."""
-get_efficiency_in(value::StorageTechnology) = value.efficiency_in
 """Get [`StorageTechnology`](@ref) `base_year`."""
 get_base_year(value::StorageTechnology) = value.base_year
 """Get [`StorageTechnology`](@ref) `existing_capacity_energy`."""
 get_existing_capacity_energy(value::StorageTechnology) = value.existing_capacity_energy
+"""Get [`StorageTechnology`](@ref) `efficiency`."""
+get_efficiency(value::StorageTechnology) = value.efficiency
 """Get [`StorageTechnology`](@ref) `min_duration`."""
 get_min_duration(value::StorageTechnology) = value.min_duration
 """Get [`StorageTechnology`](@ref) `operations_costs_energy`."""
@@ -249,22 +243,20 @@ set_min_capacity_power!(value::StorageTechnology, val) = value.min_capacity_powe
 set_max_capacity_power!(value::StorageTechnology, val) = value.max_capacity_power = val
 """Set [`StorageTechnology`](@ref) `balancing_topology`."""
 set_balancing_topology!(value::StorageTechnology, val) = value.balancing_topology = val
-"""Set [`StorageTechnology`](@ref) `efficiency_out`."""
-set_efficiency_out!(value::StorageTechnology, val) = value.efficiency_out = val
-"""Set [`StorageTechnology`](@ref) `region`."""
-set_region!(value::StorageTechnology, val) = value.region = val
 """Set [`StorageTechnology`](@ref) `ext`."""
 set_ext!(value::StorageTechnology, val) = value.ext = val
+"""Set [`StorageTechnology`](@ref) `region`."""
+set_region!(value::StorageTechnology, val) = value.region = val
 """Set [`StorageTechnology`](@ref) `unit_size_energy`."""
 set_unit_size_energy!(value::StorageTechnology, val) = value.unit_size_energy = val
 """Set [`StorageTechnology`](@ref) `max_capacity_energy`."""
 set_max_capacity_energy!(value::StorageTechnology, val) = value.max_capacity_energy = val
-"""Set [`StorageTechnology`](@ref) `efficiency_in`."""
-set_efficiency_in!(value::StorageTechnology, val) = value.efficiency_in = val
 """Set [`StorageTechnology`](@ref) `base_year`."""
 set_base_year!(value::StorageTechnology, val) = value.base_year = val
 """Set [`StorageTechnology`](@ref) `existing_capacity_energy`."""
 set_existing_capacity_energy!(value::StorageTechnology, val) = value.existing_capacity_energy = val
+"""Set [`StorageTechnology`](@ref) `efficiency`."""
+set_efficiency!(value::StorageTechnology, val) = value.efficiency = val
 """Set [`StorageTechnology`](@ref) `min_duration`."""
 set_min_duration!(value::StorageTechnology, val) = value.min_duration = val
 """Set [`StorageTechnology`](@ref) `operations_costs_energy`."""

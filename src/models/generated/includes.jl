@@ -40,8 +40,7 @@ export get_demand_energy_efficiency
 export get_demand_mw
 export get_discount_rate
 export get_dn_time
-export get_efficiency_in
-export get_efficiency_out
+export get_efficiency
 export get_eligible_resources
 export get_eligible_zones
 export get_end_region
@@ -129,8 +128,7 @@ export set_demand_energy_efficiency!
 export set_demand_mw!
 export set_discount_rate!
 export set_dn_time!
-export set_efficiency_in!
-export set_efficiency_out!
+export set_efficiency!
 export set_eligible_resources!
 export set_eligible_zones!
 export set_end_region!
