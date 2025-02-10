@@ -17,7 +17,6 @@ This file is auto-generated. Do not edit.
         region::Union{Nothing, Region}
         min_power::Float64
         ramp_up_percentage::Float64
-        capacity::Float64
     end
 
 
@@ -34,7 +33,6 @@ This file is auto-generated. Do not edit.
 - `region::Union{Nothing, Region}`: (default: `nothing`) Region where tech operates in
 - `min_power::Float64`: (default: `0.0`) Minimum operation of demandside unit as a fraction of total capacity
 - `ramp_up_percentage::Float64`: (default: `1.0`) Maximum increase in output between operation periods. Fraction of total capacity
-- `capacity::Float64`: (default: `0.0`) Total capacity of technology available in the region
 """
 mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: Technology
     "Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers"
@@ -59,13 +57,11 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: Technology
     min_power::Float64
     "Maximum increase in output between operation periods. Fraction of total capacity"
     ramp_up_percentage::Float64
-    "Total capacity of technology available in the region"
-    capacity::Float64
 end
 
 
-function DemandSideTechnology{T}(; price_per_unit=0.0, ramp_dn_percentage=1.0, available, name, technology_efficiency=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=nothing, min_power=0.0, ramp_up_percentage=1.0, capacity=0.0, ) where T <: PSY.StaticInjection
-    DemandSideTechnology{T}(price_per_unit, ramp_dn_percentage, available, name, technology_efficiency, power_systems_type, internal, ext, region, min_power, ramp_up_percentage, capacity, )
+function DemandSideTechnology{T}(; price_per_unit=0.0, ramp_dn_percentage=1.0, available, name, technology_efficiency=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=nothing, min_power=0.0, ramp_up_percentage=1.0, ) where T <: PSY.StaticInjection
+    DemandSideTechnology{T}(price_per_unit, ramp_dn_percentage, available, name, technology_efficiency, power_systems_type, internal, ext, region, min_power, ramp_up_percentage, )
 end
 
 """Get [`DemandSideTechnology`](@ref) `price_per_unit`."""
@@ -90,8 +86,6 @@ get_region(value::DemandSideTechnology) = value.region
 get_min_power(value::DemandSideTechnology) = value.min_power
 """Get [`DemandSideTechnology`](@ref) `ramp_up_percentage`."""
 get_ramp_up_percentage(value::DemandSideTechnology) = value.ramp_up_percentage
-"""Get [`DemandSideTechnology`](@ref) `capacity`."""
-get_capacity(value::DemandSideTechnology) = value.capacity
 
 """Set [`DemandSideTechnology`](@ref) `price_per_unit`."""
 set_price_per_unit!(value::DemandSideTechnology, val) = value.price_per_unit = val
@@ -115,5 +109,3 @@ set_region!(value::DemandSideTechnology, val) = value.region = val
 set_min_power!(value::DemandSideTechnology, val) = value.min_power = val
 """Set [`DemandSideTechnology`](@ref) `ramp_up_percentage`."""
 set_ramp_up_percentage!(value::DemandSideTechnology, val) = value.ramp_up_percentage = val
-"""Set [`DemandSideTechnology`](@ref) `capacity`."""
-set_capacity!(value::DemandSideTechnology, val) = value.capacity = val
