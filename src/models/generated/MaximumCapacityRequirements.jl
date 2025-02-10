@@ -1,0 +1,79 @@
+#=
+This file is auto-generated. Do not edit.
+=#
+
+#! format: off
+
+"""
+    mutable struct MaximumCapacityRequirements <: Requirements
+        name::String
+        max_capacity_mw::Float64
+        power_systems_type::String
+        internal::InfrastructureSystemsInternal
+        ext::Dict
+        eligible_resources::Vector{Technology}
+        available::Bool
+    end
+
+
+
+# Arguments
+- `name::String`: The technology name
+- `max_capacity_mw::Float64`: (default: `0.0`) Maximum total capacity across all eligible resources
+- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of technologies that contribute to the carbon cap constraint.
+- `available::Bool`: Availability
+"""
+mutable struct MaximumCapacityRequirements <: Requirements
+    "The technology name"
+    name::String
+    "Maximum total capacity across all eligible resources"
+    max_capacity_mw::Float64
+    "maps to a valid PowerSystems.jl for PCM modeling"
+    power_systems_type::String
+    "Internal field"
+    internal::InfrastructureSystemsInternal
+    "Option for providing additional data"
+    ext::Dict
+    "List of technologies that contribute to the carbon cap constraint."
+    eligible_resources::Vector{Technology}
+    "Availability"
+    available::Bool
+end
+
+
+function MaximumCapacityRequirements(; name, max_capacity_mw=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), eligible_resources=Vector{Technology}(), available, )
+    MaximumCapacityRequirements(name, max_capacity_mw, power_systems_type, internal, ext, eligible_resources, available, )
+end
+
+"""Get [`MaximumCapacityRequirements`](@ref) `name`."""
+get_name(value::MaximumCapacityRequirements) = value.name
+"""Get [`MaximumCapacityRequirements`](@ref) `max_capacity_mw`."""
+get_max_capacity_mw(value::MaximumCapacityRequirements) = value.max_capacity_mw
+"""Get [`MaximumCapacityRequirements`](@ref) `power_systems_type`."""
+get_power_systems_type(value::MaximumCapacityRequirements) = value.power_systems_type
+"""Get [`MaximumCapacityRequirements`](@ref) `internal`."""
+get_internal(value::MaximumCapacityRequirements) = value.internal
+"""Get [`MaximumCapacityRequirements`](@ref) `ext`."""
+get_ext(value::MaximumCapacityRequirements) = value.ext
+"""Get [`MaximumCapacityRequirements`](@ref) `eligible_resources`."""
+get_eligible_resources(value::MaximumCapacityRequirements) = value.eligible_resources
+"""Get [`MaximumCapacityRequirements`](@ref) `available`."""
+get_available(value::MaximumCapacityRequirements) = value.available
+
+"""Set [`MaximumCapacityRequirements`](@ref) `name`."""
+set_name!(value::MaximumCapacityRequirements, val) = value.name = val
+"""Set [`MaximumCapacityRequirements`](@ref) `max_capacity_mw`."""
+set_max_capacity_mw!(value::MaximumCapacityRequirements, val) = value.max_capacity_mw = val
+"""Set [`MaximumCapacityRequirements`](@ref) `power_systems_type`."""
+set_power_systems_type!(value::MaximumCapacityRequirements, val) = value.power_systems_type = val
+"""Set [`MaximumCapacityRequirements`](@ref) `internal`."""
+set_internal!(value::MaximumCapacityRequirements, val) = value.internal = val
+"""Set [`MaximumCapacityRequirements`](@ref) `ext`."""
+set_ext!(value::MaximumCapacityRequirements, val) = value.ext = val
+"""Set [`MaximumCapacityRequirements`](@ref) `eligible_resources`."""
+set_eligible_resources!(value::MaximumCapacityRequirements, val) = value.eligible_resources = val
+"""Set [`MaximumCapacityRequirements`](@ref) `available`."""
+set_available!(value::MaximumCapacityRequirements, val) = value.available = val
