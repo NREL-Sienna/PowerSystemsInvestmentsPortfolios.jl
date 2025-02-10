@@ -50,9 +50,8 @@ export HVDCTransportTechnology
 export ExistingTransportTechnology
 export StorageTechnology
 export DemandRequirement
-export DemandsideTechnology
-export FlexibleDemandTechnology
-export Electrolyzers
+export DemandSideTechnology
+export FlexibleDemandSideTechnology
 export CurtailableDemandSideTechnology
 export RetirementPotential
 export AggregateRetirementPotential
@@ -60,7 +59,9 @@ export RetrofitPotential
 export AggregateRetrofitPotential
 export ExistingCapacity
 export CarbonCaps
+export CapacityReserveMargin
 export MinimumCapacityRequirements
+export MaximumCapacityRequirements
 export Region
 export Zone
 export PortfolioFinancialData
