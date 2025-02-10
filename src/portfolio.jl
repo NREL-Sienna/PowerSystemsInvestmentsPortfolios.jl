@@ -91,15 +91,22 @@ end
 """
 Construct an empty `Portfolio` with specified financial data.
 """
-function Portfolio(base_year::Int64, discount_rate::Float64, inflation_rate::Float64, interest_rate::Float64=0.0; kwargs...)
+function Portfolio(
+    base_year::Int64,
+    discount_rate::Float64,
+    inflation_rate::Float64,
+    interest_rate::Float64=0.0;
+    kwargs...,
+)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
-    portfolio = Portfolio(DEFAULT_AGGREGATION, data, Dict(), IS.InfrastructureSystemsInternal())
-    financials = PortfolioFinancialData(; 
+    portfolio =
+        Portfolio(DEFAULT_AGGREGATION, data, Dict(), IS.InfrastructureSystemsInternal())
+    financials = PortfolioFinancialData(;
         name="PortfolioFinancials",
-        base_year=base_year, 
+        base_year=base_year,
         discount_rate=discount_rate,
         interest_rate=interest_rate,
-        inflation_rate=inflation_rate
+        inflation_rate=inflation_rate,
     )
     add_financial_data!(portfolio, financials)
     return portfolio
