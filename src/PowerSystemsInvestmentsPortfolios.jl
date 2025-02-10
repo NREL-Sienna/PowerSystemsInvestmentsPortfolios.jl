@@ -104,8 +104,8 @@ export PrimeMovers
 export StorageTech
 
 #submodule for OpenAPI structs 
-include("models/generated/open_api_models/src/APIClient.jl")
-using .APIClient
+include("models/generated/open_api_models/src/APIServer.jl")
+using .APIServer
 
 include("models/technologies.jl")
 include("models/regions.jl")

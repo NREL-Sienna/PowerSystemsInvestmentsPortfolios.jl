@@ -62,7 +62,6 @@ function serialize_uuid_handling(val)
 end
 
 function serialize_struct(val::T) where {T}
-    @debug "serialize_struct" _group = LOG_GROUP_SERIALIZATION val T
     data = Dict{String, Any}(
         string(name) => serialize(getproperty(val, name)) for name in fieldnames(T)
     )
