@@ -7,6 +7,7 @@ const CONSTRUCT_WITH_PARAMETERS_KEY = "construct_with_parameters"
 const FUNCTION_KEY = "function"
 
 function IS.serialize(portfolio::T) where {T <: Portfolio}
+    @show "IS.Enter serialize"
     data = Dict{String, Any}()
     data["data_format_version"] = DATA_FORMAT_VERSION
     for field in fieldnames(T)
@@ -14,11 +15,10 @@ function IS.serialize(portfolio::T) where {T <: Portfolio}
         # Exclude time_series_directory because the portfolio may get deserialized on a
         # different portfolio.
         if field != :bus_numbers && field != :time_series_directory
-            #@show getfield(portfolio, field)
             data[string(field)] = serialize(getfield(portfolio, field))
         end
+        @show string(field)
     end
-
     return data
 end
 
@@ -62,11 +62,44 @@ function serialize_uuid_handling(val)
 end
 
 function serialize_struct(val::T) where {T}
+    @show "enter serialize_struct"
     data = Dict{String, Any}(
         string(name) => serialize(getproperty(val, name)) for name in fieldnames(T)
     )
     add_serialization_metadata!(data, T)
     return data
+end
+
+function serialize(technology::Technology)
+    @show "ENTER!!!"
+    api_struct = serialize_openapi_struct(technology)
+
+    # Build OpenAPI struct from modeling struct
+    for field in fieldnames(typeof(api_struct))
+
+        #For fields with references to other structs, serialize with
+        #the name of that struct
+        if field == :region || field == :financial_data
+            value = get_name(getfield(technology, field))
+
+        #convert enums to strings
+        elseif field == :prime_mover_type || field == :fuel
+            value = string(getfield(technology, field))
+            @show value
+
+        else
+            value = getfield(technology, field)
+        end
+
+        setfield!(api_struct, field, value) 
+
+    end
+
+    data = Dict{String, Any}(
+        string(name) => serialize(getproperty(api_struct, name)) for name in fieldnames(typeof(api_struct))
+    )
+    return data
+
 end
 
 """
@@ -255,7 +288,6 @@ function IS.deserialize(
     data::Dict,
     component_cache::Dict,
 ) where {T <: _CONTAINS_SHOULD_ENCODE}
-    @debug "deserialize Component" _group = IS.LOG_GROUP_SERIALIZATION T data
     vals = Dict{Symbol, Any}()
     for (name, type) in zip(fieldnames(T), fieldtypes(T))
         field_name = string(name)
@@ -382,7 +414,7 @@ Serializes a portfolio to a JSON file and saves time series to an HDF5 file.
 
 Refer to [`check_component`](@ref) for exceptions thrown if `check = true`.
 """
-function IS.to_json(
+function to_json(
     portfolio::Portfolio,
     filename::AbstractString;
     user_data=nothing,
@@ -395,7 +427,7 @@ function IS.to_json(
     #     check(portfolio)
     #     check_technologies(portfolio)
     # end
-
+    @show "enter to_json round 1"
     IS.prepare_for_serialization_to_file!(portfolio.data, filename; force=force)
     data = to_json(portfolio; pretty=pretty)
     open(filename, "w") do io
@@ -407,6 +439,25 @@ function IS.to_json(
     @info "Serialized Portfolio to $filename"
 
     return
+end
+
+"""
+Serializes a InfrastructureSystemsType to a JSON string.
+"""
+function to_json(obj::T; pretty = false, indent = 2) where {T <: InfrastructureSystemsType}
+    @show "Enter to_json round 2"
+    try
+        if pretty
+            io = IOBuffer()
+            JSON3.pretty(io, serialize(obj), JSON3.AlignmentContext(; indent = indent))
+            return take!(io)
+        else
+            return JSON3.write(serialize(obj))
+        end
+    catch e
+        @error "Failed to serialize $(summary(obj))"
+        rethrow(e)
+    end
 end
 
 function _serialize_portfolio_metadata_to_file(portfolio::Portfolio, filename, user_data)
