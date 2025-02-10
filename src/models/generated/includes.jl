@@ -1,5 +1,5 @@
-include("Zone.jl")
 include("TechnologyFinancialData.jl")
+include("Zone.jl")
 include("MinimumCapacityRequirements.jl")
 include("PortfolioFinancialData.jl")
 include("SupplyTechnology.jl")
@@ -18,6 +18,7 @@ include("StorageTechnology.jl")
 include("CarbonCaps.jl")
 include("RetrofitPotential.jl")
 include("CurtailableDemandSideTechnology.jl")
+include("ColocatedSupplyStorageTechnology.jl")
 
 export get_angle_limit
 export get_available
@@ -29,6 +30,9 @@ export get_capital_cost
 export get_capital_costs
 export get_capital_costs_energy
 export get_capital_costs_power
+export get_capital_costs_storage_energy
+export get_capital_costs_storage_power
+export get_capital_costs_supply
 export get_capital_recovery_period
 export get_co2
 export get_cofire_level_max
@@ -63,6 +67,9 @@ export get_max_capacity
 export get_max_capacity_energy
 export get_max_capacity_mw
 export get_max_capacity_power
+export get_max_capacity_storage_energy
+export get_max_capacity_storage_power
+export get_max_capacity_supply
 export get_max_demand_advance
 export get_max_demand_curtailment
 export get_max_demand_delay
@@ -74,11 +81,16 @@ export get_min_capacity
 export get_min_capacity_energy
 export get_min_capacity_mw
 export get_min_capacity_power
+export get_min_capacity_storage_energy
+export get_min_capacity_storage_power
+export get_min_capacity_supply
 export get_min_duration
 export get_min_generation_percentage
 export get_min_power
 export get_name
 export get_operation_costs
+export get_operation_costs_storage
+export get_operation_costs_supply
 export get_operations_costs_energy
 export get_operations_costs_power
 export get_outage_factor
@@ -98,12 +110,17 @@ export get_retrofit_potential
 export get_start_cost_per_mw
 export get_start_fuel_mmbtu_per_mw
 export get_start_region
+export get_storage_financial_data
 export get_storage_tech
+export get_supply_financial_data
 export get_technology_base_year
 export get_technology_efficiency
 export get_unit_size
 export get_unit_size_energy
 export get_unit_size_power
+export get_unit_size_storage_energy
+export get_unit_size_storage_power
+export get_unit_size_supply
 export get_up_time
 export get_value_of_lost_load
 export get_variable_cost_per_mwh
@@ -118,6 +135,9 @@ export set_capital_cost!
 export set_capital_costs!
 export set_capital_costs_energy!
 export set_capital_costs_power!
+export set_capital_costs_storage_energy!
+export set_capital_costs_storage_power!
+export set_capital_costs_supply!
 export set_capital_recovery_period!
 export set_co2!
 export set_cofire_level_max!
@@ -152,6 +172,9 @@ export set_max_capacity!
 export set_max_capacity_energy!
 export set_max_capacity_mw!
 export set_max_capacity_power!
+export set_max_capacity_storage_energy!
+export set_max_capacity_storage_power!
+export set_max_capacity_supply!
 export set_max_demand_advance!
 export set_max_demand_curtailment!
 export set_max_demand_delay!
@@ -163,11 +186,16 @@ export set_min_capacity!
 export set_min_capacity_energy!
 export set_min_capacity_mw!
 export set_min_capacity_power!
+export set_min_capacity_storage_energy!
+export set_min_capacity_storage_power!
+export set_min_capacity_supply!
 export set_min_duration!
 export set_min_generation_percentage!
 export set_min_power!
 export set_name!
 export set_operation_costs!
+export set_operation_costs_storage!
+export set_operation_costs_supply!
 export set_operations_costs_energy!
 export set_operations_costs_power!
 export set_outage_factor!
@@ -187,12 +215,17 @@ export set_retrofit_potential!
 export set_start_cost_per_mw!
 export set_start_fuel_mmbtu_per_mw!
 export set_start_region!
+export set_storage_financial_data!
 export set_storage_tech!
+export set_supply_financial_data!
 export set_technology_base_year!
 export set_technology_efficiency!
 export set_unit_size!
 export set_unit_size_energy!
 export set_unit_size_power!
+export set_unit_size_storage_energy!
+export set_unit_size_storage_power!
+export set_unit_size_supply!
 export set_up_time!
 export set_value_of_lost_load!
 export set_variable_cost_per_mwh!
