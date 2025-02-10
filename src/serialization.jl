@@ -7,7 +7,6 @@ const CONSTRUCT_WITH_PARAMETERS_KEY = "construct_with_parameters"
 const FUNCTION_KEY = "function"
 
 function IS.serialize(portfolio::T) where {T <: Portfolio}
-    @show "IS.Enter serialize"
     data = Dict{String, Any}()
     data["data_format_version"] = DATA_FORMAT_VERSION
     for field in fieldnames(T)
@@ -17,7 +16,6 @@ function IS.serialize(portfolio::T) where {T <: Portfolio}
         if field != :bus_numbers && field != :time_series_directory
             data[string(field)] = serialize(getfield(portfolio, field))
         end
-        @show string(field)
     end
     return data
 end
@@ -62,7 +60,6 @@ function serialize_uuid_handling(val)
 end
 
 function serialize_struct(val::T) where {T}
-    @show "enter serialize_struct"
     data = Dict{String, Any}(
         string(name) => serialize(getproperty(val, name)) for name in fieldnames(T)
     )
@@ -71,33 +68,40 @@ function serialize_struct(val::T) where {T}
 end
 
 function serialize(technology::Technology)
-    @show "ENTER!!!"
     api_struct = serialize_openapi_struct(technology)
 
+    struct_type = typeof(technology)
+    api_type = typeof(api_struct)
+
     # Build OpenAPI struct from modeling struct
-    for field in fieldnames(typeof(api_struct))
+    for field in fieldnames(api_type)
 
         #For fields with references to other structs, serialize with
         #the name of that struct
-        if field == :region || field == :financial_data
+        if field == :region || field == :financial_data || field == :start_region || field == :end_region
             value = get_name(getfield(technology, field))
 
         #convert enums to strings
-        elseif field == :prime_mover_type || field == :fuel
+        elseif field == :prime_mover_type || field == :fuel || field == :storage_tech
             value = string(getfield(technology, field))
-            @show value
 
         else
             value = getfield(technology, field)
         end
 
-        setfield!(api_struct, field, value) 
+        setfield!(api_struct, field, value)
 
     end
 
     data = Dict{String, Any}(
         string(name) => serialize(getproperty(api_struct, name)) for name in fieldnames(typeof(api_struct))
     )
+
+    add_serialization_metadata!(data, struct_type)
+    if !isempty(struct_type.parameters)
+        data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
+    end
+
     return data
 
 end
@@ -106,7 +110,6 @@ end
 Add type information to the dictionary that can be used to deserialize the value.
 """
 function add_serialization_metadata!(data::Dict, ::Type{T}) where {T}
-    #@show T
     data[METADATA_KEY] = Dict{String, Any}(
         TYPE_KEY => string(nameof(T)),
         MODULE_KEY => string(parentmodule(T)),
@@ -133,7 +136,6 @@ function from_dict(
 )
     # Read any field that is defined in Portfolio but optional for the constructors and not
     # already handled here.
-    #@show raw
     handled = (
         "aggregation",
         "discount_rate",
@@ -208,7 +210,6 @@ function deserialize_components!(sys::Portfolio, raw)
     # Convert the array of components into type-specific arrays to allow addition by type.
     data = Dict{Any, Vector{Dict}}()
     for component in raw["components"]
-        #@show component
         type = IS.get_type_from_serialization_data(component)
         components = get(data, type, nothing)
         if components === nothing
@@ -346,7 +347,6 @@ function deserialize_uuid_handling(field_type, val, component_cache)
             end
             value = _vals
         else
-            #@show val
             uuid = deserialize(Base.UUID, val["internal"]["uuid"])
             component = component_cache[uuid]
             value = component
@@ -427,7 +427,6 @@ function to_json(
     #     check(portfolio)
     #     check_technologies(portfolio)
     # end
-    @show "enter to_json round 1"
     IS.prepare_for_serialization_to_file!(portfolio.data, filename; force=force)
     data = to_json(portfolio; pretty=pretty)
     open(filename, "w") do io
@@ -445,7 +444,6 @@ end
 Serializes a InfrastructureSystemsType to a JSON string.
 """
 function to_json(obj::T; pretty = false, indent = 2) where {T <: InfrastructureSystemsType}
-    @show "Enter to_json round 2"
     try
         if pretty
             io = IOBuffer()
