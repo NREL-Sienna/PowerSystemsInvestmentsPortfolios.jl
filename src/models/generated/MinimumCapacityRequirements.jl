@@ -7,7 +7,6 @@ This file is auto-generated. Do not edit.
 """
     mutable struct MinimumCapacityRequirements <: Requirements
         name::String
-        power_systems_type::String
         internal::InfrastructureSystemsInternal
         min_capacity_mw::Float64
         ext::Dict
@@ -19,7 +18,6 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `name::String`: The technology name
-- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `min_capacity_mw::Float64`: (default: `0.0`) Minimum total capacity across all eligible resources
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
@@ -29,8 +27,6 @@ This file is auto-generated. Do not edit.
 mutable struct MinimumCapacityRequirements <: Requirements
     "The technology name"
     name::String
-    "maps to a valid PowerSystems.jl for PCM modeling"
-    power_systems_type::String
     "Internal field"
     internal::InfrastructureSystemsInternal
     "Minimum total capacity across all eligible resources"
@@ -44,14 +40,12 @@ mutable struct MinimumCapacityRequirements <: Requirements
 end
 
 
-function MinimumCapacityRequirements(; name, power_systems_type, internal=InfrastructureSystemsInternal(), min_capacity_mw=0.0, ext=Dict(), eligible_resources=Vector{Technology}(), available, )
-    MinimumCapacityRequirements(name, power_systems_type, internal, min_capacity_mw, ext, eligible_resources, available, )
+function MinimumCapacityRequirements(; name, internal=InfrastructureSystemsInternal(), min_capacity_mw=0.0, ext=Dict(), eligible_resources=Vector{Technology}(), available, )
+    MinimumCapacityRequirements(name, internal, min_capacity_mw, ext, eligible_resources, available, )
 end
 
 """Get [`MinimumCapacityRequirements`](@ref) `name`."""
 get_name(value::MinimumCapacityRequirements) = value.name
-"""Get [`MinimumCapacityRequirements`](@ref) `power_systems_type`."""
-get_power_systems_type(value::MinimumCapacityRequirements) = value.power_systems_type
 """Get [`MinimumCapacityRequirements`](@ref) `internal`."""
 get_internal(value::MinimumCapacityRequirements) = value.internal
 """Get [`MinimumCapacityRequirements`](@ref) `min_capacity_mw`."""
@@ -65,8 +59,6 @@ get_available(value::MinimumCapacityRequirements) = value.available
 
 """Set [`MinimumCapacityRequirements`](@ref) `name`."""
 set_name!(value::MinimumCapacityRequirements, val) = value.name = val
-"""Set [`MinimumCapacityRequirements`](@ref) `power_systems_type`."""
-set_power_systems_type!(value::MinimumCapacityRequirements, val) = value.power_systems_type = val
 """Set [`MinimumCapacityRequirements`](@ref) `internal`."""
 set_internal!(value::MinimumCapacityRequirements, val) = value.internal = val
 """Set [`MinimumCapacityRequirements`](@ref) `min_capacity_mw`."""

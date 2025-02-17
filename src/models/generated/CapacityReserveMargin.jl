@@ -7,7 +7,6 @@ This file is auto-generated. Do not edit.
 """
     mutable struct CapacityReserveMargin <: Requirements
         name::String
-        power_systems_type::String
         internal::InfrastructureSystemsInternal
         ext::Dict
         capacity_reserve_fraction::Float64
@@ -19,7 +18,6 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `name::String`: The technology name
-- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `capacity_reserve_fraction::Float64`: (default: `0.0`) Capacity reserve requirements, represented as a fraction of demand in region
@@ -29,8 +27,6 @@ This file is auto-generated. Do not edit.
 mutable struct CapacityReserveMargin <: Requirements
     "The technology name"
     name::String
-    "maps to a valid PowerSystems.jl for PCM modeling"
-    power_systems_type::String
     "Internal field"
     internal::InfrastructureSystemsInternal
     "Option for providing additional data"
@@ -44,14 +40,12 @@ mutable struct CapacityReserveMargin <: Requirements
 end
 
 
-function CapacityReserveMargin(; name, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), capacity_reserve_fraction=0.0, available, regions=Vector{Technology}(), )
-    CapacityReserveMargin(name, power_systems_type, internal, ext, capacity_reserve_fraction, available, regions, )
+function CapacityReserveMargin(; name, internal=InfrastructureSystemsInternal(), ext=Dict(), capacity_reserve_fraction=0.0, available, regions=Vector{Technology}(), )
+    CapacityReserveMargin(name, internal, ext, capacity_reserve_fraction, available, regions, )
 end
 
 """Get [`CapacityReserveMargin`](@ref) `name`."""
 get_name(value::CapacityReserveMargin) = value.name
-"""Get [`CapacityReserveMargin`](@ref) `power_systems_type`."""
-get_power_systems_type(value::CapacityReserveMargin) = value.power_systems_type
 """Get [`CapacityReserveMargin`](@ref) `internal`."""
 get_internal(value::CapacityReserveMargin) = value.internal
 """Get [`CapacityReserveMargin`](@ref) `ext`."""
@@ -65,8 +59,6 @@ get_regions(value::CapacityReserveMargin) = value.regions
 
 """Set [`CapacityReserveMargin`](@ref) `name`."""
 set_name!(value::CapacityReserveMargin, val) = value.name = val
-"""Set [`CapacityReserveMargin`](@ref) `power_systems_type`."""
-set_power_systems_type!(value::CapacityReserveMargin, val) = value.power_systems_type = val
 """Set [`CapacityReserveMargin`](@ref) `internal`."""
 set_internal!(value::CapacityReserveMargin, val) = value.internal = val
 """Set [`CapacityReserveMargin`](@ref) `ext`."""
