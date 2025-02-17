@@ -14,6 +14,7 @@ This file is auto-generated. Do not edit.
         region::Union{Nothing, Region}
         max_demand_curtailment::Float64
         available::Bool
+        min_power::Float64
     end
 
 
@@ -27,6 +28,7 @@ This file is auto-generated. Do not edit.
 - `region::Union{Nothing, Region}`: (default: `nothing`) Region where tech operates in
 - `max_demand_curtailment::Float64`: (default: `1.0`) percent of demand that can be curtailed
 - `available::Bool`: identifies whether the technology is available
+- `min_power::Float64`: (default: `0.0`) Minimum operation of demandside unit as a fraction of total capacity
 """
 mutable struct CurtailableDemandSideTechnology{T <: PSY.StaticInjection} <: Technology
     "The technology name"
@@ -45,11 +47,13 @@ mutable struct CurtailableDemandSideTechnology{T <: PSY.StaticInjection} <: Tech
     max_demand_curtailment::Float64
     "identifies whether the technology is available"
     available::Bool
+    "Minimum operation of demandside unit as a fraction of total capacity"
+    min_power::Float64
 end
 
 
-function CurtailableDemandSideTechnology{T}(; name, power_systems_type, internal=InfrastructureSystemsInternal(), curtailment_cost, ext=Dict(), region=nothing, max_demand_curtailment=1.0, available, ) where T <: PSY.StaticInjection
-    CurtailableDemandSideTechnology{T}(name, power_systems_type, internal, curtailment_cost, ext, region, max_demand_curtailment, available, )
+function CurtailableDemandSideTechnology{T}(; name, power_systems_type, internal=InfrastructureSystemsInternal(), curtailment_cost, ext=Dict(), region=nothing, max_demand_curtailment=1.0, available, min_power=0.0, ) where T <: PSY.StaticInjection
+    CurtailableDemandSideTechnology{T}(name, power_systems_type, internal, curtailment_cost, ext, region, max_demand_curtailment, available, min_power, )
 end
 
 """Get [`CurtailableDemandSideTechnology`](@ref) `name`."""
@@ -68,6 +72,8 @@ get_region(value::CurtailableDemandSideTechnology) = value.region
 get_max_demand_curtailment(value::CurtailableDemandSideTechnology) = value.max_demand_curtailment
 """Get [`CurtailableDemandSideTechnology`](@ref) `available`."""
 get_available(value::CurtailableDemandSideTechnology) = value.available
+"""Get [`CurtailableDemandSideTechnology`](@ref) `min_power`."""
+get_min_power(value::CurtailableDemandSideTechnology) = value.min_power
 
 """Set [`CurtailableDemandSideTechnology`](@ref) `name`."""
 set_name!(value::CurtailableDemandSideTechnology, val) = value.name = val
@@ -85,3 +91,5 @@ set_region!(value::CurtailableDemandSideTechnology, val) = value.region = val
 set_max_demand_curtailment!(value::CurtailableDemandSideTechnology, val) = value.max_demand_curtailment = val
 """Set [`CurtailableDemandSideTechnology`](@ref) `available`."""
 set_available!(value::CurtailableDemandSideTechnology, val) = value.available = val
+"""Set [`CurtailableDemandSideTechnology`](@ref) `min_power`."""
+set_min_power!(value::CurtailableDemandSideTechnology, val) = value.min_power = val
