@@ -12,11 +12,13 @@ include("AggregateRetrofitPotential.jl")
 include("MaximumCapacityRequirements.jl")
 include("CapacityReserveMargin.jl")
 include("DemandSideTechnology.jl")
+include("EnergyShareRequirements.jl")
 include("AggregateRetirementPotential.jl")
 include("HVDCTransportTechnology.jl")
 include("StorageTechnology.jl")
 include("CarbonCaps.jl")
 include("RetrofitPotential.jl")
+include("HourlyMatching.jl")
 include("CurtailableDemandSideTechnology.jl")
 include("ColocatedSupplyStorageTechnology.jl")
 
@@ -53,6 +55,7 @@ export get_existing_line_capacity
 export get_ext
 export get_financial_data
 export get_fuel
+export get_generation_fraction
 export get_heat_rate_mmbtu_per_mwh
 export get_id
 export get_inflation_rate
@@ -150,6 +153,7 @@ export set_existing_line_capacity!
 export set_ext!
 export set_financial_data!
 export set_fuel!
+export set_generation_fraction!
 export set_heat_rate_mmbtu_per_mwh!
 export set_id!
 export set_inflation_rate!
