@@ -737,7 +737,7 @@ function dataframe_to_structs(df_dict::Dict)
             #Data pulled from DB
             name=string(row["entity_attribute_id"]),
             region=zones[area_int],#parse(Int64, row["area"]),
-
+            value_of_lost_load = 0.0,
             #Placeholder/default values
             available=true,
             power_systems_type="ElectricLoad",
