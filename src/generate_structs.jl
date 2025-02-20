@@ -9,8 +9,6 @@ end
 {{/has_parametric}}
 
 {{^has_parametric}}
-serialize(val::{{struct_name}}) = serialize_struct(val)
-IS.deserialize(T::Type{<:{{struct_name}}}, val::Dict) = IS.deserialize_struct(T, val)
 function serialize_openapi_struct(technology::{{struct_name}}, vals...)
     base_struct = APIServer.{{struct_name}}(; vals...)
     return base_struct

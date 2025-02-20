@@ -55,8 +55,6 @@ set_ext!(value::ExistingCapacity, val) = value.ext = val
 """Set [`ExistingCapacity`](@ref) `existing_capacity`."""
 set_existing_capacity!(value::ExistingCapacity, val) = value.existing_capacity = val
 
-serialize(val::ExistingCapacity) = serialize_struct(val)
-IS.deserialize(T::Type{<:ExistingCapacity}, val::Dict) = IS.deserialize_struct(T, val)
 function serialize_openapi_struct(technology::ExistingCapacity, vals...)
     base_struct = APIServer.ExistingCapacity(; vals...)
     return base_struct

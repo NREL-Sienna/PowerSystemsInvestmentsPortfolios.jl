@@ -7,7 +7,7 @@ This file is auto-generated. Do not edit.
 """
     mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
         base_power::Float64
-        heat_rate_mmbtu_per_mwh::Union{Float64, PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}
+        heat_rate_mmbtu_per_mwh::Union{PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}
         outage_factor::Float64
         prime_mover_type::PrimeMovers
         cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}
@@ -17,7 +17,7 @@ This file is auto-generated. Do not edit.
         lifetime::Int
         cofire_start_max::Union{Nothing, Dict{ThermalFuels, Float64}}
         available::Bool
-        co2::Union{Float64, Dict{String, Float64}, Dict{ThermalFuels, Float64}}
+        co2::Union{Float64, Dict{ThermalFuels, Float64}}
         cofire_start_min::Union{Nothing, Dict{ThermalFuels, Float64}}
         name::String
         ramp_dn_percentage::Float64
@@ -27,7 +27,7 @@ This file is auto-generated. Do not edit.
         financial_data::TechnologyFinancialData
         start_fuel_mmbtu_per_mw::Float64
         operation_costs::PSY.OperationalCost
-        fuel::Union{String, ThermalFuels, Vector{ThermalFuels}, Vector{String}}
+        fuel::Union{ThermalFuels, Vector{ThermalFuels}}
         power_systems_type::String
         cofire_level_max::Union{Nothing, Dict{ThermalFuels, Float64}}
         internal::InfrastructureSystemsInternal
@@ -46,7 +46,7 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `base_power::Float64`: Base power
-- `heat_rate_mmbtu_per_mwh::Union{Float64, PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}`: (default: `0.0`) Heat rate of generator, MMBTU/MWh
+- `heat_rate_mmbtu_per_mwh::Union{PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}`: (default: `0.0`) Heat rate of generator, MMBTU/MWh
 - `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Minimum blending level of each fuel during normal generation process for multi-fuel generator
@@ -56,7 +56,7 @@ This file is auto-generated. Do not edit.
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed
 - `cofire_start_max::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Maximum blending level of each fuel during start-up process for multi-fuel generator
 - `available::Bool`: (default: `True`) identifies whether the technology is available
-- `co2::Union{Float64, Dict{String, Float64}, Dict{ThermalFuels, Float64}}`: (default: `0.0`) Carbon Intensity of fuel
+- `co2::Union{Float64, Dict{ThermalFuels, Float64}}`: (default: `0.0`) Carbon Intensity of fuel
 - `cofire_start_min::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Minimum blending level of each fuel during start-up process for multi-fuel generator
 - `name::String`: The technology name
 - `ramp_dn_percentage::Float64`: (default: `100.0`) Maximum decrease in output between operation periods. Fraction of total capacity
@@ -66,7 +66,7 @@ This file is auto-generated. Do not edit.
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `start_fuel_mmbtu_per_mw::Float64`: (default: `0.0`) Startup fuel use per MW of nameplate capacity of each generator (MMBtu/MW per start)
 - `operation_costs::PSY.OperationalCost`: (default: `ThermalGenerationCost()`) Fixed and variable O&M costs for a technology
-- `fuel::Union{String, ThermalFuels, Vector{ThermalFuels}, Vector{String}}`: (default: `ThermalFuels.OTHER`) Fuel type according to IEA
+- `fuel::Union{ThermalFuels, Vector{ThermalFuels}}`: (default: `ThermalFuels.OTHER`) Fuel type according to IEA
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `cofire_level_max::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Maximum blending level of each fuel during normal generation process for multi-fuel generator
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
@@ -84,7 +84,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     "Base power"
     base_power::Float64
     "Heat rate of generator, MMBTU/MWh"
-    heat_rate_mmbtu_per_mwh::Union{Float64, PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}
+    heat_rate_mmbtu_per_mwh::Union{PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}
     "Derating factor to account for planned or forced outages of a technology"
     outage_factor::Float64
     "Prime mover for generator"
@@ -104,7 +104,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     "identifies whether the technology is available"
     available::Bool
     "Carbon Intensity of fuel"
-    co2::Union{Float64, Dict{String, Float64}, Dict{ThermalFuels, Float64}}
+    co2::Union{Float64, Dict{ThermalFuels, Float64}}
     "Minimum blending level of each fuel during start-up process for multi-fuel generator"
     cofire_start_min::Union{Nothing, Dict{ThermalFuels, Float64}}
     "The technology name"
@@ -124,7 +124,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     "Fixed and variable O&M costs for a technology"
     operation_costs::PSY.OperationalCost
     "Fuel type according to IEA"
-    fuel::Union{String, ThermalFuels, Vector{ThermalFuels}, Vector{String}}
+    fuel::Union{ThermalFuels, Vector{ThermalFuels}}
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
     "Maximum blending level of each fuel during normal generation process for multi-fuel generator"

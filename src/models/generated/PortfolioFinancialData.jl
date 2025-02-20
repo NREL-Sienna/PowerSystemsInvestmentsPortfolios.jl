@@ -70,8 +70,6 @@ set_inflation_rate!(value::PortfolioFinancialData, val) = value.inflation_rate =
 """Set [`PortfolioFinancialData`](@ref) `interest_rate`."""
 set_interest_rate!(value::PortfolioFinancialData, val) = value.interest_rate = val
 
-serialize(val::PortfolioFinancialData) = serialize_struct(val)
-IS.deserialize(T::Type{<:PortfolioFinancialData}, val::Dict) = IS.deserialize_struct(T, val)
 function serialize_openapi_struct(technology::PortfolioFinancialData, vals...)
     base_struct = APIServer.PortfolioFinancialData(; vals...)
     return base_struct

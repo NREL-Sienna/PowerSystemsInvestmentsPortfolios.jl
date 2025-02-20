@@ -94,8 +94,6 @@ set_co_2_max_mtons!(value::CarbonCaps, val) = value.co_2_max_mtons = val
 """Set [`CarbonCaps`](@ref) `available`."""
 set_available!(value::CarbonCaps, val) = value.available = val
 
-serialize(val::CarbonCaps) = serialize_struct(val)
-IS.deserialize(T::Type{<:CarbonCaps}, val::Dict) = IS.deserialize_struct(T, val)
 function serialize_openapi_struct(technology::CarbonCaps, vals...)
     base_struct = APIServer.CarbonCaps(; vals...)
     return base_struct

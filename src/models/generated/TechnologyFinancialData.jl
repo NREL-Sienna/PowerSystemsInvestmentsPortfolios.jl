@@ -62,8 +62,6 @@ set_capital_recovery_period!(value::TechnologyFinancialData, val) = value.capita
 """Set [`TechnologyFinancialData`](@ref) `technology_base_year`."""
 set_technology_base_year!(value::TechnologyFinancialData, val) = value.technology_base_year = val
 
-serialize(val::TechnologyFinancialData) = serialize_struct(val)
-IS.deserialize(T::Type{<:TechnologyFinancialData}, val::Dict) = IS.deserialize_struct(T, val)
 function serialize_openapi_struct(technology::TechnologyFinancialData, vals...)
     base_struct = APIServer.TechnologyFinancialData(; vals...)
     return base_struct
