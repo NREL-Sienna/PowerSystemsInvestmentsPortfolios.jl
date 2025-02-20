@@ -46,7 +46,7 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `base_power::Float64`: Base power
-- `heat_rate_mmbtu_per_mwh::Union{PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}`: (default: `0.0`) Heat rate of generator, MMBTU/MWh
+- `heat_rate_mmbtu_per_mwh::Union{PSY.ValueCurve, Dict{ThermalFuels, PSY.ValueCurve}}`: (default: `LinearCurve(0.0)`) Heat rate of generator, MMBTU/MWh
 - `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `cofire_level_min::Union{Nothing, Dict{ThermalFuels, Float64}}`: (default: `nothing`) Minimum blending level of each fuel during normal generation process for multi-fuel generator
@@ -152,7 +152,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
 end
 
 
-function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=0.0, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), max_capacity=1e8, dn_time=0.0, lifetime=100, cofire_start_max=nothing, available=True, co2=0.0, cofire_start_min=nothing, name, ramp_dn_percentage=100.0, min_capacity=0.0, id, initial_capacity=0.0, financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=nothing, ramp_up_percentage=100.0, base_year=2020, unit_size=0.0, min_generation_percentage=0.0, start_cost_per_mw=0.0, up_time=0.0, ) where T <: PSY.Generator
+function SupplyTechnology{T}(; base_power, heat_rate_mmbtu_per_mwh=LinearCurve(0.0), outage_factor=1.0, prime_mover_type=PrimeMovers.OT, cofire_level_min=nothing, capital_costs=LinearCurve(0.0), max_capacity=1e8, dn_time=0.0, lifetime=100, cofire_start_max=nothing, available=True, co2=0.0, cofire_start_min=nothing, name, ramp_dn_percentage=100.0, min_capacity=0.0, id, initial_capacity=0.0, financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=ThermalFuels.OTHER, power_systems_type, cofire_level_max=nothing, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=nothing, ramp_up_percentage=100.0, base_year=2020, unit_size=0.0, min_generation_percentage=0.0, start_cost_per_mw=0.0, up_time=0.0, ) where T <: PSY.Generator
     SupplyTechnology{T}(base_power, heat_rate_mmbtu_per_mwh, outage_factor, prime_mover_type, cofire_level_min, capital_costs, max_capacity, dn_time, lifetime, cofire_start_max, available, co2, cofire_start_min, name, ramp_dn_percentage, min_capacity, id, initial_capacity, financial_data, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_max, internal, ext, balancing_topology, region, ramp_up_percentage, base_year, unit_size, min_generation_percentage, start_cost_per_mw, up_time, )
 end
 
