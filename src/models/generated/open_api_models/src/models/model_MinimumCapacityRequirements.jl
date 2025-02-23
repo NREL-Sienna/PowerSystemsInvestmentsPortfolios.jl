@@ -11,7 +11,6 @@
         eligible_resources=nothing,
         min_mw=nothing,
         pricecap=nothing,
-        ext=nothing,
     )
 
     - name::String
@@ -20,7 +19,6 @@
     - eligible_resources::Vector{String}
     - min_mw::Float64
     - pricecap::Float64
-    - ext::Any
 """
 Base.@kwdef mutable struct MinimumCapacityRequirements <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
@@ -29,21 +27,19 @@ Base.@kwdef mutable struct MinimumCapacityRequirements <: OpenAPI.APIModel
     eligible_resources::Union{Nothing, Vector{String}} = nothing
     min_mw::Union{Nothing, Float64} = nothing
     pricecap::Union{Nothing, Float64} = nothing
-    ext::Union{Nothing, Any} = nothing
 
-    function MinimumCapacityRequirements(name, available, power_systems_type, eligible_resources, min_mw, pricecap, ext, )
+    function MinimumCapacityRequirements(name, available, power_systems_type, eligible_resources, min_mw, pricecap, )
         OpenAPI.validate_property(MinimumCapacityRequirements, Symbol("name"), name)
         OpenAPI.validate_property(MinimumCapacityRequirements, Symbol("available"), available)
         OpenAPI.validate_property(MinimumCapacityRequirements, Symbol("power_systems_type"), power_systems_type)
         OpenAPI.validate_property(MinimumCapacityRequirements, Symbol("eligible_resources"), eligible_resources)
         OpenAPI.validate_property(MinimumCapacityRequirements, Symbol("min_mw"), min_mw)
         OpenAPI.validate_property(MinimumCapacityRequirements, Symbol("pricecap"), pricecap)
-        OpenAPI.validate_property(MinimumCapacityRequirements, Symbol("ext"), ext)
-        return new(name, available, power_systems_type, eligible_resources, min_mw, pricecap, ext, )
+        return new(name, available, power_systems_type, eligible_resources, min_mw, pricecap, )
     end
 end # type MinimumCapacityRequirements
 
-const _property_types_MinimumCapacityRequirements = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("available")=>"Bool", Symbol("power_systems_type")=>"String", Symbol("eligible_resources")=>"Vector{String}", Symbol("min_mw")=>"Float64", Symbol("pricecap")=>"Float64", Symbol("ext")=>"Any", )
+const _property_types_MinimumCapacityRequirements = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("available")=>"Bool", Symbol("power_systems_type")=>"String", Symbol("eligible_resources")=>"Vector{String}", Symbol("min_mw")=>"Float64", Symbol("pricecap")=>"Float64", )
 OpenAPI.property_type(::Type{ MinimumCapacityRequirements }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_MinimumCapacityRequirements[name]))}
 
 function check_required(o::MinimumCapacityRequirements)
@@ -54,7 +50,6 @@ function check_required(o::MinimumCapacityRequirements)
 end
 
 function OpenAPI.validate_property(::Type{ MinimumCapacityRequirements }, name::Symbol, val)
-
 
 
 

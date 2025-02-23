@@ -21,7 +21,6 @@
         voltage=0.0,
         angle_limit=0.0,
         financial_data=nothing,
-        ext=nothing,
     )
 
     - name::String
@@ -40,7 +39,6 @@
     - voltage::Float64
     - angle_limit::Float64
     - financial_data::String
-    - ext::Any
 """
 Base.@kwdef mutable struct ACTransportTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
@@ -59,9 +57,8 @@ Base.@kwdef mutable struct ACTransportTechnology <: OpenAPI.APIModel
     voltage::Union{Nothing, Float64} = 0.0
     angle_limit::Union{Nothing, Float64} = 0.0
     financial_data::Union{Nothing, String} = nothing
-    ext::Union{Nothing, Any} = nothing
 
-    function ACTransportTechnology(name, base_year, id, available, base_power, power_systems_type, start_region, end_region, existing_line_capacity, maximum_new_capacity, capital_cost, line_loss, resistance, voltage, angle_limit, financial_data, ext, )
+    function ACTransportTechnology(name, base_year, id, available, base_power, power_systems_type, start_region, end_region, existing_line_capacity, maximum_new_capacity, capital_cost, line_loss, resistance, voltage, angle_limit, financial_data, )
         OpenAPI.validate_property(ACTransportTechnology, Symbol("name"), name)
         OpenAPI.validate_property(ACTransportTechnology, Symbol("base_year"), base_year)
         OpenAPI.validate_property(ACTransportTechnology, Symbol("id"), id)
@@ -78,12 +75,11 @@ Base.@kwdef mutable struct ACTransportTechnology <: OpenAPI.APIModel
         OpenAPI.validate_property(ACTransportTechnology, Symbol("voltage"), voltage)
         OpenAPI.validate_property(ACTransportTechnology, Symbol("angle_limit"), angle_limit)
         OpenAPI.validate_property(ACTransportTechnology, Symbol("financial_data"), financial_data)
-        OpenAPI.validate_property(ACTransportTechnology, Symbol("ext"), ext)
-        return new(name, base_year, id, available, base_power, power_systems_type, start_region, end_region, existing_line_capacity, maximum_new_capacity, capital_cost, line_loss, resistance, voltage, angle_limit, financial_data, ext, )
+        return new(name, base_year, id, available, base_power, power_systems_type, start_region, end_region, existing_line_capacity, maximum_new_capacity, capital_cost, line_loss, resistance, voltage, angle_limit, financial_data, )
     end
 end # type ACTransportTechnology
 
-const _property_types_ACTransportTechnology = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("base_year")=>"Int64", Symbol("id")=>"Int64", Symbol("available")=>"Bool", Symbol("base_power")=>"Float64", Symbol("power_systems_type")=>"String", Symbol("start_region")=>"String", Symbol("end_region")=>"String", Symbol("existing_line_capacity")=>"Float64", Symbol("maximum_new_capacity")=>"Float64", Symbol("capital_cost")=>"ValueCurve", Symbol("line_loss")=>"Float64", Symbol("resistance")=>"Float64", Symbol("voltage")=>"Float64", Symbol("angle_limit")=>"Float64", Symbol("financial_data")=>"String", Symbol("ext")=>"Any", )
+const _property_types_ACTransportTechnology = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("base_year")=>"Int64", Symbol("id")=>"Int64", Symbol("available")=>"Bool", Symbol("base_power")=>"Float64", Symbol("power_systems_type")=>"String", Symbol("start_region")=>"String", Symbol("end_region")=>"String", Symbol("existing_line_capacity")=>"Float64", Symbol("maximum_new_capacity")=>"Float64", Symbol("capital_cost")=>"ValueCurve", Symbol("line_loss")=>"Float64", Symbol("resistance")=>"Float64", Symbol("voltage")=>"Float64", Symbol("angle_limit")=>"Float64", Symbol("financial_data")=>"String", )
 OpenAPI.property_type(::Type{ ACTransportTechnology }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_ACTransportTechnology[name]))}
 
 function check_required(o::ACTransportTechnology)
@@ -93,7 +89,6 @@ function check_required(o::ACTransportTechnology)
 end
 
 function OpenAPI.validate_property(::Type{ ACTransportTechnology }, name::Symbol, val)
-
 
 
 

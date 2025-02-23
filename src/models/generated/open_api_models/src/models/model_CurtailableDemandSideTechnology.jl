@@ -13,7 +13,6 @@
         curtailment_cost=nothing,
         max_demand_curtailment=nothing,
         curtailment_cost_mwh=nothing,
-        ext=nothing,
     )
 
     - name::String
@@ -24,7 +23,6 @@
     - curtailment_cost::Vector{Float64}
     - max_demand_curtailment::Vector{Float64}
     - curtailment_cost_mwh::Vector{Float64}
-    - ext::Any
 """
 Base.@kwdef mutable struct CurtailableDemandSideTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
@@ -35,9 +33,8 @@ Base.@kwdef mutable struct CurtailableDemandSideTechnology <: OpenAPI.APIModel
     curtailment_cost::Union{Nothing, Vector{Float64}} = nothing
     max_demand_curtailment::Union{Nothing, Vector{Float64}} = nothing
     curtailment_cost_mwh::Union{Nothing, Vector{Float64}} = nothing
-    ext::Union{Nothing, Any} = nothing
 
-    function CurtailableDemandSideTechnology(name, available, power_systems_type, voll, segments, curtailment_cost, max_demand_curtailment, curtailment_cost_mwh, ext, )
+    function CurtailableDemandSideTechnology(name, available, power_systems_type, voll, segments, curtailment_cost, max_demand_curtailment, curtailment_cost_mwh, )
         OpenAPI.validate_property(CurtailableDemandSideTechnology, Symbol("name"), name)
         OpenAPI.validate_property(CurtailableDemandSideTechnology, Symbol("available"), available)
         OpenAPI.validate_property(CurtailableDemandSideTechnology, Symbol("power_systems_type"), power_systems_type)
@@ -46,12 +43,11 @@ Base.@kwdef mutable struct CurtailableDemandSideTechnology <: OpenAPI.APIModel
         OpenAPI.validate_property(CurtailableDemandSideTechnology, Symbol("curtailment_cost"), curtailment_cost)
         OpenAPI.validate_property(CurtailableDemandSideTechnology, Symbol("max_demand_curtailment"), max_demand_curtailment)
         OpenAPI.validate_property(CurtailableDemandSideTechnology, Symbol("curtailment_cost_mwh"), curtailment_cost_mwh)
-        OpenAPI.validate_property(CurtailableDemandSideTechnology, Symbol("ext"), ext)
-        return new(name, available, power_systems_type, voll, segments, curtailment_cost, max_demand_curtailment, curtailment_cost_mwh, ext, )
+        return new(name, available, power_systems_type, voll, segments, curtailment_cost, max_demand_curtailment, curtailment_cost_mwh, )
     end
 end # type CurtailableDemandSideTechnology
 
-const _property_types_CurtailableDemandSideTechnology = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("available")=>"Bool", Symbol("power_systems_type")=>"String", Symbol("voll")=>"Float64", Symbol("segments")=>"Vector{Int64}", Symbol("curtailment_cost")=>"Vector{Float64}", Symbol("max_demand_curtailment")=>"Vector{Float64}", Symbol("curtailment_cost_mwh")=>"Vector{Float64}", Symbol("ext")=>"Any", )
+const _property_types_CurtailableDemandSideTechnology = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("available")=>"Bool", Symbol("power_systems_type")=>"String", Symbol("voll")=>"Float64", Symbol("segments")=>"Vector{Int64}", Symbol("curtailment_cost")=>"Vector{Float64}", Symbol("max_demand_curtailment")=>"Vector{Float64}", Symbol("curtailment_cost_mwh")=>"Vector{Float64}", )
 OpenAPI.property_type(::Type{ CurtailableDemandSideTechnology }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_CurtailableDemandSideTechnology[name]))}
 
 function check_required(o::CurtailableDemandSideTechnology)
@@ -62,7 +58,6 @@ function check_required(o::CurtailableDemandSideTechnology)
 end
 
 function OpenAPI.validate_property(::Type{ CurtailableDemandSideTechnology }, name::Symbol, val)
-
 
 
 

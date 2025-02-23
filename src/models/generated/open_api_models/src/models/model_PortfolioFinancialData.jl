@@ -10,7 +10,6 @@
         inflation_rate=0.0,
         interest_rate=0.0,
         base_year=nothing,
-        ext=nothing,
     )
 
     - name::String
@@ -18,7 +17,6 @@
     - inflation_rate::Float64
     - interest_rate::Float64
     - base_year::Int64
-    - ext::Any
 """
 Base.@kwdef mutable struct PortfolioFinancialData <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
@@ -26,20 +24,18 @@ Base.@kwdef mutable struct PortfolioFinancialData <: OpenAPI.APIModel
     inflation_rate::Union{Nothing, Float64} = 0.0
     interest_rate::Union{Nothing, Float64} = 0.0
     base_year::Union{Nothing, Int64} = nothing
-    ext::Union{Nothing, Any} = nothing
 
-    function PortfolioFinancialData(name, discount_rate, inflation_rate, interest_rate, base_year, ext, )
+    function PortfolioFinancialData(name, discount_rate, inflation_rate, interest_rate, base_year, )
         OpenAPI.validate_property(PortfolioFinancialData, Symbol("name"), name)
         OpenAPI.validate_property(PortfolioFinancialData, Symbol("discount_rate"), discount_rate)
         OpenAPI.validate_property(PortfolioFinancialData, Symbol("inflation_rate"), inflation_rate)
         OpenAPI.validate_property(PortfolioFinancialData, Symbol("interest_rate"), interest_rate)
         OpenAPI.validate_property(PortfolioFinancialData, Symbol("base_year"), base_year)
-        OpenAPI.validate_property(PortfolioFinancialData, Symbol("ext"), ext)
-        return new(name, discount_rate, inflation_rate, interest_rate, base_year, ext, )
+        return new(name, discount_rate, inflation_rate, interest_rate, base_year, )
     end
 end # type PortfolioFinancialData
 
-const _property_types_PortfolioFinancialData = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("discount_rate")=>"Float64", Symbol("inflation_rate")=>"Float64", Symbol("interest_rate")=>"Float64", Symbol("base_year")=>"Int64", Symbol("ext")=>"Any", )
+const _property_types_PortfolioFinancialData = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("discount_rate")=>"Float64", Symbol("inflation_rate")=>"Float64", Symbol("interest_rate")=>"Float64", Symbol("base_year")=>"Int64", )
 OpenAPI.property_type(::Type{ PortfolioFinancialData }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_PortfolioFinancialData[name]))}
 
 function check_required(o::PortfolioFinancialData)
@@ -51,7 +47,6 @@ function check_required(o::PortfolioFinancialData)
 end
 
 function OpenAPI.validate_property(::Type{ PortfolioFinancialData }, name::Symbol, val)
-
 
 
 

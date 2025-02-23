@@ -8,7 +8,7 @@
     SupplyTechnologyHeatRateMmbtuPerMwh(; value=nothing)
 """
 mutable struct SupplyTechnologyHeatRateMmbtuPerMwh <: OpenAPI.OneOfAPIModel
-    value::Any # Union{ Dict{String, ValueCurve}, Float64, ValueCurve }
+    value::Any # Union{ Dict{String, ValueCurve}, ValueCurve }
     SupplyTechnologyHeatRateMmbtuPerMwh() = new()
     SupplyTechnologyHeatRateMmbtuPerMwh(value) = new(value)
 end # type SupplyTechnologyHeatRateMmbtuPerMwh

@@ -8,30 +8,26 @@
         retrofit_id=0,
         retrofit_potential=0.0,
         retrofit_fraction=nothing,
-        ext=nothing,
     )
 
     - retrofit_id::Int64
     - retrofit_potential::Float64
     - retrofit_fraction::Float64
-    - ext::Any
 """
 Base.@kwdef mutable struct AggregateRetirementPotential <: OpenAPI.APIModel
     retrofit_id::Union{Nothing, Int64} = 0
     retrofit_potential::Union{Nothing, Float64} = 0.0
     retrofit_fraction::Union{Nothing, Float64} = nothing
-    ext::Union{Nothing, Any} = nothing
 
-    function AggregateRetirementPotential(retrofit_id, retrofit_potential, retrofit_fraction, ext, )
+    function AggregateRetirementPotential(retrofit_id, retrofit_potential, retrofit_fraction, )
         OpenAPI.validate_property(AggregateRetirementPotential, Symbol("retrofit_id"), retrofit_id)
         OpenAPI.validate_property(AggregateRetirementPotential, Symbol("retrofit_potential"), retrofit_potential)
         OpenAPI.validate_property(AggregateRetirementPotential, Symbol("retrofit_fraction"), retrofit_fraction)
-        OpenAPI.validate_property(AggregateRetirementPotential, Symbol("ext"), ext)
-        return new(retrofit_id, retrofit_potential, retrofit_fraction, ext, )
+        return new(retrofit_id, retrofit_potential, retrofit_fraction, )
     end
 end # type AggregateRetirementPotential
 
-const _property_types_AggregateRetirementPotential = Dict{Symbol,String}(Symbol("retrofit_id")=>"Int64", Symbol("retrofit_potential")=>"Float64", Symbol("retrofit_fraction")=>"Float64", Symbol("ext")=>"Any", )
+const _property_types_AggregateRetirementPotential = Dict{Symbol,String}(Symbol("retrofit_id")=>"Int64", Symbol("retrofit_potential")=>"Float64", Symbol("retrofit_fraction")=>"Float64", )
 OpenAPI.property_type(::Type{ AggregateRetirementPotential }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_AggregateRetirementPotential[name]))}
 
 function check_required(o::AggregateRetirementPotential)
@@ -40,7 +36,6 @@ function check_required(o::AggregateRetirementPotential)
 end
 
 function OpenAPI.validate_property(::Type{ AggregateRetirementPotential }, name::Symbol, val)
-
 
 
 

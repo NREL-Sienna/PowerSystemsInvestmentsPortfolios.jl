@@ -11,7 +11,6 @@ Name | Type | Description | Notes
 **max_demand_advance** | **Float64** |  | [optional] [default to nothing]
 **demand_energy_efficiency** | **Float64** |  | [optional] [default to nothing]
 **var_cost_per_mwh** | [***ValueCurve**](ValueCurve.md) |  | [optional] [default to nothing]
-**ext** | **Any** |  | [optional] [default to nothing]
 
 
 [[Back to Model list]](../README.md#models) [[Back to API list]](../README.md#api-endpoints) [[Back to README]](../README.md)

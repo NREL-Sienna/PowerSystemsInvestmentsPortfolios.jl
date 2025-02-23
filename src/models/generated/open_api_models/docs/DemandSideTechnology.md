@@ -12,7 +12,6 @@ Name | Type | Description | Notes
 **min_power** | **Float64** |  | [optional] [default to 0.0]
 **ramp_up_percentage** | **Float64** |  | [optional] [default to 1.0]
 **ramp_dn_percentage** | **Float64** |  | [optional] [default to 1.0]
-**ext** | **Any** |  | [optional] [default to nothing]
 
 
 [[Back to Model list]](../README.md#models) [[Back to API list]](../README.md#api-endpoints) [[Back to README]](../README.md)

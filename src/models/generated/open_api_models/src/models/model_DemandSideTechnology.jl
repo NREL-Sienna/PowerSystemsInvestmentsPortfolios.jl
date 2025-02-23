@@ -13,7 +13,6 @@
         min_power=0.0,
         ramp_up_percentage=1.0,
         ramp_dn_percentage=1.0,
-        ext=nothing,
     )
 
     - name::String
@@ -24,7 +23,6 @@
     - min_power::Float64
     - ramp_up_percentage::Float64
     - ramp_dn_percentage::Float64
-    - ext::Any
 """
 Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
@@ -35,9 +33,8 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
     min_power::Union{Nothing, Float64} = 0.0
     ramp_up_percentage::Union{Nothing, Float64} = 1.0
     ramp_dn_percentage::Union{Nothing, Float64} = 1.0
-    ext::Union{Nothing, Any} = nothing
 
-    function DemandSideTechnology(name, available, power_systems_type, technology_efficiency, price_per_unit, min_power, ramp_up_percentage, ramp_dn_percentage, ext, )
+    function DemandSideTechnology(name, available, power_systems_type, technology_efficiency, price_per_unit, min_power, ramp_up_percentage, ramp_dn_percentage, )
         OpenAPI.validate_property(DemandSideTechnology, Symbol("name"), name)
         OpenAPI.validate_property(DemandSideTechnology, Symbol("available"), available)
         OpenAPI.validate_property(DemandSideTechnology, Symbol("power_systems_type"), power_systems_type)
@@ -46,12 +43,11 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
         OpenAPI.validate_property(DemandSideTechnology, Symbol("min_power"), min_power)
         OpenAPI.validate_property(DemandSideTechnology, Symbol("ramp_up_percentage"), ramp_up_percentage)
         OpenAPI.validate_property(DemandSideTechnology, Symbol("ramp_dn_percentage"), ramp_dn_percentage)
-        OpenAPI.validate_property(DemandSideTechnology, Symbol("ext"), ext)
-        return new(name, available, power_systems_type, technology_efficiency, price_per_unit, min_power, ramp_up_percentage, ramp_dn_percentage, ext, )
+        return new(name, available, power_systems_type, technology_efficiency, price_per_unit, min_power, ramp_up_percentage, ramp_dn_percentage, )
     end
 end # type DemandSideTechnology
 
-const _property_types_DemandSideTechnology = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("available")=>"Bool", Symbol("power_systems_type")=>"String", Symbol("technology_efficiency")=>"Float64", Symbol("price_per_unit")=>"Float64", Symbol("min_power")=>"Float64", Symbol("ramp_up_percentage")=>"Float64", Symbol("ramp_dn_percentage")=>"Float64", Symbol("ext")=>"Any", )
+const _property_types_DemandSideTechnology = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("available")=>"Bool", Symbol("power_systems_type")=>"String", Symbol("technology_efficiency")=>"Float64", Symbol("price_per_unit")=>"Float64", Symbol("min_power")=>"Float64", Symbol("ramp_up_percentage")=>"Float64", Symbol("ramp_dn_percentage")=>"Float64", )
 OpenAPI.property_type(::Type{ DemandSideTechnology }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_DemandSideTechnology[name]))}
 
 function check_required(o::DemandSideTechnology)
@@ -62,7 +58,6 @@ function check_required(o::DemandSideTechnology)
 end
 
 function OpenAPI.validate_property(::Type{ DemandSideTechnology }, name::Symbol, val)
-
 
 
 

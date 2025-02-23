@@ -20,7 +20,6 @@ Name | Type | Description | Notes
 **voltage** | **Float64** |  | [optional] [default to 0.0]
 **angle_limit** | **Float64** |  | [optional] [default to 0.0]
 **financial_data** | **String** |  | [optional] [default to nothing]
-**ext** | **Any** |  | [optional] [default to nothing]
 
 
 [[Back to Model list]](../README.md#models) [[Back to API list]](../README.md#api-endpoints) [[Back to README]](../README.md)

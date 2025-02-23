@@ -34,7 +34,6 @@
         losses=1.0,
         lifetime=100,
         financial_data=nothing,
-        ext=nothing,
     )
 
     - name::String
@@ -66,7 +65,6 @@
     - losses::Float64
     - lifetime::Int64
     - financial_data::String
-    - ext::Any
 """
 Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
@@ -98,9 +96,8 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
     losses::Union{Nothing, Float64} = 1.0
     lifetime::Union{Nothing, Int64} = 100
     financial_data::Union{Nothing, String} = nothing
-    ext::Union{Nothing, Any} = nothing
 
-    function StorageTechnology(name, base_year, region, id, available, power_systems_type, balancing_topology, base_power, prime_mover_type, storage_tech, capital_costs_energy, capital_costs_power, operations_costs_energy, operations_costs_power, existing_capacity_power, existing_capacity_energy, unit_size_power, unit_size_energy, max_capacity_power, max_capacity_energy, min_capacity_power, min_capacity_energy, min_duration, max_duration, efficiency_in, efficiency_out, losses, lifetime, financial_data, ext, )
+    function StorageTechnology(name, base_year, region, id, available, power_systems_type, balancing_topology, base_power, prime_mover_type, storage_tech, capital_costs_energy, capital_costs_power, operations_costs_energy, operations_costs_power, existing_capacity_power, existing_capacity_energy, unit_size_power, unit_size_energy, max_capacity_power, max_capacity_energy, min_capacity_power, min_capacity_energy, min_duration, max_duration, efficiency_in, efficiency_out, losses, lifetime, financial_data, )
         OpenAPI.validate_property(StorageTechnology, Symbol("name"), name)
         OpenAPI.validate_property(StorageTechnology, Symbol("base_year"), base_year)
         OpenAPI.validate_property(StorageTechnology, Symbol("region"), region)
@@ -130,12 +127,11 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         OpenAPI.validate_property(StorageTechnology, Symbol("losses"), losses)
         OpenAPI.validate_property(StorageTechnology, Symbol("lifetime"), lifetime)
         OpenAPI.validate_property(StorageTechnology, Symbol("financial_data"), financial_data)
-        OpenAPI.validate_property(StorageTechnology, Symbol("ext"), ext)
-        return new(name, base_year, region, id, available, power_systems_type, balancing_topology, base_power, prime_mover_type, storage_tech, capital_costs_energy, capital_costs_power, operations_costs_energy, operations_costs_power, existing_capacity_power, existing_capacity_energy, unit_size_power, unit_size_energy, max_capacity_power, max_capacity_energy, min_capacity_power, min_capacity_energy, min_duration, max_duration, efficiency_in, efficiency_out, losses, lifetime, financial_data, ext, )
+        return new(name, base_year, region, id, available, power_systems_type, balancing_topology, base_power, prime_mover_type, storage_tech, capital_costs_energy, capital_costs_power, operations_costs_energy, operations_costs_power, existing_capacity_power, existing_capacity_energy, unit_size_power, unit_size_energy, max_capacity_power, max_capacity_energy, min_capacity_power, min_capacity_energy, min_duration, max_duration, efficiency_in, efficiency_out, losses, lifetime, financial_data, )
     end
 end # type StorageTechnology
 
-const _property_types_StorageTechnology = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("base_year")=>"Int64", Symbol("region")=>"SupplyTechnologyRegion", Symbol("id")=>"Int64", Symbol("available")=>"Bool", Symbol("power_systems_type")=>"String", Symbol("balancing_topology")=>"String", Symbol("base_power")=>"Float64", Symbol("prime_mover_type")=>"String", Symbol("storage_tech")=>"String", Symbol("capital_costs_energy")=>"ValueCurve", Symbol("capital_costs_power")=>"ValueCurve", Symbol("operations_costs_energy")=>"StorageCost", Symbol("operations_costs_power")=>"StorageCost", Symbol("existing_capacity_power")=>"Float64", Symbol("existing_capacity_energy")=>"Float64", Symbol("unit_size_power")=>"Float64", Symbol("unit_size_energy")=>"Float64", Symbol("max_capacity_power")=>"Float64", Symbol("max_capacity_energy")=>"Float64", Symbol("min_capacity_power")=>"Float64", Symbol("min_capacity_energy")=>"Float64", Symbol("min_duration")=>"Float64", Symbol("max_duration")=>"Float64", Symbol("efficiency_in")=>"Float64", Symbol("efficiency_out")=>"Float64", Symbol("losses")=>"Float64", Symbol("lifetime")=>"Int64", Symbol("financial_data")=>"String", Symbol("ext")=>"Any", )
+const _property_types_StorageTechnology = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("base_year")=>"Int64", Symbol("region")=>"SupplyTechnologyRegion", Symbol("id")=>"Int64", Symbol("available")=>"Bool", Symbol("power_systems_type")=>"String", Symbol("balancing_topology")=>"String", Symbol("base_power")=>"Float64", Symbol("prime_mover_type")=>"String", Symbol("storage_tech")=>"String", Symbol("capital_costs_energy")=>"ValueCurve", Symbol("capital_costs_power")=>"ValueCurve", Symbol("operations_costs_energy")=>"StorageCost", Symbol("operations_costs_power")=>"StorageCost", Symbol("existing_capacity_power")=>"Float64", Symbol("existing_capacity_energy")=>"Float64", Symbol("unit_size_power")=>"Float64", Symbol("unit_size_energy")=>"Float64", Symbol("max_capacity_power")=>"Float64", Symbol("max_capacity_energy")=>"Float64", Symbol("min_capacity_power")=>"Float64", Symbol("min_capacity_energy")=>"Float64", Symbol("min_duration")=>"Float64", Symbol("max_duration")=>"Float64", Symbol("efficiency_in")=>"Float64", Symbol("efficiency_out")=>"Float64", Symbol("losses")=>"Float64", Symbol("lifetime")=>"Int64", Symbol("financial_data")=>"String", )
 OpenAPI.property_type(::Type{ StorageTechnology }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_StorageTechnology[name]))}
 
 function check_required(o::StorageTechnology)
@@ -163,7 +159,6 @@ function OpenAPI.validate_property(::Type{ StorageTechnology }, name::Symbol, va
     if name === Symbol("storage_tech")
         OpenAPI.validate_param(name, "StorageTechnology", :enum, val, ["PTES", "LIB", "LAB", "FLWB", "SIB", "ZIB", "HGS", "LAES", "OTHER_CHEM", "OTHER_MECH", "OTHER_THERM"])
     end
-
 
 
 

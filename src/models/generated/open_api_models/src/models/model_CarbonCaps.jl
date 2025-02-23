@@ -12,7 +12,6 @@
         co_2_max_tons_mwh=1e8,
         co_2_max_mtons=nothing,
         pricecap=1e8,
-        ext=nothing,
     )
 
     - name::String
@@ -22,7 +21,6 @@
     - co_2_max_tons_mwh::Float64
     - co_2_max_mtons::Float64
     - pricecap::Float64
-    - ext::Any
 """
 Base.@kwdef mutable struct CarbonCaps <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
@@ -32,9 +30,8 @@ Base.@kwdef mutable struct CarbonCaps <: OpenAPI.APIModel
     co_2_max_tons_mwh::Union{Nothing, Float64} = 1e8
     co_2_max_mtons::Union{Nothing, Float64} = nothing
     pricecap::Union{Nothing, Float64} = 1e8
-    ext::Union{Nothing, Any} = nothing
 
-    function CarbonCaps(name, available, power_systems_type, eligible_zones, co_2_max_tons_mwh, co_2_max_mtons, pricecap, ext, )
+    function CarbonCaps(name, available, power_systems_type, eligible_zones, co_2_max_tons_mwh, co_2_max_mtons, pricecap, )
         OpenAPI.validate_property(CarbonCaps, Symbol("name"), name)
         OpenAPI.validate_property(CarbonCaps, Symbol("available"), available)
         OpenAPI.validate_property(CarbonCaps, Symbol("power_systems_type"), power_systems_type)
@@ -42,12 +39,11 @@ Base.@kwdef mutable struct CarbonCaps <: OpenAPI.APIModel
         OpenAPI.validate_property(CarbonCaps, Symbol("co_2_max_tons_mwh"), co_2_max_tons_mwh)
         OpenAPI.validate_property(CarbonCaps, Symbol("co_2_max_mtons"), co_2_max_mtons)
         OpenAPI.validate_property(CarbonCaps, Symbol("pricecap"), pricecap)
-        OpenAPI.validate_property(CarbonCaps, Symbol("ext"), ext)
-        return new(name, available, power_systems_type, eligible_zones, co_2_max_tons_mwh, co_2_max_mtons, pricecap, ext, )
+        return new(name, available, power_systems_type, eligible_zones, co_2_max_tons_mwh, co_2_max_mtons, pricecap, )
     end
 end # type CarbonCaps
 
-const _property_types_CarbonCaps = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("available")=>"Bool", Symbol("power_systems_type")=>"String", Symbol("eligible_zones")=>"Vector{Int64}", Symbol("co_2_max_tons_mwh")=>"Float64", Symbol("co_2_max_mtons")=>"Float64", Symbol("pricecap")=>"Float64", Symbol("ext")=>"Any", )
+const _property_types_CarbonCaps = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("available")=>"Bool", Symbol("power_systems_type")=>"String", Symbol("eligible_zones")=>"Vector{Int64}", Symbol("co_2_max_tons_mwh")=>"Float64", Symbol("co_2_max_mtons")=>"Float64", Symbol("pricecap")=>"Float64", )
 OpenAPI.property_type(::Type{ CarbonCaps }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_CarbonCaps[name]))}
 
 function check_required(o::CarbonCaps)
@@ -57,7 +53,6 @@ function check_required(o::CarbonCaps)
 end
 
 function OpenAPI.validate_property(::Type{ CarbonCaps }, name::Symbol, val)
-
 
 
 

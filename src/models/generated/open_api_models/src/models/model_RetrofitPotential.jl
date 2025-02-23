@@ -6,24 +6,20 @@
 
     RetrofitPotential(;
         retrofit_potential=nothing,
-        ext=nothing,
     )
 
     - retrofit_potential::Vector{String}
-    - ext::Any
 """
 Base.@kwdef mutable struct RetrofitPotential <: OpenAPI.APIModel
     retrofit_potential::Union{Nothing, Vector{String}} = nothing
-    ext::Union{Nothing, Any} = nothing
 
-    function RetrofitPotential(retrofit_potential, ext, )
+    function RetrofitPotential(retrofit_potential, )
         OpenAPI.validate_property(RetrofitPotential, Symbol("retrofit_potential"), retrofit_potential)
-        OpenAPI.validate_property(RetrofitPotential, Symbol("ext"), ext)
-        return new(retrofit_potential, ext, )
+        return new(retrofit_potential, )
     end
 end # type RetrofitPotential
 
-const _property_types_RetrofitPotential = Dict{Symbol,String}(Symbol("retrofit_potential")=>"Vector{String}", Symbol("ext")=>"Any", )
+const _property_types_RetrofitPotential = Dict{Symbol,String}(Symbol("retrofit_potential")=>"Vector{String}", )
 OpenAPI.property_type(::Type{ RetrofitPotential }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_RetrofitPotential[name]))}
 
 function check_required(o::RetrofitPotential)
@@ -32,6 +28,5 @@ function check_required(o::RetrofitPotential)
 end
 
 function OpenAPI.validate_property(::Type{ RetrofitPotential }, name::Symbol, val)
-
 
 end

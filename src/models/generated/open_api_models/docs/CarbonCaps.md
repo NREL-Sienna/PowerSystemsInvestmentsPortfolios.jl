@@ -11,7 +11,6 @@ Name | Type | Description | Notes
 **co_2_max_tons_mwh** | **Float64** |  | [optional] [default to 1e8]
 **co_2_max_mtons** | **Float64** |  | [optional] [default to nothing]
 **pricecap** | **Float64** |  | [optional] [default to 1e8]
-**ext** | **Any** |  | [optional] [default to nothing]
 
 
 [[Back to Model list]](../README.md#models) [[Back to API list]](../README.md#api-endpoints) [[Back to README]](../README.md)
