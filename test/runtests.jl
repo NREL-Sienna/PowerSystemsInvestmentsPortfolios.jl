@@ -1,5 +1,17 @@
 using Test
 import Logging
+using PowerSystems
+using PowerSystemsInvestmentsPortfolios
+using PowerSystemCaseBuilder
+using Statistics
+using InfrastructureSystems
+using TimeSeries
+using Dates
+using CSV
+using DataFrames
+const PSIP = PowerSystemsInvestmentsPortfolios
+const IS = InfrastructureSystems
+const PSY = PowerSystems
 
 import Aqua
 Aqua.test_unbound_args(PowerSystemsInvestmentsPortfolios)
