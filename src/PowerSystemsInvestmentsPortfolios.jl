@@ -110,6 +110,7 @@ export StorageTech
 include("models/generated/open_api_models/src/APIServer.jl")
 using .APIServer
 
+include("definitions.jl")
 include("models/technologies.jl")
 include("models/regions.jl")
 include("models/financials.jl")
