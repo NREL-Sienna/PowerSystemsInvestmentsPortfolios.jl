@@ -16,15 +16,16 @@ const SYSTEM_KWARGS = Set((
     :description,
 ))
 
-"""Constructs a Portfolio from a file path ending with .json
+"""
+Constructs a Portfolio from a file path ending with .json
 
 If the file is JSON, then `assign_new_uuids = true` will generate new UUIDs for the system
 and all components.
 """
 function Portfolio(
     file_path::AbstractString;
-    assign_new_uuids = false,
-    try_reimport = true,
+    assign_new_uuids=false,
+    try_reimport=true,
     kwargs...,
 )
     ext = lowercase(splitext(file_path)[2])
@@ -37,14 +38,14 @@ function Portfolio(
         portfolio = deserialize(
             Portfolio,
             file_path;
-            time_series_read_only = time_series_read_only,
+            time_series_read_only=time_series_read_only,
             # runchecks = runchecks,
-            time_series_directory = time_series_directory,
+            time_series_directory=time_series_directory,
         )
         _post_deserialize_handling(
             portfolio;
             # runchecks = runchecks,
-            assign_new_uuids = assign_new_uuids,
+            assign_new_uuids=assign_new_uuids,
         )
         return portfolio
     else
@@ -123,10 +124,13 @@ function serialize(technology::Technology)
 
         #For fields with references to other structs, serialize with
         #the name of that struct
-        if field == :region || field == :financial_data || field == :start_region || field == :end_region
+        if field == :region ||
+           field == :financial_data ||
+           field == :start_region ||
+           field == :end_region
             value = get_name(getfield(technology, field))
 
-        #convert enums to strings
+            #convert enums to strings
         elseif field == :prime_mover_type || field == :fuel || field == :storage_tech
             value = string(getfield(technology, field))
 
@@ -135,11 +139,11 @@ function serialize(technology::Technology)
         end
 
         setfield!(api_struct, field, value)
-
     end
 
     data = Dict{String, Any}(
-        string(name) => serialize(getproperty(api_struct, name)) for name in fieldnames(typeof(api_struct))
+        string(name) => serialize(getproperty(api_struct, name)) for
+        name in fieldnames(typeof(api_struct))
     )
 
     add_serialization_metadata!(data, struct_type)
@@ -148,7 +152,6 @@ function serialize(technology::Technology)
     end
 
     return data
-
 end
 
 """
@@ -221,8 +224,8 @@ function from_dict(
         aggregation=aggregation,
         investment_schedule=investment_schedule,
         internal=internal,
-        name = name,
-        description = description,
+        name=name,
+        description=description,
         parsed_kwargs...,
     )
 
@@ -256,9 +259,9 @@ end
 function IS.deserialize(
     ::Type{IS.SystemData},
     raw::Dict;
-    time_series_read_only = false,
-    time_series_directory = nothing,
-    validation_descriptor_file = nothing,
+    time_series_read_only=false,
+    time_series_directory=nothing,
+    validation_descriptor_file=nothing,
     kwargs...,
 )
     if haskey(raw, "time_series_storage_file")
@@ -266,7 +269,8 @@ function IS.deserialize(
             error("time series file $(raw["time_series_storage_file"]) does not exist")
         end
         # TODO: need to address this limitation
-        if IS.strip_module_name(raw["time_series_storage_type"]) == "InMemoryTimeSeriesStorage"
+        if IS.strip_module_name(raw["time_series_storage_type"]) ==
+           "InMemoryTimeSeriesStorage"
             @info "Deserializing with InMemoryTimeSeriesStorage is currently not supported. Using HDF"
             #hdf5_storage = Hdf5TimeSeriesStorage(raw["time_series_storage_file"], true)
             #time_series_storage = InMemoryTimeSeriesStorage(hdf5_storage)
@@ -274,8 +278,8 @@ function IS.deserialize(
         time_series_storage = IS.from_file(
             IS.Hdf5TimeSeriesStorage,
             raw["time_series_storage_file"];
-            directory = time_series_directory,
-            read_only = time_series_read_only,
+            directory=time_series_directory,
+            read_only=time_series_read_only,
         )
         time_series_metadata_store = IS.from_h5_file(
             IS.TimeSeriesMetadataStore,
@@ -284,18 +288,18 @@ function IS.deserialize(
         )
     else
         time_series_storage = IS.make_time_series_storage(;
-            compression = CompressionSettings(;
-                enabled = get(raw, "time_series_compression_enabled", DEFAULT_COMPRESSION),
+            compression=CompressionSettings(;
+                enabled=get(raw, "time_series_compression_enabled", DEFAULT_COMPRESSION),
             ),
-            directory = time_series_directory,
+            directory=time_series_directory,
         )
         time_series_metadata_store = nothing
     end
 
     time_series_manager = IS.TimeSeriesManager(;
-        data_store = time_series_storage,
-        read_only = time_series_read_only,
-        metadata_store = time_series_metadata_store,
+        data_store=time_series_storage,
+        read_only=time_series_read_only,
+        metadata_store=time_series_metadata_store,
     )
     @show time_series_metadata_store
     subsystems = Dict(k => Set(Base.UUID.(v)) for (k, v) in raw["subsystems"])
@@ -338,7 +342,6 @@ function IS.deserialize(
     return sys
 end
 
-
 function deserialize_components!(portfolio::Portfolio, raw)
     # Convert the array of components into type-specific arrays to allow addition by type.
     # Need to maintain an order here. Deserialize regions and financials first so they can
@@ -362,7 +365,7 @@ function deserialize_components!(portfolio::Portfolio, raw)
         end
         push!(components, component)
     end
-    data=merge(regions, technologies)
+    data = merge(regions, technologies)
 
     # Maintain a lookup of UUID to component because some component types encode
     # composed types as UUIDs instead of actual types.
@@ -393,7 +396,8 @@ function deserialize_components!(portfolio::Portfolio, raw)
                 handle_deserialization_special_cases!(component, type)
                 #TODO: See if component cache is needed
                 api_component = deserialize_openapi_struct(type, component)
-                model_component = build_model_struct(api_component, portfolio, component["__metadata__"])
+                model_component =
+                    build_model_struct(api_component, portfolio, component["__metadata__"])
                 IS.add_component!(portfolio.data, model_component)
                 component_cache[IS.get_uuid(model_component)] = model_component
                 if !isnothing(post_add_func)
@@ -401,7 +405,6 @@ function deserialize_components!(portfolio::Portfolio, raw)
                 end
             end
             push!(parsed_types, type)
-            
         end
     end
 
@@ -415,13 +418,17 @@ function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{St
         vals[name] = getfield(base_struct, name)
         if name == :region || name == :start_region || name == :end_region
             vals[name] = get_region(Region, portfolio, getfield(base_struct, name))
-        elseif name==:financial_data
-            vals[name] = get_financial(TechnologyFinancialData, portfolio, getfield(base_struct, name))
-        elseif name==:prime_mover_type
+        elseif name == :financial_data
+            vals[name] = get_financial(
+                TechnologyFinancialData,
+                portfolio,
+                getfield(base_struct, name),
+            )
+        elseif name == :prime_mover_type
             vals[name] = PrimeMovers(getfield(base_struct, name))
-        elseif name==:fuel
+        elseif name == :fuel
             vals[name] = ThermalFuels(getfield(base_struct, name))
-        elseif name==:storage_tech
+        elseif name == :storage_tech
             vals[name] = StorageTech(getfield(base_struct, name))
         end
     end
@@ -498,7 +505,10 @@ Allow types to implement handling of special cases during deserialization.
   - `component::Dict`: The component serialized as a dictionary.
   - `::Type`: The type of the technology.
 """
-handle_deserialization_special_cases!(component::Dict, ::Type{<:InfrastructureSystemsComponent}) = nothing
+handle_deserialization_special_cases!(
+    component::Dict,
+    ::Type{<:InfrastructureSystemsComponent},
+) = nothing
 
 function _is_deserialization_in_progress(portfolio::Portfolio)
     ext = get_ext(portfolio)
@@ -551,11 +561,11 @@ end
 """
 Serializes a InfrastructureSystemsType to a JSON string.
 """
-function to_json(obj::T; pretty = false, indent = 2) where {T <: InfrastructureSystemsType}
+function to_json(obj::T; pretty=false, indent=2) where {T <: InfrastructureSystemsType}
     try
         if pretty
             io = IOBuffer()
-            JSON3.pretty(io, serialize(obj), JSON3.AlignmentContext(; indent = indent))
+            JSON3.pretty(io, serialize(obj), JSON3.AlignmentContext(; indent=indent))
             return take!(io)
         else
             return JSON3.write(serialize(obj))
