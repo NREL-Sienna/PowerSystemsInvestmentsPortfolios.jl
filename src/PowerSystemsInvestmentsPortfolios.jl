@@ -47,6 +47,8 @@ using StringEncodings
 export Portfolio
 export Technology
 export Requirements
+export Financials
+export Region
 export SupplyTechnology
 export ACTransportTechnology
 export HVDCTransportTechnology
@@ -64,7 +66,6 @@ export AggregateRetrofitPotential
 export ExistingCapacity
 export CarbonCaps
 export MinimumCapacityRequirements
-export Region
 export Zone
 export PortfolioFinancialData
 export TechnologyFinancialData
@@ -74,6 +75,8 @@ export get_regions
 export get_technologies
 export get_technology
 export get_requirements
+export get_financials
+export get_financial
 export get_ext
 export add_technology!
 export add_technologies!

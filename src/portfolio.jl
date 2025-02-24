@@ -184,7 +184,6 @@ function add_technology!(
     skip_validation=false,
     kwargs...,
 ) where {T <: Technology}
-    #deserialization_in_progress = _is_deserialization_in_progress(portfolio)
 
     #set_units_setting!(technology, portfolio.data.units_settings)
     #@assert has_units_setting(technology)
@@ -206,7 +205,7 @@ function add_technology!(
     IS.add_component!(
         portfolio.data,
         technology;
-        #allow_existing_time_series=deserialization_in_progress,
+        allow_existing_time_series=deserialization_in_progress,
         skip_validation=skip_validation,
         kwargs...,
     )
