@@ -276,7 +276,6 @@ function serialize_openapi_struct(technology::StorageTechnology{T}, vals...) whe
 end
 
 
-function deserialize_openapi_struct(::Type{<:StorageTechnology}, vals...)
-    base_struct = APIServer.StorageTechnology(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:StorageTechnology}, vals::Dict)
+    return IS.deserialize_struct(APIServer.StorageTechnology, vals)
 end

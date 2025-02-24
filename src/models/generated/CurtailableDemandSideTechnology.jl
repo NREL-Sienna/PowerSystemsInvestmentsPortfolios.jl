@@ -108,7 +108,6 @@ function serialize_openapi_struct(technology::CurtailableDemandSideTechnology{T}
 end
 
 
-function deserialize_openapi_struct(::Type{<:CurtailableDemandSideTechnology}, vals...)
-    base_struct = APIServer.CurtailableDemandSideTechnology(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:CurtailableDemandSideTechnology}, vals::Dict)
+    return IS.deserialize_struct(APIServer.CurtailableDemandSideTechnology, vals)
 end

@@ -99,7 +99,6 @@ function serialize_openapi_struct(technology::CarbonCaps, vals...)
     return base_struct
 end
 
-function deserialize_openapi_struct(::Type{<:CarbonCaps}, vals...)
-    base_struct = APIServer.CarbonCaps(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:CarbonCaps}, vals::Dict)
+    return IS.deserialize_struct(APIServer.CarbonCaps, vals)
 end

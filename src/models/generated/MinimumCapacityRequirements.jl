@@ -91,7 +91,6 @@ function serialize_openapi_struct(technology::MinimumCapacityRequirements, vals.
     return base_struct
 end
 
-function deserialize_openapi_struct(::Type{<:MinimumCapacityRequirements}, vals...)
-    base_struct = APIServer.MinimumCapacityRequirements(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:MinimumCapacityRequirements}, vals::Dict)
+    return IS.deserialize_struct(APIServer.MinimumCapacityRequirements, vals)
 end

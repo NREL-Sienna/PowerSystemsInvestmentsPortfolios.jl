@@ -59,7 +59,6 @@ function serialize_openapi_struct(technology::Zone, vals...)
     return base_struct
 end
 
-function deserialize_openapi_struct(::Type{<:Zone}, vals...)
-    base_struct = APIServer.Zone(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:Zone}, vals::Dict)
+    return IS.deserialize_struct(APIServer.Zone, vals)
 end

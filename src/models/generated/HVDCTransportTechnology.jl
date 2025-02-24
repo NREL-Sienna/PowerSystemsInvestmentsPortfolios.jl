@@ -172,7 +172,6 @@ function serialize_openapi_struct(technology::HVDCTransportTechnology{T}, vals..
 end
 
 
-function deserialize_openapi_struct(::Type{<:HVDCTransportTechnology}, vals...)
-    base_struct = APIServer.HVDCTransportTechnology(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:HVDCTransportTechnology}, vals::Dict)
+    return IS.deserialize_struct(APIServer.HVDCTransportTechnology, vals)
 end

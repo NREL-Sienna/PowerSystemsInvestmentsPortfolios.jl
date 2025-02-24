@@ -172,7 +172,6 @@ function serialize_openapi_struct(technology::ACTransportTechnology{T}, vals...)
 end
 
 
-function deserialize_openapi_struct(::Type{<:ACTransportTechnology}, vals...)
-    base_struct = APIServer.ACTransportTechnology(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:ACTransportTechnology}, vals::Dict)
+    return IS.deserialize_struct(APIServer.ACTransportTechnology, vals)
 end

@@ -78,7 +78,6 @@ function serialize_openapi_struct(technology::AggregateRetrofitPotential, vals..
     return base_struct
 end
 
-function deserialize_openapi_struct(::Type{<:AggregateRetrofitPotential}, vals...)
-    base_struct = APIServer.AggregateRetrofitPotential(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:AggregateRetrofitPotential}, vals::Dict)
+    return IS.deserialize_struct(APIServer.AggregateRetrofitPotential, vals)
 end

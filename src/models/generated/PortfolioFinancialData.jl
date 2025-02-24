@@ -75,7 +75,6 @@ function serialize_openapi_struct(technology::PortfolioFinancialData, vals...)
     return base_struct
 end
 
-function deserialize_openapi_struct(::Type{<:PortfolioFinancialData}, vals...)
-    base_struct = APIServer.PortfolioFinancialData(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:PortfolioFinancialData}, vals::Dict)
+    return IS.deserialize_struct(APIServer.PortfolioFinancialData, vals)
 end

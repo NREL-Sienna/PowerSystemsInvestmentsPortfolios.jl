@@ -60,7 +60,6 @@ function serialize_openapi_struct(technology::ExistingCapacity, vals...)
     return base_struct
 end
 
-function deserialize_openapi_struct(::Type{<:ExistingCapacity}, vals...)
-    base_struct = APIServer.ExistingCapacity(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:ExistingCapacity}, vals::Dict)
+    return IS.deserialize_struct(APIServer.ExistingCapacity, vals)
 end

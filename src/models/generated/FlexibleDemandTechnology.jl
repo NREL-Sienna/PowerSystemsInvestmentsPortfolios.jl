@@ -100,7 +100,6 @@ function serialize_openapi_struct(technology::FlexibleDemandTechnology{T}, vals.
 end
 
 
-function deserialize_openapi_struct(::Type{<:FlexibleDemandTechnology}, vals...)
-    base_struct = APIServer.FlexibleDemandTechnology(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:FlexibleDemandTechnology}, vals::Dict)
+    return IS.deserialize_struct(APIServer.FlexibleDemandTechnology, vals)
 end

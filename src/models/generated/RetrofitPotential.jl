@@ -60,7 +60,6 @@ function serialize_openapi_struct(technology::RetrofitPotential, vals...)
     return base_struct
 end
 
-function deserialize_openapi_struct(::Type{<:RetrofitPotential}, vals...)
-    base_struct = APIServer.RetrofitPotential(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:RetrofitPotential}, vals::Dict)
+    return IS.deserialize_struct(APIServer.RetrofitPotential, vals)
 end

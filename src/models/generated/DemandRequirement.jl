@@ -84,7 +84,6 @@ function serialize_openapi_struct(technology::DemandRequirement{T}, vals...) whe
 end
 
 
-function deserialize_openapi_struct(::Type{<:DemandRequirement}, vals...)
-    base_struct = APIServer.DemandRequirement(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:DemandRequirement}, vals::Dict)
+    return IS.deserialize_struct(APIServer.DemandRequirement, vals)
 end

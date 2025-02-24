@@ -60,7 +60,6 @@ function serialize_openapi_struct(technology::RetirementPotential, vals...)
     return base_struct
 end
 
-function deserialize_openapi_struct(::Type{<:RetirementPotential}, vals...)
-    base_struct = APIServer.RetirementPotential(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:RetirementPotential}, vals::Dict)
+    return IS.deserialize_struct(APIServer.RetirementPotential, vals)
 end

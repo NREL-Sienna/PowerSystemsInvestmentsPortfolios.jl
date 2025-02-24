@@ -300,7 +300,6 @@ function serialize_openapi_struct(technology::SupplyTechnology{T}, vals...) wher
 end
 
 
-function deserialize_openapi_struct(::Type{<:SupplyTechnology}, vals...)
-    base_struct = APIServer.SupplyTechnology(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:SupplyTechnology}, vals::Dict)
+    return IS.deserialize_struct(APIServer.SupplyTechnology, vals)
 end

@@ -15,9 +15,8 @@ function serialize_openapi_struct(technology::{{struct_name}}, vals...)
 end
 {{/has_parametric}}
 
-function deserialize_openapi_struct(::Type{<:{{struct_name}}}, vals...)
-    base_struct = APIServer.{{struct_name}}(; vals...)
-    return base_struct
+function deserialize_openapi_struct(::Type{<:{{struct_name}}}, vals::Dict)
+    return IS.deserialize_struct(APIServer.{{struct_name}}, vals)
 end
 
 """
