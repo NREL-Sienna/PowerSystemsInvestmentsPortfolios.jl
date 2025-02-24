@@ -702,6 +702,14 @@ function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: Region}
     return IS.get_components(T, portfolio.data)
 end
 
+function get_region(
+    ::Type{T},
+    portfolio::Portfolio,
+    name::AbstractString,
+) where {T <: Region}
+    return IS.get_component(T, portfolio.data, name)
+end
+
 ################################
 ######### Requirements #########
 ################################
@@ -738,6 +746,13 @@ function get_financials(::Type{T}, portfolio::Portfolio;) where {T <: Financials
     return IS.get_components(T, portfolio.data)
 end
 
+function get_financial(
+    ::Type{T},
+    portfolio::Portfolio,
+    name::AbstractString,
+) where {T <: Financials}
+    return IS.get_component(T, portfolio.data, name)
+end
 ###########################################
 ######### Supplemental Attributes #########
 ###########################################
