@@ -84,7 +84,7 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     prime_mover_type::Union{Nothing, String} = "OT"
     fuel = nothing # spec type: Union{ Nothing, SupplyTechnologyFuel }
     heat_rate_mmbtu_per_mwh = nothing # spec type: Union{ Nothing, SupplyTechnologyHeatRateMmbtuPerMwh }
-    co2 = nothing # spec type: Union{ Nothing, SupplyTechnologyCo2 }
+    co2::Union{Nothing, Float64} = nothing # spec type: Union{ Nothing, SupplyTechnologyCo2 }
     cofire_start_min::Union{Nothing, Dict{String, Float64}} = nothing
     cofire_start_max::Union{Nothing, Dict{String, Float64}} = nothing
     cofire_level_min::Union{Nothing, Dict{String, Float64}} = nothing

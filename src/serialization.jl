@@ -5,22 +5,67 @@ const MODULE_KEY = "module"
 const PARAMETERS_KEY = "parameters"
 const CONSTRUCT_WITH_PARAMETERS_KEY = "construct_with_parameters"
 const FUNCTION_KEY = "function"
+const SYSTEM_KWARGS = Set((
+    :internal,
+    :runchecks,
+    :time_series_directory,
+    :time_series_in_memory,
+    :time_series_read_only,
+    :timeseries_metadata_file,
+    :name,
+    :description,
+))
+
+"""Constructs a Portfolio from a file path ending with .json
+
+If the file is JSON, then `assign_new_uuids = true` will generate new UUIDs for the system
+and all components.
+"""
+function Portfolio(
+    file_path::AbstractString;
+    assign_new_uuids = false,
+    try_reimport = true,
+    kwargs...,
+)
+    ext = lowercase(splitext(file_path)[2])
+    if ext == ".json"
+        unsupported = setdiff(keys(kwargs), SYSTEM_KWARGS)
+        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
+        # runchecks = get(kwargs, :runchecks, true)
+        time_series_read_only = get(kwargs, :time_series_read_only, false)
+        time_series_directory = get(kwargs, :time_series_directory, nothing)
+        portfolio = deserialize(
+            Portfolio,
+            file_path;
+            time_series_read_only = time_series_read_only,
+            # runchecks = runchecks,
+            time_series_directory = time_series_directory,
+        )
+        _post_deserialize_handling(
+            portfolio;
+            # runchecks = runchecks,
+            assign_new_uuids = assign_new_uuids,
+        )
+        return portfolio
+    else
+        throw(DataFormatError("$file_path is not a supported file type"))
+    end
+end
 
 function IS.serialize(portfolio::T) where {T <: Portfolio}
     data = Dict{String, Any}()
     data["data_format_version"] = DATA_FORMAT_VERSION
     for field in fieldnames(T)
-        # Exclude bus_numbers because they will get rebuilt during deserialization.
         # Exclude time_series_directory because the portfolio may get deserialized on a
         # different portfolio.
-        if field != :bus_numbers && field != :time_series_directory
+        if field != :time_series_directory
             data[string(field)] = serialize(getfield(portfolio, field))
         end
     end
     return data
 end
 
-function IS.deserialize(::Type{Portfolio}, filename::AbstractString, kwargs...)
+function IS.deserialize(::Type{Portfolio}, filename::AbstractString; kwargs...)
     raw = open(filename) do io
         JSON3.read(io, Dict)
     end
@@ -29,7 +74,7 @@ function IS.deserialize(::Type{Portfolio}, filename::AbstractString, kwargs...)
         pre_read_conversion!(raw)
     end
 
-    # These file paths are relative to the system file.
+    # These file paths are relative to the portfolio file.
     directory = dirname(filename)
     for file_key in ("time_series_storage_file",)
         if haskey(raw["data"], file_key) && !isabspath(raw["data"][file_key])
@@ -140,6 +185,7 @@ function from_dict(
         "aggregation",
         "discount_rate",
         "data",
+        "base_system",
         "investment_schedule",
         "time_series_directory",
         "time_series_container",
@@ -150,13 +196,18 @@ function from_dict(
     for field in setdiff(keys(raw), handled)
         parsed_kwargs[Symbol(field)] = raw[field]
     end
-
     # The user can override the serialized runchecks value by passing a kwarg here.
     if haskey(kwargs, :runchecks)
         parsed_kwargs[:runchecks] = kwargs[:runchecks]
     end
 
-    # units = IS.deserialize(SystemUnitsSettings, raw["units_settings"])
+    # Initialize empty portfolio without component data
+    metadata = get(raw, "metadata", Dict())
+    name = get(metadata, "name", nothing)
+    description = get(metadata, "description", nothing)
+    internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
+    aggregation = PSY.ACBus
+    investment_schedule = raw["investment_schedule"]
     data = IS.deserialize(
         IS.SystemData,
         raw["data"];
@@ -164,24 +215,18 @@ function from_dict(
         time_series_directory=time_series_directory,
         validation_descriptor_file=config_path,
     )
-    metadata = get(raw, "metadata", Dict())
-    name = get(metadata, "name", nothing)
-    description = get(metadata, "description", nothing)
-    internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
-    aggregation = PSY.ACBus
-    discount_rate = raw["discount_rate"]
-    investment_schedule = raw["investment_schedule"]
-    portfolio = Portfolio(
-        aggregation,
-        discount_rate,
-        data,
-        investment_schedule,
-        internal,
-        # name = name,
-        # description = description,
-        # parsed_kwargs...,
+
+    portfolio = Portfolio(;
+        data=data,
+        aggregation=aggregation,
+        investment_schedule=investment_schedule,
+        internal=internal,
+        name = name,
+        description = description,
+        parsed_kwargs...,
     )
 
+    # units = IS.deserialize(SystemUnitsSettings, raw["units_settings"])
     if raw["data_format_version"] != DATA_FORMAT_VERSION
         pre_deserialize_conversion!(raw, portfolio)
     end
@@ -206,22 +251,123 @@ function from_dict(
     return portfolio
 end
 
-function deserialize_components!(sys::Portfolio, raw)
+# Function copied over from IS. This version of the function is modified to not use the internal field for components,
+# since the internal field is not stored in the JSON when serializing with OpenAPI structs
+function IS.deserialize(
+    ::Type{IS.SystemData},
+    raw::Dict;
+    time_series_read_only = false,
+    time_series_directory = nothing,
+    validation_descriptor_file = nothing,
+    kwargs...,
+)
+    if haskey(raw, "time_series_storage_file")
+        if !isfile(raw["time_series_storage_file"])
+            error("time series file $(raw["time_series_storage_file"]) does not exist")
+        end
+        # TODO: need to address this limitation
+        if IS.strip_module_name(raw["time_series_storage_type"]) == "InMemoryTimeSeriesStorage"
+            @info "Deserializing with InMemoryTimeSeriesStorage is currently not supported. Using HDF"
+            #hdf5_storage = Hdf5TimeSeriesStorage(raw["time_series_storage_file"], true)
+            #time_series_storage = InMemoryTimeSeriesStorage(hdf5_storage)
+        end
+        time_series_storage = IS.from_file(
+            IS.Hdf5TimeSeriesStorage,
+            raw["time_series_storage_file"];
+            directory = time_series_directory,
+            read_only = time_series_read_only,
+        )
+        time_series_metadata_store = IS.from_h5_file(
+            IS.TimeSeriesMetadataStore,
+            time_series_storage.file_path,
+            time_series_directory,
+        )
+    else
+        time_series_storage = IS.make_time_series_storage(;
+            compression = CompressionSettings(;
+                enabled = get(raw, "time_series_compression_enabled", DEFAULT_COMPRESSION),
+            ),
+            directory = time_series_directory,
+        )
+        time_series_metadata_store = nothing
+    end
+
+    time_series_manager = IS.TimeSeriesManager(;
+        data_store = time_series_storage,
+        read_only = time_series_read_only,
+        metadata_store = time_series_metadata_store,
+    )
+    @show time_series_metadata_store
+    subsystems = Dict(k => Set(Base.UUID.(v)) for (k, v) in raw["subsystems"])
+    supplemental_attribute_manager = IS.deserialize(
+        IS.SupplementalAttributeManager,
+        get(
+            raw,
+            "supplemental_attribute_manager",
+            Dict("attributes" => [], "associations" => []),
+        ),
+        time_series_manager,
+    )
+    internal = IS.deserialize(IS.InfrastructureSystemsInternal, raw["internal"])
+    validation_descriptors = if isnothing(validation_descriptor_file)
+        []
+    else
+        IS.read_validation_descriptor(validation_descriptor_file)
+    end
+
+    sys = IS.SystemData(
+        validation_descriptors,
+        time_series_manager,
+        subsystems,
+        supplemental_attribute_manager,
+        internal,
+    )
+    attributes_by_uuid = Dict{Base.UUID, SupplementalAttribute}()
+    for attr_dict in values(supplemental_attribute_manager.data)
+        for attr in values(attr_dict)
+            uuid = IS.get_uuid(attr)
+            if haskey(attributes_by_uuid, uuid)
+                error("Bug: Found duplicate supplemental attribute UUID: $uuid")
+            end
+            attributes_by_uuid[uuid] = attr
+        end
+    end
+
+    # Note: components need to be deserialized by the parent so that they can go through
+    # the proper checks.
+    return sys
+end
+
+
+function deserialize_components!(portfolio::Portfolio, raw)
     # Convert the array of components into type-specific arrays to allow addition by type.
-    data = Dict{Any, Vector{Dict}}()
+    # Need to maintain an order here. Deserialize regions and financials first so they can
+    # be referenced when deserializing technologies
+    technologies = OrderedDict{Any, Vector{Dict}}()
+    regions = OrderedDict{Any, Vector{Dict}}()
     for component in raw["components"]
         type = IS.get_type_from_serialization_data(component)
-        components = get(data, type, nothing)
-        if components === nothing
-            components = Vector{Dict}()
-            data[type] = components
+        if type <: Region || type <: Financials
+            components = get(regions, type, nothing)
+            if components === nothing
+                components = Vector{Dict}()
+                regions[type] = components
+            end
+        else
+            components = get(technologies, type, nothing)
+            if components === nothing
+                components = Vector{Dict}()
+                technologies[type] = components
+            end
         end
         push!(components, component)
     end
+    data=merge(regions, technologies)
 
     # Maintain a lookup of UUID to component because some component types encode
     # composed types as UUIDs instead of actual types.
-    component_cache = Dict{Base.UUID, Technology}()
+    # Can remove this I think since we aren't using UUIDs anymore to encode
+    component_cache = Dict{Base.UUID, InfrastructureSystemsComponent}()
 
     # Add each type to this as we parse.
     parsed_types = Set()
@@ -245,26 +391,39 @@ function deserialize_components!(sys::Portfolio, raw)
             end
             for component in components
                 handle_deserialization_special_cases!(component, type)
-                api_comp = deserialize(type, component, component_cache)
-                comp = build_model_struct(api_comp, component["__metadata__"])
-                add_technology!(sys, comp)
-                component_cache[IS.get_uuid(comp)] = comp
+                #TODO: See if component cache is needed
+                api_component = deserialize_openapi_struct(type, component)
+                model_component = build_model_struct(api_component, portfolio, component["__metadata__"])
+                IS.add_component!(portfolio.data, model_component)
+                component_cache[IS.get_uuid(model_component)] = model_component
                 if !isnothing(post_add_func)
-                    post_add_func(comp)
+                    post_add_func(model_component)
                 end
             end
             push!(parsed_types, type)
+            
         end
     end
 
     deserialize_and_add!()
 end
 
-function build_model_struct(base_struct, metadata::Dict{String, Any})
+function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{String, Any})
     vals = Dict{Symbol, Any}()
     struct_type = typeof(base_struct)
     for (name, type) in zip(fieldnames(struct_type), fieldtypes(struct_type))
         vals[name] = getfield(base_struct, name)
+        if name == :region || name == :start_region || name == :end_region
+            vals[name] = get_region(Region, portfolio, getfield(base_struct, name))
+        elseif name==:financial_data
+            vals[name] = get_financial(TechnologyFinancialData, portfolio, getfield(base_struct, name))
+        elseif name==:prime_mover_type
+            vals[name] = PrimeMovers(getfield(base_struct, name))
+        elseif name==:fuel
+            vals[name] = ThermalFuels(getfield(base_struct, name))
+        elseif name==:storage_tech
+            vals[name] = StorageTech(getfield(base_struct, name))
+        end
     end
 
     struct_type_string = metadata["type"]
@@ -282,7 +441,9 @@ function build_model_struct(base_struct, metadata::Dict{String, Any})
     return model_struct
 end
 
-const _CONTAINS_SHOULD_ENCODE = Technology  # PSIP types with fields that we should_encode_as_uuid
+# PSIP types with fields that we should_encode_as_uuid
+# Okay this probably shouldn't exist anymore since we aren't doing that but run with it for now
+const _CONTAINS_SHOULD_ENCODE = Union{Technology, Region, Financials, Requirements}
 
 function IS.deserialize(
     ::Type{T},
@@ -310,62 +471,9 @@ function IS.deserialize(
 
     type = IS.get_type_from_serialization_metadata(data[IS.METADATA_KEY])
 
-    base_struct = build_openapi_struct(type, vals...)
+    base_struct = deserialize_openapi_struct(type, vals...)
 
     return base_struct
-end
-#=
-function IS.get_type_from_serialization_metadata(metadata::Dict)
-    _module = IS.get_module(metadata[MODULE_KEY])
-    base_type = IS.getproperty(_module, Symbol(metadata[TYPE_KEY]))
-    if !get(metadata, CONSTRUCT_WITH_PARAMETERS_KEY, false)
-        return base_type
-    end
-
-    # This has several limitations and is only a workaround for PSY.Reserve subtypes.
-    # - each parameter must be in _module
-    # - does not support nested parametrics.
-    # Reserves should be fixed and then we can remove this hack.
-    parameters = [getproperty(_module, Symbol(x)) for x in metadata[PARAMETERS_KEY]]
-    return base_type{parameters...}
-end
-=#
-"""
-Deserialize the value, converting UUIDs to components where necessary.
-"""
-function deserialize_uuid_handling(field_type, val, component_cache)
-    @debug "deserialize_uuid_handling" _group = IS.LOG_GROUP_SERIALIZATION field_type val
-    if val === nothing
-        value = val
-    elseif should_encode_as_uuid(field_type)
-        if field_type <: Vector
-            _vals = field_type()
-            for _val in val
-                uuid = deserialize(Base.UUID, _val)
-                component = component_cache[uuid]
-                push!(_vals, component)
-            end
-            value = _vals
-        else
-            uuid = deserialize(Base.UUID, val["internal"]["uuid"])
-            component = component_cache[uuid]
-            value = component
-        end
-    elseif field_type <: _CONTAINS_SHOULD_ENCODE
-        value = IS.deserialize(field_type, val, component_cache)
-    elseif field_type <: Union{Nothing, _CONTAINS_SHOULD_ENCODE}
-        value = IS.deserialize(field_type.b, val, component_cache)
-    elseif field_type <: InfrastructureSystemsType
-        value = deserialize(field_type, val)
-    elseif field_type isa Union && field_type.a <: Nothing && !(field_type.b <: Union)
-        # Nothing has already been handled. Apply the second type as long as there isn't a
-        # third. Julia appears to always put the Nothing in field a.
-        value = deserialize(field_type.b, val)
-    else
-        value = deserialize(field_type, val)
-    end
-
-    return value
 end
 
 const _ENCODE_AS_UUID_A = (
@@ -374,10 +482,10 @@ const _ENCODE_AS_UUID_A = (
     #    Union{Nothing, DemandRequirement},
     Union{Nothing, Zone},
     Union{Nothing, ACTransportTechnology, HVDCTransportTechnology},
-    Vector{Service},
+    Vector{Requirements},
 )
 const _ENCODE_AS_UUID_B =
-    (Zone, ACTransportTechnology, HVDCTransportTechnology, Vector{Service})
+    (Zone, ACTransportTechnology, HVDCTransportTechnology, Vector{Requirements})
 
 should_encode_as_uuid(val) = any(x -> val isa x, _ENCODE_AS_UUID_B)
 should_encode_as_uuid(::Type{T}) where {T} = any(x -> T <: x, _ENCODE_AS_UUID_A)
@@ -390,7 +498,7 @@ Allow types to implement handling of special cases during deserialization.
   - `component::Dict`: The component serialized as a dictionary.
   - `::Type`: The type of the technology.
 """
-handle_deserialization_special_cases!(component::Dict, ::Type{<:Technology}) = nothing
+handle_deserialization_special_cases!(component::Dict, ::Type{<:InfrastructureSystemsComponent}) = nothing
 
 function _is_deserialization_in_progress(portfolio::Portfolio)
     ext = get_ext(portfolio)
@@ -410,7 +518,7 @@ Serializes a portfolio to a JSON file and saves time series to an HDF5 file.
   - `user_data::Union{Nothing, Dict} = nothing`: optional metadata to record
   - `pretty::Bool = false`: whether to pretty-print the JSON
   - `force::Bool = false`: whether to overwrite existing files
-  - `check::Bool = false`: whether to run portfolio validation checks
+  - `runchecks::Bool = false`: whether to run portfolio validation checks
 
 Refer to [`check_component`](@ref) for exceptions thrown if `check = true`.
 """
