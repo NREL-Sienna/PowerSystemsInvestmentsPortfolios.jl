@@ -19,12 +19,13 @@ mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
 end
 
 #TODO: Define if we are going to support unit systems
-#TODO: Make immutable -> Done but make sure everything still works
-struct Portfolio <: IS.InfrastructureSystemsType
+#TODO: Make immutable
+mutable struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     time_series_directory::Union{Nothing, String}
+    financial_data::Union{Nothing,PortfolioFinancialData}
     base_system::Union{Nothing, System}
     metadata::PortfolioMetadata
     internal::IS.InfrastructureSystemsInternal
@@ -33,13 +34,13 @@ struct Portfolio <: IS.InfrastructureSystemsType
         aggregation,
         data,
         investment_schedule::Dict,
-        #units_settings::IS.SystemUnitsSettings,
         internal::IS.InfrastructureSystemsInternal,
         time_series_directory=nothing,
+        financial_data=nothing,
+        base_system=nothing,
         name=nothing,
         description=nothing,
         data_source=nothing,
-        base_system=nothing,
         kwargs...,
     )
         #TODO: Provide support to kwargs
@@ -56,8 +57,8 @@ struct Portfolio <: IS.InfrastructureSystemsType
             aggregation,
             data,
             investment_schedule,
-            #units_settings,
             time_series_directory,
+            financial_data,
             base_system,
             PortfolioMetadata(name, description, data_source),
             internal,
@@ -86,8 +87,20 @@ end
 Construct an empty `Portfolio` specifying aggregation. Useful for building a Portfolio from scratch.
 """
 function Portfolio(aggregation; kwargs...)
-    data = _create_system_data_from_kwargs(; kwargs...)
+    data = PSY._create_system_data_from_kwargs(; kwargs...)
     return Portfolio(aggregation, data, Dict(), IS.InfrastructureSystemsInternal())
+end
+
+"""
+Construct an empty `Portfolio` specifying financial data. Useful for building a Portfolio from scratch.
+"""
+function Portfolio(financial_data; kwargs...)
+    data = PSY._create_system_data_from_kwargs(; kwargs...)
+    return Portfolio(; aggregation=DEFAULT_AGGREGATION, 
+            data=data, investment_schedule=Dict(), 
+            internal=IS.InfrastructureSystemsInternal(), 
+            financial_data=financial_data
+        )
 end
 
 """
@@ -125,6 +138,12 @@ get_description(val::Portfolio) = val.metadata.description
 Return true if checks are enabled on the system.
 """
 get_runchecks(val::Portfolio) = val.runchecks[]
+
+"""
+Set the financial data of the portfolio.
+"""
+set_financial_data!(val::Portfolio, financial_data::PortfolioFinancialData) =
+    val.financial_data = financial_data
 
 function _validate_or_skip!(sys, component, skip_validation)
     if skip_validation && get_runchecks(sys)
@@ -711,14 +730,14 @@ end
 """
 Add policy requirement to portfolio
 """
-function add_requirement!(portfolio::Portfolio, req::Requirements)
+function add_requirement!(portfolio::Portfolio, req::Requirement)
     #return PSY.add_service!(portfolio.data, req)
     #skip_validation = false
     #skip_validation = _validate_or_skip!(sys, service, skip_validation)
     return IS.add_component!(portfolio.data, req, skip_validation=false)
 end
 
-function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirements}
+function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirement}
     return IS.get_components(T, portfolio.data)
 end
 
