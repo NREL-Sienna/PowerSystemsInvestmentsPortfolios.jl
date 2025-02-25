@@ -19,12 +19,11 @@ mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
 end
 
 #TODO: Define if we are going to support unit systems
-#TODO: Make immutable
-mutable struct Portfolio <: IS.InfrastructureSystemsType
+#TODO: Make immutable -> Done but make sure everything still works
+struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
-    #units_settings::IS.SystemUnitsSettings
     time_series_directory::Union{Nothing, String}
     base_system::Union{Nothing, System}
     metadata::PortfolioMetadata
@@ -185,9 +184,6 @@ function add_technology!(
     kwargs...,
 ) where {T <: Technology}
 
-    #set_units_setting!(technology, portfolio.data.units_settings)
-    #@assert has_units_setting(technology)
-
     #check_topology(portfolio.data, component)
     #check_component_addition(portfolio.data, technology; kwargs...)
 
@@ -215,15 +211,15 @@ end
 
 function add_region!(
     portfolio::Portfolio,
-    zone::T;
+    region::T;
     skip_validation=false,
     kwargs...,
 ) where {T <: Region}
-    #deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+    deserialization_in_progress = _is_deserialization_in_progress(portfolio)
     IS.add_component!(
         portfolio.data,
-        zone;
-        #allow_existing_time_series=deserialization_in_progress,
+        region;
+        allow_existing_time_series=deserialization_in_progress,
         skip_validation=skip_validation,
         kwargs...,
     )
@@ -244,7 +240,6 @@ range.
 ```julia
 portfolio = Portfolio(100.0)
 
-buses = [bus1, bus2, bus3]
 generators = [gen1, gen2, gen3]
 foreach(x -> add_technologies!(portfolio, x), Iterators.flatten((buses, generators)))
 ```
