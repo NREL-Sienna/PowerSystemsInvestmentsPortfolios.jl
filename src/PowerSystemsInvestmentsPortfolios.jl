@@ -47,12 +47,11 @@ using StringEncodings
 export Portfolio
 export Technology
 export Requirements
-export Financials
+export FinancialData
 export Region
 export SupplyTechnology
 export ACTransportTechnology
 export HVDCTransportTechnology
-export ExistingTransportTechnology
 export StorageTechnology
 export DemandRequirement
 export DemandsideTechnology
@@ -75,7 +74,6 @@ export get_regions
 export get_technologies
 export get_technology
 export get_requirements
-export get_financials
 export get_financial
 export get_ext
 export add_technology!
@@ -111,14 +109,19 @@ include("models/generated/open_api_models/src/APIServer.jl")
 using .APIServer
 
 include("definitions.jl")
+
 include("models/technologies.jl")
 include("models/regions.jl")
-include("models/financials.jl")
+include("models/financial_data/financial_data.jl")
+include("models/financial_data/TechnologyFinancialData.jl")
+include("models/financial_data/PortfolioFinancialData.jl")
 include("models/requirements.jl")
 include("models/generated/includes.jl")
+
 include("portfolio.jl")
 include("serialization.jl")
 include("generate_structs.jl")
+include("db_parser.jl")
 include("utils/print.jl")
 
 using DocStringExtensions

@@ -727,31 +727,7 @@ function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirem
     return IS.get_components(T, portfolio.data)
 end
 
-################################
-######### Financials #########
-################################
 
-"""
-Add financial data to portfolio
-"""
-function add_financials!(portfolio::Portfolio, fin::Financials)
-    #return PSY.add_service!(portfolio.data, req)
-    #skip_validation = false
-    #skip_validation = _validate_or_skip!(sys, service, skip_validation)
-    return IS.add_component!(portfolio.data, fin, skip_validation=false)
-end
-
-function get_financials(::Type{T}, portfolio::Portfolio;) where {T <: Financials}
-    return IS.get_components(T, portfolio.data)
-end
-
-function get_financial(
-    ::Type{T},
-    portfolio::Portfolio,
-    name::AbstractString,
-) where {T <: Financials}
-    return IS.get_component(T, portfolio.data, name)
-end
 ###########################################
 ######### Supplemental Attributes #########
 ###########################################

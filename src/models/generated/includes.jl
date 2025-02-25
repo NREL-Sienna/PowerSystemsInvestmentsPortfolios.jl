@@ -1,7 +1,5 @@
 include("Zone.jl")
-include("TechnologyFinancialData.jl")
 include("MinimumCapacityRequirements.jl")
-include("PortfolioFinancialData.jl")
 include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
 include("RetirementPotential.jl")
@@ -29,7 +27,6 @@ export get_capital_cost
 export get_capital_costs
 export get_capital_costs_energy
 export get_capital_costs_power
-export get_capital_recovery_period
 export get_co2
 export get_co_2_max_mtons
 export get_co_2_max_tons_mwh
@@ -39,7 +36,6 @@ export get_curtailment_cost
 export get_curtailment_cost_mwh
 export get_demand_energy_efficiency
 export get_demand_mw
-export get_discount_rate
 export get_dn_time
 export get_duration_limits
 export get_efficiency
@@ -55,9 +51,7 @@ export get_financial_data
 export get_fuel
 export get_heat_rate_mmbtu_per_mwh
 export get_id
-export get_inflation_rate
 export get_initial_capacity
-export get_interest_rate
 export get_lifetime
 export get_line_loss
 export get_losses
@@ -90,7 +84,6 @@ export get_start_cost_per_mw
 export get_start_fuel_mmbtu_per_mw
 export get_start_region
 export get_storage_tech
-export get_technology_base_year
 export get_technology_efficiency
 export get_unit_size
 export get_unit_size_energy
@@ -111,7 +104,6 @@ export set_capital_cost!
 export set_capital_costs!
 export set_capital_costs_energy!
 export set_capital_costs_power!
-export set_capital_recovery_period!
 export set_co2!
 export set_co_2_max_mtons!
 export set_co_2_max_tons_mwh!
@@ -121,7 +113,6 @@ export set_curtailment_cost!
 export set_curtailment_cost_mwh!
 export set_demand_energy_efficiency!
 export set_demand_mw!
-export set_discount_rate!
 export set_dn_time!
 export set_duration_limits!
 export set_efficiency!
@@ -137,9 +128,7 @@ export set_financial_data!
 export set_fuel!
 export set_heat_rate_mmbtu_per_mwh!
 export set_id!
-export set_inflation_rate!
 export set_initial_capacity!
-export set_interest_rate!
 export set_lifetime!
 export set_line_loss!
 export set_losses!
@@ -172,7 +161,6 @@ export set_start_cost_per_mw!
 export set_start_fuel_mmbtu_per_mw!
 export set_start_region!
 export set_storage_tech!
-export set_technology_base_year!
 export set_technology_efficiency!
 export set_unit_size!
 export set_unit_size_energy!

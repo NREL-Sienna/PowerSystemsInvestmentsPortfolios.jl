@@ -6,7 +6,9 @@ Examples of this data include the base financial year, the discount rate, and th
 This does not include capital and operation costs, which are defined separately for each technology.
 """
 
-abstract type Financials <: IS.InfrastructureSystemsComponent end
+abstract type FinancialData <: IS.DeviceParameter end
 
-supports_time_series(::Financials) = true
-supports_supplemental_attributes(::Financials) = true
+supports_time_series(::FinancialData) = true
+
+IS.serialize(val::FinancialData) = IS.serialize_struct(val)
+IS.deserialize(T::Type{<:FinancialData}, val::Dict) = IS.deserialize_struct(T, val)
