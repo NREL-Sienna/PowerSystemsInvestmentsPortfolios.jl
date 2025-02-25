@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct CarbonCaps <: Requirements
+    mutable struct CarbonCaps <: Requirement
         name::String
         power_systems_type::String
         pricecap::Float64
@@ -30,7 +30,7 @@ This file is auto-generated. Do not edit.
 - `co_2_max_mtons::Float64`: (default: `Vector{Int64}()`) Emission limit in absolute values, in Million of tons
 - `available::Bool`: Availability
 """
-mutable struct CarbonCaps <: Requirements
+mutable struct CarbonCaps <: Requirement
     "The technology name"
     name::String
     "maps to a valid PowerSystems.jl for PCM modeling"

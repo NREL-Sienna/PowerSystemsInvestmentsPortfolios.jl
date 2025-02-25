@@ -46,7 +46,7 @@ using StringEncodings
 
 export Portfolio
 export Technology
-export Requirements
+export Requirement
 export FinancialData
 export Region
 export SupplyTechnology

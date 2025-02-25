@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct MinimumCapacityRequirements <: Requirements
+    mutable struct MinimumCapacityRequirements <: Requirement
         name::String
         power_systems_type::String
         pricecap::Float64
@@ -28,7 +28,7 @@ This file is auto-generated. Do not edit.
 - `eligible_resources::Vector{String}`: (default: `Vector{String}()`) List of resources that contribute to the carbon cap constraint.
 - `available::Bool`: Availability
 """
-mutable struct MinimumCapacityRequirements <: Requirements
+mutable struct MinimumCapacityRequirements <: Requirement
     "The technology name"
     name::String
     "maps to a valid PowerSystems.jl for PCM modeling"
