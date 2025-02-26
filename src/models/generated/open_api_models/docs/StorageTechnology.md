@@ -28,7 +28,7 @@ Name | Type | Description | Notes
 **efficiency** | [***InOut**](InOut.md) |  | [optional] [default to nothing]
 **losses** | **Float64** |  | [optional] [default to 1.0]
 **lifetime** | **Int64** |  | [optional] [default to 100]
-**financial_data** | **Int64** |  | [optional] [default to nothing]
+**financial_data** | **Any** |  | [optional] [default to nothing]
 
 
 [[Back to Model list]](../README.md#models) [[Back to API list]](../README.md#api-endpoints) [[Back to README]](../README.md)

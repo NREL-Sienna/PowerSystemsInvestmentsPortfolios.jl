@@ -24,7 +24,6 @@ docs/MinMax.md
 docs/MinimumCapacityRequirements.md
 docs/PiecewiseLinearData.md
 docs/PiecewiseStepData.md
-docs/PortfolioFinancialData.md
 docs/ProductionVariableCostCurve.md
 docs/QuadraticFunctionData.md
 docs/RenewableGenerationCost.md
@@ -37,7 +36,6 @@ docs/StorageCostStartUpOneOf.md
 docs/StorageTechnology.md
 docs/SupplyTechnology.md
 docs/SupplyTechnologyOperationCosts.md
-docs/TechnologyFinancialData.md
 docs/ThermalGenerationCost.md
 docs/ThermalGenerationCostStartUp.md
 docs/ValueCurve.md
@@ -70,7 +68,6 @@ src/models/model_MinMax.jl
 src/models/model_MinimumCapacityRequirements.jl
 src/models/model_PiecewiseLinearData.jl
 src/models/model_PiecewiseStepData.jl
-src/models/model_PortfolioFinancialData.jl
 src/models/model_ProductionVariableCostCurve.jl
 src/models/model_QuadraticFunctionData.jl
 src/models/model_RenewableGenerationCost.jl
@@ -83,7 +80,6 @@ src/models/model_StorageCostStartUpOneOf.jl
 src/models/model_StorageTechnology.jl
 src/models/model_SupplyTechnology.jl
 src/models/model_SupplyTechnologyOperationCosts.jl
-src/models/model_TechnologyFinancialData.jl
 src/models/model_ThermalGenerationCost.jl
 src/models/model_ThermalGenerationCostStartUp.jl
 src/models/model_ValueCurve.jl

@@ -27,7 +27,7 @@ This file is auto-generated. Do not edit.
         internal::InfrastructureSystemsInternal
         ext::Dict
         balancing_topology::String
-        region::Union{Nothing, Region, Vector{Region}}
+        region::Vector{Region}
         unit_size_energy::Float64
         base_year::Int
         existing_capacity_energy::Float64
@@ -59,7 +59,7 @@ This file is auto-generated. Do not edit.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `balancing_topology::String`: Set of balancing nodes
-- `region::Union{Nothing, Region, Vector{Region}}`: (default: `nothing`) Region
+- `region::Vector{Region}`: (default: `Vector()`) Region
 - `unit_size_energy::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
 - `base_year::Int`: (default: `2020`) Reference year for technology data
 - `existing_capacity_energy::Float64`: (default: `0.0`) Pre-existing energy capacity for a technology (MWh)
@@ -110,7 +110,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     "Set of balancing nodes"
     balancing_topology::String
     "Region"
-    region::Union{Nothing, Region, Vector{Region}}
+    region::Vector{Region}
     "Used for discrete investment decisions. Size of each unit being built (MW)"
     unit_size_energy::Float64
     "Reference year for technology data"
@@ -124,7 +124,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
 end
 
 
-function StorageTechnology{T}(; base_power, prime_mover_type=PrimeMovers.OT, lifetime=100, available, name, storage_tech, capital_costs_power=LinearCurve(0.0), capacity_power_limits=(min=0,max=1e8), capacity_energy_limits=(min=0,max=1e8), operations_costs_power=StorageCost(), unit_size_power=0.0, id, duration_limits=(min=0,max=1000), capital_costs_energy=LinearCurve(0.0), losses=1.0, financial_data, existing_capacity_power=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=nothing, unit_size_energy=0.0, base_year=2020, existing_capacity_energy=0.0, efficiency=(in=1, out=1), operations_costs_energy=StorageCost(), ) where T <: PSY.Storage
+function StorageTechnology{T}(; base_power, prime_mover_type=PrimeMovers.OT, lifetime=100, available, name, storage_tech, capital_costs_power=LinearCurve(0.0), capacity_power_limits=(min=0,max=1e8), capacity_energy_limits=(min=0,max=1e8), operations_costs_power=StorageCost(), unit_size_power=0.0, id, duration_limits=(min=0,max=1000), capital_costs_energy=LinearCurve(0.0), losses=1.0, financial_data, existing_capacity_power=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=Vector(), unit_size_energy=0.0, base_year=2020, existing_capacity_energy=0.0, efficiency=(in=1, out=1), operations_costs_energy=StorageCost(), ) where T <: PSY.Storage
     StorageTechnology{T}(base_power, prime_mover_type, lifetime, available, name, storage_tech, capital_costs_power, capacity_power_limits, capacity_energy_limits, operations_costs_power, unit_size_power, id, duration_limits, capital_costs_energy, losses, financial_data, existing_capacity_power, power_systems_type, internal, ext, balancing_topology, region, unit_size_energy, base_year, existing_capacity_energy, efficiency, operations_costs_energy, )
 end
 

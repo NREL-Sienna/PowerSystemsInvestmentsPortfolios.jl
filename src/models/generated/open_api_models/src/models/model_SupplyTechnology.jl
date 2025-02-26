@@ -64,7 +64,7 @@
     - start_cost_per_mw::Float64
     - start_fuel_mmbtu_per_mw::Float64
     - lifetime::Int64
-    - financial_data::Int64
+    - financial_data::Any
 """
 Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
@@ -95,7 +95,7 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     start_cost_per_mw::Union{Nothing, Float64} = 0.0
     start_fuel_mmbtu_per_mw::Union{Nothing, Float64} = 0.0
     lifetime::Union{Nothing, Int64} = 100
-    financial_data::Union{Nothing, Int64} = nothing
+    financial_data::Union{Nothing, Any} = nothing
 
     function SupplyTechnology(name, power_systems_type, base_year, region, id, available, balancing_topology, base_power, prime_mover_type, fuel, heat_rate_mmbtu_per_mwh, co2, cofire_start_limits, cofire_level_limits, capital_costs, operation_costs, initial_capacity, unit_size, capacity_limits, outage_factor, min_generation_percentage, ramp_up_percentage, ramp_dn_percentage, up_time, dn_time, start_cost_per_mw, start_fuel_mmbtu_per_mw, lifetime, financial_data, )
         OpenAPI.validate_property(SupplyTechnology, Symbol("name"), name)
@@ -131,7 +131,7 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     end
 end # type SupplyTechnology
 
-const _property_types_SupplyTechnology = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("power_systems_type")=>"String", Symbol("base_year")=>"Int64", Symbol("region")=>"Vector{Int64}", Symbol("id")=>"Int64", Symbol("available")=>"Bool", Symbol("balancing_topology")=>"String", Symbol("base_power")=>"Float64", Symbol("prime_mover_type")=>"String", Symbol("fuel")=>"Vector{String}", Symbol("heat_rate_mmbtu_per_mwh")=>"Dict{String, ValueCurve}", Symbol("co2")=>"Dict{String, Float64}", Symbol("cofire_start_limits")=>"Dict{String, MinMax}", Symbol("cofire_level_limits")=>"Dict{String, MinMax}", Symbol("capital_costs")=>"ValueCurve", Symbol("operation_costs")=>"SupplyTechnologyOperationCosts", Symbol("initial_capacity")=>"Float64", Symbol("unit_size")=>"Float64", Symbol("capacity_limits")=>"MinMax", Symbol("outage_factor")=>"Float64", Symbol("min_generation_percentage")=>"Float64", Symbol("ramp_up_percentage")=>"Float64", Symbol("ramp_dn_percentage")=>"Float64", Symbol("up_time")=>"Float64", Symbol("dn_time")=>"Float64", Symbol("start_cost_per_mw")=>"Float64", Symbol("start_fuel_mmbtu_per_mw")=>"Float64", Symbol("lifetime")=>"Int64", Symbol("financial_data")=>"Int64", )
+const _property_types_SupplyTechnology = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("power_systems_type")=>"String", Symbol("base_year")=>"Int64", Symbol("region")=>"Vector{Int64}", Symbol("id")=>"Int64", Symbol("available")=>"Bool", Symbol("balancing_topology")=>"String", Symbol("base_power")=>"Float64", Symbol("prime_mover_type")=>"String", Symbol("fuel")=>"Vector{String}", Symbol("heat_rate_mmbtu_per_mwh")=>"Dict{String, ValueCurve}", Symbol("co2")=>"Dict{String, Float64}", Symbol("cofire_start_limits")=>"Dict{String, MinMax}", Symbol("cofire_level_limits")=>"Dict{String, MinMax}", Symbol("capital_costs")=>"ValueCurve", Symbol("operation_costs")=>"SupplyTechnologyOperationCosts", Symbol("initial_capacity")=>"Float64", Symbol("unit_size")=>"Float64", Symbol("capacity_limits")=>"MinMax", Symbol("outage_factor")=>"Float64", Symbol("min_generation_percentage")=>"Float64", Symbol("ramp_up_percentage")=>"Float64", Symbol("ramp_dn_percentage")=>"Float64", Symbol("up_time")=>"Float64", Symbol("dn_time")=>"Float64", Symbol("start_cost_per_mw")=>"Float64", Symbol("start_fuel_mmbtu_per_mw")=>"Float64", Symbol("lifetime")=>"Int64", Symbol("financial_data")=>"Any", )
 OpenAPI.property_type(::Type{ SupplyTechnology }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_SupplyTechnology[name]))}
 
 function check_required(o::SupplyTechnology)

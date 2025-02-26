@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **id** | **Int64** |  | [optional] [default to nothing]
 **available** | **Bool** |  | [default to nothing]
 **power_systems_type** | **String** |  | [default to nothing]
+**region** | **Vector{Int64}** |  | [optional] [default to nothing]
 **voll** | **Float64** |  | [optional] [default to nothing]
 **segments** | **Vector{Int64}** |  | [optional] [default to nothing]
 **curtailment_cost** | **Vector{Float64}** |  | [optional] [default to nothing]

@@ -14,7 +14,7 @@
 - `inflation_rate::Float64`: Inflation rate
 - `interest_rate::Float64`: (default: `0.0`) Interest rate
 """
-mutable struct PortfolioFinancialData
+mutable struct PortfolioFinancialData 
     "Base economic year. All costs will be converted to a net present value in this year."
     base_year::Int64
     "Discount rate"

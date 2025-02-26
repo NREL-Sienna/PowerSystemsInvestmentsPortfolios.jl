@@ -124,16 +124,31 @@ function serialize(technology::Technology)
 
         #For fields with references to other structs, serialize with
         #the name of that struct
-        if field == :region ||
-           field == :financial_data ||
-           field == :start_region ||
+        if field == :region
+            regions = getfield(technology, field)
+            value = [get_id(r) for r in regions]
+        
+        elseif field == :start_region ||
            field == :end_region
-            value = get_name(getfield(technology, field))
+            value = get_id(getfield(technology, field))
 
-            #convert enums to strings
-        elseif field == :prime_mover_type || field == :fuel || field == :storage_tech
+        #convert enums to strings
+        elseif field == :prime_mover_type || field == :storage_tech
             value = string(getfield(technology, field))
-
+        elseif field == :fuel    
+            value = [string(f) for f in getfield(technology, field)]
+        elseif field == :heat_rate_mmbtu_per_mwh
+            fuel_params = getfield(technology, field)
+            value = Dict{String, ValueCurve}()
+            for (k,v) in fuel_params
+                value[string(k)] = v
+            end
+        elseif field == :co2 || field == :cofire_start_limits || field == :cofire_level_limits
+            fuel_params = getfield(technology, field)
+            value = Dict{String, Float64}()
+            for (k,v) in fuel_params
+                value[string(k)] = v
+            end
         else
             value = getfield(technology, field)
         end
@@ -344,13 +359,13 @@ end
 
 function deserialize_components!(portfolio::Portfolio, raw)
     # Convert the array of components into type-specific arrays to allow addition by type.
-    # Need to maintain an order here. Deserialize regions and financials first so they can
+    # Need to maintain an order here. Deserialize regions first so they can
     # be referenced when deserializing technologies
     technologies = OrderedDict{Any, Vector{Dict}}()
     regions = OrderedDict{Any, Vector{Dict}}()
     for component in raw["components"]
         type = IS.get_type_from_serialization_data(component)
-        if type <: Region || type <: Financials
+        if type <: Region
             components = get(regions, type, nothing)
             if components === nothing
                 components = Vector{Dict}()
@@ -414,25 +429,48 @@ end
 function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{String, Any})
     vals = Dict{Symbol, Any}()
     struct_type = typeof(base_struct)
+
+    #TODO: Add get_component wrappers for IS functions
     for (name, type) in zip(fieldnames(struct_type), fieldtypes(struct_type))
-        vals[name] = getfield(base_struct, name)
-        if name == :region || name == :start_region || name == :end_region
-            vals[name] = get_region(Region, portfolio, getfield(base_struct, name))
-        elseif name == :financial_data
-            vals[name] = get_financial(
-                TechnologyFinancialData,
-                portfolio,
-                getfield(base_struct, name),
-            )
+        if name == :region
+            vals[name] = collect(IS.get_components(x -> get_id(x) in getfield(base_struct, name), Region, portfolio.data))
+        elseif name == :capacity_limits || name == :capacity_power_limits || name == :capacity_energy_limits || name == :duration_limits
+            data = getfield(base_struct, name)
+            vals[name] = (min=data["min"], max=data["max"])
+        elseif name == :efficiency
+            data = getfield(base_struct, name)
+            vals[name] = (in=data["in"], out=data["out"])
+        elseif name == :start_region || name == :end_region
+            vals[name] = first(IS.get_components(x -> get_id(x) in getfield(base_struct, name), Region, portfolio.data))
         elseif name == :prime_mover_type
             vals[name] = PrimeMovers(getfield(base_struct, name))
         elseif name == :fuel
-            vals[name] = ThermalFuels(getfield(base_struct, name))
+            vals[name] = [ThermalFuels(f) for f in getfield(base_struct, name)]
+        elseif name == :co2
+            data = getfield(base_struct, name)
+            vals[name] = Dict{ThermalFuels, Float64}()
+            for (k,v) in data
+                vals[name][ThermalFuels(k)] = v
+            end
+        elseif name == :heat_rate_mmbtu_per_mwh
+            data = getfield(base_struct, name)
+            vals[name] = Dict{ThermalFuels, ValueCurve}()
+            for (k,v) in data
+                vals[name][ThermalFuels(k)] = v
+            end
+        elseif name == :cofire_level_limits || name ==:cofire_start_limits
+            data = getfield(base_struct, name)
+            vals[name] = Dict{ThermalFuels, MinMax}()
+            for (k,v) in data
+                vals[name][ThermalFuels(k)] = (min=v["min"], max=v["max"])
+            end
         elseif name == :storage_tech
             vals[name] = StorageTech(getfield(base_struct, name))
+        else
+            vals[name] = getfield(base_struct, name)
         end
     end
-
+    @show vals
     struct_type_string = metadata["type"]
     struct_type = getproperty(PowerSystemsInvestmentsPortfolios, Symbol(struct_type_string))
     if haskey(metadata, "parameters")
@@ -450,7 +488,7 @@ end
 
 # PSIP types with fields that we should_encode_as_uuid
 # Okay this probably shouldn't exist anymore since we aren't doing that but run with it for now
-const _CONTAINS_SHOULD_ENCODE = Union{Technology, Region, Financials, Requirements}
+const _CONTAINS_SHOULD_ENCODE = Union{Technology, Region, Requirement}
 
 function IS.deserialize(
     ::Type{T},
@@ -489,10 +527,10 @@ const _ENCODE_AS_UUID_A = (
     #    Union{Nothing, DemandRequirement},
     Union{Nothing, Zone},
     Union{Nothing, ACTransportTechnology, HVDCTransportTechnology},
-    Vector{Requirements},
+    Vector{Requirement},
 )
 const _ENCODE_AS_UUID_B =
-    (Zone, ACTransportTechnology, HVDCTransportTechnology, Vector{Requirements})
+    (Zone, ACTransportTechnology, HVDCTransportTechnology, Vector{Requirement})
 
 should_encode_as_uuid(val) = any(x -> val isa x, _ENCODE_AS_UUID_B)
 should_encode_as_uuid(::Type{T}) where {T} = any(x -> T <: x, _ENCODE_AS_UUID_A)

@@ -12,6 +12,7 @@ This file is auto-generated. Do not edit.
         eligible_zones::Vector{Region}
         internal::InfrastructureSystemsInternal
         co_2_max_tons_mwh::Float64
+        id::Int64
         ext::Dict
         co_2_max_mtons::Float64
         available::Bool
@@ -26,6 +27,7 @@ This file is auto-generated. Do not edit.
 - `eligible_zones::Vector{Region}`: (default: `Vector{Region}()`) List of regions that contribute to the carbon cap constraint.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `co_2_max_tons_mwh::Float64`: (default: `1`) Emission limit in terms of rate (tCO@/MWh)
+- `id::Int64`: ID for individual generator
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `co_2_max_mtons::Float64`: (default: `Vector{Int64}()`) Emission limit in absolute values, in Million of tons
 - `available::Bool`: Availability
@@ -43,6 +45,8 @@ mutable struct CarbonCaps <: Requirement
     internal::InfrastructureSystemsInternal
     "Emission limit in terms of rate (tCO@/MWh)"
     co_2_max_tons_mwh::Float64
+    "ID for individual generator"
+    id::Int64
     "Option for providing additional data"
     ext::Dict
     "Emission limit in absolute values, in Million of tons"
@@ -52,8 +56,8 @@ mutable struct CarbonCaps <: Requirement
 end
 
 
-function CarbonCaps(; name, power_systems_type, pricecap=1e8, eligible_zones=Vector{Region}(), internal=InfrastructureSystemsInternal(), co_2_max_tons_mwh=1, ext=Dict(), co_2_max_mtons=Vector{Int64}(), available, )
-    CarbonCaps(name, power_systems_type, pricecap, eligible_zones, internal, co_2_max_tons_mwh, ext, co_2_max_mtons, available, )
+function CarbonCaps(; name, power_systems_type, pricecap=1e8, eligible_zones=Vector{Region}(), internal=InfrastructureSystemsInternal(), co_2_max_tons_mwh=1, id, ext=Dict(), co_2_max_mtons=Vector{Int64}(), available, )
+    CarbonCaps(name, power_systems_type, pricecap, eligible_zones, internal, co_2_max_tons_mwh, id, ext, co_2_max_mtons, available, )
 end
 
 """Get [`CarbonCaps`](@ref) `name`."""
@@ -68,6 +72,8 @@ get_eligible_zones(value::CarbonCaps) = value.eligible_zones
 get_internal(value::CarbonCaps) = value.internal
 """Get [`CarbonCaps`](@ref) `co_2_max_tons_mwh`."""
 get_co_2_max_tons_mwh(value::CarbonCaps) = value.co_2_max_tons_mwh
+"""Get [`CarbonCaps`](@ref) `id`."""
+get_id(value::CarbonCaps) = value.id
 """Get [`CarbonCaps`](@ref) `ext`."""
 get_ext(value::CarbonCaps) = value.ext
 """Get [`CarbonCaps`](@ref) `co_2_max_mtons`."""
@@ -87,6 +93,8 @@ set_eligible_zones!(value::CarbonCaps, val) = value.eligible_zones = val
 set_internal!(value::CarbonCaps, val) = value.internal = val
 """Set [`CarbonCaps`](@ref) `co_2_max_tons_mwh`."""
 set_co_2_max_tons_mwh!(value::CarbonCaps, val) = value.co_2_max_tons_mwh = val
+"""Set [`CarbonCaps`](@ref) `id`."""
+set_id!(value::CarbonCaps, val) = value.id = val
 """Set [`CarbonCaps`](@ref) `ext`."""
 set_ext!(value::CarbonCaps, val) = value.ext = val
 """Set [`CarbonCaps`](@ref) `co_2_max_mtons`."""

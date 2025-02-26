@@ -8,6 +8,7 @@
         name=nothing,
         id=nothing,
         available=nothing,
+        region=nothing,
         power_systems_type=nothing,
         max_demand_delay=nothing,
         max_demand_advance=nothing,
@@ -18,6 +19,7 @@
     - name::String
     - id::Int64
     - available::Bool
+    - region::Vector{Int64}
     - power_systems_type::String
     - max_demand_delay::Float64
     - max_demand_advance::Float64
@@ -28,26 +30,28 @@ Base.@kwdef mutable struct FlexibleDemandTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
+    region::Union{Nothing, Vector{Int64}} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     max_demand_delay::Union{Nothing, Float64} = nothing
     max_demand_advance::Union{Nothing, Float64} = nothing
     demand_energy_efficiency::Union{Nothing, Float64} = nothing
     var_cost_per_mwh = nothing # spec type: Union{ Nothing, ValueCurve }
 
-    function FlexibleDemandTechnology(name, id, available, power_systems_type, max_demand_delay, max_demand_advance, demand_energy_efficiency, var_cost_per_mwh, )
+    function FlexibleDemandTechnology(name, id, available, region, power_systems_type, max_demand_delay, max_demand_advance, demand_energy_efficiency, var_cost_per_mwh, )
         OpenAPI.validate_property(FlexibleDemandTechnology, Symbol("name"), name)
         OpenAPI.validate_property(FlexibleDemandTechnology, Symbol("id"), id)
         OpenAPI.validate_property(FlexibleDemandTechnology, Symbol("available"), available)
+        OpenAPI.validate_property(FlexibleDemandTechnology, Symbol("region"), region)
         OpenAPI.validate_property(FlexibleDemandTechnology, Symbol("power_systems_type"), power_systems_type)
         OpenAPI.validate_property(FlexibleDemandTechnology, Symbol("max_demand_delay"), max_demand_delay)
         OpenAPI.validate_property(FlexibleDemandTechnology, Symbol("max_demand_advance"), max_demand_advance)
         OpenAPI.validate_property(FlexibleDemandTechnology, Symbol("demand_energy_efficiency"), demand_energy_efficiency)
         OpenAPI.validate_property(FlexibleDemandTechnology, Symbol("var_cost_per_mwh"), var_cost_per_mwh)
-        return new(name, id, available, power_systems_type, max_demand_delay, max_demand_advance, demand_energy_efficiency, var_cost_per_mwh, )
+        return new(name, id, available, region, power_systems_type, max_demand_delay, max_demand_advance, demand_energy_efficiency, var_cost_per_mwh, )
     end
 end # type FlexibleDemandTechnology
 
-const _property_types_FlexibleDemandTechnology = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("id")=>"Int64", Symbol("available")=>"Bool", Symbol("power_systems_type")=>"String", Symbol("max_demand_delay")=>"Float64", Symbol("max_demand_advance")=>"Float64", Symbol("demand_energy_efficiency")=>"Float64", Symbol("var_cost_per_mwh")=>"ValueCurve", )
+const _property_types_FlexibleDemandTechnology = Dict{Symbol,String}(Symbol("name")=>"String", Symbol("id")=>"Int64", Symbol("available")=>"Bool", Symbol("region")=>"Vector{Int64}", Symbol("power_systems_type")=>"String", Symbol("max_demand_delay")=>"Float64", Symbol("max_demand_advance")=>"Float64", Symbol("demand_energy_efficiency")=>"Float64", Symbol("var_cost_per_mwh")=>"ValueCurve", )
 OpenAPI.property_type(::Type{ FlexibleDemandTechnology }, name::Symbol) = Union{Nothing,eval(Base.Meta.parse(_property_types_FlexibleDemandTechnology[name]))}
 
 function check_required(o::FlexibleDemandTechnology)
@@ -58,6 +62,7 @@ function check_required(o::FlexibleDemandTechnology)
 end
 
 function OpenAPI.validate_property(::Type{ FlexibleDemandTechnology }, name::Symbol, val)
+
 
 
 
