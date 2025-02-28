@@ -204,6 +204,7 @@ function from_dict(
         "discount_rate",
         "data",
         "base_system",
+        "financial_data",
         "investment_schedule",
         "time_series_directory",
         "time_series_container",
@@ -219,10 +220,12 @@ function from_dict(
         parsed_kwargs[:runchecks] = kwargs[:runchecks]
     end
 
-    # Initialize empty portfolio without component data
+    # Initialize portfolio
     metadata = get(raw, "metadata", Dict())
     name = get(metadata, "name", nothing)
     description = get(metadata, "description", nothing)
+    financial_data = IS.deserialize_struct(PortfolioFinancialData, raw["financial_data"])
+    @show name
     internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
     aggregation = PSY.ACBus
     investment_schedule = raw["investment_schedule"]
@@ -238,12 +241,13 @@ function from_dict(
         data=data,
         aggregation=aggregation,
         investment_schedule=investment_schedule,
+        financial_data=financial_data,
         internal=internal,
         name=name,
         description=description,
         parsed_kwargs...,
     )
-
+    @show portfolio
     # units = IS.deserialize(SystemUnitsSettings, raw["units_settings"])
     if raw["data_format_version"] != DATA_FORMAT_VERSION
         pre_deserialize_conversion!(raw, portfolio)
@@ -316,7 +320,6 @@ function IS.deserialize(
         read_only=time_series_read_only,
         metadata_store=time_series_metadata_store,
     )
-    @show time_series_metadata_store
     subsystems = Dict(k => Set(Base.UUID.(v)) for (k, v) in raw["subsystems"])
     supplemental_attribute_manager = IS.deserialize(
         IS.SupplementalAttributeManager,
@@ -470,7 +473,6 @@ function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{St
             vals[name] = getfield(base_struct, name)
         end
     end
-    @show vals
     struct_type_string = metadata["type"]
     struct_type = getproperty(PowerSystemsInvestmentsPortfolios, Symbol(struct_type_string))
     if haskey(metadata, "parameters")
