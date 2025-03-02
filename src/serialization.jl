@@ -42,6 +42,7 @@ function Portfolio(
             # runchecks = runchecks,
             time_series_directory=time_series_directory,
         )
+        #return portfolio
         _post_deserialize_handling(
             portfolio;
             # runchecks = runchecks,
@@ -82,7 +83,7 @@ function IS.deserialize(::Type{Portfolio}, filename::AbstractString; kwargs...)
             raw["data"][file_key] = joinpath(directory, raw["data"][file_key])
         end
     end
-    # return raw
+    #return raw
     return from_dict(Portfolio, raw; kwargs...)
 end
 
@@ -225,7 +226,6 @@ function from_dict(
     name = get(metadata, "name", nothing)
     description = get(metadata, "description", nothing)
     financial_data = IS.deserialize_struct(PortfolioFinancialData, raw["financial_data"])
-    @show name
     internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
     aggregation = PSY.ACBus
     investment_schedule = raw["investment_schedule"]
@@ -236,18 +236,17 @@ function from_dict(
         time_series_directory=time_series_directory,
         validation_descriptor_file=config_path,
     )
-
-    portfolio = Portfolio(;
-        data=data,
-        aggregation=aggregation,
-        investment_schedule=investment_schedule,
+    portfolio = Portfolio(
+        aggregation,
+        data,
+        investment_schedule,
+        internal;
         financial_data=financial_data,
-        internal=internal,
         name=name,
         description=description,
         parsed_kwargs...,
     )
-    @show portfolio
+    #return portfolio
     # units = IS.deserialize(SystemUnitsSettings, raw["units_settings"])
     if raw["data_format_version"] != DATA_FORMAT_VERSION
         pre_deserialize_conversion!(raw, portfolio)
@@ -273,7 +272,7 @@ function from_dict(
     return portfolio
 end
 
-# Function copied over from IS. This version of the function is modified to not use the internal field for components,
+# Function copied over from IS. This version of the function is modified to not use the internal field  and UUIDs for components,
 # since the internal field is not stored in the JSON when serializing with OpenAPI structs
 function IS.deserialize(
     ::Type{IS.SystemData},
@@ -284,6 +283,7 @@ function IS.deserialize(
     kwargs...,
 )
     if haskey(raw, "time_series_storage_file")
+        @show "enter"
         if !isfile(raw["time_series_storage_file"])
             error("time series file $(raw["time_series_storage_file"]) does not exist")
         end
