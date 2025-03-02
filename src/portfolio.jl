@@ -34,7 +34,7 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
         aggregation,
         data,
         investment_schedule::Dict,
-        internal::IS.InfrastructureSystemsInternal,
+        internal::IS.InfrastructureSystemsInternal;
         time_series_directory=nothing,
         financial_data=nothing,
         base_system=nothing,
@@ -80,7 +80,7 @@ Construct an empty `Portfolio`. Useful for building a Portfolio from scratch.
 """
 function Portfolio(; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(DEFAULT_AGGREGATION, data, Dict(), IS.InfrastructureSystemsInternal())
+    return Portfolio(DEFAULT_AGGREGATION, data, Dict(), IS.InfrastructureSystemsInternal(); kwargs...)
 end
 
 """
@@ -97,10 +97,49 @@ Construct an empty `Portfolio` specifying financial data. Useful for building a 
 function Portfolio(financial_data; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
     return Portfolio(; aggregation=DEFAULT_AGGREGATION, 
-            data=data, investment_schedule=Dict(), 
+            data=data, 
+            investment_schedule=Dict(), 
             internal=IS.InfrastructureSystemsInternal(), 
             financial_data=financial_data
         )
+end
+
+"""
+Constructs a Portfolio from a file path ending with .json
+
+If the file is JSON, then `assign_new_uuids = true` will generate new UUIDs for the system
+and all components.
+"""
+function Portfolio(
+    file_path::AbstractString;
+    assign_new_uuids=false,
+    try_reimport=true,
+    kwargs...,
+)
+    ext = lowercase(splitext(file_path)[2])
+    if ext == ".json"
+        unsupported = setdiff(keys(kwargs), SYSTEM_KWARGS)
+        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
+        runchecks = get(kwargs, :runchecks, false)
+        time_series_read_only = get(kwargs, :time_series_read_only, false)
+        time_series_directory = get(kwargs, :time_series_directory, nothing)
+        portfolio = deserialize(
+            Portfolio,
+            file_path;
+            time_series_read_only=time_series_read_only,
+            # runchecks = runchecks,
+            time_series_directory=time_series_directory,
+        )
+        return portfolio
+        _post_deserialize_handling(
+            portfolio;
+            runchecks = runchecks,
+            assign_new_uuids=assign_new_uuids,
+        )
+        return portfolio
+    else
+        throw(DataFormatError("$file_path is not a supported file type"))
+    end
 end
 
 """

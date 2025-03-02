@@ -16,44 +16,6 @@ const SYSTEM_KWARGS = Set((
     :description,
 ))
 
-"""
-Constructs a Portfolio from a file path ending with .json
-
-If the file is JSON, then `assign_new_uuids = true` will generate new UUIDs for the system
-and all components.
-"""
-function Portfolio(
-    file_path::AbstractString;
-    assign_new_uuids=false,
-    try_reimport=true,
-    kwargs...,
-)
-    ext = lowercase(splitext(file_path)[2])
-    if ext == ".json"
-        unsupported = setdiff(keys(kwargs), SYSTEM_KWARGS)
-        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
-        # runchecks = get(kwargs, :runchecks, true)
-        time_series_read_only = get(kwargs, :time_series_read_only, false)
-        time_series_directory = get(kwargs, :time_series_directory, nothing)
-        portfolio = deserialize(
-            Portfolio,
-            file_path;
-            time_series_read_only=time_series_read_only,
-            # runchecks = runchecks,
-            time_series_directory=time_series_directory,
-        )
-        #return portfolio
-        _post_deserialize_handling(
-            portfolio;
-            # runchecks = runchecks,
-            assign_new_uuids=assign_new_uuids,
-        )
-        return portfolio
-    else
-        throw(DataFormatError("$file_path is not a supported file type"))
-    end
-end
-
 function IS.serialize(portfolio::T) where {T <: Portfolio}
     data = Dict{String, Any}()
     data["data_format_version"] = DATA_FORMAT_VERSION
@@ -83,35 +45,8 @@ function IS.deserialize(::Type{Portfolio}, filename::AbstractString; kwargs...)
             raw["data"][file_key] = joinpath(directory, raw["data"][file_key])
         end
     end
-    #return raw
+
     return from_dict(Portfolio, raw; kwargs...)
-end
-
-"""
-Serialize the value, encoding as UUIDs where necessary.
-"""
-function serialize_uuid_handling(val)
-    if should_encode_as_uuid(val)
-        if val isa Array
-            value = IS.get_uuid.(val)
-        elseif val === nothing
-            value = nothing
-        else
-            value = IS.get_uuid(val)
-        end
-    else
-        value = val
-    end
-
-    return serialize(value)
-end
-
-function serialize_struct(val::T) where {T}
-    data = Dict{String, Any}(
-        string(name) => serialize(getproperty(val, name)) for name in fieldnames(T)
-    )
-    add_serialization_metadata!(data, T)
-    return data
 end
 
 function serialize(technology::Technology)
@@ -188,7 +123,7 @@ end
 """
 Clear any value stored in ext.
 """
-clear_ext!(sys::Portfolio) = IS.clear_ext!(sys.internal)
+clear_ext!(port::Portfolio) = IS.clear_ext!(port.internal)
 
 function from_dict(
     ::Type{Portfolio},
@@ -246,8 +181,7 @@ function from_dict(
         description=description,
         parsed_kwargs...,
     )
-    #return portfolio
-    # units = IS.deserialize(SystemUnitsSettings, raw["units_settings"])
+
     if raw["data_format_version"] != DATA_FORMAT_VERSION
         pre_deserialize_conversion!(raw, portfolio)
     end
@@ -283,7 +217,6 @@ function IS.deserialize(
     kwargs...,
 )
     if haskey(raw, "time_series_storage_file")
-        @show "enter"
         if !isfile(raw["time_series_storage_file"])
             error("time series file $(raw["time_series_storage_file"]) does not exist")
         end
@@ -362,7 +295,7 @@ end
 
 function deserialize_components!(portfolio::Portfolio, raw)
     # Convert the array of components into type-specific arrays to allow addition by type.
-    # Need to maintain an order here. Deserialize regions first so they can
+    # Need to maintain an order here and deserialize regions first so they can
     # be referenced when deserializing technologies
     technologies = OrderedDict{Any, Vector{Dict}}()
     regions = OrderedDict{Any, Vector{Dict}}()
@@ -384,11 +317,6 @@ function deserialize_components!(portfolio::Portfolio, raw)
         push!(components, component)
     end
     data = merge(regions, technologies)
-
-    # Maintain a lookup of UUID to component because some component types encode
-    # composed types as UUIDs instead of actual types.
-    # Can remove this I think since we aren't using UUIDs anymore to encode
-    component_cache = Dict{Base.UUID, InfrastructureSystemsComponent}()
 
     # Add each type to this as we parse.
     parsed_types = Set()
@@ -416,8 +344,10 @@ function deserialize_components!(portfolio::Portfolio, raw)
                 api_component = deserialize_openapi_struct(type, component)
                 model_component =
                     build_model_struct(api_component, portfolio, component["__metadata__"])
-                IS.add_component!(portfolio.data, model_component)
-                component_cache[IS.get_uuid(model_component)] = model_component
+                
+                #TODO: skip_validation currently set to true, review the IS validation
+                IS.add_component!(portfolio.data, model_component; skip_validation = true)
+
                 if !isnothing(post_add_func)
                     post_add_func(model_component)
                 end
@@ -497,6 +427,7 @@ function IS.deserialize(
     data::Dict,
     component_cache::Dict,
 ) where {T <: _CONTAINS_SHOULD_ENCODE}
+    @show "ENTER"
     vals = Dict{Symbol, Any}()
     for (name, type) in zip(fieldnames(T), fieldtypes(T))
         field_name = string(name)
