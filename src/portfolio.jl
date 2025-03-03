@@ -3,14 +3,9 @@ const PORTFOLIO_KWARGS =
 
 const DATA_FORMAT_VERSION = "0.1.0"
 
-const DEFAULT_DISCOUNT_RATE = 0.07
 const DEFAULT_AGGREGATION = PSY.ACBus
 
-const PORTFOLIO_STRUCT_DESCRIPTOR_FILE = joinpath(
-    dirname(pathof(PowerSystemsInvestmentsPortfolios)),
-    "descriptors",
-    "portfolio_structs.json",
-)
+const PORTFOLIO_STRUCT_DESCRIPTOR_FILE = nothing
 
 mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
