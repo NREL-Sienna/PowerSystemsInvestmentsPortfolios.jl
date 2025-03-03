@@ -15,6 +15,23 @@ const SYSTEM_KWARGS = Set((
     :name,
     :description,
 ))
+const ENCODED_FIELDS= Set((
+    :duration_limits,
+    :capacity_limits,
+    :capacity_energy_limits,
+    :capacity_power_limits,
+    :co2,
+    :fuel,
+    :prime_mover_type,
+    :heat_rate_mmbtu_per_mwh,
+    :storage_tech,
+    :cofire_level_limits,
+    :cofire_start_limits,
+    :region,
+    :start_region,
+    :end_region,
+    :efficiency
+))
 
 function IS.serialize(portfolio::T) where {T <: Portfolio}
     data = Dict{String, Any}()
@@ -151,6 +168,7 @@ function from_dict(
     for field in setdiff(keys(raw), handled)
         parsed_kwargs[Symbol(field)] = raw[field]
     end
+
     # The user can override the serialized runchecks value by passing a kwarg here.
     if haskey(kwargs, :runchecks)
         parsed_kwargs[:runchecks] = kwargs[:runchecks]
@@ -196,7 +214,7 @@ function from_dict(
     end
 
     # if !get_runchecks(portfolio)
-    #     @warn "The System was deserialized with checks disabled, and so was not validated."
+    #     @warn "The Portfolio was deserialized with checks disabled, and so was not validated."
     # end
 
     if raw["data_format_version"] != DATA_FORMAT_VERSION
@@ -365,40 +383,9 @@ function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{St
 
     #TODO: Add get_component wrappers for IS functions
     for (name, type) in zip(fieldnames(struct_type), fieldtypes(struct_type))
-        if name == :region
-            vals[name] = collect(IS.get_components(x -> get_id(x) in getfield(base_struct, name), Region, portfolio.data))
-        elseif name == :capacity_limits || name == :capacity_power_limits || name == :capacity_energy_limits || name == :duration_limits
-            data = getfield(base_struct, name)
-            vals[name] = (min=data["min"], max=data["max"])
-        elseif name == :efficiency
-            data = getfield(base_struct, name)
-            vals[name] = (in=data["in"], out=data["out"])
-        elseif name == :start_region || name == :end_region
-            vals[name] = first(IS.get_components(x -> get_id(x) in getfield(base_struct, name), Region, portfolio.data))
-        elseif name == :prime_mover_type
-            vals[name] = PrimeMovers(getfield(base_struct, name))
-        elseif name == :fuel
-            vals[name] = [ThermalFuels(f) for f in getfield(base_struct, name)]
-        elseif name == :co2
-            data = getfield(base_struct, name)
-            vals[name] = Dict{ThermalFuels, Float64}()
-            for (k,v) in data
-                vals[name][ThermalFuels(k)] = v
-            end
-        elseif name == :heat_rate_mmbtu_per_mwh
-            data = getfield(base_struct, name)
-            vals[name] = Dict{ThermalFuels, ValueCurve}()
-            for (k,v) in data
-                vals[name][ThermalFuels(k)] = v
-            end
-        elseif name == :cofire_level_limits || name ==:cofire_start_limits
-            data = getfield(base_struct, name)
-            vals[name] = Dict{ThermalFuels, MinMax}()
-            for (k,v) in data
-                vals[name][ThermalFuels(k)] = (min=v["min"], max=v["max"])
-            end
-        elseif name == :storage_tech
-            vals[name] = StorageTech(getfield(base_struct, name))
+        @show name
+        if name in ENCODED_FIELDS
+            vals[name] = deserialize_custom_types(name, base_struct, portfolio)
         else
             vals[name] = getfield(base_struct, name)
         end
@@ -406,7 +393,6 @@ function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{St
     struct_type_string = metadata["type"]
     struct_type = getproperty(PowerSystemsInvestmentsPortfolios, Symbol(struct_type_string))
     if haskey(metadata, "parameters")
-        # = [getproperty(_module, Symbol(x)) for x in metadata[PARAMETERS_KEY]]
         parameter_string = metadata["parameters"][1]
         #TODO: Generalize this later. Will all future parameterizing be with PSY structs?
         parameter = getproperty(PowerSystems, Symbol(parameter_string))
@@ -418,16 +404,12 @@ function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{St
     return model_struct
 end
 
-# PSIP types with fields that we should_encode_as_uuid
-# Okay this probably shouldn't exist anymore since we aren't doing that but run with it for now
-const _CONTAINS_SHOULD_ENCODE = Union{Technology, Region, Requirement}
-
 function IS.deserialize(
     ::Type{T},
     data::Dict,
     component_cache::Dict,
-) where {T <: _CONTAINS_SHOULD_ENCODE}
-    @show "ENTER"
+) where {T <: IS.InfrastructureSystemsComponent}
+    @show "ENTERED!!"
     vals = Dict{Symbol, Any}()
     for (name, type) in zip(fieldnames(T), fieldtypes(T))
         field_name = string(name)
@@ -449,24 +431,52 @@ function IS.deserialize(
 
     type = IS.get_type_from_serialization_metadata(data[IS.METADATA_KEY])
 
+    @show vals
     base_struct = deserialize_openapi_struct(type, vals...)
 
     return base_struct
 end
 
-const _ENCODE_AS_UUID_A = (
-    #    Union{Nothing, SupplyTechnology},
-    #    Union{Nothing, StorageTechnology},
-    #    Union{Nothing, DemandRequirement},
-    Union{Nothing, Zone},
-    Union{Nothing, ACTransportTechnology, HVDCTransportTechnology},
-    Vector{Requirement},
-)
-const _ENCODE_AS_UUID_B =
-    (Zone, ACTransportTechnology, HVDCTransportTechnology, Vector{Requirement})
+# Handle cases where the data types in the OpenAPI struct do not match the PSIP struct
+function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio::Portfolio)
+    if name == :region
+        val = collect(IS.get_components(x -> get_id(x) in getfield(base_struct, name), Region, portfolio.data))
+    elseif name == :capacity_limits || name == :capacity_power_limits || name == :capacity_energy_limits || name == :duration_limits
+        data = getfield(base_struct, name)
+        val = (min=data["min"], max=data["max"])
+    elseif name == :efficiency
+        data = getfield(base_struct, name)
+        val = (in=data["in"], out=data["out"])
+    elseif name == :start_region || name == :end_region
+        val = first(IS.get_components(x -> get_id(x) in getfield(base_struct, name), Region, portfolio.data))
+    elseif name == :prime_mover_type
+        val = PrimeMovers(getfield(base_struct, name))
+    elseif name == :fuel
+        val = [ThermalFuels(f) for f in getfield(base_struct, name)]
+    elseif name == :co2
+        data = getfield(base_struct, name)
+        val = Dict{ThermalFuels, Float64}()
+        for (k,v) in data
+            val[ThermalFuels(k)] = v
+        end
+    elseif name == :heat_rate_mmbtu_per_mwh
+        data = getfield(base_struct, name)
+        val = Dict{ThermalFuels, ValueCurve}()
+        for (k,v) in data
+            val[ThermalFuels(k)] = v
+        end
+    elseif name == :cofire_level_limits || name ==:cofire_start_limits
+        data = getfield(base_struct, name)
+        val = Dict{ThermalFuels, MinMax}()
+        for (k,v) in data
+            val[ThermalFuels(k)] = (min=v["min"], max=v["max"])
+        end
+    elseif name == :storage_tech
+        val = StorageTech(getfield(base_struct, name))
+    end
 
-should_encode_as_uuid(val) = any(x -> val isa x, _ENCODE_AS_UUID_B)
-should_encode_as_uuid(::Type{T}) where {T} = any(x -> T <: x, _ENCODE_AS_UUID_A)
+    return val
+end
 
 """
 Allow types to implement handling of special cases during deserialization.
