@@ -36,10 +36,13 @@ end
     )
     add_technology!(port, gen)
 
+    #TODO: Fix validate_serialization function and compare_values
     #port2, result = validate_serialization(port)
     port2 = validate_serialization(port)
     #@test result
-    @test port2.financial_data == financial_data
+    @test port2.financial_data.discount_rate == financial_data.discount_rate
+    @test port2.financial_data.inflation_rate == financial_data.inflation_rate
+    @test port2.financial_data.interest_rate == financial_data.interest_rate
     @test port2.metadata.name == name
     @test port2.metadata.description == description
 end

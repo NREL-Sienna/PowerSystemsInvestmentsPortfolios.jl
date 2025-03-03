@@ -204,8 +204,8 @@ function from_dict(
         internal;
         financial_data=PortfolioFinancialData(
             base_year,
-            inflation_rate,
             discount_rate,
+            inflation_rate,
             interest_rate,
         ),
         name=name,
