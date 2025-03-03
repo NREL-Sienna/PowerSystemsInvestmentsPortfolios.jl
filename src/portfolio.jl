@@ -106,14 +106,19 @@ end
 """
 Construct an empty `Portfolio` specifying financial data. Useful for building a Portfolio from scratch.
 """
-function Portfolio(financial_data; kwargs...)
+function Portfolio(base_year, discount_rate, inflation_rate, interest_rate; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(;
-        aggregation=DEFAULT_AGGREGATION,
-        data=data,
-        investment_schedule=Dict(),
-        internal=IS.InfrastructureSystemsInternal(),
-        financial_data=financial_data,
+    return Portfolio(
+        DEFAULT_AGGREGATION,
+        data,
+        Dict(),
+        InfrastructureSystemsInternal();
+        financial_data=PortfolioFinancialData(
+            base_year,
+            discount_rate,
+            inflation_rate,
+            interest_rate,
+        ),
     )
 end
 

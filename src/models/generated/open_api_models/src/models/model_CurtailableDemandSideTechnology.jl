@@ -128,5 +128,4 @@ function OpenAPI.validate_property(
     ::Type{CurtailableDemandSideTechnology},
     name::Symbol,
     val,
-)
-end
+) end

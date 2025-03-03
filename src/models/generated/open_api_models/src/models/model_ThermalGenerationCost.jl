@@ -48,5 +48,4 @@ function check_required(o::ThermalGenerationCost)
     true
 end
 
-function OpenAPI.validate_property(::Type{ThermalGenerationCost}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{ThermalGenerationCost}, name::Symbol, val) end

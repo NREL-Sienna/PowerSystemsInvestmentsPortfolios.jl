@@ -69,5 +69,4 @@ function check_required(o::TechnologyFinancialData)
     true
 end
 
-function OpenAPI.validate_property(::Type{TechnologyFinancialData}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{TechnologyFinancialData}, name::Symbol, val) end

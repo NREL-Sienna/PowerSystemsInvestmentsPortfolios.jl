@@ -31,5 +31,4 @@ function check_required(o::InOut)
     true
 end
 
-function OpenAPI.validate_property(::Type{InOut}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{InOut}, name::Symbol, val) end

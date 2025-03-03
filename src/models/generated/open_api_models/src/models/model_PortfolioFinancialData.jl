@@ -76,5 +76,4 @@ function check_required(o::PortfolioFinancialData)
     true
 end
 
-function OpenAPI.validate_property(::Type{PortfolioFinancialData}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{PortfolioFinancialData}, name::Symbol, val) end

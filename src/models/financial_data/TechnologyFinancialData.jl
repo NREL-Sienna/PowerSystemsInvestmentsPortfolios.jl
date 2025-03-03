@@ -1,5 +1,5 @@
 """
-    mutable struct TechnologyFinancialData <: Financials
+    mutable struct TechnologyFinancialData <: FinancialData
         interest_rate::Float64
         capital_recovery_period::Int64
         technology_base_year::Int64

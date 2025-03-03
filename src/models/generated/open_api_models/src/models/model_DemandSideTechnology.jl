@@ -118,5 +118,4 @@ function check_required(o::DemandSideTechnology)
     true
 end
 
-function OpenAPI.validate_property(::Type{DemandSideTechnology}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{DemandSideTechnology}, name::Symbol, val) end
