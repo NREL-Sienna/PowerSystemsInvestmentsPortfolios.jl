@@ -18,6 +18,17 @@ mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     data_source::Union{Nothing, String}
 end
 
+mutable struct PortfolioFinancialData <: IS.InfrastructureSystemsType
+    "Base economic year. All costs will be converted to a net present value in this year."
+    base_year::Int64
+    "Discount rate"
+    discount_rate::Float64
+    "Inflation rate"
+    inflation_rate::Float64
+    "Interest rate"
+    interest_rate::Float64
+end
+
 #TODO: Define if we are going to support unit systems
 #TODO: Make immutable
 mutable struct Portfolio <: IS.InfrastructureSystemsType
@@ -163,10 +174,25 @@ Get the name of the portfolio.
 get_name(val::Portfolio) = val.metadata.name
 
 """
-Set the description of the portfolio.
+Get the base year of the portfolio.
 """
-set_description!(val::Portfolio, description::AbstractString) =
-    val.metadata.description = description
+get_base_year(val::Portfolio) = value.financial_data.base_year
+
+"""
+Get the discount rate.
+"""
+get_discount_rate(val::Portfolio) = value.financial_data.discount_rate
+
+"""
+Get the inflation rate.
+"""
+get_inflation_rate(val::Portfolio) = value.financial_data.inflation_rate
+
+"""
+Get the interest rate.
+"""
+get_interest_rate(val::Portfolio) = value.financial_data.interest_rate
+
 
 """
 Get the description of the portfolio.
@@ -179,10 +205,19 @@ Return true if checks are enabled on the system.
 get_runchecks(val::Portfolio) = val.runchecks[]
 
 """
+Set the description of the portfolio.
+"""
+set_description!(val::Portfolio, description::AbstractString) =
+    val.metadata.description = description
+
+"""
 Set the financial data of the portfolio.
 """
 set_financial_data!(val::Portfolio, financial_data::PortfolioFinancialData) =
     val.financial_data = financial_data
+
+set_financial_data!(val::Portfolio, base_year::Int64, inflation_rate::Float64, interest_rate::Float64) =
+    val.financial_data = PortfolioFinancialData(base_year, discount_rate, inflation_rate, interest_rate)
 
 function _validate_or_skip!(sys, component, skip_validation)
     if skip_validation && get_runchecks(sys)
