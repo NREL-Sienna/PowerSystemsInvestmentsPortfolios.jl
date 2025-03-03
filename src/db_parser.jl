@@ -507,8 +507,8 @@ function dataframe_to_structs(df_dict::Dict)
             start_cost_per_mw=91.0,
             up_time=6.0,
             dn_time=6.0,
-            heat_rate_mmbtu_per_mwh=Dict(f=>7.43),
-            co2=Dict(f=>0.05306),
+            heat_rate_mmbtu_per_mwh=Dict(f => 7.43),
+            co2=Dict(f => 0.05306),
             ramp_dn_percentage=0.64,
             ramp_up_percentage=0.64,
 

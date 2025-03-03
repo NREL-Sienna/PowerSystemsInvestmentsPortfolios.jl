@@ -15,7 +15,7 @@ const SYSTEM_KWARGS = Set((
     :name,
     :description,
 ))
-const ENCODED_FIELDS= Set((
+const ENCODED_FIELDS = Set((
     :duration_limits,
     :capacity_limits,
     :capacity_energy_limits,
@@ -30,7 +30,7 @@ const ENCODED_FIELDS= Set((
     :region,
     :start_region,
     :end_region,
-    :efficiency
+    :efficiency,
 ))
 
 function IS.serialize(portfolio::T) where {T <: Portfolio}
@@ -80,26 +80,27 @@ function serialize(technology::Technology)
         if field == :region
             regions = getfield(technology, field)
             value = [get_id(r) for r in regions]
-        
-        elseif field == :start_region ||
-           field == :end_region
+
+        elseif field == :start_region || field == :end_region
             value = get_id(getfield(technology, field))
 
-        #convert enums to strings
+            #convert enums to strings
         elseif field == :prime_mover_type || field == :storage_tech
             value = string(getfield(technology, field))
-        elseif field == :fuel    
+        elseif field == :fuel
             value = [string(f) for f in getfield(technology, field)]
         elseif field == :heat_rate_mmbtu_per_mwh
             fuel_params = getfield(technology, field)
             value = Dict{String, ValueCurve}()
-            for (k,v) in fuel_params
+            for (k, v) in fuel_params
                 value[string(k)] = v
             end
-        elseif field == :co2 || field == :cofire_start_limits || field == :cofire_level_limits
+        elseif field == :co2 ||
+               field == :cofire_start_limits ||
+               field == :cofire_level_limits
             fuel_params = getfield(technology, field)
             value = Dict{String, Float64}()
-            for (k,v) in fuel_params
+            for (k, v) in fuel_params
                 value[string(k)] = v
             end
         else
@@ -174,11 +175,18 @@ function from_dict(
         parsed_kwargs[:runchecks] = kwargs[:runchecks]
     end
 
-    # Initialize portfolio
+    # Metadata
     metadata = get(raw, "metadata", Dict())
     name = get(metadata, "name", nothing)
     description = get(metadata, "description", nothing)
-    financial_data = IS.deserialize_struct(PortfolioFinancialData, raw["financial_data"])
+
+    #Financial Data
+    financial_data = get(raw, "financial_data", Dict())
+    base_year = get(financial_data, "base_year", nothing)
+    inflation_rate = get(financial_data, "inflation_rate", nothing)
+    discount_rate = get(financial_data, "discount_rate", nothing)
+    interest_rate = get(financial_data, "interest_rate", nothing)
+
     internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
     aggregation = PSY.ACBus
     investment_schedule = raw["investment_schedule"]
@@ -194,7 +202,12 @@ function from_dict(
         data,
         investment_schedule,
         internal;
-        financial_data=financial_data,
+        financial_data=PortfolioFinancialData(
+            base_year,
+            inflation_rate,
+            discount_rate,
+            interest_rate,
+        ),
         name=name,
         description=description,
         parsed_kwargs...,
@@ -259,7 +272,7 @@ function IS.deserialize(
     else
         time_series_storage = IS.make_time_series_storage(;
             compression=CompressionSettings(;
-                enabled=get(raw, "time_series_compression_enabled", DEFAULT_COMPRESSION),
+                enabled=get(raw, "time_series_compression_enabled", false),
             ),
             directory=time_series_directory,
         )
@@ -362,9 +375,9 @@ function deserialize_components!(portfolio::Portfolio, raw)
                 api_component = deserialize_openapi_struct(type, component)
                 model_component =
                     build_model_struct(api_component, portfolio, component["__metadata__"])
-                
+
                 #TODO: skip_validation currently set to true, review the IS validation
-                IS.add_component!(portfolio.data, model_component; skip_validation = true)
+                IS.add_component!(portfolio.data, model_component; skip_validation=true)
 
                 if !isnothing(post_add_func)
                     post_add_func(model_component)
@@ -383,7 +396,6 @@ function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{St
 
     #TODO: Add get_component wrappers for IS functions
     for (name, type) in zip(fieldnames(struct_type), fieldtypes(struct_type))
-        @show name
         if name in ENCODED_FIELDS
             vals[name] = deserialize_custom_types(name, base_struct, portfolio)
         else
@@ -409,7 +421,6 @@ function IS.deserialize(
     data::Dict,
     component_cache::Dict,
 ) where {T <: IS.InfrastructureSystemsComponent}
-    @show "ENTERED!!"
     vals = Dict{Symbol, Any}()
     for (name, type) in zip(fieldnames(T), fieldtypes(T))
         field_name = string(name)
@@ -431,7 +442,6 @@ function IS.deserialize(
 
     type = IS.get_type_from_serialization_metadata(data[IS.METADATA_KEY])
 
-    @show vals
     base_struct = deserialize_openapi_struct(type, vals...)
 
     return base_struct
@@ -440,15 +450,30 @@ end
 # Handle cases where the data types in the OpenAPI struct do not match the PSIP struct
 function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio::Portfolio)
     if name == :region
-        val = collect(IS.get_components(x -> get_id(x) in getfield(base_struct, name), Region, portfolio.data))
-    elseif name == :capacity_limits || name == :capacity_power_limits || name == :capacity_energy_limits || name == :duration_limits
+        val = collect(
+            IS.get_components(
+                x -> get_id(x) in getfield(base_struct, name),
+                Region,
+                portfolio.data,
+            ),
+        )
+    elseif name == :capacity_limits ||
+           name == :capacity_power_limits ||
+           name == :capacity_energy_limits ||
+           name == :duration_limits
         data = getfield(base_struct, name)
         val = (min=data["min"], max=data["max"])
     elseif name == :efficiency
         data = getfield(base_struct, name)
         val = (in=data["in"], out=data["out"])
     elseif name == :start_region || name == :end_region
-        val = first(IS.get_components(x -> get_id(x) in getfield(base_struct, name), Region, portfolio.data))
+        val = first(
+            IS.get_components(
+                x -> get_id(x) in getfield(base_struct, name),
+                Region,
+                portfolio.data,
+            ),
+        )
     elseif name == :prime_mover_type
         val = PrimeMovers(getfield(base_struct, name))
     elseif name == :fuel
@@ -456,19 +481,19 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
     elseif name == :co2
         data = getfield(base_struct, name)
         val = Dict{ThermalFuels, Float64}()
-        for (k,v) in data
+        for (k, v) in data
             val[ThermalFuels(k)] = v
         end
     elseif name == :heat_rate_mmbtu_per_mwh
         data = getfield(base_struct, name)
         val = Dict{ThermalFuels, ValueCurve}()
-        for (k,v) in data
+        for (k, v) in data
             val[ThermalFuels(k)] = v
         end
-    elseif name == :cofire_level_limits || name ==:cofire_start_limits
+    elseif name == :cofire_level_limits || name == :cofire_start_limits
         data = getfield(base_struct, name)
         val = Dict{ThermalFuels, MinMax}()
-        for (k,v) in data
+        for (k, v) in data
             val[ThermalFuels(k)] = (min=v["min"], max=v["max"])
         end
     elseif name == :storage_tech
@@ -560,11 +585,9 @@ end
 function _serialize_portfolio_metadata_to_file(portfolio::Portfolio, filename, user_data)
     name = get_name(portfolio)
     description = get_description(portfolio)
-    resolution = get_time_series_resolution(portfolio)[1]
     metadata = OrderedDict(
         "name" => isnothing(name) ? "" : name,
         "description" => isnothing(description) ? "" : description,
-        "time_series_resolution_milliseconds" => resolution,
         "component_counts" => IS.get_component_counts_by_type(portfolio.data),
         "time_series_counts" => IS.get_time_series_counts_by_type(portfolio.data),
     )

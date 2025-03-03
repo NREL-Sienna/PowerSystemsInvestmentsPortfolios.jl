@@ -37,13 +37,10 @@ function build_portfolio()
     ##### Thermals #####
     ####################
 
-    tech_financials = TechnologyFinancialData(;
-        name="all_technologies",
-        capital_recovery_period=30,
-        technology_base_year=2025,
-    )
+    tech_financials =
+        TechnologyFinancialData(; capital_recovery_period=30, technology_base_year=2025)
 
-    thermals = collect(get_components(ThermalStandard, sys));
+    thermals = collect(get_components(ThermalStandard, sys))
     var_cost = PSY.get_variable.((get_operation_cost.((thermals))))
     op_cost = get_proportional_term.(get_value_curve.(var_cost))
 
@@ -77,12 +74,11 @@ function build_portfolio()
         base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.ST,
         capital_costs=LinearCurve(coal_igcc_capex * 1000.0),
-        min_capacity=0.0,
         id=1,
         available=true,
         name="cheap_thermal",
         initial_capacity=initial_cap_cheap,
-        fuel=ThermalFuels.COAL,
+        fuel=[ThermalFuels.COAL],
         power_systems_type="ThermalStandard",
         balancing_topology="Region",
         operation_costs=ThermalGenerationCost(
@@ -91,9 +87,9 @@ function build_portfolio()
             start_up=0.0,
             shut_down=0.0,
         ),#LinearCurve(0.0),
-        max_capacity=3000.0,
+        capacity_limits=(0.0, 3000.0),
         outage_factor=0.92,
-        region=z1,
+        region=[z1],
         unit_size=250.0,
         financial_data=tech_financials,
     )
@@ -102,12 +98,11 @@ function build_portfolio()
         base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.ST,
         capital_costs=LinearCurve(coal_new_capex * 1000.0),
-        min_capacity=0.0,
         id=2,
         available=true,
         name="expensive_thermal",
         initial_capacity=initial_cap_exp,
-        fuel=ThermalFuels.COAL,
+        fuel=[ThermalFuels.COAL],
         power_systems_type="ThermalStandard",
         balancing_topology="Region",
         operation_costs=ThermalGenerationCost(
@@ -116,9 +111,9 @@ function build_portfolio()
             start_up=0.0,
             shut_down=0.0,
         ),
-        max_capacity=3000.0,
+        capacity_limits=(0.0, 3000.0),
         outage_factor=0.95,
-        region=z2,
+        region=[z2],
         unit_size=75.0,
         financial_data=tech_financials,
     )
@@ -138,9 +133,12 @@ function build_portfolio()
     #####################
 
     #### Wind ####
-    wind_ts = CSV.read("./data/wind_ts_LDES.csv", DataFrame)
+    wind_ts = CSV.read(
+        "C:\\Users\\jpotts\\.julia\\dev\\PowerSystemsInvestments\\5_bus_ts_data/wind_ts_LDES.csv",
+        DataFrame,
+    )
     wind_ts_vec = wind_ts[!, "Wind"] ./ 451.0
-    renewables = collect(get_components(RenewableDispatch, sys));
+    renewables = collect(get_components(RenewableDispatch, sys))
     wind_op_costs =
         get_proportional_term.(
             get_value_curve.(PSY.get_variable.((get_operation_cost.((renewables)))))
@@ -176,12 +174,11 @@ function build_portfolio()
         base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.WT,
         capital_costs=LinearCurve(wind_capex * 1000.0), # to $/MW
-        min_capacity=0.0,
         id=3,
         available=true,
         name="wind",
         initial_capacity=initial_cap_wind,
-        fuel=ThermalFuels.OTHER,
+        fuel=[ThermalFuels.OTHER],
         power_systems_type="RenewableDispatch",
         balancing_topology="Region",
         operation_costs=ThermalGenerationCost(
@@ -190,14 +187,17 @@ function build_portfolio()
             start_up=0.0,
             shut_down=0.0,
         ),
-        max_capacity=300.0,
+        capacity_limits=(0.0, 300.0),
         outage_factor=0.92,
-        region=z2,
+        region=[z2],
         financial_data=tech_financials,
     )
 
     #### Solar ####
-    pv_ts = CSV.read("./data/solar_ts_LDES.csv", DataFrame)
+    pv_ts = CSV.read(
+        "C:\\Users\\jpotts\\.julia\\dev\\PowerSystemsInvestments\\5_bus_ts_data/solar_ts_LDES.csv",
+        DataFrame,
+    )
     pv1_ts = pv_ts[!, "SolarPV1"] ./ 384.0
     pv2_ts = pv_ts[!, "SolarPV2"] ./ 384.0
 
@@ -237,21 +237,24 @@ function build_portfolio()
         scaling_factor_multiplier=get_initial_capacity,
     )
 
-    ts_pv1_inv_capex =
-        SingleTimeSeries("inv_capex", TimeArray(tstamp_inv, [1.0, pv_capex / pv_capex_2028]))
-    ts_pv2_inv_capex =
-        SingleTimeSeries("inv_capex", TimeArray(tstamp_inv, [1.0, pv_capex / pv_capex_2028]))
+    ts_pv1_inv_capex = SingleTimeSeries(
+        "inv_capex",
+        TimeArray(tstamp_inv, [1.0, pv_capex / pv_capex_2028]),
+    )
+    ts_pv2_inv_capex = SingleTimeSeries(
+        "inv_capex",
+        TimeArray(tstamp_inv, [1.0, pv_capex / pv_capex_2028]),
+    )
 
     t_pv1 = SupplyTechnology{RenewableDispatch}(;
         base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.PVe,
         capital_costs=LinearCurve(pv_capex * 1000.0), # to $/MW
-        min_capacity=0.0,
         id=4,
         available=true,
         name="PV1",
         initial_capacity=initial_cap_pv1,
-        fuel=ThermalFuels.OTHER,
+        fuel=[ThermalFuels.OTHER],
         power_systems_type="RenewableDispatch",
         balancing_topology="Region",
         operation_costs=ThermalGenerationCost(
@@ -260,9 +263,9 @@ function build_portfolio()
             start_up=0.0,
             shut_down=0.0,
         ),
-        max_capacity=1e8,
+        capacity_limits=(0.0, 1e8),
         outage_factor=0.92,
-        region=z1,
+        region=[z1],
         financial_data=tech_financials,
     )
 
@@ -270,12 +273,11 @@ function build_portfolio()
         base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.PVe,
         capital_costs=LinearCurve(pv_capex * 1000.0), # to $/MW
-        min_capacity=0.0,
         id=5,
         available=true,
         name="PV2",
         initial_capacity=initial_cap_pv2,
-        fuel=ThermalFuels.OTHER,
+        fuel=[ThermalFuels.OTHER],
         power_systems_type="RenewableDispatch",
         balancing_topology="Region",
         operation_costs=ThermalGenerationCost(
@@ -284,9 +286,9 @@ function build_portfolio()
             start_up=0.0,
             shut_down=0.0,
         ),
-        max_capacity=1e8,
+        capacity_limits=(0.0, 1e8),
         outage_factor=0.92,
-        region=z2,
+        region=[z2],
         financial_data=tech_financials,
     )
 
@@ -299,15 +301,12 @@ function build_portfolio()
         name="test_storage",
         base_power=1.0,
         id=1,
-        # zone=1,
-        region=z1,
+        region=[z1],
         storage_tech=StorageTech.LIB,
         existing_capacity_energy=0.0,
         existing_capacity_power=0.0,
-        min_capacity_power=0.0,
-        max_capacity_power=300.0,
-        min_capacity_energy=0.0,
-        max_capacity_energy=1000.0,
+        capacity_power_limits=(0.0, 300.0),
+        capacity_energy_limits=(0.0, 1000.0),
         power_systems_type="EnergyReservoirStorage",
         balancing_topology="Region",
         prime_mover_type=PrimeMovers.BT,
@@ -343,9 +342,12 @@ function build_portfolio()
     ######## Load #######
     #####################
 
-    loads = collect(get_components(PowerLoad, sys));
+    loads = collect(get_components(PowerLoad, sys))
 
-    load_ts = CSV.read("./data/load_ts_LDES.csv", DataFrame)
+    load_ts = CSV.read(
+        "C:\\Users\\jpotts\\.julia\\dev\\PowerSystemsInvestments\\5_bus_ts_data/load_ts_LDES.csv",
+        DataFrame,
+    )
     load_b_ts = load_ts[!, "node_b"]
     load_c_ts = load_ts[!, "node_c"]
     load_d_ts = load_ts[!, "node_d"]
@@ -373,9 +375,10 @@ function build_portfolio()
     t_demand_b = DemandRequirement{PowerLoad}(
         #load_growth=0.05,
         name="demand_b",
+        id=1,
         available=true,
         power_systems_type="PowerLoad",
-        region=z1,
+        region=[z1],
         #peak_load=peak_load,
     )
 
@@ -393,9 +396,10 @@ function build_portfolio()
     t_demand_c = DemandRequirement{PowerLoad}(
         #load_growth=0.05,
         name="demand_c",
+        id=2,
         available=true,
         power_systems_type="PowerLoad",
-        region=z1,
+        region=[z1],
         #peak_load=peak_load,
     )
 
@@ -413,9 +417,10 @@ function build_portfolio()
     t_demand_d = DemandRequirement{PowerLoad}(
         #load_growth=0.05,
         name="demand_d",
+        id=3,
         available=true,
         power_systems_type="PowerLoad",
-        region=z2,
+        region=[z2],
         #peak_load=peak_load,
     )
 
@@ -449,23 +454,18 @@ function build_portfolio()
         scaling_factor_multiplier=get_initial_capacity,
     )
 
-    finances = PortfolioFinancialData(;
-        name="finances",
-        base_year=2025,
-        discount_rate=0.07,
-        inflation_rate=0.05,
-        interest_rate=0.03,
-        #capital_recovery_period=30,
-    )
+    finances = PortfolioFinancialData(2025, 0.07, 0.05, 0.03)
 
     #####################
     ##### Portfolio #####
     #####################
 
-    p_5bus = Portfolio()
+    p_5bus = Portfolio(finances)
 
-    PSIP.add_financials!(p_5bus, finances)
-    PSIP.add_financials!(p_5bus, tech_financials)
+    PSIP.set_name!(p_5bus, "test")
+    #PSIP.add_financials!(p_5bus, finances)
+    #PSIP.add_financials!(p_5bus, tech_financials)
+    PSIP.set_financial_data!(p_5bus, finances)
     PSIP.add_region!(p_5bus, z1)
     PSIP.add_region!(p_5bus, z2)
     PSIP.add_technology!(p_5bus, t_th)
@@ -535,4 +535,6 @@ function build_portfolio()
     IS.add_time_series!(p_5bus.data, t_demand_c, ts_demand_c_2028; year="2028", rep_day=4)
     IS.add_time_series!(p_5bus.data, t_demand_d, ts_demand_d_2024; year="2024", rep_day=3)
     IS.add_time_series!(p_5bus.data, t_demand_d, ts_demand_d_2028; year="2028", rep_day=4)
+
+    return p_5bus
 end

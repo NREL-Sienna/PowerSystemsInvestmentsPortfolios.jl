@@ -54,9 +54,8 @@ export ACTransportTechnology
 export HVDCTransportTechnology
 export StorageTechnology
 export DemandRequirement
-export DemandsideTechnology
+export DemandSideTechnology
 export FlexibleDemandTechnology
-export Electrolyzers
 export CurtailableDemandSideTechnology
 export RetirementPotential
 export AggregateRetirementPotential
@@ -74,10 +73,12 @@ export get_regions
 export get_technologies
 export get_technology
 export get_requirements
-export get_financial
+export get_financial_data
 export get_ext
 export add_technology!
 export add_technologies!
+export add_region!
+export add_requirement!
 export read_json_data
 export generate_invest_structs
 export generate_structs
@@ -115,7 +116,6 @@ include("models/technologies.jl")
 include("models/regions.jl")
 include("models/financial_data/financial_data.jl")
 include("models/financial_data/TechnologyFinancialData.jl")
-include("models/financial_data/PortfolioFinancialData.jl")
 include("models/requirements.jl")
 include("models/generated/includes.jl")
 

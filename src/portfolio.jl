@@ -36,7 +36,7 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
     data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     time_series_directory::Union{Nothing, String}
-    financial_data::Union{Nothing,PortfolioFinancialData}
+    financial_data::Union{Nothing, PortfolioFinancialData}
     base_system::Union{Nothing, System}
     metadata::PortfolioMetadata
     internal::IS.InfrastructureSystemsInternal
@@ -91,7 +91,13 @@ Construct an empty `Portfolio`. Useful for building a Portfolio from scratch.
 """
 function Portfolio(; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(DEFAULT_AGGREGATION, data, Dict(), IS.InfrastructureSystemsInternal(); kwargs...)
+    return Portfolio(
+        DEFAULT_AGGREGATION,
+        data,
+        Dict(),
+        IS.InfrastructureSystemsInternal();
+        kwargs...,
+    )
 end
 
 """
@@ -107,12 +113,13 @@ Construct an empty `Portfolio` specifying financial data. Useful for building a 
 """
 function Portfolio(financial_data; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(; aggregation=DEFAULT_AGGREGATION, 
-            data=data, 
-            investment_schedule=Dict(), 
-            internal=IS.InfrastructureSystemsInternal(), 
-            financial_data=financial_data
-        )
+    return Portfolio(;
+        aggregation=DEFAULT_AGGREGATION,
+        data=data,
+        investment_schedule=Dict(),
+        internal=IS.InfrastructureSystemsInternal(),
+        financial_data=financial_data,
+    )
 end
 
 """
@@ -144,7 +151,7 @@ function Portfolio(
         return portfolio
         _post_deserialize_handling(
             portfolio;
-            runchecks = runchecks,
+            runchecks=runchecks,
             assign_new_uuids=assign_new_uuids,
         )
         return portfolio
@@ -174,25 +181,29 @@ Get the name of the portfolio.
 get_name(val::Portfolio) = val.metadata.name
 
 """
+Get the financial data of the portfolio.
+"""
+get_financial_data(val::Portfolio) = val.financial_data
+
+"""
 Get the base year of the portfolio.
 """
-get_base_year(val::Portfolio) = value.financial_data.base_year
+get_base_year(val::Portfolio) = val.financial_data.base_year
 
 """
 Get the discount rate.
 """
-get_discount_rate(val::Portfolio) = value.financial_data.discount_rate
+get_discount_rate(val::Portfolio) = val.financial_data.discount_rate
 
 """
 Get the inflation rate.
 """
-get_inflation_rate(val::Portfolio) = value.financial_data.inflation_rate
+get_inflation_rate(val::Portfolio) = val.financial_data.inflation_rate
 
 """
 Get the interest rate.
 """
-get_interest_rate(val::Portfolio) = value.financial_data.interest_rate
-
+get_interest_rate(val::Portfolio) = val.financial_data.interest_rate
 
 """
 Get the description of the portfolio.
@@ -216,8 +227,14 @@ Set the financial data of the portfolio.
 set_financial_data!(val::Portfolio, financial_data::PortfolioFinancialData) =
     val.financial_data = financial_data
 
-set_financial_data!(val::Portfolio, base_year::Int64, inflation_rate::Float64, interest_rate::Float64) =
-    val.financial_data = PortfolioFinancialData(base_year, discount_rate, inflation_rate, interest_rate)
+set_financial_data!(
+    val::Portfolio,
+    base_year::Int64,
+    inflation_rate::Float64,
+    interest_rate::Float64,
+) =
+    val.financial_data =
+        PortfolioFinancialData(base_year, discount_rate, inflation_rate, interest_rate)
 
 function _validate_or_skip!(sys, component, skip_validation)
     if skip_validation && get_runchecks(sys)
@@ -814,7 +831,6 @@ end
 function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirement}
     return IS.get_components(T, portfolio.data)
 end
-
 
 ###########################################
 ######### Supplemental Attributes #########
