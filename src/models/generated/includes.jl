@@ -17,6 +17,7 @@ include("AggregateRetirementPotential.jl")
 include("HVDCTransportTechnology.jl")
 include("StorageTechnology.jl")
 include("CarbonCaps.jl")
+include("CarbonTax.jl")
 include("RetrofitPotential.jl")
 include("HourlyMatching.jl")
 include("CurtailableDemandSideTechnology.jl")
@@ -111,6 +112,7 @@ export get_start_region
 export get_storage_tech
 export get_storage_technology
 export get_supply_technology
+export get_tax_dollars_per_ton
 export get_technology_base_year
 export get_technology_efficiency
 export get_unit_size
@@ -209,6 +211,7 @@ export set_start_region!
 export set_storage_tech!
 export set_storage_technology!
 export set_supply_technology!
+export set_tax_dollars_per_ton!
 export set_technology_base_year!
 export set_technology_efficiency!
 export set_unit_size!
