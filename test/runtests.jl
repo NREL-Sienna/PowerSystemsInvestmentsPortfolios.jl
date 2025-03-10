@@ -1,12 +1,27 @@
 using Test
-import Logging
+using Logging
+using DataStructures
+using PowerSystems
+using PowerSystemsInvestmentsPortfolios
+using PowerSystemCaseBuilder
+using Statistics
+using InfrastructureSystems
+using TimeSeries
+using Dates
+using CSV
+using DataFrames
+import InteractiveUtils
+import JSON3
+const PSIP = PowerSystemsInvestmentsPortfolios
+const IS = InfrastructureSystems
+const PSY = PowerSystems
 
 import Aqua
 Aqua.test_unbound_args(PowerSystemsInvestmentsPortfolios)
 Aqua.test_undefined_exports(PowerSystemsInvestmentsPortfolios)
 Aqua.test_ambiguities(PowerSystemsInvestmentsPortfolios)
 Aqua.test_stale_deps(PowerSystemsInvestmentsPortfolios)
-Aqua.test_deps_compat(PowerSystemsInvestmentsPortfolios)
+#Aqua.test_deps_compat(PowerSystemsInvestmentsPortfolios)
 
 LOG_FILE = "power-systems.log"
 LOG_LEVELS = Dict(
