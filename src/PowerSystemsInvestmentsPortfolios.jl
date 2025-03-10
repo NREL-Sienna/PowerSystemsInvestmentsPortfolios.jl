@@ -47,12 +47,10 @@ export Requirements
 export SupplyTechnology
 export ACTransportTechnology
 export HVDCTransportTechnology
-export ExistingTransportTechnology
 export StorageTechnology
 export DemandRequirement
-export DemandsideTechnology
+export DemandSideTechnology
 export FlexibleDemandTechnology
-export Electrolyzers
 export CurtailableDemandSideTechnology
 export RetirementPotential
 export AggregateRetirementPotential
