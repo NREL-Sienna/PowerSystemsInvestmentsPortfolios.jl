@@ -77,7 +77,13 @@ Construct an empty `Portfolio`. Useful for building a Portfolio from scratch.
 """
 function Portfolio(; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(DEFAULT_AGGREGATION, data, Dict(), IS.InfrastructureSystemsInternal(); kwargs...)
+    return Portfolio(
+        DEFAULT_AGGREGATION,
+        data,
+        Dict(),
+        IS.InfrastructureSystemsInternal();
+        kwargs...,
+    )
 end
 
 """
@@ -85,7 +91,13 @@ Construct an empty `Portfolio` specifying aggregation. Useful for building a Por
 """
 function Portfolio(aggregation; kwargs...)
     data = _create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(aggregation, data, Dict(), IS.InfrastructureSystemsInternal(); kwargs...)
+    return Portfolio(
+        aggregation,
+        data,
+        Dict(),
+        IS.InfrastructureSystemsInternal();
+        kwargs...,
+    )
 end
 
 """
@@ -277,7 +289,12 @@ end
 """
 Like [`get_technology`](@ref) but also returns `nothing` if the component is not [`get_available`](@ref).
 """
-function get_available_technology(::Type{T}, port::Portfolio, args...; kwargs...) where {T <: Technology}
+function get_available_technology(
+    ::Type{T},
+    port::Portfolio,
+    args...;
+    kwargs...,
+) where {T <: Technology}
     return IS.get_available_component(T, port.data, args...; kwargs...)
 end
 
@@ -425,27 +442,29 @@ because it reads time series data from media.
 Call `collect` on the result to get an array.
 
 # Arguments
-- `data::SystemData`: system
-- `filter_func = nothing`: Only return time series for which this returns true.
-- `type = nothing`: Only return time series with this type.
-- `name = nothing`: Only return time series matching this value.
+
+  - `data::SystemData`: system
+  - `filter_func = nothing`: Only return time series for which this returns true.
+  - `type = nothing`: Only return time series with this type.
+  - `name = nothing`: Only return time series matching this value.
 
 # Examples
+
 ```julia
 for time_series in get_time_series_multiple(sys)
     @show time_series
 end
 
-ts = collect(get_time_series_multiple(sys; type = SingleTimeSeries))
+ts = collect(get_time_series_multiple(sys; type=SingleTimeSeries))
 ```
 """
 function IS.get_time_series_multiple(
     port::Portfolio,
-    filter_func = nothing;
-    type = nothing,
-    name = nothing,
+    filter_func=nothing;
+    type=nothing,
+    name=nothing,
 )
-    return get_time_series_multiple(port.data, filter_func; type = type, name = name)
+    return get_time_series_multiple(port.data, filter_func; type=type, name=name)
 end
 
 """

@@ -2,12 +2,14 @@ import UUIDs
 
 include("portfolio_5bus.jl")
 
-"""Recursively validates that the object and fields have UUIDs."""
+"""
+Recursively validates that the object and fields have UUIDs.
+"""
 function validate_uuids(obj::T) where {T}
     if !(obj isa IS.InfrastructureSystemsComponent)
         return true
     end
-    
+
     result = true
     if !(IS.get_uuid(obj) isa Base.UUID)
         result = false

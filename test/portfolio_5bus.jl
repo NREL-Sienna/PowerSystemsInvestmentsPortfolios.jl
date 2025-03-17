@@ -55,7 +55,7 @@ function build_portfolio()
         technology_base_year=2025,
     )
 
-    thermals = collect(get_components(ThermalStandard, sys));
+    thermals = collect(get_components(ThermalStandard, sys))
     var_cost = PSY.get_variable.((get_operation_cost.((thermals))))
     op_cost = get_proportional_term.(get_value_curve.(var_cost))
 
@@ -63,7 +63,6 @@ function build_portfolio()
     exp_th_ixs = [1, 5]
     cheap_th_var_cost = mean(op_cost[cheap_th_ixs])
     exp_th_var_cost = mean(op_cost[exp_th_ixs])
-
 
     initial_cap_cheap = 100.0
     initial_cap_exp = 100.0
@@ -152,7 +151,7 @@ function build_portfolio()
     #### Wind ####
     wind_ts = CSV.read("data/wind_ts_LDES.csv", DataFrame)
     wind_ts_vec = wind_ts[!, "Wind"] ./ 451.0
-    renewables = collect(get_components(RenewableDispatch, sys));
+    renewables = collect(get_components(RenewableDispatch, sys))
     wind_op_costs =
         get_proportional_term.(
             get_value_curve.(PSY.get_variable.((get_operation_cost.((renewables)))))
@@ -249,10 +248,14 @@ function build_portfolio()
         scaling_factor_multiplier=get_initial_capacity,
     )
 
-    ts_pv1_inv_capex =
-        SingleTimeSeries("inv_capex", TimeArray(tstamp_inv, [1.0, pv_capex / pv_capex_2028]))
-    ts_pv2_inv_capex =
-        SingleTimeSeries("inv_capex", TimeArray(tstamp_inv, [1.0, pv_capex / pv_capex_2028]))
+    ts_pv1_inv_capex = SingleTimeSeries(
+        "inv_capex",
+        TimeArray(tstamp_inv, [1.0, pv_capex / pv_capex_2028]),
+    )
+    ts_pv2_inv_capex = SingleTimeSeries(
+        "inv_capex",
+        TimeArray(tstamp_inv, [1.0, pv_capex / pv_capex_2028]),
+    )
 
     t_pv1 = SupplyTechnology{RenewableDispatch}(;
         base_power=1.0, # Natural Units
@@ -355,7 +358,7 @@ function build_portfolio()
     ######## Load #######
     #####################
 
-    loads = collect(get_components(PowerLoad, sys));
+    loads = collect(get_components(PowerLoad, sys))
 
     load_ts = CSV.read("data/load_ts_LDES.csv", DataFrame)
     load_b_ts = load_ts[!, "node_b"]
