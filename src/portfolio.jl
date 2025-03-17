@@ -832,7 +832,6 @@ function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirem
     return IS.get_components(T, portfolio.data)
 end
 
-
 ###########################################
 ######### Supplemental Attributes #########
 ###########################################
