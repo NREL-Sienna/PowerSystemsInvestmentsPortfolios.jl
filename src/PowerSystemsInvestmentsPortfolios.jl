@@ -68,6 +68,9 @@ export get_name
 export get_regions
 export get_technologies
 export get_technology
+export get_available_technology
+export get_available_technologies
+export get_technologies_by_name
 export get_requirements
 export get_ext
 export add_technology!
@@ -82,6 +85,7 @@ export db_to_portfolio_parser
 export add_supplemental_attribute!
 export remove_supplemental_attribute!
 export get_supplemental_attribute
+export clear_time_series!
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems
