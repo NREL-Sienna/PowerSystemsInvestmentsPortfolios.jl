@@ -86,6 +86,7 @@ export add_supplemental_attribute!
 export remove_supplemental_attribute!
 export get_supplemental_attribute
 export clear_time_series!
+export get_time_series_counts
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems

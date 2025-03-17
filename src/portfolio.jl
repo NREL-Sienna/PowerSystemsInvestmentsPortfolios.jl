@@ -468,6 +468,12 @@ function IS.get_time_series_multiple(
 end
 
 """
+Returns counts of time series including attachments to components and supplemental
+attributes.
+"""
+get_time_series_counts(port::Portfolio) = IS.get_time_series_counts(port.data)
+
+"""
 Remove the time series data for a component and time series type.
 """
 function remove_time_series!(
