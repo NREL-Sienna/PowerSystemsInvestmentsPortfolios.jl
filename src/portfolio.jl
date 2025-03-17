@@ -32,7 +32,7 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
         data,
         investment_schedule::Dict,
         #units_settings::IS.SystemUnitsSettings,
-        internal::IS.InfrastructureSystemsInternal,
+        internal::IS.InfrastructureSystemsInternal;
         time_series_directory=nothing,
         name=nothing,
         description=nothing,
@@ -77,7 +77,7 @@ Construct an empty `Portfolio`. Useful for building a Portfolio from scratch.
 """
 function Portfolio(; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(DEFAULT_AGGREGATION, data, Dict(), IS.InfrastructureSystemsInternal())
+    return Portfolio(DEFAULT_AGGREGATION, data, Dict(), IS.InfrastructureSystemsInternal(); kwargs...)
 end
 
 """
@@ -85,7 +85,7 @@ Construct an empty `Portfolio` specifying aggregation. Useful for building a Por
 """
 function Portfolio(aggregation; kwargs...)
     data = _create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(aggregation, data, Dict(), IS.InfrastructureSystemsInternal())
+    return Portfolio(aggregation, data, Dict(), IS.InfrastructureSystemsInternal(); kwargs...)
 end
 
 """
