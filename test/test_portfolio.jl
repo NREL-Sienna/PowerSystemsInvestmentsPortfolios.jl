@@ -62,3 +62,14 @@ include("portfolio_5bus.jl")
     @test IS.get_internal(p_5bus) isa IS.InfrastructureSystemsInternal
 
 end
+
+@testset "Test get_technologies filter_func" begin
+    port = build_portfolio()
+    tech = first(get_technologies(SupplyTechnology{ThermalStandard}, port))
+    name = PSIP.get_name(tech)
+    technologies = get_technologies(SupplyTechnology{ThermalStandard}, port) do tech
+        PSIP.get_name(tech) == name && PSIP.get_available(tech)
+    end
+
+    @test length(technologies) == 1 && PSIP.get_name(first(technologies)) == name
+end
