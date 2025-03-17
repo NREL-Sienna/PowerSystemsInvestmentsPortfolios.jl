@@ -73,3 +73,17 @@ end
 
     @test length(technologies) == 1 && PSIP.get_name(first(technologies)) == name
 end
+
+@testset "Test portfolio name and description" begin
+    name = "test_portfolio"
+    description = "a system description"
+    port = Portfolio()
+    @test PSIP.get_name(port) === nothing
+    @test PSIP.get_description(port) === nothing
+    PSIP.set_name!(port, name)
+    PSIP.set_description!(port, description)
+
+    port = Portfolio(; name = name, description = description)
+    @test PSIP.get_name(port) == name
+    @test PSIP.get_description(port) == description
+end
