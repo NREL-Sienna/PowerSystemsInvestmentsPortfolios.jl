@@ -226,10 +226,6 @@ function from_dict(
         isempty(ext) && clear_ext!(portfolio)
     end
 
-    # if !get_runchecks(portfolio)
-    #     @warn "The Portfolio was deserialized with checks disabled, and so was not validated."
-    # end
-
     if raw["data_format_version"] != DATA_FORMAT_VERSION
         post_deserialize_conversion!(portfolio, raw)
     end
@@ -546,11 +542,7 @@ function to_json(
     force=false,
     runchecks=false,
 )
-    # TODO: add checks for portfolio and technology
-    # if runchecks
-    #     check(portfolio)
-    #     check_technologies(portfolio)
-    # end
+
     IS.prepare_for_serialization_to_file!(portfolio.data, filename; force=force)
     data = to_json(portfolio; pretty=pretty)
     open(filename, "w") do io
