@@ -59,7 +59,7 @@ This file is auto-generated. Do not edit.
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `start_fuel_mmbtu_per_mw::Float64`: (default: `0.0`) Startup fuel use per MW of nameplate capacity of each generator (MMBtu/MW per start)
 - `operation_costs::PSY.OperationalCost`: (default: `ThermalGenerationCost()`) Fixed and variable O&M costs for a technology
-- `fuel::Vector{ThermalFuels}`: (default: `Vector(ThermalFuels.OTHER)`) Fuel type according to IEA
+- `fuel::Vector{ThermalFuels}`: (default: `[ThermalFuels.OTHER]`) Fuel type according to IEA
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `cofire_level_limits::Dict{ThermalFuels, MinMax}`: (default: `Dict()`) Minimum blending level of each fuel during normal generation process for multi-fuel generator
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field

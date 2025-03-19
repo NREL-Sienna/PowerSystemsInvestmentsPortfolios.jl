@@ -20,7 +20,7 @@ This file is auto-generated. Do not edit.
 
 
 # Arguments
-- `name::String`: The technology name
+- `name::String`: The requirement name
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `pricecap::Float64`: (default: `1e8`) price threshold for policy constraint, USD/MW
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
@@ -31,7 +31,7 @@ This file is auto-generated. Do not edit.
 - `available::Bool`: Availability
 """
 mutable struct MinimumCapacityRequirements <: Requirement
-    "The technology name"
+    "The requirement name"
     name::String
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
