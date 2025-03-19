@@ -8,7 +8,7 @@ end
 
 @testset "Test serialization of Portfolio fields" begin
     financial_data = PortfolioFinancialData(2020, 0.07, 0.03, 0.05)
-    name = "my_system"
+    name = "my_portfolio"
     description = "test"
     port = Portfolio(; financial_data=financial_data, name=name, description=description)
     zone = Zone(; name="zone1", id=1)

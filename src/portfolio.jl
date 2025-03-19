@@ -213,8 +213,7 @@ set_description!(val::Portfolio, description::AbstractString) =
 """
 Set the base year of the portfolio.
 """
-set_base_year!(val::Portfolio, base_year::Int64) =
-    val.financial_data.base_year = base_year
+set_base_year!(val::Portfolio, base_year::Int64) = val.financial_data.base_year = base_year
 
 """
 Set the discount rate of the portfolio.
@@ -546,9 +545,10 @@ Throws ArgumentError if the component is not stored in the system.
 function add_time_series!(
     portfolio::Portfolio,
     component::Technology,
-    time_series::PSY.TimeSeriesData,
+    time_series::PSY.TimeSeriesData;
+    features...,
 )
-    return IS.add_time_series!(portfolio.data, component, time_series)
+    return IS.add_time_series!(portfolio.data, component, time_series; features...)
 end
 
 """
@@ -562,9 +562,10 @@ Throws ArgumentError if a component is not stored in the system.
 function add_time_series!(
     portfolio::Portfolio,
     technologies,
-    time_series::PSY.TimeSeriesData,
+    time_series::PSY.TimeSeriesData;
+    features...,
 )
-    return IS.add_time_series!(portfolio.data, technologies, time_series)
+    return IS.add_time_series!(portfolio.data, technologies, time_series; features...)
 end
 
 """

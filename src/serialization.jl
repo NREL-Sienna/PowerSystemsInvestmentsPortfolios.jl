@@ -542,7 +542,6 @@ function to_json(
     force=false,
     runchecks=false,
 )
-
     IS.prepare_for_serialization_to_file!(portfolio.data, filename; force=force)
     data = to_json(portfolio; pretty=pretty)
     open(filename, "w") do io

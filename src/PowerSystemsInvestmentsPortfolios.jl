@@ -91,6 +91,7 @@ export add_technology!
 export add_technologies!
 export add_region!
 export add_requirement!
+export add_time_series!
 export read_json_data
 export generate_invest_structs
 export generate_structs
