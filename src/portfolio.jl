@@ -24,9 +24,7 @@ mutable struct PortfolioFinancialData <: IS.InfrastructureSystemsType
     interest_rate::Float64
 end
 
-#TODO: Define if we are going to support unit systems
-#TODO: Make immutable
-mutable struct Portfolio <: IS.InfrastructureSystemsType
+struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
@@ -71,15 +69,6 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
         )
     end
 end
-
-#= #TODO: Check how to handle unit settings
-function Portfolio(aggregation, discount_rate::Number, data, investment_schedule, internal; kwargs...)
-    unit_portfolio_ = get(kwargs, "unit_system", "NATURAL_UNITS")
-    unit_portfolio = PSY.UNIT_SYSTEM_MAPPING[unit_portfolio_]
-    unit_settings = IS.SystemUnitsSettings(base_power, unit_portfolio)
-    return Portfolio(aggregation, data, discount_rate, investment_schedule, unit_settings, internal; kwargs...)
-end
-=#
 
 """
 Construct an empty `Portfolio`. Useful for building a Portfolio from scratch.
@@ -222,19 +211,28 @@ set_description!(val::Portfolio, description::AbstractString) =
     val.metadata.description = description
 
 """
-Set the financial data of the portfolio.
+Set the base year of the portfolio.
 """
-set_financial_data!(val::Portfolio, financial_data::PortfolioFinancialData) =
-    val.financial_data = financial_data
+set_base_year!(val::Portfolio, base_year::Int64) =
+    val.financial_data.base_year = base_year
 
-set_financial_data!(
-    val::Portfolio,
-    base_year::Int64,
-    inflation_rate::Float64,
-    interest_rate::Float64,
-) =
-    val.financial_data =
-        PortfolioFinancialData(base_year, discount_rate, inflation_rate, interest_rate)
+"""
+Set the discount rate of the portfolio.
+"""
+set_discount_rate!(val::Portfolio, discount_rate::Float64) =
+    val.financial_data.discount_rate = discount_rate
+
+"""
+Set the inflation rate of the portfolio.
+"""
+set_inflation_rate!(val::Portfolio, inflation_rate::Float64) =
+    val.financial_data.inflation_rate = inflation_rate
+
+"""
+Set the interest rate of the portfolio.
+"""
+set_interest_rate!(val::Portfolio, interest_rate::Float64) =
+    val.financial_data.interest_rate = interest_rate
 
 function _validate_or_skip!(sys, component, skip_validation)
     if skip_validation && get_runchecks(sys)
