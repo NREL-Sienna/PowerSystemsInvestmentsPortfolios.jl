@@ -25,7 +25,7 @@ This file is auto-generated. Do not edit.
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: The technology name
 - `var_cost_per_mwh::PSY.ValueCurve`: Variable operations and maintenance costs associated with flexible demand deferral
-- `id::Int64`: ID for individual generator
+- `id::Int64`: ID for individual demand side technology
 - `max_demand_advance::Float64`: Maximum number of hours that demand can be scheduled in advance of the original schedule (hours).
 - `demand_energy_efficiency::Float64`: Energy efficiency associated with time shifting demand. Represents energy losses due to time shifting
 - `max_demand_delay::Float64`: Maximum number of hours that demand can be deferred or delayed (hours).
@@ -41,7 +41,7 @@ mutable struct FlexibleDemandTechnology{T <: PSY.StaticInjection} <: Technology
     name::String
     "Variable operations and maintenance costs associated with flexible demand deferral"
     var_cost_per_mwh::PSY.ValueCurve
-    "ID for individual generator"
+    "ID for individual demand side technology"
     id::Int64
     "Maximum number of hours that demand can be scheduled in advance of the original schedule (hours)."
     max_demand_advance::Float64

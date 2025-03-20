@@ -49,7 +49,7 @@ This file is auto-generated. Do not edit.
 - `capacity_energy_limits::MinMax`: (default: `(min=0,max=1e8)`) allowable installed energy capacity for a storage technology
 - `operations_costs_power::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a technology
 - `unit_size_power::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
-- `id::Int64`: ID for individual generator
+- `id::Int64`: ID for individual storage technology
 - `duration_limits::MinMax`: (default: `(min=0,max=1000)`) Minimum required durection for a storage technology
 - `capital_costs_energy::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
 - `losses::Float64`: (default: `1.0`) Power loss (pct per hour)
@@ -89,7 +89,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     operations_costs_power::PSY.OperationalCost
     "Used for discrete investment decisions. Size of each unit being built (MW)"
     unit_size_power::Float64
-    "ID for individual generator"
+    "ID for individual storage technology"
     id::Int64
     "Minimum required durection for a storage technology"
     duration_limits::MinMax

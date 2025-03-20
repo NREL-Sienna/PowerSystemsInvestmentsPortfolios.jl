@@ -24,7 +24,7 @@ This file is auto-generated. Do not edit.
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `pricecap::Float64`: (default: `1e8`) price threshold for policy constraint, USD/MW
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `id::Int64`: ID for individual generator
+- `id::Int64`: ID for individual policy
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `min_mw::Float64`: (default: `0.0`) Minimum total capacity across all eligible resources
 - `eligible_resources::Vector{String}`: (default: `Vector{String}()`) List of resources that contribute to the carbon cap constraint.
@@ -39,7 +39,7 @@ mutable struct MinimumCapacityRequirements <: Requirement
     pricecap::Float64
     "Internal field"
     internal::InfrastructureSystemsInternal
-    "ID for individual generator"
+    "ID for individual policy"
     id::Int64
     "Option for providing additional data"
     ext::Dict

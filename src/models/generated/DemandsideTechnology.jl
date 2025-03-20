@@ -27,7 +27,7 @@ This file is auto-generated. Do not edit.
 - `ramp_dn_percentage::Float64`: (default: `1.0`) Maximum decrease in output between operation periods. Fraction of total capacity
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: The technology name
-- `id::Int64`: ID for individual generator
+- `id::Int64`: ID for demand side technology
 - `technology_efficiency::Float64`: (default: `0.0`) MWh of electricity per unit of output. Ex: MWh per ton of hydrogen for electrolyzers
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
@@ -45,7 +45,7 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: Technology
     available::Bool
     "The technology name"
     name::String
-    "ID for individual generator"
+    "ID for demand side technology"
     id::Int64
     "MWh of electricity per unit of output. Ex: MWh per ton of hydrogen for electrolyzers"
     technology_efficiency::Float64

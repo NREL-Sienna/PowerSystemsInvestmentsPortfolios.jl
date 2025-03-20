@@ -22,7 +22,7 @@ This file is auto-generated. Do not edit.
 - `name::String`: The technology name
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `id::Int64`: ID for individual generator
+- `id::Int64`: ID for individual demand requirement
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `demand_mw::Float64`: (default: `0.0`) Demand value in MW
 - `region::Union{Nothing, Vector{Region}}`: (default: `Vector()`) Region
@@ -35,7 +35,7 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     power_systems_type::String
     "Internal field"
     internal::InfrastructureSystemsInternal
-    "ID for individual generator"
+    "ID for individual demand requirement"
     id::Int64
     "Option for providing additional data"
     ext::Dict

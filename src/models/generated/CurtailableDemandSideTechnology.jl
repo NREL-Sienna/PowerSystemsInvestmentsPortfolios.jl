@@ -27,7 +27,7 @@ This file is auto-generated. Do not edit.
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: The technology name
 - `curtailment_cost::Vector{Float64}`: Fraction of VOLL for curtailment cost
-- `id::Int64`: ID for individual generator
+- `id::Int64`: ID for demand side technology
 - `max_demand_curtailment::Vector{Float64}`: percent of demand that can be curtailed in that segment
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
@@ -45,7 +45,7 @@ mutable struct CurtailableDemandSideTechnology{T <: PSY.StaticInjection} <: Tech
     name::String
     "Fraction of VOLL for curtailment cost"
     curtailment_cost::Vector{Float64}
-    "ID for individual generator"
+    "ID for demand side technology"
     id::Int64
     "percent of demand that can be curtailed in that segment"
     max_demand_curtailment::Vector{Float64}

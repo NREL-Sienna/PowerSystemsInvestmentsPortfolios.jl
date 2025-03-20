@@ -27,7 +27,7 @@ This file is auto-generated. Do not edit.
 - `eligible_zones::Vector{Region}`: (default: `Vector{Region}()`) List of regions that contribute to the carbon cap constraint.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `co_2_max_tons_mwh::Float64`: (default: `1`) Emission limit in terms of rate (tCO@/MWh)
-- `id::Int64`: ID for individual generator
+- `id::Int64`: ID for individual policy
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `co_2_max_mtons::Float64`: (default: `Vector{Int64}()`) Emission limit in absolute values, in Million of tons
 - `available::Bool`: Availability
@@ -45,7 +45,7 @@ mutable struct CarbonCaps <: Requirement
     internal::InfrastructureSystemsInternal
     "Emission limit in terms of rate (tCO@/MWh)"
     co_2_max_tons_mwh::Float64
-    "ID for individual generator"
+    "ID for individual policy"
     id::Int64
     "Option for providing additional data"
     ext::Dict

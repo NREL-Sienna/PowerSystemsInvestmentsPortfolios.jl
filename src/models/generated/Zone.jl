@@ -17,7 +17,7 @@ This file is auto-generated. Do not edit.
 # Arguments
 - `name::String`: Name of region
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `id::Int64`: A unique zone identification number (positive integer)
+- `id::Int64`: A unique zone identification number
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 """
 mutable struct Zone <: Region
@@ -25,7 +25,7 @@ mutable struct Zone <: Region
     name::String
     "Internal field"
     internal::InfrastructureSystemsInternal
-    "A unique zone identification number (positive integer)"
+    "A unique zone identification number"
     id::Int64
     "Option for providing additional data"
     ext::Dict
