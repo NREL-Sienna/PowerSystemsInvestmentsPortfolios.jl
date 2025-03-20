@@ -32,5 +32,4 @@ function check_required(o::AggregateRetrofitPotential)
     true
 end
 
-function OpenAPI.validate_property(::Type{AggregateRetrofitPotential}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{AggregateRetrofitPotential}, name::Symbol, val) end

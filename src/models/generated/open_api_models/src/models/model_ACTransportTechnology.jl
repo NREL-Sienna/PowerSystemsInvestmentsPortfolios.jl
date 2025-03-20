@@ -163,5 +163,4 @@ function check_required(o::ACTransportTechnology)
     true
 end
 
-function OpenAPI.validate_property(::Type{ACTransportTechnology}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{ACTransportTechnology}, name::Symbol, val) end
