@@ -31,4 +31,5 @@ function check_required(o::MinMax)
     true
 end
 
-function OpenAPI.validate_property(::Type{MinMax}, name::Symbol, val) end
+function OpenAPI.validate_property(::Type{MinMax}, name::Symbol, val)
+end

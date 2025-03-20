@@ -56,7 +56,6 @@ export get_lifetime
 export get_line_loss
 export get_losses
 export get_max_demand_advance
-export get_max_demand_curtailment
 export get_max_demand_delay
 export get_maximum_new_capacity
 export get_min_generation_percentage
@@ -79,7 +78,6 @@ export get_retirement_potential
 export get_retrofit_fraction
 export get_retrofit_id
 export get_retrofit_potential
-export get_segments
 export get_start_cost_per_mw
 export get_start_fuel_mmbtu_per_mw
 export get_start_region
@@ -133,7 +131,6 @@ export set_lifetime!
 export set_line_loss!
 export set_losses!
 export set_max_demand_advance!
-export set_max_demand_curtailment!
 export set_max_demand_delay!
 export set_maximum_new_capacity!
 export set_min_generation_percentage!
@@ -156,7 +153,6 @@ export set_retirement_potential!
 export set_retrofit_fraction!
 export set_retrofit_id!
 export set_retrofit_potential!
-export set_segments!
 export set_start_cost_per_mw!
 export set_start_fuel_mmbtu_per_mw!
 export set_start_region!

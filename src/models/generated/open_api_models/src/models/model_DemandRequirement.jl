@@ -60,4 +60,5 @@ function check_required(o::DemandRequirement)
     true
 end
 
-function OpenAPI.validate_property(::Type{DemandRequirement}, name::Symbol, val) end
+function OpenAPI.validate_property(::Type{DemandRequirement}, name::Symbol, val)
+end

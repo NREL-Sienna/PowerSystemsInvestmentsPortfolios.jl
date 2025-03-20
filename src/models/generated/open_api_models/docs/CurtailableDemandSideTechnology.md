@@ -10,10 +10,8 @@ Name | Type | Description | Notes
 **power_systems_type** | **String** |  | [default to nothing]
 **region** | **Vector{Int64}** |  | [optional] [default to nothing]
 **voll** | **Float64** |  | [optional] [default to nothing]
-**segments** | **Vector{Int64}** |  | [optional] [default to nothing]
-**curtailment_cost** | **Vector{Float64}** |  | [optional] [default to nothing]
-**max_demand_curtailment** | **Vector{Float64}** |  | [optional] [default to nothing]
-**curtailment_cost_mwh** | **Vector{Float64}** |  | [optional] [default to nothing]
+**curtailment_cost** | [**Dict{String, ValueCurve}**](ValueCurve.md) |  | [optional] [default to nothing]
+**curtailment_cost_mwh** | [**Dict{String, ValueCurve}**](ValueCurve.md) |  | [optional] [default to nothing]
 
 
 [[Back to Model list]](../README.md#models) [[Back to API list]](../README.md#api-endpoints) [[Back to README]](../README.md)

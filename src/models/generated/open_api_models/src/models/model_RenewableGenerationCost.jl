@@ -39,4 +39,5 @@ function check_required(o::RenewableGenerationCost)
     true
 end
 
-function OpenAPI.validate_property(::Type{RenewableGenerationCost}, name::Symbol, val) end
+function OpenAPI.validate_property(::Type{RenewableGenerationCost}, name::Symbol, val)
+end

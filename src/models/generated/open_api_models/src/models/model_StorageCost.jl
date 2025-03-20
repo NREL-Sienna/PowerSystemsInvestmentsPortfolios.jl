@@ -94,4 +94,5 @@ function check_required(o::StorageCost)
     true
 end
 
-function OpenAPI.validate_property(::Type{StorageCost}, name::Symbol, val) end
+function OpenAPI.validate_property(::Type{StorageCost}, name::Symbol, val)
+end

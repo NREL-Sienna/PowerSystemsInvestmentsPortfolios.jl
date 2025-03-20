@@ -32,4 +32,5 @@ function check_required(o::ExistingCapacity)
     true
 end
 
-function OpenAPI.validate_property(::Type{ExistingCapacity}, name::Symbol, val) end
+function OpenAPI.validate_property(::Type{ExistingCapacity}, name::Symbol, val)
+end

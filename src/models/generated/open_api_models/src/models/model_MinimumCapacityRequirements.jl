@@ -89,4 +89,5 @@ function check_required(o::MinimumCapacityRequirements)
     true
 end
 
-function OpenAPI.validate_property(::Type{MinimumCapacityRequirements}, name::Symbol, val) end
+function OpenAPI.validate_property(::Type{MinimumCapacityRequirements}, name::Symbol, val)
+end

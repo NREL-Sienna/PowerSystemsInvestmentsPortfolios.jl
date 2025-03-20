@@ -34,11 +34,10 @@ Optional parameters:
   - `optional_middlewares`: Register one or more optional middlewares to be applied to all requests.
 
 Optional middlewares can be one or more of:
-
-  - `init`: called before the request is processed
-  - `pre_validation`: called after the request is parsed but before validation
-  - `pre_invoke`: called after validation but before the handler is invoked
-  - `post_invoke`: called after the handler is invoked but before the response is sent
+- `init`: called before the request is processed
+- `pre_validation`: called after the request is parsed but before validation
+- `pre_invoke`: called after validation but before the handler is invoked
+- `post_invoke`: called after the handler is invoked but before the response is sent
 
 The order in which middlewares are invoked are:
 `init |> read |> pre_validation |> validate |> pre_invoke |> invoke |> post_invoke`

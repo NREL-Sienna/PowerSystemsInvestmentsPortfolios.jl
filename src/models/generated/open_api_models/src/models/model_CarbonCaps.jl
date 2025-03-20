@@ -91,4 +91,5 @@ function check_required(o::CarbonCaps)
     true
 end
 
-function OpenAPI.validate_property(::Type{CarbonCaps}, name::Symbol, val) end
+function OpenAPI.validate_property(::Type{CarbonCaps}, name::Symbol, val)
+end

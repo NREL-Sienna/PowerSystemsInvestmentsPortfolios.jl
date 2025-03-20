@@ -168,4 +168,5 @@ function check_required(o::HVDCTransportTechnology)
     true
 end
 
-function OpenAPI.validate_property(::Type{HVDCTransportTechnology}, name::Symbol, val) end
+function OpenAPI.validate_property(::Type{HVDCTransportTechnology}, name::Symbol, val)
+end
