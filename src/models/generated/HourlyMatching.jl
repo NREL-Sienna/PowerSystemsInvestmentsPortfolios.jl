@@ -69,3 +69,12 @@ set_id!(value::HourlyMatching, val) = value.id = val
 set_ext!(value::HourlyMatching, val) = value.ext = val
 """Set [`HourlyMatching`](@ref) `available`."""
 set_available!(value::HourlyMatching, val) = value.available = val
+
+function serialize_openapi_struct(technology::HourlyMatching, vals...)
+    base_struct = APIServer.HourlyMatching(; vals...)
+    return base_struct
+end
+
+function deserialize_openapi_struct(::Type{<:HourlyMatching}, vals::Dict)
+    return IS.deserialize_struct(APIServer.HourlyMatching, vals)
+end

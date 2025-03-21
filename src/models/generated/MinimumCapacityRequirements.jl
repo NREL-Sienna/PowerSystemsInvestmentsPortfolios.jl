@@ -6,7 +6,6 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct MinimumCapacityRequirements <: Requirement
-    mutable struct MinimumCapacityRequirements <: Requirement
         name::String
         internal::InfrastructureSystemsInternal
         id::Int64
@@ -27,8 +26,6 @@ This file is auto-generated. Do not edit.
 - `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of resources that contribute to the carbon cap constraint.
 - `available::Bool`: Availability
 """
-mutable struct MinimumCapacityRequirements <: Requirement
-    "The requirement name"
 mutable struct MinimumCapacityRequirements <: Requirement
     "The requirement name"
     name::String

@@ -12,7 +12,6 @@ This file is auto-generated. Do not edit.
         peak_demand_mw::Float64
         internal::InfrastructureSystemsInternal
         id::Int64
-        id::Int64
         ext::Dict
         region::Union{Nothing, Vector{Region}}
         available::Bool
@@ -26,7 +25,6 @@ This file is auto-generated. Do not edit.
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `peak_demand_mw::Float64`: (default: `0.0`) Peak demand value in MW
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `id::Int64`: ID for individual demand requirement
 - `id::Int64`: ID for individual demand requirement
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `region::Union{Nothing, Vector{Region}}`: (default: `Vector()`) Region
@@ -45,12 +43,9 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     internal::InfrastructureSystemsInternal
     "ID for individual demand requirement"
     id::Int64
-    "ID for individual demand requirement"
-    id::Int64
     "Option for providing additional data"
     ext::Dict
     "Region"
-    region::Union{Nothing, Vector{Region}}
     region::Union{Nothing, Vector{Region}}
     "identifies whether the technology is available"
     available::Bool
@@ -73,8 +68,6 @@ get_peak_demand_mw(value::DemandRequirement) = value.peak_demand_mw
 get_internal(value::DemandRequirement) = value.internal
 """Get [`DemandRequirement`](@ref) `id`."""
 get_id(value::DemandRequirement) = value.id
-"""Get [`DemandRequirement`](@ref) `id`."""
-get_id(value::DemandRequirement) = value.id
 """Get [`DemandRequirement`](@ref) `ext`."""
 get_ext(value::DemandRequirement) = value.ext
 """Get [`DemandRequirement`](@ref) `region`."""
@@ -92,8 +85,6 @@ set_power_systems_type!(value::DemandRequirement, val) = value.power_systems_typ
 set_peak_demand_mw!(value::DemandRequirement, val) = value.peak_demand_mw = val
 """Set [`DemandRequirement`](@ref) `internal`."""
 set_internal!(value::DemandRequirement, val) = value.internal = val
-"""Set [`DemandRequirement`](@ref) `id`."""
-set_id!(value::DemandRequirement, val) = value.id = val
 """Set [`DemandRequirement`](@ref) `id`."""
 set_id!(value::DemandRequirement, val) = value.id = val
 """Set [`DemandRequirement`](@ref) `ext`."""

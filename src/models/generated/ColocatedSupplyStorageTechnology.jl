@@ -109,3 +109,13 @@ set_inverter_supply_ratio!(value::ColocatedSupplyStorageTechnology, val) = value
 set_capital_costs_inverter!(value::ColocatedSupplyStorageTechnology, val) = value.capital_costs_inverter = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `storage_technology`."""
 set_storage_technology!(value::ColocatedSupplyStorageTechnology, val) = value.storage_technology = val
+
+function serialize_openapi_struct(technology::ColocatedSupplyStorageTechnology{T}, vals...) where T <: PSY.Generator
+    base_struct = APIServer.ColocatedSupplyStorageTechnology(; vals...)
+    return base_struct
+end
+
+
+function deserialize_openapi_struct(::Type{<:ColocatedSupplyStorageTechnology}, vals::Dict)
+    return IS.deserialize_struct(APIServer.ColocatedSupplyStorageTechnology, vals)
+end

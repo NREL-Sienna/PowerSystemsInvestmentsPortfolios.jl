@@ -69,3 +69,12 @@ set_capacity_reserve_fraction!(value::CapacityReserveMargin, val) = value.capaci
 set_available!(value::CapacityReserveMargin, val) = value.available = val
 """Set [`CapacityReserveMargin`](@ref) `regions`."""
 set_regions!(value::CapacityReserveMargin, val) = value.regions = val
+
+function serialize_openapi_struct(technology::CapacityReserveMargin, vals...)
+    base_struct = APIServer.CapacityReserveMargin(; vals...)
+    return base_struct
+end
+
+function deserialize_openapi_struct(::Type{<:CapacityReserveMargin}, vals::Dict)
+    return IS.deserialize_struct(APIServer.CapacityReserveMargin, vals)
+end

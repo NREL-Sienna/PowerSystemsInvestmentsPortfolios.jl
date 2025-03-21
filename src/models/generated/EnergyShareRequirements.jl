@@ -77,3 +77,12 @@ set_generation_fraction!(value::EnergyShareRequirements, val) = value.generation
 set_available!(value::EnergyShareRequirements, val) = value.available = val
 """Set [`EnergyShareRequirements`](@ref) `eligible_regions`."""
 set_eligible_regions!(value::EnergyShareRequirements, val) = value.eligible_regions = val
+
+function serialize_openapi_struct(technology::EnergyShareRequirements, vals...)
+    base_struct = APIServer.EnergyShareRequirements(; vals...)
+    return base_struct
+end
+
+function deserialize_openapi_struct(::Type{<:EnergyShareRequirements}, vals::Dict)
+    return IS.deserialize_struct(APIServer.EnergyShareRequirements, vals)
+end

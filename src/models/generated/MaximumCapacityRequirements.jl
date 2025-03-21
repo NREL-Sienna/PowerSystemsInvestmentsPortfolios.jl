@@ -69,3 +69,12 @@ set_ext!(value::MaximumCapacityRequirements, val) = value.ext = val
 set_eligible_resources!(value::MaximumCapacityRequirements, val) = value.eligible_resources = val
 """Set [`MaximumCapacityRequirements`](@ref) `available`."""
 set_available!(value::MaximumCapacityRequirements, val) = value.available = val
+
+function serialize_openapi_struct(technology::MaximumCapacityRequirements, vals...)
+    base_struct = APIServer.MaximumCapacityRequirements(; vals...)
+    return base_struct
+end
+
+function deserialize_openapi_struct(::Type{<:MaximumCapacityRequirements}, vals::Dict)
+    return IS.deserialize_struct(APIServer.MaximumCapacityRequirements, vals)
+end

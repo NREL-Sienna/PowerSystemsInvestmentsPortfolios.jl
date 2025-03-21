@@ -117,3 +117,13 @@ set_ext!(value::FlexibleDemandSideTechnology, val) = value.ext = val
 set_region!(value::FlexibleDemandSideTechnology, val) = value.region = val
 """Set [`FlexibleDemandSideTechnology`](@ref) `min_power`."""
 set_min_power!(value::FlexibleDemandSideTechnology, val) = value.min_power = val
+
+function serialize_openapi_struct(technology::FlexibleDemandSideTechnology{T}, vals...) where T <: PSY.StaticInjection
+    base_struct = APIServer.FlexibleDemandSideTechnology(; vals...)
+    return base_struct
+end
+
+
+function deserialize_openapi_struct(::Type{<:FlexibleDemandSideTechnology}, vals::Dict)
+    return IS.deserialize_struct(APIServer.FlexibleDemandSideTechnology, vals)
+end

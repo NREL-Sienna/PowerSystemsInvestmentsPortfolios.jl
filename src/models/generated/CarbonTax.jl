@@ -77,3 +77,12 @@ set_ext!(value::CarbonTax, val) = value.ext = val
 set_available!(value::CarbonTax, val) = value.available = val
 """Set [`CarbonTax`](@ref) `eligible_regions`."""
 set_eligible_regions!(value::CarbonTax, val) = value.eligible_regions = val
+
+function serialize_openapi_struct(technology::CarbonTax, vals...)
+    base_struct = APIServer.CarbonTax(; vals...)
+    return base_struct
+end
+
+function deserialize_openapi_struct(::Type{<:CarbonTax}, vals::Dict)
+    return IS.deserialize_struct(APIServer.CarbonTax, vals)
+end
