@@ -5,9 +5,10 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct EnergyShareRequirements <: Requirements
+    mutable struct EnergyShareRequirements <: Requirement
         name::String
         internal::InfrastructureSystemsInternal
+        id::Int64
         ext::Dict
         generation_fraction::Float64
         available::Bool
@@ -17,18 +18,21 @@ This file is auto-generated. Do not edit.
 
 
 # Arguments
-- `name::String`: The technology name
+- `name::String`: The policy name
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `id::Int64`: ID for individual policy
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `generation_fraction::Float64`: (default: `0.0`) Fraction of total demand across all eligible zones that needs to be met by qualifying resources.
 - `available::Bool`: Availability
 - `eligible_regions::Vector{Region}`: (default: `Vector{Region}()`) List of regions where the EnergyShareRequirement will be applied.
 """
-mutable struct EnergyShareRequirements <: Requirements
-    "The technology name"
+mutable struct EnergyShareRequirements <: Requirement
+    "The policy name"
     name::String
     "Internal field"
     internal::InfrastructureSystemsInternal
+    "ID for individual policy"
+    id::Int64
     "Option for providing additional data"
     ext::Dict
     "Fraction of total demand across all eligible zones that needs to be met by qualifying resources."
@@ -40,14 +44,16 @@ mutable struct EnergyShareRequirements <: Requirements
 end
 
 
-function EnergyShareRequirements(; name, internal=InfrastructureSystemsInternal(), ext=Dict(), generation_fraction=0.0, available, eligible_regions=Vector{Region}(), )
-    EnergyShareRequirements(name, internal, ext, generation_fraction, available, eligible_regions, )
+function EnergyShareRequirements(; name, internal=InfrastructureSystemsInternal(), id, ext=Dict(), generation_fraction=0.0, available, eligible_regions=Vector{Region}(), )
+    EnergyShareRequirements(name, internal, id, ext, generation_fraction, available, eligible_regions, )
 end
 
 """Get [`EnergyShareRequirements`](@ref) `name`."""
 get_name(value::EnergyShareRequirements) = value.name
 """Get [`EnergyShareRequirements`](@ref) `internal`."""
 get_internal(value::EnergyShareRequirements) = value.internal
+"""Get [`EnergyShareRequirements`](@ref) `id`."""
+get_id(value::EnergyShareRequirements) = value.id
 """Get [`EnergyShareRequirements`](@ref) `ext`."""
 get_ext(value::EnergyShareRequirements) = value.ext
 """Get [`EnergyShareRequirements`](@ref) `generation_fraction`."""
@@ -61,6 +67,8 @@ get_eligible_regions(value::EnergyShareRequirements) = value.eligible_regions
 set_name!(value::EnergyShareRequirements, val) = value.name = val
 """Set [`EnergyShareRequirements`](@ref) `internal`."""
 set_internal!(value::EnergyShareRequirements, val) = value.internal = val
+"""Set [`EnergyShareRequirements`](@ref) `id`."""
+set_id!(value::EnergyShareRequirements, val) = value.id = val
 """Set [`EnergyShareRequirements`](@ref) `ext`."""
 set_ext!(value::EnergyShareRequirements, val) = value.ext = val
 """Set [`EnergyShareRequirements`](@ref) `generation_fraction`."""

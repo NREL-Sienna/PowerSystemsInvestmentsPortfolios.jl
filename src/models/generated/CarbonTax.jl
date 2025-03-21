@@ -5,10 +5,11 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct CarbonTax <: Requirements
+    mutable struct CarbonTax <: Requirement
         name::String
         tax_dollars_per_ton::Float64
         internal::InfrastructureSystemsInternal
+        id::Int64
         ext::Dict
         available::Bool
         eligible_regions::Vector{Region}
@@ -17,20 +18,23 @@ This file is auto-generated. Do not edit.
 
 
 # Arguments
-- `name::String`: The technology name
+- `name::String`: The requirement name
 - `tax_dollars_per_ton::Float64`: (default: `1.0`) Emission limit in terms of rate (USD/tCO2)
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `id::Int64`: ID for individual policy
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `available::Bool`: Availability
 - `eligible_regions::Vector{Region}`: (default: `Vector{Region}()`) List of regions that contribute to the carbon cap constraint.
 """
-mutable struct CarbonTax <: Requirements
-    "The technology name"
+mutable struct CarbonTax <: Requirement
+    "The requirement name"
     name::String
     "Emission limit in terms of rate (USD/tCO2)"
     tax_dollars_per_ton::Float64
     "Internal field"
     internal::InfrastructureSystemsInternal
+    "ID for individual policy"
+    id::Int64
     "Option for providing additional data"
     ext::Dict
     "Availability"
@@ -40,8 +44,8 @@ mutable struct CarbonTax <: Requirements
 end
 
 
-function CarbonTax(; name, tax_dollars_per_ton=1.0, internal=InfrastructureSystemsInternal(), ext=Dict(), available, eligible_regions=Vector{Region}(), )
-    CarbonTax(name, tax_dollars_per_ton, internal, ext, available, eligible_regions, )
+function CarbonTax(; name, tax_dollars_per_ton=1.0, internal=InfrastructureSystemsInternal(), id, ext=Dict(), available, eligible_regions=Vector{Region}(), )
+    CarbonTax(name, tax_dollars_per_ton, internal, id, ext, available, eligible_regions, )
 end
 
 """Get [`CarbonTax`](@ref) `name`."""
@@ -50,6 +54,8 @@ get_name(value::CarbonTax) = value.name
 get_tax_dollars_per_ton(value::CarbonTax) = value.tax_dollars_per_ton
 """Get [`CarbonTax`](@ref) `internal`."""
 get_internal(value::CarbonTax) = value.internal
+"""Get [`CarbonTax`](@ref) `id`."""
+get_id(value::CarbonTax) = value.id
 """Get [`CarbonTax`](@ref) `ext`."""
 get_ext(value::CarbonTax) = value.ext
 """Get [`CarbonTax`](@ref) `available`."""
@@ -63,6 +69,8 @@ set_name!(value::CarbonTax, val) = value.name = val
 set_tax_dollars_per_ton!(value::CarbonTax, val) = value.tax_dollars_per_ton = val
 """Set [`CarbonTax`](@ref) `internal`."""
 set_internal!(value::CarbonTax, val) = value.internal = val
+"""Set [`CarbonTax`](@ref) `id`."""
+set_id!(value::CarbonTax, val) = value.id = val
 """Set [`CarbonTax`](@ref) `ext`."""
 set_ext!(value::CarbonTax, val) = value.ext = val
 """Set [`CarbonTax`](@ref) `available`."""

@@ -34,7 +34,7 @@ This file is auto-generated. Do not edit.
 - `start_region::Region`: Start region for transport technology
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: Name
-- `id::Int64`: Numerical Index
+- `id::Int64`: Numerical Index for HVDC lines
 - `end_region::Region`: End region for transport technology
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
@@ -42,7 +42,7 @@ This file is auto-generated. Do not edit.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `resistance::Float64`: (default: `0.0`) Technology resistance in Ohms
-- `voltage::Float64`: (default: `0.0`) Technology resistance in Ohms
+- `voltage::Float64`: (default: `0.0`) Technology voltage in V
 - `maximum_new_capacity::Float64`: Maximum capacity that can be added to transmission line (MW)
 - `base_year::Int`: (default: `2020`) Reference year for technology data
 - `existing_line_capacity::Float64`: Existing capacity of transport technology (MW)
@@ -59,7 +59,7 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
     available::Bool
     "Name"
     name::String
-    "Numerical Index"
+    "Numerical Index for HVDC lines"
     id::Int64
     "End region for transport technology"
     end_region::Region
@@ -75,7 +75,7 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
     ext::Dict
     "Technology resistance in Ohms"
     resistance::Float64
-    "Technology resistance in Ohms"
+    "Technology voltage in V"
     voltage::Float64
     "Maximum capacity that can be added to transmission line (MW)"
     maximum_new_capacity::Float64

@@ -34,15 +34,15 @@ This file is auto-generated. Do not edit.
 - `start_region::Region`: Start region for transport technology
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: Name
-- `id::Int64`: Numerical Index
+- `id::Int64`: Numerical Index for AC transport technologies
 - `end_region::Region`: End region for transport technology
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
-- `angle_limit::Float64`: (default: `0.0`) Votlage angle limit (radians)
+- `angle_limit::Float64`: (default: `0.0`) Voltage angle limit (radians)
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `resistance::Float64`: (default: `0.0`) Technology resistance in Ohms
-- `voltage::Float64`: (default: `0.0`) Technology resistance in Ohms
+- `voltage::Float64`: (default: `0.0`) Technology voltage in Volts
 - `maximum_new_capacity::Float64`: Maximum capacity that can be added to transmission line (MW)
 - `base_year::Int`: (default: `2020`) Reference year for technology data
 - `existing_line_capacity::Float64`: Existing capacity of transport technology (MW)
@@ -59,7 +59,7 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     available::Bool
     "Name"
     name::String
-    "Numerical Index"
+    "Numerical Index for AC transport technologies"
     id::Int64
     "End region for transport technology"
     end_region::Region
@@ -67,7 +67,7 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     financial_data::TechnologyFinancialData
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
-    "Votlage angle limit (radians)"
+    "Voltage angle limit (radians)"
     angle_limit::Float64
     "Internal field"
     internal::InfrastructureSystemsInternal
@@ -75,7 +75,7 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     ext::Dict
     "Technology resistance in Ohms"
     resistance::Float64
-    "Technology resistance in Ohms"
+    "Technology voltage in Volts"
     voltage::Float64
     "Maximum capacity that can be added to transmission line (MW)"
     maximum_new_capacity::Float64

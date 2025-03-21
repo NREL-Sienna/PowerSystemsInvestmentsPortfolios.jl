@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct MaximumCapacityRequirements <: Requirements
+    mutable struct MaximumCapacityRequirements <: Requirement
         name::String
         max_capacity_mw::Float64
         internal::InfrastructureSystemsInternal
@@ -24,7 +24,7 @@ This file is auto-generated. Do not edit.
 - `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of technologies that contribute to the carbon cap constraint.
 - `available::Bool`: Availability
 """
-mutable struct MaximumCapacityRequirements <: Requirements
+mutable struct MaximumCapacityRequirements <: Requirement
     "The technology name"
     name::String
     "Maximum total capacity across all eligible resources"

@@ -5,9 +5,10 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct MinimumCapacityRequirements <: Requirements
+    mutable struct MinimumCapacityRequirements <: Requirement
         name::String
         internal::InfrastructureSystemsInternal
+        id::Int64
         min_capacity_mw::Float64
         ext::Dict
         eligible_resources::Vector{Technology}
@@ -17,37 +18,42 @@ This file is auto-generated. Do not edit.
 
 
 # Arguments
-- `name::String`: The technology name
+- `name::String`: The requirement name
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `id::Int64`: ID for individual policy
 - `min_capacity_mw::Float64`: (default: `0.0`) Minimum total capacity across all eligible resources
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of technologies that contribute to the carbon cap constraint.
+- `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of resources that contribute to the carbon cap constraint.
 - `available::Bool`: Availability
 """
-mutable struct MinimumCapacityRequirements <: Requirements
-    "The technology name"
+mutable struct MinimumCapacityRequirements <: Requirement
+    "The requirement name"
     name::String
     "Internal field"
     internal::InfrastructureSystemsInternal
+    "ID for individual policy"
+    id::Int64
     "Minimum total capacity across all eligible resources"
     min_capacity_mw::Float64
     "Option for providing additional data"
     ext::Dict
-    "List of technologies that contribute to the carbon cap constraint."
+    "List of resources that contribute to the carbon cap constraint."
     eligible_resources::Vector{Technology}
     "Availability"
     available::Bool
 end
 
 
-function MinimumCapacityRequirements(; name, internal=InfrastructureSystemsInternal(), min_capacity_mw=0.0, ext=Dict(), eligible_resources=Vector{Technology}(), available, )
-    MinimumCapacityRequirements(name, internal, min_capacity_mw, ext, eligible_resources, available, )
+function MinimumCapacityRequirements(; name, internal=InfrastructureSystemsInternal(), id, min_capacity_mw=0.0, ext=Dict(), eligible_resources=Vector{Technology}(), available, )
+    MinimumCapacityRequirements(name, internal, id, min_capacity_mw, ext, eligible_resources, available, )
 end
 
 """Get [`MinimumCapacityRequirements`](@ref) `name`."""
 get_name(value::MinimumCapacityRequirements) = value.name
 """Get [`MinimumCapacityRequirements`](@ref) `internal`."""
 get_internal(value::MinimumCapacityRequirements) = value.internal
+"""Get [`MinimumCapacityRequirements`](@ref) `id`."""
+get_id(value::MinimumCapacityRequirements) = value.id
 """Get [`MinimumCapacityRequirements`](@ref) `min_capacity_mw`."""
 get_min_capacity_mw(value::MinimumCapacityRequirements) = value.min_capacity_mw
 """Get [`MinimumCapacityRequirements`](@ref) `ext`."""
@@ -61,6 +67,8 @@ get_available(value::MinimumCapacityRequirements) = value.available
 set_name!(value::MinimumCapacityRequirements, val) = value.name = val
 """Set [`MinimumCapacityRequirements`](@ref) `internal`."""
 set_internal!(value::MinimumCapacityRequirements, val) = value.internal = val
+"""Set [`MinimumCapacityRequirements`](@ref) `id`."""
+set_id!(value::MinimumCapacityRequirements, val) = value.id = val
 """Set [`MinimumCapacityRequirements`](@ref) `min_capacity_mw`."""
 set_min_capacity_mw!(value::MinimumCapacityRequirements, val) = value.min_capacity_mw = val
 """Set [`MinimumCapacityRequirements`](@ref) `ext`."""

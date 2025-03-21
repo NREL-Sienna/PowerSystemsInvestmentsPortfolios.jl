@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct CapacityReserveMargin <: Requirements
+    mutable struct CapacityReserveMargin <: Requirement
         name::String
         internal::InfrastructureSystemsInternal
         ext::Dict
@@ -17,15 +17,15 @@ This file is auto-generated. Do not edit.
 
 
 # Arguments
-- `name::String`: The technology name
+- `name::String`: The requirement name
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `capacity_reserve_fraction::Float64`: (default: `0.0`) Capacity reserve requirements, represented as a fraction of demand in region
 - `available::Bool`: Availability
 - `regions::Vector{Region}`: (default: `Vector{Technology}()`) List of regions where this reserve margin is enforced
 """
-mutable struct CapacityReserveMargin <: Requirements
-    "The technology name"
+mutable struct CapacityReserveMargin <: Requirement
+    "The requirement name"
     name::String
     "Internal field"
     internal::InfrastructureSystemsInternal

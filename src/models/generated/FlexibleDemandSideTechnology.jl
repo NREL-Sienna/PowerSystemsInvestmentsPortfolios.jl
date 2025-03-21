@@ -9,13 +9,14 @@ This file is auto-generated. Do not edit.
         variable_cost_per_mwh::PSY.ValueCurve
         available::Bool
         name::String
+        id::Int64
         max_demand_advance::Float64
         demand_energy_efficiency::Float64
         max_demand_delay::Float64
         power_systems_type::String
         internal::InfrastructureSystemsInternal
         ext::Dict
-        region::Union{Nothing, Region}
+        region::Union{Nothing, Vector{Region}}
         min_power::Float64
     end
 
@@ -25,13 +26,14 @@ This file is auto-generated. Do not edit.
 - `variable_cost_per_mwh::PSY.ValueCurve`: Variable operations and maintenance costs associated with flexible demand deferral
 - `available::Bool`: identifies whether the technology is available
 - `name::String`: The technology name
+- `id::Int64`: ID for individual demand side technology
 - `max_demand_advance::Float64`: Maximum number of hours that demand can be scheduled in advance of the original schedule (hours).
 - `demand_energy_efficiency::Float64`: Energy efficiency associated with time shifting demand. Represents energy losses due to time shifting
-- `max_demand_delay::Float64`: Maximum number of hours that demand can be deferred or delayed.
+- `max_demand_delay::Float64`: Maximum number of hours that demand can be deferred or delayed (hours).
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `region::Union{Nothing, Region}`: (default: `nothing`) Region where tech operates in
+- `region::Union{Nothing, Vector{Region}}`: (default: `Vector()`) Region
 - `min_power::Float64`: (default: `0.0`) Minimum operation of demandside unit as a fraction of total capacity
 """
 mutable struct FlexibleDemandSideTechnology{T <: PSY.StaticInjection} <: Technology
@@ -41,11 +43,13 @@ mutable struct FlexibleDemandSideTechnology{T <: PSY.StaticInjection} <: Technol
     available::Bool
     "The technology name"
     name::String
+    "ID for individual demand side technology"
+    id::Int64
     "Maximum number of hours that demand can be scheduled in advance of the original schedule (hours)."
     max_demand_advance::Float64
     "Energy efficiency associated with time shifting demand. Represents energy losses due to time shifting"
     demand_energy_efficiency::Float64
-    "Maximum number of hours that demand can be deferred or delayed."
+    "Maximum number of hours that demand can be deferred or delayed (hours)."
     max_demand_delay::Float64
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
@@ -53,15 +57,15 @@ mutable struct FlexibleDemandSideTechnology{T <: PSY.StaticInjection} <: Technol
     internal::InfrastructureSystemsInternal
     "Option for providing additional data"
     ext::Dict
-    "Region where tech operates in"
-    region::Union{Nothing, Region}
+    "Region"
+    region::Union{Nothing, Vector{Region}}
     "Minimum operation of demandside unit as a fraction of total capacity"
     min_power::Float64
 end
 
 
-function FlexibleDemandSideTechnology{T}(; variable_cost_per_mwh, available, name, max_demand_advance, demand_energy_efficiency, max_demand_delay, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=nothing, min_power=0.0, ) where T <: PSY.StaticInjection
-    FlexibleDemandSideTechnology{T}(variable_cost_per_mwh, available, name, max_demand_advance, demand_energy_efficiency, max_demand_delay, power_systems_type, internal, ext, region, min_power, )
+function FlexibleDemandSideTechnology{T}(; variable_cost_per_mwh, available, name, id, max_demand_advance, demand_energy_efficiency, max_demand_delay, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), min_power=0.0, ) where T <: PSY.StaticInjection
+    FlexibleDemandSideTechnology{T}(variable_cost_per_mwh, available, name, id, max_demand_advance, demand_energy_efficiency, max_demand_delay, power_systems_type, internal, ext, region, min_power, )
 end
 
 """Get [`FlexibleDemandSideTechnology`](@ref) `variable_cost_per_mwh`."""
@@ -70,6 +74,8 @@ get_variable_cost_per_mwh(value::FlexibleDemandSideTechnology) = value.variable_
 get_available(value::FlexibleDemandSideTechnology) = value.available
 """Get [`FlexibleDemandSideTechnology`](@ref) `name`."""
 get_name(value::FlexibleDemandSideTechnology) = value.name
+"""Get [`FlexibleDemandSideTechnology`](@ref) `id`."""
+get_id(value::FlexibleDemandSideTechnology) = value.id
 """Get [`FlexibleDemandSideTechnology`](@ref) `max_demand_advance`."""
 get_max_demand_advance(value::FlexibleDemandSideTechnology) = value.max_demand_advance
 """Get [`FlexibleDemandSideTechnology`](@ref) `demand_energy_efficiency`."""
@@ -93,6 +99,8 @@ set_variable_cost_per_mwh!(value::FlexibleDemandSideTechnology, val) = value.var
 set_available!(value::FlexibleDemandSideTechnology, val) = value.available = val
 """Set [`FlexibleDemandSideTechnology`](@ref) `name`."""
 set_name!(value::FlexibleDemandSideTechnology, val) = value.name = val
+"""Set [`FlexibleDemandSideTechnology`](@ref) `id`."""
+set_id!(value::FlexibleDemandSideTechnology, val) = value.id = val
 """Set [`FlexibleDemandSideTechnology`](@ref) `max_demand_advance`."""
 set_max_demand_advance!(value::FlexibleDemandSideTechnology, val) = value.max_demand_advance = val
 """Set [`FlexibleDemandSideTechnology`](@ref) `demand_energy_efficiency`."""
