@@ -379,6 +379,7 @@ function build_portfolio()
         available=true,
         power_systems_type="PowerLoad",
         region=[z1],
+        value_of_lost_load=0.0,
         #peak_load=peak_load,
     )
 
@@ -400,6 +401,8 @@ function build_portfolio()
         available=true,
         power_systems_type="PowerLoad",
         region=[z1],
+        value_of_lost_load=0.0,
+
         #peak_load=peak_load,
     )
 
@@ -421,6 +424,8 @@ function build_portfolio()
         available=true,
         power_systems_type="PowerLoad",
         region=[z2],
+        value_of_lost_load=0.0,
+
         #peak_load=peak_load,
     )
 
