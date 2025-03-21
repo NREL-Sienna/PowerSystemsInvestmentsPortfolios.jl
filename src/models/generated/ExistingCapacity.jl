@@ -54,3 +54,12 @@ set_internal!(value::ExistingCapacity, val) = value.internal = val
 set_ext!(value::ExistingCapacity, val) = value.ext = val
 """Set [`ExistingCapacity`](@ref) `existing_capacity`."""
 set_existing_capacity!(value::ExistingCapacity, val) = value.existing_capacity = val
+
+function serialize_openapi_struct(technology::ExistingCapacity, vals...)
+    base_struct = APIServer.ExistingCapacity(; vals...)
+    return base_struct
+end
+
+function deserialize_openapi_struct(::Type{<:ExistingCapacity}, vals::Dict)
+    return IS.deserialize_struct(APIServer.ExistingCapacity, vals)
+end

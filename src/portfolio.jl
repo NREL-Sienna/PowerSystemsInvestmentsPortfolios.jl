@@ -1,13 +1,11 @@
 const PORTFOLIO_KWARGS =
     Set((:name, :description, :data_source, :run_checks, :unit_portfolio))
 
+const DATA_FORMAT_VERSION = "0.1.0"
+
 const DEFAULT_AGGREGATION = PSY.ACBus
 
-const PORTFOLIO_STRUCT_DESCRIPTOR_FILE = joinpath(
-    dirname(pathof(PowerSystemsInvestmentsPortfolios)),
-    "descriptors",
-    "portfolio_structs.json",
-)
+const PORTFOLIO_STRUCT_DESCRIPTOR_FILE = nothing
 
 mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
@@ -15,14 +13,23 @@ mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     data_source::Union{Nothing, String}
 end
 
-#TODO: Define if we are going to support unit systems
-#TODO: Make immutable
-mutable struct Portfolio <: IS.InfrastructureSystemsType
+mutable struct PortfolioFinancialData <: IS.InfrastructureSystemsType
+    "Base economic year. All costs will be converted to a net present value in this year."
+    base_year::Int64
+    "Discount rate"
+    discount_rate::Float64
+    "Inflation rate"
+    inflation_rate::Float64
+    "Interest rate"
+    interest_rate::Float64
+end
+
+struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     data::IS.SystemData # Inputs to the model
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
-    #units_settings::IS.SystemUnitsSettings
     time_series_directory::Union{Nothing, String}
+    financial_data::Union{Nothing, PortfolioFinancialData}
     base_system::Union{Nothing, System}
     metadata::PortfolioMetadata
     internal::IS.InfrastructureSystemsInternal
@@ -31,13 +38,13 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
         aggregation,
         data,
         investment_schedule::Dict,
-        #units_settings::IS.SystemUnitsSettings,
-        internal::IS.InfrastructureSystemsInternal,
+        internal::IS.InfrastructureSystemsInternal;
         time_series_directory=nothing,
+        financial_data=nothing,
+        base_system=nothing,
         name=nothing,
         description=nothing,
         data_source=nothing,
-        base_system=nothing,
         kwargs...,
     )
         #TODO: Provide support to kwargs
@@ -54,8 +61,8 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
             aggregation,
             data,
             investment_schedule,
-            #units_settings,
             time_series_directory,
+            financial_data,
             base_system,
             PortfolioMetadata(name, description, data_source),
             internal,
@@ -63,29 +70,83 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
     end
 end
 
-#= #TODO: Check how to handle unit settings
-function Portfolio(aggregation, discount_rate::Number, data, investment_schedule, internal; kwargs...)
-    unit_portfolio_ = get(kwargs, "unit_system", "NATURAL_UNITS")
-    unit_portfolio = PSY.UNIT_SYSTEM_MAPPING[unit_portfolio_]
-    unit_settings = IS.SystemUnitsSettings(base_power, unit_portfolio)
-    return Portfolio(aggregation, data, discount_rate, investment_schedule, unit_settings, internal; kwargs...)
-end
-=#
-
 """
 Construct an empty `Portfolio`. Useful for building a Portfolio from scratch.
 """
 function Portfolio(; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(DEFAULT_AGGREGATION, data, Dict(), IS.InfrastructureSystemsInternal())
+    return Portfolio(
+        DEFAULT_AGGREGATION,
+        data,
+        Dict(),
+        IS.InfrastructureSystemsInternal();
+        kwargs...,
+    )
 end
 
 """
 Construct an empty `Portfolio` specifying aggregation. Useful for building a Portfolio from scratch.
 """
 function Portfolio(aggregation; kwargs...)
-    data = _create_system_data_from_kwargs(; kwargs...)
+    data = PSY._create_system_data_from_kwargs(; kwargs...)
     return Portfolio(aggregation, data, Dict(), IS.InfrastructureSystemsInternal())
+end
+
+"""
+Construct an empty `Portfolio` specifying financial data. Useful for building a Portfolio from scratch.
+"""
+function Portfolio(base_year, discount_rate, inflation_rate, interest_rate; kwargs...)
+    data = PSY._create_system_data_from_kwargs(; kwargs...)
+    return Portfolio(
+        DEFAULT_AGGREGATION,
+        data,
+        Dict(),
+        InfrastructureSystemsInternal();
+        financial_data=PortfolioFinancialData(
+            base_year,
+            discount_rate,
+            inflation_rate,
+            interest_rate,
+        ),
+    )
+end
+
+"""
+Constructs a Portfolio from a file path ending with .json
+
+If the file is JSON, then `assign_new_uuids = true` will generate new UUIDs for the system
+and all components.
+"""
+function Portfolio(
+    file_path::AbstractString;
+    assign_new_uuids=false,
+    try_reimport=true,
+    kwargs...,
+)
+    ext = lowercase(splitext(file_path)[2])
+    if ext == ".json"
+        unsupported = setdiff(keys(kwargs), SYSTEM_KWARGS)
+        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
+        runchecks = get(kwargs, :runchecks, false)
+        time_series_read_only = get(kwargs, :time_series_read_only, false)
+        time_series_directory = get(kwargs, :time_series_directory, nothing)
+        portfolio = deserialize(
+            Portfolio,
+            file_path;
+            time_series_read_only=time_series_read_only,
+            # runchecks = runchecks,
+            time_series_directory=time_series_directory,
+        )
+        return portfolio
+        _post_deserialize_handling(
+            portfolio;
+            runchecks=runchecks,
+            assign_new_uuids=assign_new_uuids,
+        )
+        return portfolio
+    else
+        throw(DataFormatError("$file_path is not a supported file type"))
+    end
 end
 
 """
@@ -109,15 +170,99 @@ Get the name of the portfolio.
 get_name(val::Portfolio) = val.metadata.name
 
 """
+Get the financial data of the portfolio.
+"""
+get_financial_data(val::Portfolio) = val.financial_data
+
+"""
+Get the base year of the portfolio.
+"""
+get_base_year(val::Portfolio) = val.financial_data.base_year
+
+"""
+Get the discount rate.
+"""
+get_discount_rate(val::Portfolio) = val.financial_data.discount_rate
+
+"""
+Get the inflation rate.
+"""
+get_inflation_rate(val::Portfolio) = val.financial_data.inflation_rate
+
+"""
+Get the interest rate.
+"""
+get_interest_rate(val::Portfolio) = val.financial_data.interest_rate
+
+"""
+Get the description of the portfolio.
+"""
+get_description(val::Portfolio) = val.metadata.description
+
+"""
+Return true if checks are enabled on the system.
+"""
+get_runchecks(val::Portfolio) = val.runchecks[]
+
+"""
 Set the description of the portfolio.
 """
 set_description!(val::Portfolio, description::AbstractString) =
     val.metadata.description = description
 
 """
-Get the description of the portfolio.
+Set the base year of the portfolio.
 """
-get_description(val::Portfolio) = val.metadata.description
+set_base_year!(val::Portfolio, base_year::Int64) = val.financial_data.base_year = base_year
+
+"""
+Set the discount rate of the portfolio.
+"""
+set_discount_rate!(val::Portfolio, discount_rate::Float64) =
+    val.financial_data.discount_rate = discount_rate
+
+"""
+Set the inflation rate of the portfolio.
+"""
+set_inflation_rate!(val::Portfolio, inflation_rate::Float64) =
+    val.financial_data.inflation_rate = inflation_rate
+
+"""
+Set the interest rate of the portfolio.
+"""
+set_interest_rate!(val::Portfolio, interest_rate::Float64) =
+    val.financial_data.interest_rate = interest_rate
+
+function _validate_or_skip!(sys, component, skip_validation)
+    if skip_validation && get_runchecks(sys)
+        @warn(
+            "skip_validation is deprecated; construct System with runchecks = true or call set_runchecks!. Disabling System.runchecks"
+        )
+        set_runchecks!(sys, false)
+    end
+
+    # Always skip if system checks are disabled.
+    if !skip_validation && !get_runchecks(sys)
+        skip_validation = true
+    end
+
+    if !skip_validation
+        sanitize_component!(component, sys)
+        if !validate_component_with_system(component, sys)
+            throw(IS.InvalidValue("Invalid value for $component"))
+        end
+    end
+
+    return skip_validation
+end
+
+"""
+Validate a component against System data. Return true if the instance is valid.
+
+Refer to [`validate_component`](@ref) if the validation logic only requires data contained
+within the instance.
+"""
+validate_component_with_system(technology::Technology, port::Portfolio) = true
 
 """
 Add a technology to the portfolio.
@@ -145,11 +290,42 @@ function add_technology!(
     skip_validation=false,
     kwargs...,
 ) where {T <: Technology}
-    #deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+
+    #check_topology(portfolio.data, component)
+    #check_component_addition(portfolio.data, technology; kwargs...)
+
+    deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+    # TODO: Attach requirements to technologies or other structs
+    #if !deserialization_in_progress
+    # Services are attached to devices at deserialization time.
+    #    check_for_services_on_addition(portfolio, technology)
+    #end
+
+    skip_validation = true #_validate_or_skip!(portfolio, technology, skip_validation)
+    _kwargs = Dict(k => v for (k, v) in kwargs if k !== :static_injector)
+
     IS.add_component!(
         portfolio.data,
         technology;
-        #allow_existing_time_series=deserialization_in_progress,
+        allow_existing_time_series=deserialization_in_progress,
+        skip_validation=skip_validation,
+        kwargs...,
+    )
+
+    return
+end
+
+function add_region!(
+    portfolio::Portfolio,
+    region::T;
+    skip_validation=false,
+    kwargs...,
+) where {T <: Region}
+    deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+    IS.add_component!(
+        portfolio.data,
+        region;
+        allow_existing_time_series=deserialization_in_progress,
         skip_validation=skip_validation,
         kwargs...,
     )
@@ -170,7 +346,6 @@ range.
 ```julia
 portfolio = Portfolio(100.0)
 
-buses = [bus1, bus2, bus3]
 generators = [gen1, gen2, gen3]
 foreach(x -> add_technologies!(portfolio, x), Iterators.flatten((buses, generators)))
 ```
@@ -370,9 +545,10 @@ Throws ArgumentError if the component is not stored in the system.
 function add_time_series!(
     portfolio::Portfolio,
     component::Technology,
-    time_series::PSY.TimeSeriesData,
+    time_series::PSY.TimeSeriesData;
+    features...,
 )
-    return IS.add_time_series!(portfolio.data, component, time_series)
+    return IS.add_time_series!(portfolio.data, component, time_series; features...)
 end
 
 """
@@ -386,9 +562,10 @@ Throws ArgumentError if a component is not stored in the system.
 function add_time_series!(
     portfolio::Portfolio,
     technologies,
-    time_series::PSY.TimeSeriesData,
+    time_series::PSY.TimeSeriesData;
+    features...,
 )
-    return IS.add_time_series!(portfolio.data, technologies, time_series)
+    return IS.add_time_series!(portfolio.data, technologies, time_series; features...)
 end
 
 """
@@ -400,7 +577,7 @@ get_compression_settings(portfolio::Portfolio) = IS.get_compression_settings(por
 Return the resolution for all time series.
 """
 get_time_series_resolution(portfolio::Portfolio) =
-    IS.get_time_series_resolution(portfolio.data)
+    IS.get_time_series_resolutions(portfolio.data)
 
 """
 Remove all time series data from the system.
@@ -506,7 +683,7 @@ function remove_technology!(
 end
 
 """
-Throws ArgumentError if a PowerSystemsInvestmentPorfol rule blocks removal from the system.
+Throws ArgumentError if a PowerSystemsInvestmentPorfolio rule blocks removal from the system.
 """
 function check_technology_removal(
     portfolio::Portfolio,
@@ -627,6 +804,14 @@ function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: Region}
     return IS.get_components(T, portfolio.data)
 end
 
+function get_region(
+    ::Type{T},
+    portfolio::Portfolio,
+    name::AbstractString,
+) where {T <: Region}
+    return IS.get_component(T, portfolio.data, name)
+end
+
 ################################
 ######### Requirements #########
 ################################
@@ -634,32 +819,14 @@ end
 """
 Add policy requirement to portfolio
 """
-function add_requirement!(portfolio::Portfolio, req::Requirements)
+function add_requirement!(portfolio::Portfolio, req::Requirement)
     #return PSY.add_service!(portfolio.data, req)
     #skip_validation = false
     #skip_validation = _validate_or_skip!(sys, service, skip_validation)
     return IS.add_component!(portfolio.data, req, skip_validation=false)
 end
 
-function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirements}
-    return IS.get_components(T, portfolio.data)
-end
-
-################################
-######### Financials #########
-################################
-
-"""
-Add financial data to portfolio
-"""
-function add_financials!(portfolio::Portfolio, fin::Financials)
-    #return PSY.add_service!(portfolio.data, req)
-    #skip_validation = false
-    #skip_validation = _validate_or_skip!(sys, service, skip_validation)
-    return IS.add_component!(portfolio.data, fin, skip_validation=false)
-end
-
-function get_financials(::Type{T}, portfolio::Portfolio;) where {T <: Financials}
+function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirement}
     return IS.get_components(T, portfolio.data)
 end
 
