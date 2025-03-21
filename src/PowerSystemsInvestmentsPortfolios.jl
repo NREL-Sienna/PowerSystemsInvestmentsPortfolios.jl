@@ -55,8 +55,6 @@ export HVDCTransportTechnology
 export StorageTechnology
 export DemandRequirement
 export DemandSideTechnology
-export FlexibleDemandSideTechnology
-export CurtailableDemandSideTechnology
 export RetirementPotential
 export AggregateRetirementPotential
 export RetrofitPotential
