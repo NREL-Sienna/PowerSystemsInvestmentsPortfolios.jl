@@ -45,6 +45,7 @@ export get_duration_limits
 export get_efficiency
 export get_eligible_regions
 export get_eligible_resources
+export get_eligible_technologies
 export get_end_region
 export get_existing_capacity
 export get_existing_capacity_energy
@@ -133,6 +134,7 @@ export set_duration_limits!
 export set_efficiency!
 export set_eligible_regions!
 export set_eligible_resources!
+export set_eligible_technologies!
 export set_end_region!
 export set_existing_capacity!
 export set_existing_capacity_energy!
