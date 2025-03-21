@@ -134,5 +134,4 @@ function OpenAPI.validate_property(
     ::Type{ColocatedSupplyStorageTechnology},
     name::Symbol,
     val,
-)
-end
+) end

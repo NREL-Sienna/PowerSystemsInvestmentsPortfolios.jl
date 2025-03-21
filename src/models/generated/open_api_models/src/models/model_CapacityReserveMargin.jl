@@ -54,5 +54,4 @@ function check_required(o::CapacityReserveMargin)
     true
 end
 
-function OpenAPI.validate_property(::Type{CapacityReserveMargin}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{CapacityReserveMargin}, name::Symbol, val) end

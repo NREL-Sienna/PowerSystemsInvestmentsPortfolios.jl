@@ -33,5 +33,4 @@ function check_required(o::XYCoords)
     true
 end
 
-function OpenAPI.validate_property(::Type{XYCoords}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{XYCoords}, name::Symbol, val) end

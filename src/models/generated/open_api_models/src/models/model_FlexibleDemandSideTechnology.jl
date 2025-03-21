@@ -128,5 +128,4 @@ function check_required(o::FlexibleDemandSideTechnology)
     true
 end
 
-function OpenAPI.validate_property(::Type{FlexibleDemandSideTechnology}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{FlexibleDemandSideTechnology}, name::Symbol, val) end

@@ -32,5 +32,4 @@ function check_required(o::RetirementPotential)
     true
 end
 
-function OpenAPI.validate_property(::Type{RetirementPotential}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{RetirementPotential}, name::Symbol, val) end

@@ -69,5 +69,4 @@ function check_required(o::MaximumCapacityRequirements)
     true
 end
 
-function OpenAPI.validate_property(::Type{MaximumCapacityRequirements}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{MaximumCapacityRequirements}, name::Symbol, val) end

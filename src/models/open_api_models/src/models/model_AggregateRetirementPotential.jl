@@ -57,5 +57,4 @@ function check_required(o::AggregateRetirementPotential)
     true
 end
 
-function OpenAPI.validate_property(::Type{AggregateRetirementPotential}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{AggregateRetirementPotential}, name::Symbol, val) end

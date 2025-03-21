@@ -54,5 +54,4 @@ function check_required(o::CarbonTax)
     true
 end
 
-function OpenAPI.validate_property(::Type{CarbonTax}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{CarbonTax}, name::Symbol, val) end

@@ -58,5 +58,4 @@ function check_required(o::HourlyMatching)
     true
 end
 
-function OpenAPI.validate_property(::Type{HourlyMatching}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{HourlyMatching}, name::Symbol, val) end
