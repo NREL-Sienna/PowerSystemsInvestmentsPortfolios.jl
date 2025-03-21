@@ -81,5 +81,4 @@ function check_required(o::EnergyShareRequirements)
     true
 end
 
-function OpenAPI.validate_property(::Type{EnergyShareRequirements}, name::Symbol, val)
-end
+function OpenAPI.validate_property(::Type{EnergyShareRequirements}, name::Symbol, val) end
