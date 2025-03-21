@@ -9,9 +9,10 @@ This file is auto-generated. Do not edit.
         name::String
         power_systems_type::String
         internal::InfrastructureSystemsInternal
+        id::Int64
         ext::Dict
         demand_mw::Float64
-        region::Union{Nothing, Region}
+        region::Union{Nothing, Vector{Region}}
         available::Bool
     end
 
@@ -21,9 +22,10 @@ This file is auto-generated. Do not edit.
 - `name::String`: The technology name
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `id::Int64`: ID for individual demand requirement
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `demand_mw::Float64`: (default: `0.0`) Demand value in MW
-- `region::Union{Nothing, Region}`: Region
+- `region::Union{Nothing, Vector{Region}}`: (default: `Vector()`) Region
 - `available::Bool`: (default: `true`) identifies whether the technology is available
 """
 mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
@@ -33,19 +35,21 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     power_systems_type::String
     "Internal field"
     internal::InfrastructureSystemsInternal
+    "ID for individual demand requirement"
+    id::Int64
     "Option for providing additional data"
     ext::Dict
     "Demand value in MW"
     demand_mw::Float64
     "Region"
-    region::Union{Nothing, Region}
+    region::Union{Nothing, Vector{Region}}
     "identifies whether the technology is available"
     available::Bool
 end
 
 
-function DemandRequirement{T}(; name, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), demand_mw=0.0, region, available=true, ) where T <: PSY.StaticInjection
-    DemandRequirement{T}(name, power_systems_type, internal, ext, demand_mw, region, available, )
+function DemandRequirement{T}(; name, power_systems_type, internal=InfrastructureSystemsInternal(), id, ext=Dict(), demand_mw=0.0, region=Vector(), available=true, ) where T <: PSY.StaticInjection
+    DemandRequirement{T}(name, power_systems_type, internal, id, ext, demand_mw, region, available, )
 end
 
 """Get [`DemandRequirement`](@ref) `name`."""
@@ -54,6 +58,8 @@ get_name(value::DemandRequirement) = value.name
 get_power_systems_type(value::DemandRequirement) = value.power_systems_type
 """Get [`DemandRequirement`](@ref) `internal`."""
 get_internal(value::DemandRequirement) = value.internal
+"""Get [`DemandRequirement`](@ref) `id`."""
+get_id(value::DemandRequirement) = value.id
 """Get [`DemandRequirement`](@ref) `ext`."""
 get_ext(value::DemandRequirement) = value.ext
 """Get [`DemandRequirement`](@ref) `demand_mw`."""
@@ -69,6 +75,8 @@ set_name!(value::DemandRequirement, val) = value.name = val
 set_power_systems_type!(value::DemandRequirement, val) = value.power_systems_type = val
 """Set [`DemandRequirement`](@ref) `internal`."""
 set_internal!(value::DemandRequirement, val) = value.internal = val
+"""Set [`DemandRequirement`](@ref) `id`."""
+set_id!(value::DemandRequirement, val) = value.id = val
 """Set [`DemandRequirement`](@ref) `ext`."""
 set_ext!(value::DemandRequirement, val) = value.ext = val
 """Set [`DemandRequirement`](@ref) `demand_mw`."""
@@ -77,3 +85,13 @@ set_demand_mw!(value::DemandRequirement, val) = value.demand_mw = val
 set_region!(value::DemandRequirement, val) = value.region = val
 """Set [`DemandRequirement`](@ref) `available`."""
 set_available!(value::DemandRequirement, val) = value.available = val
+
+function serialize_openapi_struct(technology::DemandRequirement{T}, vals...) where T <: PSY.StaticInjection
+    base_struct = APIServer.DemandRequirement(; vals...)
+    return base_struct
+end
+
+
+function deserialize_openapi_struct(::Type{<:DemandRequirement}, vals::Dict)
+    return IS.deserialize_struct(APIServer.DemandRequirement, vals)
+end
