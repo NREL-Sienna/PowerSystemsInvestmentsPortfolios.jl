@@ -85,3 +85,12 @@ set_ext!(value::CarbonCaps, val) = value.ext = val
 set_available!(value::CarbonCaps, val) = value.available = val
 """Set [`CarbonCaps`](@ref) `eligible_regions`."""
 set_eligible_regions!(value::CarbonCaps, val) = value.eligible_regions = val
+
+function serialize_openapi_struct(technology::CarbonCaps, vals...)
+    base_struct = APIServer.CarbonCaps(; vals...)
+    return base_struct
+end
+
+function deserialize_openapi_struct(::Type{<:CarbonCaps}, vals::Dict)
+    return IS.deserialize_struct(APIServer.CarbonCaps, vals)
+end

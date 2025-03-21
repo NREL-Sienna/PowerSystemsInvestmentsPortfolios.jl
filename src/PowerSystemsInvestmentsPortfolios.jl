@@ -20,7 +20,8 @@ import InfrastructureSystems:
     StructField,
     CostCurve,
     LinearCurve,
-    InfrastructureSystemsComponent
+    InfrastructureSystemsComponent,
+    InfrastructureSystemsType
 
 import PowerSystems
 import PowerSystems: StorageCost, ThermalGenerationCost
@@ -33,6 +34,8 @@ import DataFrames
 import DBInterface
 import TimeSeries
 import Dates
+import DataStructures: OrderedDict, SortedDict
+import OpenAPI
 
 # Temporary, imports not working properly for some reason?
 using DataFrames
@@ -43,11 +46,12 @@ using StringEncodings
 
 export Portfolio
 export Technology
-export Requirements
+export Requirement
+export FinancialData
+export Region
 export SupplyTechnology
 export ACTransportTechnology
 export HVDCTransportTechnology
-export ExistingTransportTechnology
 export StorageTechnology
 export DemandRequirement
 export DemandSideTechnology
@@ -68,13 +72,29 @@ export PortfolioFinancialData
 export TechnologyFinancialData
 
 export get_name
+export get_description
 export get_regions
 export get_technologies
 export get_technology
 export get_requirements
 export get_ext
+export get_description
+export get_financial_data
+export get_base_year
+export get_inflation_rate
+export get_interest_rate
+export get_discount_rate
+export set_description!
+export set_name!
+export set_base_year!
+export set_inflation_rate!
+export set_interest_rate!
+export set_discount_rate!
 export add_technology!
 export add_technologies!
+export add_region!
+export add_requirement!
+export add_time_series!
 export read_json_data
 export generate_invest_structs
 export generate_structs
@@ -85,6 +105,8 @@ export db_to_portfolio_parser
 export add_supplemental_attribute!
 export remove_supplemental_attribute!
 export get_supplemental_attribute
+export to_json
+export from_json
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems
@@ -100,14 +122,23 @@ export ThermalFuels
 export PrimeMovers
 export StorageTech
 
+#submodule for OpenAPI structs 
+include("models/generated/open_api_models/src/APIServer.jl")
+using .APIServer
+
+include("definitions.jl")
+
 include("models/technologies.jl")
 include("models/regions.jl")
-include("models/financials.jl")
+include("models/financial_data/financial_data.jl")
+include("models/financial_data/TechnologyFinancialData.jl")
 include("models/requirements.jl")
 include("models/generated/includes.jl")
+
 include("portfolio.jl")
 include("serialization.jl")
 include("generate_structs.jl")
+include("db_parser.jl")
 include("utils/print.jl")
 
 using DocStringExtensions

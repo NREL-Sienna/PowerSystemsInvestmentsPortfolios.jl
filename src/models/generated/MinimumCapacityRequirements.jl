@@ -6,6 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct MinimumCapacityRequirements <: Requirement
+    mutable struct MinimumCapacityRequirements <: Requirement
         name::String
         internal::InfrastructureSystemsInternal
         id::Int64
@@ -26,6 +27,8 @@ This file is auto-generated. Do not edit.
 - `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of resources that contribute to the carbon cap constraint.
 - `available::Bool`: Availability
 """
+mutable struct MinimumCapacityRequirements <: Requirement
+    "The requirement name"
 mutable struct MinimumCapacityRequirements <: Requirement
     "The requirement name"
     name::String
@@ -77,3 +80,12 @@ set_ext!(value::MinimumCapacityRequirements, val) = value.ext = val
 set_eligible_resources!(value::MinimumCapacityRequirements, val) = value.eligible_resources = val
 """Set [`MinimumCapacityRequirements`](@ref) `available`."""
 set_available!(value::MinimumCapacityRequirements, val) = value.available = val
+
+function serialize_openapi_struct(technology::MinimumCapacityRequirements, vals...)
+    base_struct = APIServer.MinimumCapacityRequirements(; vals...)
+    return base_struct
+end
+
+function deserialize_openapi_struct(::Type{<:MinimumCapacityRequirements}, vals::Dict)
+    return IS.deserialize_struct(APIServer.MinimumCapacityRequirements, vals)
+end

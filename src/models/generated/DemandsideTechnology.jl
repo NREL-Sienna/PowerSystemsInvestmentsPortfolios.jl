@@ -101,3 +101,13 @@ set_region!(value::DemandSideTechnology, val) = value.region = val
 set_available!(value::DemandSideTechnology, val) = value.available = val
 """Set [`DemandSideTechnology`](@ref) `min_power`."""
 set_min_power!(value::DemandSideTechnology, val) = value.min_power = val
+
+function serialize_openapi_struct(technology::DemandSideTechnology{T}, vals...) where T <: PSY.StaticInjection
+    base_struct = APIServer.DemandSideTechnology(; vals...)
+    return base_struct
+end
+
+
+function deserialize_openapi_struct(::Type{<:DemandSideTechnology}, vals::Dict)
+    return IS.deserialize_struct(APIServer.DemandSideTechnology, vals)
+end

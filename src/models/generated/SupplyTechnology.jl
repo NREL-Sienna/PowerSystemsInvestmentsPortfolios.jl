@@ -269,3 +269,13 @@ set_start_cost_per_mw!(value::SupplyTechnology, val) = value.start_cost_per_mw =
 set_capacity_limits!(value::SupplyTechnology, val) = value.capacity_limits = val
 """Set [`SupplyTechnology`](@ref) `up_time`."""
 set_up_time!(value::SupplyTechnology, val) = value.up_time = val
+
+function serialize_openapi_struct(technology::SupplyTechnology{T}, vals...) where T <: PSY.Generator
+    base_struct = APIServer.SupplyTechnology(; vals...)
+    return base_struct
+end
+
+
+function deserialize_openapi_struct(::Type{<:SupplyTechnology}, vals::Dict)
+    return IS.deserialize_struct(APIServer.SupplyTechnology, vals)
+end

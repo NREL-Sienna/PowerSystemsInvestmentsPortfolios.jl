@@ -101,3 +101,13 @@ set_max_demand_curtailment!(value::CurtailableDemandSideTechnology, val) = value
 set_available!(value::CurtailableDemandSideTechnology, val) = value.available = val
 """Set [`CurtailableDemandSideTechnology`](@ref) `min_power`."""
 set_min_power!(value::CurtailableDemandSideTechnology, val) = value.min_power = val
+
+function serialize_openapi_struct(technology::CurtailableDemandSideTechnology{T}, vals...) where T <: PSY.StaticInjection
+    base_struct = APIServer.CurtailableDemandSideTechnology(; vals...)
+    return base_struct
+end
+
+
+function deserialize_openapi_struct(::Type{<:CurtailableDemandSideTechnology}, vals::Dict)
+    return IS.deserialize_struct(APIServer.CurtailableDemandSideTechnology, vals)
+end

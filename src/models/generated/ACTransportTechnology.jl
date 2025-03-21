@@ -165,3 +165,13 @@ set_base_year!(value::ACTransportTechnology, val) = value.base_year = val
 set_existing_line_capacity!(value::ACTransportTechnology, val) = value.existing_line_capacity = val
 """Set [`ACTransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::ACTransportTechnology, val) = value.line_loss = val
+
+function serialize_openapi_struct(technology::ACTransportTechnology{T}, vals...) where T <: PSY.Device
+    base_struct = APIServer.ACTransportTechnology(; vals...)
+    return base_struct
+end
+
+
+function deserialize_openapi_struct(::Type{<:ACTransportTechnology}, vals::Dict)
+    return IS.deserialize_struct(APIServer.ACTransportTechnology, vals)
+end

@@ -64,7 +64,6 @@ export get_line_loss
 export get_losses
 export get_max_capacity_mw
 export get_max_demand_advance
-export get_max_demand_curtailment
 export get_max_demand_delay
 export get_max_mtons
 export get_max_tons_mwh
@@ -152,7 +151,6 @@ export set_line_loss!
 export set_losses!
 export set_max_capacity_mw!
 export set_max_demand_advance!
-export set_max_demand_curtailment!
 export set_max_demand_delay!
 export set_max_mtons!
 export set_max_tons_mwh!

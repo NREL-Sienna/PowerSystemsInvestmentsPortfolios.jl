@@ -53,3 +53,12 @@ set_internal!(value::Zone, val) = value.internal = val
 set_id!(value::Zone, val) = value.id = val
 """Set [`Zone`](@ref) `ext`."""
 set_ext!(value::Zone, val) = value.ext = val
+
+function serialize_openapi_struct(technology::Zone, vals...)
+    base_struct = APIServer.Zone(; vals...)
+    return base_struct
+end
+
+function deserialize_openapi_struct(::Type{<:Zone}, vals::Dict)
+    return IS.deserialize_struct(APIServer.Zone, vals)
+end

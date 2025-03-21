@@ -54,3 +54,12 @@ set_internal!(value::RetrofitPotential, val) = value.internal = val
 set_retrofit_potential!(value::RetrofitPotential, val) = value.retrofit_potential = val
 """Set [`RetrofitPotential`](@ref) `ext`."""
 set_ext!(value::RetrofitPotential, val) = value.ext = val
+
+function serialize_openapi_struct(technology::RetrofitPotential, vals...)
+    base_struct = APIServer.RetrofitPotential(; vals...)
+    return base_struct
+end
+
+function deserialize_openapi_struct(::Type{<:RetrofitPotential}, vals::Dict)
+    return IS.deserialize_struct(APIServer.RetrofitPotential, vals)
+end

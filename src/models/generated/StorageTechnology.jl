@@ -237,3 +237,13 @@ set_existing_capacity_energy!(value::StorageTechnology, val) = value.existing_ca
 set_efficiency!(value::StorageTechnology, val) = value.efficiency = val
 """Set [`StorageTechnology`](@ref) `operations_costs_energy`."""
 set_operations_costs_energy!(value::StorageTechnology, val) = value.operations_costs_energy = val
+
+function serialize_openapi_struct(technology::StorageTechnology{T}, vals...) where T <: PSY.Storage
+    base_struct = APIServer.StorageTechnology(; vals...)
+    return base_struct
+end
+
+
+function deserialize_openapi_struct(::Type{<:StorageTechnology}, vals::Dict)
+    return IS.deserialize_struct(APIServer.StorageTechnology, vals)
+end
