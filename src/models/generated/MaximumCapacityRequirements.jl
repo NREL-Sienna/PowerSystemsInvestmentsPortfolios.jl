@@ -8,6 +8,7 @@ This file is auto-generated. Do not edit.
     mutable struct MaximumCapacityRequirements <: Requirement
         name::String
         max_capacity_mw::Float64
+        target_year::Int64
         internal::InfrastructureSystemsInternal
         ext::Dict
         eligible_resources::Vector{Technology}
@@ -19,6 +20,7 @@ This file is auto-generated. Do not edit.
 # Arguments
 - `name::String`: The technology name
 - `max_capacity_mw::Float64`: (default: `0.0`) Maximum total capacity across all eligible resources
+- `target_year::Int64`: (default: `2050`) Year in which carbon cap will be applied
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of technologies that contribute to the carbon cap constraint.
@@ -29,6 +31,8 @@ mutable struct MaximumCapacityRequirements <: Requirement
     name::String
     "Maximum total capacity across all eligible resources"
     max_capacity_mw::Float64
+    "Year in which carbon cap will be applied"
+    target_year::Int64
     "Internal field"
     internal::InfrastructureSystemsInternal
     "Option for providing additional data"
@@ -40,14 +44,16 @@ mutable struct MaximumCapacityRequirements <: Requirement
 end
 
 
-function MaximumCapacityRequirements(; name, max_capacity_mw=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), eligible_resources=Vector{Technology}(), available, )
-    MaximumCapacityRequirements(name, max_capacity_mw, internal, ext, eligible_resources, available, )
+function MaximumCapacityRequirements(; name, max_capacity_mw=0.0, target_year=2050, internal=InfrastructureSystemsInternal(), ext=Dict(), eligible_resources=Vector{Technology}(), available, )
+    MaximumCapacityRequirements(name, max_capacity_mw, target_year, internal, ext, eligible_resources, available, )
 end
 
 """Get [`MaximumCapacityRequirements`](@ref) `name`."""
 get_name(value::MaximumCapacityRequirements) = value.name
 """Get [`MaximumCapacityRequirements`](@ref) `max_capacity_mw`."""
 get_max_capacity_mw(value::MaximumCapacityRequirements) = value.max_capacity_mw
+"""Get [`MaximumCapacityRequirements`](@ref) `target_year`."""
+get_target_year(value::MaximumCapacityRequirements) = value.target_year
 """Get [`MaximumCapacityRequirements`](@ref) `internal`."""
 get_internal(value::MaximumCapacityRequirements) = value.internal
 """Get [`MaximumCapacityRequirements`](@ref) `ext`."""
@@ -61,6 +67,8 @@ get_available(value::MaximumCapacityRequirements) = value.available
 set_name!(value::MaximumCapacityRequirements, val) = value.name = val
 """Set [`MaximumCapacityRequirements`](@ref) `max_capacity_mw`."""
 set_max_capacity_mw!(value::MaximumCapacityRequirements, val) = value.max_capacity_mw = val
+"""Set [`MaximumCapacityRequirements`](@ref) `target_year`."""
+set_target_year!(value::MaximumCapacityRequirements, val) = value.target_year = val
 """Set [`MaximumCapacityRequirements`](@ref) `internal`."""
 set_internal!(value::MaximumCapacityRequirements, val) = value.internal = val
 """Set [`MaximumCapacityRequirements`](@ref) `ext`."""

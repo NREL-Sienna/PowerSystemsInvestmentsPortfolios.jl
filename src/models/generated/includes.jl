@@ -83,6 +83,7 @@ export get_peak_demand_mw
 export get_power_systems_type
 export get_price_per_unit
 export get_prime_mover_type
+export get_qualified_demand
 export get_qualified_supply
 export get_ramp_dn_percentage
 export get_ramp_up_percentage
@@ -99,6 +100,7 @@ export get_start_region
 export get_storage_tech
 export get_storage_technology
 export get_supply_technology
+export get_target_year
 export get_tax_dollars_per_ton
 export get_technology_efficiency
 export get_unit_size
@@ -172,6 +174,7 @@ export set_peak_demand_mw!
 export set_power_systems_type!
 export set_price_per_unit!
 export set_prime_mover_type!
+export set_qualified_demand!
 export set_qualified_supply!
 export set_ramp_dn_percentage!
 export set_ramp_up_percentage!
@@ -188,6 +191,7 @@ export set_start_region!
 export set_storage_tech!
 export set_storage_technology!
 export set_supply_technology!
+export set_target_year!
 export set_tax_dollars_per_ton!
 export set_technology_efficiency!
 export set_unit_size!

@@ -7,6 +7,7 @@ This file is auto-generated. Do not edit.
 """
     mutable struct HourlyMatching <: Requirement
         name::String
+        qualified_demand::Vector{Technology}
         internal::InfrastructureSystemsInternal
         qualified_supply::Vector{Technology}
         id::Int64
@@ -18,6 +19,7 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `name::String`: The policy name
+- `qualified_demand::Vector{Technology}`: (default: `Vector{Technology}()`) List of demand side technologies that need to be met with hourly matching.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `qualified_supply::Vector{Technology}`: (default: `Vector{Technology}()`) List of technologies eligible to provide hourly matching for demand side technologies.
 - `id::Int64`: ID for individual policy
@@ -27,6 +29,8 @@ This file is auto-generated. Do not edit.
 mutable struct HourlyMatching <: Requirement
     "The policy name"
     name::String
+    "List of demand side technologies that need to be met with hourly matching."
+    qualified_demand::Vector{Technology}
     "Internal field"
     internal::InfrastructureSystemsInternal
     "List of technologies eligible to provide hourly matching for demand side technologies."
@@ -40,12 +44,14 @@ mutable struct HourlyMatching <: Requirement
 end
 
 
-function HourlyMatching(; name, internal=InfrastructureSystemsInternal(), qualified_supply=Vector{Technology}(), id, ext=Dict(), available, )
-    HourlyMatching(name, internal, qualified_supply, id, ext, available, )
+function HourlyMatching(; name, qualified_demand=Vector{Technology}(), internal=InfrastructureSystemsInternal(), qualified_supply=Vector{Technology}(), id, ext=Dict(), available, )
+    HourlyMatching(name, qualified_demand, internal, qualified_supply, id, ext, available, )
 end
 
 """Get [`HourlyMatching`](@ref) `name`."""
 get_name(value::HourlyMatching) = value.name
+"""Get [`HourlyMatching`](@ref) `qualified_demand`."""
+get_qualified_demand(value::HourlyMatching) = value.qualified_demand
 """Get [`HourlyMatching`](@ref) `internal`."""
 get_internal(value::HourlyMatching) = value.internal
 """Get [`HourlyMatching`](@ref) `qualified_supply`."""
@@ -59,6 +65,8 @@ get_available(value::HourlyMatching) = value.available
 
 """Set [`HourlyMatching`](@ref) `name`."""
 set_name!(value::HourlyMatching, val) = value.name = val
+"""Set [`HourlyMatching`](@ref) `qualified_demand`."""
+set_qualified_demand!(value::HourlyMatching, val) = value.qualified_demand = val
 """Set [`HourlyMatching`](@ref) `internal`."""
 set_internal!(value::HourlyMatching, val) = value.internal = val
 """Set [`HourlyMatching`](@ref) `qualified_supply`."""

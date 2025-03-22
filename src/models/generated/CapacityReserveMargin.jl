@@ -7,6 +7,7 @@ This file is auto-generated. Do not edit.
 """
     mutable struct CapacityReserveMargin <: Requirement
         name::String
+        target_year::Int64
         internal::InfrastructureSystemsInternal
         ext::Dict
         capacity_reserve_fraction::Float64
@@ -18,6 +19,7 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `name::String`: The requirement name
+- `target_year::Int64`: (default: `2050`) Year in which carbon cap will be applied
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `capacity_reserve_fraction::Float64`: (default: `0.0`) Capacity reserve requirements, represented as a fraction of demand in region
@@ -27,6 +29,8 @@ This file is auto-generated. Do not edit.
 mutable struct CapacityReserveMargin <: Requirement
     "The requirement name"
     name::String
+    "Year in which carbon cap will be applied"
+    target_year::Int64
     "Internal field"
     internal::InfrastructureSystemsInternal
     "Option for providing additional data"
@@ -40,12 +44,14 @@ mutable struct CapacityReserveMargin <: Requirement
 end
 
 
-function CapacityReserveMargin(; name, internal=InfrastructureSystemsInternal(), ext=Dict(), capacity_reserve_fraction=0.0, available, regions=Vector{Technology}(), )
-    CapacityReserveMargin(name, internal, ext, capacity_reserve_fraction, available, regions, )
+function CapacityReserveMargin(; name, target_year=2050, internal=InfrastructureSystemsInternal(), ext=Dict(), capacity_reserve_fraction=0.0, available, regions=Vector{Technology}(), )
+    CapacityReserveMargin(name, target_year, internal, ext, capacity_reserve_fraction, available, regions, )
 end
 
 """Get [`CapacityReserveMargin`](@ref) `name`."""
 get_name(value::CapacityReserveMargin) = value.name
+"""Get [`CapacityReserveMargin`](@ref) `target_year`."""
+get_target_year(value::CapacityReserveMargin) = value.target_year
 """Get [`CapacityReserveMargin`](@ref) `internal`."""
 get_internal(value::CapacityReserveMargin) = value.internal
 """Get [`CapacityReserveMargin`](@ref) `ext`."""
@@ -59,6 +65,8 @@ get_regions(value::CapacityReserveMargin) = value.regions
 
 """Set [`CapacityReserveMargin`](@ref) `name`."""
 set_name!(value::CapacityReserveMargin, val) = value.name = val
+"""Set [`CapacityReserveMargin`](@ref) `target_year`."""
+set_target_year!(value::CapacityReserveMargin, val) = value.target_year = val
 """Set [`CapacityReserveMargin`](@ref) `internal`."""
 set_internal!(value::CapacityReserveMargin, val) = value.internal = val
 """Set [`CapacityReserveMargin`](@ref) `ext`."""

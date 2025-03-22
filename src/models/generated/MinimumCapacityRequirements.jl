@@ -7,6 +7,7 @@ This file is auto-generated. Do not edit.
 """
     mutable struct MinimumCapacityRequirements <: Requirement
         name::String
+        target_year::Int64
         internal::InfrastructureSystemsInternal
         id::Int64
         min_capacity_mw::Float64
@@ -19,6 +20,7 @@ This file is auto-generated. Do not edit.
 
 # Arguments
 - `name::String`: The requirement name
+- `target_year::Int64`: (default: `2050`) Year in which carbon cap will be applied
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `id::Int64`: ID for individual policy
 - `min_capacity_mw::Float64`: (default: `0.0`) Minimum total capacity across all eligible resources
@@ -29,6 +31,8 @@ This file is auto-generated. Do not edit.
 mutable struct MinimumCapacityRequirements <: Requirement
     "The requirement name"
     name::String
+    "Year in which carbon cap will be applied"
+    target_year::Int64
     "Internal field"
     internal::InfrastructureSystemsInternal
     "ID for individual policy"
@@ -44,12 +48,14 @@ mutable struct MinimumCapacityRequirements <: Requirement
 end
 
 
-function MinimumCapacityRequirements(; name, internal=InfrastructureSystemsInternal(), id, min_capacity_mw=0.0, ext=Dict(), eligible_resources=Vector{Technology}(), available, )
-    MinimumCapacityRequirements(name, internal, id, min_capacity_mw, ext, eligible_resources, available, )
+function MinimumCapacityRequirements(; name, target_year=2050, internal=InfrastructureSystemsInternal(), id, min_capacity_mw=0.0, ext=Dict(), eligible_resources=Vector{Technology}(), available, )
+    MinimumCapacityRequirements(name, target_year, internal, id, min_capacity_mw, ext, eligible_resources, available, )
 end
 
 """Get [`MinimumCapacityRequirements`](@ref) `name`."""
 get_name(value::MinimumCapacityRequirements) = value.name
+"""Get [`MinimumCapacityRequirements`](@ref) `target_year`."""
+get_target_year(value::MinimumCapacityRequirements) = value.target_year
 """Get [`MinimumCapacityRequirements`](@ref) `internal`."""
 get_internal(value::MinimumCapacityRequirements) = value.internal
 """Get [`MinimumCapacityRequirements`](@ref) `id`."""
@@ -65,6 +71,8 @@ get_available(value::MinimumCapacityRequirements) = value.available
 
 """Set [`MinimumCapacityRequirements`](@ref) `name`."""
 set_name!(value::MinimumCapacityRequirements, val) = value.name = val
+"""Set [`MinimumCapacityRequirements`](@ref) `target_year`."""
+set_target_year!(value::MinimumCapacityRequirements, val) = value.target_year = val
 """Set [`MinimumCapacityRequirements`](@ref) `internal`."""
 set_internal!(value::MinimumCapacityRequirements, val) = value.internal = val
 """Set [`MinimumCapacityRequirements`](@ref) `id`."""
