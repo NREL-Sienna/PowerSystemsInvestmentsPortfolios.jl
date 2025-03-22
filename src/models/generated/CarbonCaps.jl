@@ -17,7 +17,7 @@ This file is auto-generated. Do not edit.
         eligible_regions::Vector{Region}
     end
 
-
+Defines limits to the amount of carbon produced. Can be defined either by the total amount of carbon produced (tons CO2) or by the carbon intensity of the portfolio (tons CO2 per MWh of electricity)
 
 # Arguments
 - `name::String`: The requirement name

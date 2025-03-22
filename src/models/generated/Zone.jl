@@ -12,7 +12,7 @@ This file is auto-generated. Do not edit.
         ext::Dict
     end
 
-
+A unit of spatial aggregation for zonal capacity expansion models. Used to define locations for supply, demand, transport, and storage technologies and relevant policy requirements.
 
 # Arguments
 - `name::String`: Name of region

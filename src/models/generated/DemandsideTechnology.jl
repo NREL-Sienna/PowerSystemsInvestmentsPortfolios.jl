@@ -24,7 +24,7 @@ This file is auto-generated. Do not edit.
         min_power::Float64
     end
 
-
+Represents demand side technologies such as electric vehicles or hydrogen electrolyzers.
 
 # Arguments
 - `price_per_unit::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers

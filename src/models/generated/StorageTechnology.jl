@@ -35,7 +35,7 @@ This file is auto-generated. Do not edit.
         operations_costs_energy::PSY.OperationalCost
     end
 
-
+Candidate storage technology in a region.
 
 # Arguments
 - `base_power::Float64`: Base power

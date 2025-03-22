@@ -13,7 +13,7 @@ This file is auto-generated. Do not edit.
         ext::Dict
     end
 
-
+Supplemental attribute used to define a total amount of capacity that can be retrofit for a SupplyTechnology
 
 # Arguments
 - `retrofit_id::Int64`: (default: `0`) Unique identifier to group retrofittable source technologies with retrofit options inside the same zone.

@@ -11,7 +11,7 @@ This file is auto-generated. Do not edit.
         retirement_potential::Vector{PSY.Generator}
     end
 
-
+Supplemental attribute used to define what existing generators are eligible for retirement for a SupplyTechnology
 
 # Arguments
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field

@@ -15,14 +15,14 @@ This file is auto-generated. Do not edit.
         regions::Vector{Region}
     end
 
-
+Policy requirement to enforce a minimum capacity reserve margin, such that (total_capacity - peak_demand)/peak_demand >= capacity_reserve_fraction
 
 # Arguments
 - `name::String`: The requirement name
 - `target_year::Int64`: (default: `2050`) Year in which carbon cap will be applied
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `capacity_reserve_fraction::Float64`: (default: `0.0`) Capacity reserve requirements, represented as a fraction of demand in region
+- `capacity_reserve_fraction::Float64`: (default: `0.0`) Capacity reserve requirements, represented as a fraction of peak demand in region
 - `available::Bool`: Availability
 - `regions::Vector{Region}`: (default: `Vector{Technology}()`) List of regions where this reserve margin is enforced
 """
@@ -35,7 +35,7 @@ mutable struct CapacityReserveMargin <: Requirement
     internal::InfrastructureSystemsInternal
     "Option for providing additional data"
     ext::Dict
-    "Capacity reserve requirements, represented as a fraction of demand in region"
+    "Capacity reserve requirements, represented as a fraction of peak demand in region"
     capacity_reserve_fraction::Float64
     "Availability"
     available::Bool

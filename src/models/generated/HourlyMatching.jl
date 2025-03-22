@@ -15,7 +15,7 @@ This file is auto-generated. Do not edit.
         available::Bool
     end
 
-
+Policy requirement that all DemandSideTechnologies in `qualified_demand` must have their demand met by an equal amount of electricity generation from `qualified_supply` at all hours, such that: `sum(P)_qualified_supply >= sum(D)_qualified_demand`
 
 # Arguments
 - `name::String`: The policy name

@@ -11,7 +11,7 @@ This file is auto-generated. Do not edit.
         existing_capacity::Vector{PSY.Generator}
     end
 
-
+Supplemental attributed used to map candidate technologies in a portfolio to the existing system. Contains a list of existing generators that correspond to a SupplyTechnology.
 
 # Arguments
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field

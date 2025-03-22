@@ -11,7 +11,7 @@ This file is auto-generated. Do not edit.
         ext::Dict
     end
 
-
+Supplemental attribute used to define what existing generators are eligible for retrofit for a SupplyTechnology
 
 # Arguments
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field

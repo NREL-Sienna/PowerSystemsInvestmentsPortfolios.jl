@@ -17,7 +17,7 @@ This file is auto-generated. Do not edit.
         available::Bool
     end
 
-
+Demand requirements for a region.
 
 # Arguments
 - `name::String`: The technology name

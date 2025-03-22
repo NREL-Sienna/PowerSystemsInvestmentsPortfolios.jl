@@ -16,7 +16,7 @@ This file is auto-generated. Do not edit.
         eligible_regions::Vector{Region}
     end
 
-
+Policy requirement that defines an additional cost penalty per ton of CO2 produced in the target in the eligible regions
 
 # Arguments
 - `name::String`: The requirement name

@@ -52,7 +52,7 @@ export get_existing_line_capacity
 export get_ext
 export get_financial_data
 export get_fuel
-export get_generation_fraction
+export get_generation_fraction_requirement
 export get_heat_rate_mmbtu_per_mwh
 export get_id
 export get_initial_capacity
@@ -143,7 +143,7 @@ export set_existing_line_capacity!
 export set_ext!
 export set_financial_data!
 export set_fuel!
-export set_generation_fraction!
+export set_generation_fraction_requirement!
 export set_heat_rate_mmbtu_per_mwh!
 export set_id!
 export set_initial_capacity!

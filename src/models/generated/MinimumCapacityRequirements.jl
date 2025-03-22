@@ -16,7 +16,7 @@ This file is auto-generated. Do not edit.
         available::Bool
     end
 
-
+Policy requirement that the total capacity of all technologies in `eligible_technologies` in the target year is greater than or equal to the specific minimum in MW
 
 # Arguments
 - `name::String`: The requirement name

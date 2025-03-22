@@ -60,6 +60,10 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
             item["has_parametric"] = true
         end
 
+        if haskey(input, "docstring")
+            item["docstring"] = input["docstring"]
+        end
+
         parameters = Vector{Dict}()
         for (field, values) in properties
             param = Dict{String, Any}()

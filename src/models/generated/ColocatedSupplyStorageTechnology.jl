@@ -19,7 +19,7 @@ This file is auto-generated. Do not edit.
         storage_technology::StorageTechnology{EnergyReservoirStorage}
     end
 
-
+Supply Technology that supports a StorageTechnology co-located with wind and solar generation
 
 # Arguments
 - `name::String`: Technology name

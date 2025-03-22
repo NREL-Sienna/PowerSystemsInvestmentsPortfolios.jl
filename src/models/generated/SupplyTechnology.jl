@@ -39,7 +39,7 @@ This file is auto-generated. Do not edit.
         up_time::Float64
     end
 
-
+Candidate generation technology for a region. Can represent either a thermal or renewable generation technology
 
 # Arguments
 - `base_power::Float64`: Base power

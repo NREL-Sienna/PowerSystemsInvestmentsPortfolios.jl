@@ -26,7 +26,7 @@ This file is auto-generated. Do not edit.
         line_loss::Float64
     end
 
-
+An aggregated representation of candidate AC transmission lines between two regions.
 
 # Arguments
 - `base_power::Float64`: Base power
