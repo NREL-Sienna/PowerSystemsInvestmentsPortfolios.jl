@@ -10,12 +10,10 @@ docs/CarbonCaps.md
 docs/CarbonTax.md
 docs/ColocatedSupplyStorageTechnology.md
 docs/CostCurve.md
-docs/CurtailableDemandSideTechnology.md
 docs/DemandRequirement.md
 docs/DemandSideTechnology.md
 docs/EnergyShareRequirements.md
 docs/ExistingCapacity.md
-docs/FlexibleDemandSideTechnology.md
 docs/FuelCurve.md
 docs/FuelCurveFuelCost.md
 docs/HVDCTransportTechnology.md
@@ -60,12 +58,10 @@ src/models/model_CarbonCaps.jl
 src/models/model_CarbonTax.jl
 src/models/model_ColocatedSupplyStorageTechnology.jl
 src/models/model_CostCurve.jl
-src/models/model_CurtailableDemandSideTechnology.jl
 src/models/model_DemandRequirement.jl
 src/models/model_DemandSideTechnology.jl
 src/models/model_EnergyShareRequirements.jl
 src/models/model_ExistingCapacity.jl
-src/models/model_FlexibleDemandSideTechnology.jl
 src/models/model_FuelCurve.jl
 src/models/model_FuelCurveFuelCost.jl
 src/models/model_HVDCTransportTechnology.jl

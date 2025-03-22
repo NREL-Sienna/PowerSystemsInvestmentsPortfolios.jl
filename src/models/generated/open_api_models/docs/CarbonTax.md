@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **name** | **String** |  | [default to nothing]
 **id** | **Int64** |  | [optional] [default to nothing]
 **available** | **Bool** |  | [default to nothing]
+**target_year** | **Int64** |  | [optional] [default to nothing]
 **eligible_regions** | **Vector{Int64}** |  | [optional] [default to nothing]
 **tax_dollars_per_ton** | **Float64** |  | [optional] [default to 0.0]
 

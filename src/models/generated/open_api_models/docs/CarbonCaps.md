@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **id** | **Int64** |  | [optional] [default to nothing]
 **available** | **Bool** |  | [default to nothing]
 **eligible_regions** | **Vector{Int64}** |  | [optional] [default to nothing]
+**target_year** | **Int64** |  | [optional] [default to nothing]
 **max_tons_mwh** | **Float64** |  | [optional] [default to 1e8]
 **max_mtons** | **Float64** |  | [optional] [default to nothing]
 

@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **name** | **String** |  | [default to nothing]
 **id** | **Int64** |  | [optional] [default to nothing]
 **available** | **Bool** |  | [default to nothing]
+**target_year** | **Int64** |  | [optional] [default to nothing]
 **eligible_resources** | **Vector{Int64}** |  | [default to nothing]
 **max_capacity_mw** | **Float64** |  | [optional] [default to nothing]
 

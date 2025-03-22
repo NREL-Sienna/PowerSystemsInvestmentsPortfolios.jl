@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **id** | **Int64** |  | [optional] [default to nothing]
 **available** | **Bool** |  | [default to nothing]
 **qualified_supply** | **Vector{Int64}** |  | [optional] [default to nothing]
+**qualified_demand** | **Vector{Int64}** |  | [optional] [default to nothing]
 **generation_fraction** | **Float64** |  | [optional] [default to 1e8]
 
 
