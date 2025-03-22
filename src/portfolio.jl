@@ -4,9 +4,6 @@ const PORTFOLIO_KWARGS =
 const DATA_FORMAT_VERSION = "0.1.0"
 
 const DEFAULT_AGGREGATION = PSY.ACBus
-
-const PORTFOLIO_STRUCT_DESCRIPTOR_FILE = nothing
-
 mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
     description::Union{Nothing, String}
@@ -723,7 +720,6 @@ function Portfolio(file_path::AbstractString; assign_new_uuids=false, kwargs...)
         runchecks = get(kwargs, :runchecks, true)
         time_series_read_only = get(kwargs, :time_series_read_only, false)
         time_series_directory = get(kwargs, :time_series_directory, nothing)
-        config_path = get(kwargs, :config_path, PORTFOLIO_STRUCT_DESCRIPTOR_FILE)
         portfolio = deserialize(
             Portfolio,
             file_path;

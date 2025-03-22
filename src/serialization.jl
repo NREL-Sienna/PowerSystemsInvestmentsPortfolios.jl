@@ -148,7 +148,6 @@ function from_dict(
     raw::Dict{String, Any};
     time_series_read_only=false,
     time_series_directory=nothing,
-    config_path=PORTFOLIO_STRUCT_DESCRIPTOR_FILE,
     kwargs...,
 )
     # Read any field that is defined in Portfolio but optional for the constructors and not
@@ -195,7 +194,6 @@ function from_dict(
         raw["data"];
         time_series_read_only=time_series_read_only,
         time_series_directory=time_series_directory,
-        validation_descriptor_file=config_path,
     )
     portfolio = Portfolio(
         aggregation,
