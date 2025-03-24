@@ -134,7 +134,7 @@ function build_portfolio()
 
     #### Wind ####
     wind_ts = CSV.read(
-        "C:\\Users\\jpotts\\.julia\\dev\\PowerSystemsInvestments\\5_bus_ts_data/wind_ts_LDES.csv",
+        "./data_utils/wind_ts_LDES.csv",
         DataFrame,
     )
     wind_ts_vec = wind_ts[!, "Wind"] ./ 451.0
@@ -195,7 +195,7 @@ function build_portfolio()
 
     #### Solar ####
     pv_ts = CSV.read(
-        "C:\\Users\\jpotts\\.julia\\dev\\PowerSystemsInvestments\\5_bus_ts_data/solar_ts_LDES.csv",
+        "./data_utils/solar_ts_LDES.csv",
         DataFrame,
     )
     pv1_ts = pv_ts[!, "SolarPV1"] ./ 384.0
@@ -345,7 +345,7 @@ function build_portfolio()
     loads = collect(get_components(PowerLoad, sys))
 
     load_ts = CSV.read(
-        "C:\\Users\\jpotts\\.julia\\dev\\PowerSystemsInvestments\\5_bus_ts_data/load_ts_LDES.csv",
+        "./data_utils/load_ts_LDES.csv",
         DataFrame,
     )
     load_b_ts = load_ts[!, "node_b"]
