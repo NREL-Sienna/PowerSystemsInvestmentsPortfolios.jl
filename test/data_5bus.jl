@@ -2,6 +2,8 @@ function build_portfolio()
     sys = build_system(PSITestSystems, "c_sys5_re")
     set_units_base_system!(sys, "NATURAL_UNITS")
 
+    ts_data = CSV.read("./data_utils/ts_data.csv", DataFrame)
+
     ###################
     ### Zones ###
     ###################
@@ -133,8 +135,7 @@ function build_portfolio()
     #####################
 
     #### Wind ####
-    wind_ts = CSV.read("./data_utils/wind_ts_LDES.csv", DataFrame)
-    wind_ts_vec = wind_ts[!, "Wind"] ./ 451.0
+    wind_ts_vec = ts_data[!, "Wind"] ./ 451.0
     renewables = collect(get_components(RenewableDispatch, sys))
     wind_op_costs =
         get_proportional_term.(
@@ -191,9 +192,8 @@ function build_portfolio()
     )
 
     #### Solar ####
-    pv_ts = CSV.read("./data_utils/solar_ts_LDES.csv", DataFrame)
-    pv1_ts = pv_ts[!, "SolarPV1"] ./ 384.0
-    pv2_ts = pv_ts[!, "SolarPV2"] ./ 384.0
+    pv1_ts = ts_data[!, "SolarPV1"] ./ 384.0
+    pv2_ts = ts_data[!, "SolarPV2"] ./ 384.0
 
     pv1_op_costs = 0.0
     pv2_op_costs = 000
@@ -338,10 +338,9 @@ function build_portfolio()
 
     loads = collect(get_components(PowerLoad, sys))
 
-    load_ts = CSV.read("./data_utils/load_ts_LDES.csv", DataFrame)
-    load_b_ts = load_ts[!, "node_b"]
-    load_c_ts = load_ts[!, "node_c"]
-    load_d_ts = load_ts[!, "node_d"]
+    load_b_ts = ts_data[!, "node_b"]
+    load_c_ts = ts_data[!, "node_c"]
+    load_d_ts = ts_data[!, "node_d"]
 
     ts_load_b_2024 = load_b_ts[1:24]
     ts_load_b_2028 = load_b_ts[1:24]
