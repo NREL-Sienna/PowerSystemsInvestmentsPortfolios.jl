@@ -312,24 +312,6 @@ function add_technology!(
     return
 end
 
-function add_region!(
-    portfolio::Portfolio,
-    region::T;
-    skip_validation=false,
-    kwargs...,
-) where {T <: Region}
-    deserialization_in_progress = _is_deserialization_in_progress(portfolio)
-    IS.add_component!(
-        portfolio.data,
-        region;
-        allow_existing_time_series=deserialization_in_progress,
-        skip_validation=skip_validation,
-        kwargs...,
-    )
-
-    return
-end
-
 """
 Add many technologies to the portfolio at once.
 
@@ -708,37 +690,6 @@ function has_technology(
     return IS.has_component(T, portfolio.data.components, name)
 end
 
-function Portfolio(file_path::AbstractString; assign_new_uuids=false, kwargs...)
-    ext = splitext(file_path)[2]
-    if lowercase(ext) in [".m", ".raw"]
-        pm_kwargs = Dict(k => v for (k, v) in kwargs if !in(k, PORTFOLIO_KWARGS))
-        sys_kwargs = Dict(k => v for (k, v) in kwargs if in(k, PORTFOLIO_KWARGS))
-        return System(PowerModelsData(file_path; pm_kwargs...); sys_kwargs...)
-    elseif lowercase(ext) == ".json"
-        unsupported = setdiff(keys(kwargs), PORTFOLIO_KWARGS)
-        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
-        runchecks = get(kwargs, :runchecks, true)
-        time_series_read_only = get(kwargs, :time_series_read_only, false)
-        time_series_directory = get(kwargs, :time_series_directory, nothing)
-        portfolio = deserialize(
-            Portfolio,
-            file_path;
-            # time_series_read_only = time_series_read_only,
-            # runchecks = runchecks,
-            # time_series_directory = time_series_directory,
-            # config_path = config_path,
-        )
-        _post_deserialize_handling(
-            portfolio;
-            runchecks=runchecks,
-            assign_new_uuids=assign_new_uuids,
-        )
-        return portfolio
-    else
-        throw(DataFormatError("$file_path is not a supported file type"))
-    end
-end
-
 ################################
 ######### Regions #########
 ################################
@@ -770,11 +721,11 @@ function add_region!(
     skip_validation=false,
     kwargs...,
 ) where {T <: Region}
-    #deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+    deserialization_in_progress = _is_deserialization_in_progress(portfolio)
     IS.add_component!(
         portfolio.data,
         zone;
-        #allow_existing_time_series=deserialization_in_progress,
+        allow_existing_time_series=deserialization_in_progress,
         skip_validation=skip_validation,
         kwargs...,
     )
