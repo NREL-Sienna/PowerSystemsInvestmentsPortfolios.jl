@@ -33,6 +33,44 @@ const ENCODED_FIELDS = Set((
     :efficiency,
 ))
 
+"""
+Constructs a Portfolio from a file path ending with .json
+
+If the file is JSON, then `assign_new_uuids = true` will generate new UUIDs for the system
+and all components.
+"""
+function Portfolio(
+    file_path::AbstractString;
+    assign_new_uuids=false,
+    try_reimport=true,
+    kwargs...,
+)
+    ext = lowercase(splitext(file_path)[2])
+    if ext == ".json"
+        unsupported = setdiff(keys(kwargs), SYSTEM_KWARGS)
+        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
+        runchecks = get(kwargs, :runchecks, false)
+        time_series_read_only = get(kwargs, :time_series_read_only, false)
+        time_series_directory = get(kwargs, :time_series_directory, nothing)
+        portfolio = deserialize(
+            Portfolio,
+            file_path;
+            time_series_read_only=time_series_read_only,
+            # runchecks = runchecks,
+            time_series_directory=time_series_directory,
+        )
+        return portfolio
+        _post_deserialize_handling(
+            portfolio;
+            runchecks=runchecks,
+            assign_new_uuids=assign_new_uuids,
+        )
+        return portfolio
+    else
+        throw(DataFormatError("$file_path is not a supported file type"))
+    end
+end
+
 function IS.serialize(portfolio::T) where {T <: Portfolio}
     data = Dict{String, Any}()
     data["data_format_version"] = DATA_FORMAT_VERSION
@@ -46,7 +84,7 @@ function IS.serialize(portfolio::T) where {T <: Portfolio}
     return data
 end
 
-function IS.deserialize(::Type{Portfolio}, filename::AbstractString; kwargs...)
+function deserialize(::Type{Portfolio}, filename::AbstractString; kwargs...)
     raw = open(filename) do io
         JSON3.read(io, Dict)
     end
@@ -189,7 +227,7 @@ function from_dict(
     internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
     aggregation = PSY.ACBus
     investment_schedule = raw["investment_schedule"]
-    data = IS.deserialize(
+    data = deserialize(
         IS.SystemData,
         raw["data"];
         time_series_read_only=time_series_read_only,
@@ -233,7 +271,7 @@ end
 
 # Function copied over from IS. This version of the function is modified to not use the internal field  and UUIDs for components,
 # since the internal field is not stored in the JSON when serializing with OpenAPI structs
-function IS.deserialize(
+function deserialize(
     ::Type{IS.SystemData},
     raw::Dict;
     time_series_read_only=false,

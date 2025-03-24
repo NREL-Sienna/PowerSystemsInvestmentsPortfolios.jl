@@ -40,7 +40,7 @@ function Base.show(io::IO, ::MIME"text/html", p::Portfolio)
     return
 end
 
-function Base.show(io::IO, ::MIME"text/plain", ist::PSY.Component)
+function Base.show(io::IO, ::MIME"text/plain", ist::Technology)
     default_units = false
     if !PSY.has_units_setting(ist)
         print(io, "\n")

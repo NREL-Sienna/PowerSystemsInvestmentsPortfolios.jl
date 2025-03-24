@@ -109,44 +109,6 @@ function Portfolio(base_year, discount_rate, inflation_rate, interest_rate; kwar
 end
 
 """
-Constructs a Portfolio from a file path ending with .json
-
-If the file is JSON, then `assign_new_uuids = true` will generate new UUIDs for the system
-and all components.
-"""
-function Portfolio(
-    file_path::AbstractString;
-    assign_new_uuids=false,
-    try_reimport=true,
-    kwargs...,
-)
-    ext = lowercase(splitext(file_path)[2])
-    if ext == ".json"
-        unsupported = setdiff(keys(kwargs), SYSTEM_KWARGS)
-        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
-        runchecks = get(kwargs, :runchecks, false)
-        time_series_read_only = get(kwargs, :time_series_read_only, false)
-        time_series_directory = get(kwargs, :time_series_directory, nothing)
-        portfolio = deserialize(
-            Portfolio,
-            file_path;
-            time_series_read_only=time_series_read_only,
-            # runchecks = runchecks,
-            time_series_directory=time_series_directory,
-        )
-        return portfolio
-        _post_deserialize_handling(
-            portfolio;
-            runchecks=runchecks,
-            assign_new_uuids=assign_new_uuids,
-        )
-        return portfolio
-    else
-        throw(DataFormatError("$file_path is not a supported file type"))
-    end
-end
-
-"""
 Return the internal of the portfolio
 """
 IS.get_internal(val::Portfolio) = val.internal
