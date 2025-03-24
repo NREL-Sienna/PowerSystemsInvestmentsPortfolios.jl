@@ -13,7 +13,7 @@
         start_region=nothing,
         end_region=nothing,
         existing_line_capacity=nothing,
-        maximum_new_capacity=nothing,
+        max_new_capacity=nothing,
         capital_cost=nothing,
         line_loss=nothing,
         resistance=0.0,
@@ -31,7 +31,7 @@
     - start_region::Int64
     - end_region::Int64
     - existing_line_capacity::Float64
-    - maximum_new_capacity::Float64
+    - max_new_capacity::Float64
     - capital_cost::ValueCurve
     - line_loss::Float64
     - resistance::Float64
@@ -49,7 +49,7 @@ Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
     start_region::Union{Nothing, Int64} = nothing
     end_region::Union{Nothing, Int64} = nothing
     existing_line_capacity::Union{Nothing, Float64} = nothing
-    maximum_new_capacity::Union{Nothing, Float64} = nothing
+    max_new_capacity::Union{Nothing, Float64} = nothing
     capital_cost = nothing # spec type: Union{ Nothing, ValueCurve }
     line_loss::Union{Nothing, Float64} = nothing
     resistance::Union{Nothing, Float64} = 0.0
@@ -67,7 +67,7 @@ Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
         start_region,
         end_region,
         existing_line_capacity,
-        maximum_new_capacity,
+        max_new_capacity,
         capital_cost,
         line_loss,
         resistance,
@@ -98,8 +98,8 @@ Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             HVDCTransportTechnology,
-            Symbol("maximum_new_capacity"),
-            maximum_new_capacity,
+            Symbol("max_new_capacity"),
+            max_new_capacity,
         )
         OpenAPI.validate_property(
             HVDCTransportTechnology,
@@ -129,7 +129,7 @@ Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
             start_region,
             end_region,
             existing_line_capacity,
-            maximum_new_capacity,
+            max_new_capacity,
             capital_cost,
             line_loss,
             resistance,
@@ -150,7 +150,7 @@ const _property_types_HVDCTransportTechnology = Dict{Symbol, String}(
     Symbol("start_region") => "Int64",
     Symbol("end_region") => "Int64",
     Symbol("existing_line_capacity") => "Float64",
-    Symbol("maximum_new_capacity") => "Float64",
+    Symbol("max_new_capacity") => "Float64",
     Symbol("capital_cost") => "ValueCurve",
     Symbol("line_loss") => "Float64",
     Symbol("resistance") => "Float64",

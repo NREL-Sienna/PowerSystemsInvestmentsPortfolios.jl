@@ -36,8 +36,8 @@
         losses_storage=1.0,
         lifetime_storage=100,
         financial_data_storage=nothing,
-        maximum_inverter_capacity=nothing,
-        minimum_inverter_capacity=nothing,
+        max_inverter_capacity=nothing,
+        min_inverter_capacity=nothing,
         capital_costs_inverter=nothing,
         operation_costs_inverter=nothing,
         inverter_efficiency=nothing,
@@ -76,8 +76,8 @@
     - losses_storage::Float64
     - lifetime_storage::Int64
     - financial_data_storage::Any
-    - maximum_inverter_capacity::Float64
-    - minimum_inverter_capacity::Float64
+    - max_inverter_capacity::Float64
+    - min_inverter_capacity::Float64
     - capital_costs_inverter::ValueCurve
     - operation_costs_inverter::ProductionVariableCostCurve
     - inverter_efficiency::Float64
@@ -116,8 +116,8 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
     losses_storage::Union{Nothing, Float64} = 1.0
     lifetime_storage::Union{Nothing, Int64} = 100
     financial_data_storage::Union{Nothing, Any} = nothing
-    maximum_inverter_capacity::Union{Nothing, Float64} = nothing
-    minimum_inverter_capacity::Union{Nothing, Float64} = nothing
+    max_inverter_capacity::Union{Nothing, Float64} = nothing
+    min_inverter_capacity::Union{Nothing, Float64} = nothing
     capital_costs_inverter = nothing # spec type: Union{ Nothing, ValueCurve }
     operation_costs_inverter = nothing # spec type: Union{ Nothing, ProductionVariableCostCurve }
     inverter_efficiency::Union{Nothing, Float64} = nothing
@@ -156,8 +156,8 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         losses_storage,
         lifetime_storage,
         financial_data_storage,
-        maximum_inverter_capacity,
-        minimum_inverter_capacity,
+        max_inverter_capacity,
+        min_inverter_capacity,
         capital_costs_inverter,
         operation_costs_inverter,
         inverter_efficiency,
@@ -317,13 +317,13 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             ColocatedSupplyStorageTechnology,
-            Symbol("maximum_inverter_capacity"),
-            maximum_inverter_capacity,
+            Symbol("max_inverter_capacity"),
+            max_inverter_capacity,
         )
         OpenAPI.validate_property(
             ColocatedSupplyStorageTechnology,
-            Symbol("minimum_inverter_capacity"),
-            minimum_inverter_capacity,
+            Symbol("min_inverter_capacity"),
+            min_inverter_capacity,
         )
         OpenAPI.validate_property(
             ColocatedSupplyStorageTechnology,
@@ -378,8 +378,8 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
             losses_storage,
             lifetime_storage,
             financial_data_storage,
-            maximum_inverter_capacity,
-            minimum_inverter_capacity,
+            max_inverter_capacity,
+            min_inverter_capacity,
             capital_costs_inverter,
             operation_costs_inverter,
             inverter_efficiency,
@@ -421,8 +421,8 @@ const _property_types_ColocatedSupplyStorageTechnology = Dict{Symbol, String}(
     Symbol("losses_storage") => "Float64",
     Symbol("lifetime_storage") => "Int64",
     Symbol("financial_data_storage") => "Any",
-    Symbol("maximum_inverter_capacity") => "Float64",
-    Symbol("minimum_inverter_capacity") => "Float64",
+    Symbol("max_inverter_capacity") => "Float64",
+    Symbol("min_inverter_capacity") => "Float64",
     Symbol("capital_costs_inverter") => "ValueCurve",
     Symbol("operation_costs_inverter") => "ProductionVariableCostCurve",
     Symbol("inverter_efficiency") => "Float64",
