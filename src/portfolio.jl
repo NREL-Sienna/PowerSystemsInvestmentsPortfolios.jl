@@ -4,6 +4,7 @@ const PORTFOLIO_KWARGS =
 const DATA_FORMAT_VERSION = "0.1.0"
 
 const DEFAULT_AGGREGATION = PSY.ACBus
+
 mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
     description::Union{Nothing, String}
