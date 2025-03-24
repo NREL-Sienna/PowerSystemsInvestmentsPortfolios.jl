@@ -14,7 +14,7 @@ function validate_serialization(
         port_ext = PSIP.get_ext(port)
         port_ext["data"] = 5
 
-        to_json(port, path; force=true)
+        PSIP.to_json(port, path; force=true)
 
         data = open(path, "r") do io
             JSON3.read(io)
