@@ -20,7 +20,7 @@ This file is auto-generated. Do not edit.
         id::Int64
         duration_limits::MinMax
         capital_costs_energy::PSY.ValueCurve
-        minimum_inverter_capacity::Float64
+        min_inverter_capacity::Float64
         operation_costs_inverter::PSY.OperationalCost
         inverter_efficiency::Float64
         initial_capacity_solar::Float64
@@ -34,15 +34,15 @@ This file is auto-generated. Do not edit.
         efficiency_storage::InOut
         region::Vector{Region}
         losses_storage::Float64
-        maximum_inverter_capacity::Float64
         inverter_supply_ratio::Float64
-        capital_costs_wind::PSY.ValueCurve
         ext::Dict
+        capital_costs_wind::PSY.ValueCurve
         internal::InfrastructureSystemsInternal
         lifetime_solar::Int
         base_year::Int
         existing_capacity_energy::Float64
         capital_costs_inverter::PSY.ValueCurve
+        max_inverter_capacity::Float64
         operations_costs_energy::PSY.OperationalCost
         financial_data_storage::TechnologyFinancialData
         capital_costs_solar::PSY.ValueCurve
@@ -65,7 +65,7 @@ Supply Technology that supports a StorageTechnology co-located with wind and sol
 - `id::Int64`: ID for individual generator
 - `duration_limits::MinMax`: (default: `(min=0,max=1000)`) Minimum required durection for a storage technology
 - `capital_costs_energy::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a storage technology's energy capacity.
-- `minimum_inverter_capacity::Float64`: (default: `1e8`) Minimum inverter capacity (MW)
+- `min_inverter_capacity::Float64`: (default: `1e8`) Minimum inverter capacity (MW)
 - `operation_costs_inverter::PSY.OperationalCost`: Operational costs for using inverter in co-located systems
 - `inverter_efficiency::Float64`: Efficiency of AC to DC conversion of inverter
 - `initial_capacity_solar::Float64`: (default: `0.0`) Pre-existing capacity for a technology
@@ -79,15 +79,15 @@ Supply Technology that supports a StorageTechnology co-located with wind and sol
 - `efficiency_storage::InOut`: (default: `(in=1, out=1)`) Efficiency of charging storage
 - `region::Vector{Region}`: (default: `Vector()`) Zone where tech operates in
 - `losses_storage::Float64`: (default: `1.0`) Power loss (pct per hour)
-- `maximum_inverter_capacity::Float64`: (default: `1e8`) Limit on inverter capacity (MW)
 - `inverter_supply_ratio::Float64`: Ratio of generation capacity to grid connection capacity
-- `capital_costs_wind::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `capital_costs_wind::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `lifetime_solar::Int`: (default: `100`) Maximum number of years a technology can be active once installed
 - `base_year::Int`: (default: `2020`) Reference year for technology data
 - `existing_capacity_energy::Float64`: (default: `0.0`) Pre-existing energy capacity for a storage technology (MWh)
 - `capital_costs_inverter::PSY.ValueCurve`: Capitals costs for investing in inverter capacity
+- `max_inverter_capacity::Float64`: (default: `1e8`) Limit on inverter capacity (MW)
 - `operations_costs_energy::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a storage technology
 - `financial_data_storage::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `capital_costs_solar::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
@@ -122,7 +122,7 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: Technolog
     "Capital costs for investing in a storage technology's energy capacity."
     capital_costs_energy::PSY.ValueCurve
     "Minimum inverter capacity (MW)"
-    minimum_inverter_capacity::Float64
+    min_inverter_capacity::Float64
     "Operational costs for using inverter in co-located systems"
     operation_costs_inverter::PSY.OperationalCost
     "Efficiency of AC to DC conversion of inverter"
@@ -149,14 +149,12 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: Technolog
     region::Vector{Region}
     "Power loss (pct per hour)"
     losses_storage::Float64
-    "Limit on inverter capacity (MW)"
-    maximum_inverter_capacity::Float64
     "Ratio of generation capacity to grid connection capacity"
     inverter_supply_ratio::Float64
-    "Capital costs for investing in a technology."
-    capital_costs_wind::PSY.ValueCurve
     "Option for providing additional data"
     ext::Dict
+    "Capital costs for investing in a technology."
+    capital_costs_wind::PSY.ValueCurve
     "Internal field"
     internal::InfrastructureSystemsInternal
     "Maximum number of years a technology can be active once installed"
@@ -167,6 +165,8 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: Technolog
     existing_capacity_energy::Float64
     "Capitals costs for investing in inverter capacity"
     capital_costs_inverter::PSY.ValueCurve
+    "Limit on inverter capacity (MW)"
+    max_inverter_capacity::Float64
     "Fixed and variable O&M costs for a storage technology"
     operations_costs_energy::PSY.OperationalCost
     "Struct containing relevant financial information for a technology"
@@ -176,8 +176,8 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: Technolog
 end
 
 
-function ColocatedSupplyStorageTechnology{T}(; lifetime_storage=100, available=True, operation_costs_solar=ThermalGenerationCost(), capacity_limits_wind=(min=0, max=1e8), name, capital_costs_power=LinearCurve(0.0), capacity_power_limits=(min=0,max=1e8), initial_capacity_wind=0.0, lifetime_wind=100, operations_costs_power=StorageCost(), capacity_energy_limits=(min=0,max=1e8), id, duration_limits=(min=0,max=1000), capital_costs_energy=LinearCurve(0.0), minimum_inverter_capacity=1e8, operation_costs_inverter, inverter_efficiency, initial_capacity_solar=0.0, power_systems_type, capacity_limits_solar=(min=0, max=1e8), financial_data_solar, financial_data_wind, existing_capacity_power=0.0, operation_costs_wind=ThermalGenerationCost(), balancing_topology, efficiency_storage=(in=1, out=1), region=Vector(), losses_storage=1.0, maximum_inverter_capacity=1e8, inverter_supply_ratio, capital_costs_wind=LinearCurve(0.0), ext=Dict(), internal=InfrastructureSystemsInternal(), lifetime_solar=100, base_year=2020, existing_capacity_energy=0.0, capital_costs_inverter, operations_costs_energy=StorageCost(), financial_data_storage, capital_costs_solar=LinearCurve(0.0), ) where T <: PSY.Generator
-    ColocatedSupplyStorageTechnology{T}(lifetime_storage, available, operation_costs_solar, capacity_limits_wind, name, capital_costs_power, capacity_power_limits, initial_capacity_wind, lifetime_wind, operations_costs_power, capacity_energy_limits, id, duration_limits, capital_costs_energy, minimum_inverter_capacity, operation_costs_inverter, inverter_efficiency, initial_capacity_solar, power_systems_type, capacity_limits_solar, financial_data_solar, financial_data_wind, existing_capacity_power, operation_costs_wind, balancing_topology, efficiency_storage, region, losses_storage, maximum_inverter_capacity, inverter_supply_ratio, capital_costs_wind, ext, internal, lifetime_solar, base_year, existing_capacity_energy, capital_costs_inverter, operations_costs_energy, financial_data_storage, capital_costs_solar, )
+function ColocatedSupplyStorageTechnology{T}(; lifetime_storage=100, available=True, operation_costs_solar=ThermalGenerationCost(), capacity_limits_wind=(min=0, max=1e8), name, capital_costs_power=LinearCurve(0.0), capacity_power_limits=(min=0,max=1e8), initial_capacity_wind=0.0, lifetime_wind=100, operations_costs_power=StorageCost(), capacity_energy_limits=(min=0,max=1e8), id, duration_limits=(min=0,max=1000), capital_costs_energy=LinearCurve(0.0), min_inverter_capacity=1e8, operation_costs_inverter, inverter_efficiency, initial_capacity_solar=0.0, power_systems_type, capacity_limits_solar=(min=0, max=1e8), financial_data_solar, financial_data_wind, existing_capacity_power=0.0, operation_costs_wind=ThermalGenerationCost(), balancing_topology, efficiency_storage=(in=1, out=1), region=Vector(), losses_storage=1.0, inverter_supply_ratio, ext=Dict(), capital_costs_wind=LinearCurve(0.0), internal=InfrastructureSystemsInternal(), lifetime_solar=100, base_year=2020, existing_capacity_energy=0.0, capital_costs_inverter, max_inverter_capacity=1e8, operations_costs_energy=StorageCost(), financial_data_storage, capital_costs_solar=LinearCurve(0.0), ) where T <: PSY.Generator
+    ColocatedSupplyStorageTechnology{T}(lifetime_storage, available, operation_costs_solar, capacity_limits_wind, name, capital_costs_power, capacity_power_limits, initial_capacity_wind, lifetime_wind, operations_costs_power, capacity_energy_limits, id, duration_limits, capital_costs_energy, min_inverter_capacity, operation_costs_inverter, inverter_efficiency, initial_capacity_solar, power_systems_type, capacity_limits_solar, financial_data_solar, financial_data_wind, existing_capacity_power, operation_costs_wind, balancing_topology, efficiency_storage, region, losses_storage, inverter_supply_ratio, ext, capital_costs_wind, internal, lifetime_solar, base_year, existing_capacity_energy, capital_costs_inverter, max_inverter_capacity, operations_costs_energy, financial_data_storage, capital_costs_solar, )
 end
 
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_storage`."""
@@ -208,8 +208,8 @@ get_id(value::ColocatedSupplyStorageTechnology) = value.id
 get_duration_limits(value::ColocatedSupplyStorageTechnology) = value.duration_limits
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_energy`."""
 get_capital_costs_energy(value::ColocatedSupplyStorageTechnology) = value.capital_costs_energy
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `minimum_inverter_capacity`."""
-get_minimum_inverter_capacity(value::ColocatedSupplyStorageTechnology) = value.minimum_inverter_capacity
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `min_inverter_capacity`."""
+get_min_inverter_capacity(value::ColocatedSupplyStorageTechnology) = value.min_inverter_capacity
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_inverter`."""
 get_operation_costs_inverter(value::ColocatedSupplyStorageTechnology) = value.operation_costs_inverter
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `inverter_efficiency`."""
@@ -236,14 +236,12 @@ get_efficiency_storage(value::ColocatedSupplyStorageTechnology) = value.efficien
 get_region(value::ColocatedSupplyStorageTechnology) = value.region
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `losses_storage`."""
 get_losses_storage(value::ColocatedSupplyStorageTechnology) = value.losses_storage
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `maximum_inverter_capacity`."""
-get_maximum_inverter_capacity(value::ColocatedSupplyStorageTechnology) = value.maximum_inverter_capacity
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `inverter_supply_ratio`."""
 get_inverter_supply_ratio(value::ColocatedSupplyStorageTechnology) = value.inverter_supply_ratio
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_wind`."""
-get_capital_costs_wind(value::ColocatedSupplyStorageTechnology) = value.capital_costs_wind
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `ext`."""
 get_ext(value::ColocatedSupplyStorageTechnology) = value.ext
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_wind`."""
+get_capital_costs_wind(value::ColocatedSupplyStorageTechnology) = value.capital_costs_wind
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `internal`."""
 get_internal(value::ColocatedSupplyStorageTechnology) = value.internal
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_solar`."""
@@ -254,6 +252,8 @@ get_base_year(value::ColocatedSupplyStorageTechnology) = value.base_year
 get_existing_capacity_energy(value::ColocatedSupplyStorageTechnology) = value.existing_capacity_energy
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_inverter`."""
 get_capital_costs_inverter(value::ColocatedSupplyStorageTechnology) = value.capital_costs_inverter
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `max_inverter_capacity`."""
+get_max_inverter_capacity(value::ColocatedSupplyStorageTechnology) = value.max_inverter_capacity
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `operations_costs_energy`."""
 get_operations_costs_energy(value::ColocatedSupplyStorageTechnology) = value.operations_costs_energy
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `financial_data_storage`."""
@@ -289,8 +289,8 @@ set_id!(value::ColocatedSupplyStorageTechnology, val) = value.id = val
 set_duration_limits!(value::ColocatedSupplyStorageTechnology, val) = value.duration_limits = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_energy`."""
 set_capital_costs_energy!(value::ColocatedSupplyStorageTechnology, val) = value.capital_costs_energy = val
-"""Set [`ColocatedSupplyStorageTechnology`](@ref) `minimum_inverter_capacity`."""
-set_minimum_inverter_capacity!(value::ColocatedSupplyStorageTechnology, val) = value.minimum_inverter_capacity = val
+"""Set [`ColocatedSupplyStorageTechnology`](@ref) `min_inverter_capacity`."""
+set_min_inverter_capacity!(value::ColocatedSupplyStorageTechnology, val) = value.min_inverter_capacity = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_inverter`."""
 set_operation_costs_inverter!(value::ColocatedSupplyStorageTechnology, val) = value.operation_costs_inverter = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `inverter_efficiency`."""
@@ -317,14 +317,12 @@ set_efficiency_storage!(value::ColocatedSupplyStorageTechnology, val) = value.ef
 set_region!(value::ColocatedSupplyStorageTechnology, val) = value.region = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `losses_storage`."""
 set_losses_storage!(value::ColocatedSupplyStorageTechnology, val) = value.losses_storage = val
-"""Set [`ColocatedSupplyStorageTechnology`](@ref) `maximum_inverter_capacity`."""
-set_maximum_inverter_capacity!(value::ColocatedSupplyStorageTechnology, val) = value.maximum_inverter_capacity = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `inverter_supply_ratio`."""
 set_inverter_supply_ratio!(value::ColocatedSupplyStorageTechnology, val) = value.inverter_supply_ratio = val
-"""Set [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_wind`."""
-set_capital_costs_wind!(value::ColocatedSupplyStorageTechnology, val) = value.capital_costs_wind = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `ext`."""
 set_ext!(value::ColocatedSupplyStorageTechnology, val) = value.ext = val
+"""Set [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_wind`."""
+set_capital_costs_wind!(value::ColocatedSupplyStorageTechnology, val) = value.capital_costs_wind = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `internal`."""
 set_internal!(value::ColocatedSupplyStorageTechnology, val) = value.internal = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_solar`."""
@@ -335,6 +333,8 @@ set_base_year!(value::ColocatedSupplyStorageTechnology, val) = value.base_year =
 set_existing_capacity_energy!(value::ColocatedSupplyStorageTechnology, val) = value.existing_capacity_energy = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_inverter`."""
 set_capital_costs_inverter!(value::ColocatedSupplyStorageTechnology, val) = value.capital_costs_inverter = val
+"""Set [`ColocatedSupplyStorageTechnology`](@ref) `max_inverter_capacity`."""
+set_max_inverter_capacity!(value::ColocatedSupplyStorageTechnology, val) = value.max_inverter_capacity = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `operations_costs_energy`."""
 set_operations_costs_energy!(value::ColocatedSupplyStorageTechnology, val) = value.operations_costs_energy = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `financial_data_storage`."""

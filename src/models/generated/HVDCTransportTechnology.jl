@@ -14,13 +14,13 @@ This file is auto-generated. Do not edit.
         id::Int64
         end_region::Region
         financial_data::TechnologyFinancialData
+        max_new_capacity::Float64
         power_systems_type::String
         angle_limit::Float64
         internal::InfrastructureSystemsInternal
         ext::Dict
         resistance::Float64
         voltage::Float64
-        maximum_new_capacity::Float64
         base_year::Int
         existing_line_capacity::Float64
         line_loss::Float64
@@ -37,13 +37,13 @@ An aggregated representation of candidate HVDC transmission lines between two re
 - `id::Int64`: Numerical Index for HVDC lines
 - `end_region::Region`: End region for transport technology
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
+- `max_new_capacity::Float64`: Maximum capacity that can be added to transmission line (MW)
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `angle_limit::Float64`: (default: `0.0`) Votlage angle limit (radians)
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `resistance::Float64`: (default: `0.0`) Technology resistance in Ohms
 - `voltage::Float64`: (default: `0.0`) Technology voltage in V
-- `maximum_new_capacity::Float64`: Maximum capacity that can be added to transmission line (MW)
 - `base_year::Int`: (default: `2020`) Reference year for technology data
 - `existing_line_capacity::Float64`: Existing capacity of transport technology (MW)
 - `line_loss::Float64`: Transmission loss for each transport technology (%)
@@ -65,6 +65,8 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
     end_region::Region
     "Struct containing relevant financial information for a technology"
     financial_data::TechnologyFinancialData
+    "Maximum capacity that can be added to transmission line (MW)"
+    max_new_capacity::Float64
     "maps to a valid PowerSystems.jl for PCM modeling"
     power_systems_type::String
     "Votlage angle limit (radians)"
@@ -77,8 +79,6 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
     resistance::Float64
     "Technology voltage in V"
     voltage::Float64
-    "Maximum capacity that can be added to transmission line (MW)"
-    maximum_new_capacity::Float64
     "Reference year for technology data"
     base_year::Int
     "Existing capacity of transport technology (MW)"
@@ -88,8 +88,8 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function HVDCTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, id, end_region, financial_data, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, maximum_new_capacity, base_year=2020, existing_line_capacity, line_loss, ) where T <: PSY.Device
-    HVDCTransportTechnology{T}(base_power, capital_cost, start_region, available, name, id, end_region, financial_data, power_systems_type, angle_limit, internal, ext, resistance, voltage, maximum_new_capacity, base_year, existing_line_capacity, line_loss, )
+function HVDCTransportTechnology{T}(; base_power, capital_cost, start_region, available, name, id, end_region, financial_data, max_new_capacity, power_systems_type, angle_limit=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, base_year=2020, existing_line_capacity, line_loss, ) where T <: PSY.Device
+    HVDCTransportTechnology{T}(base_power, capital_cost, start_region, available, name, id, end_region, financial_data, max_new_capacity, power_systems_type, angle_limit, internal, ext, resistance, voltage, base_year, existing_line_capacity, line_loss, )
 end
 
 """Get [`HVDCTransportTechnology`](@ref) `base_power`."""
@@ -108,6 +108,8 @@ get_id(value::HVDCTransportTechnology) = value.id
 get_end_region(value::HVDCTransportTechnology) = value.end_region
 """Get [`HVDCTransportTechnology`](@ref) `financial_data`."""
 get_financial_data(value::HVDCTransportTechnology) = value.financial_data
+"""Get [`HVDCTransportTechnology`](@ref) `max_new_capacity`."""
+get_max_new_capacity(value::HVDCTransportTechnology) = value.max_new_capacity
 """Get [`HVDCTransportTechnology`](@ref) `power_systems_type`."""
 get_power_systems_type(value::HVDCTransportTechnology) = value.power_systems_type
 """Get [`HVDCTransportTechnology`](@ref) `angle_limit`."""
@@ -120,8 +122,6 @@ get_ext(value::HVDCTransportTechnology) = value.ext
 get_resistance(value::HVDCTransportTechnology) = value.resistance
 """Get [`HVDCTransportTechnology`](@ref) `voltage`."""
 get_voltage(value::HVDCTransportTechnology) = value.voltage
-"""Get [`HVDCTransportTechnology`](@ref) `maximum_new_capacity`."""
-get_maximum_new_capacity(value::HVDCTransportTechnology) = value.maximum_new_capacity
 """Get [`HVDCTransportTechnology`](@ref) `base_year`."""
 get_base_year(value::HVDCTransportTechnology) = value.base_year
 """Get [`HVDCTransportTechnology`](@ref) `existing_line_capacity`."""
@@ -145,6 +145,8 @@ set_id!(value::HVDCTransportTechnology, val) = value.id = val
 set_end_region!(value::HVDCTransportTechnology, val) = value.end_region = val
 """Set [`HVDCTransportTechnology`](@ref) `financial_data`."""
 set_financial_data!(value::HVDCTransportTechnology, val) = value.financial_data = val
+"""Set [`HVDCTransportTechnology`](@ref) `max_new_capacity`."""
+set_max_new_capacity!(value::HVDCTransportTechnology, val) = value.max_new_capacity = val
 """Set [`HVDCTransportTechnology`](@ref) `power_systems_type`."""
 set_power_systems_type!(value::HVDCTransportTechnology, val) = value.power_systems_type = val
 """Set [`HVDCTransportTechnology`](@ref) `angle_limit`."""
@@ -157,8 +159,6 @@ set_ext!(value::HVDCTransportTechnology, val) = value.ext = val
 set_resistance!(value::HVDCTransportTechnology, val) = value.resistance = val
 """Set [`HVDCTransportTechnology`](@ref) `voltage`."""
 set_voltage!(value::HVDCTransportTechnology, val) = value.voltage = val
-"""Set [`HVDCTransportTechnology`](@ref) `maximum_new_capacity`."""
-set_maximum_new_capacity!(value::HVDCTransportTechnology, val) = value.maximum_new_capacity = val
 """Set [`HVDCTransportTechnology`](@ref) `base_year`."""
 set_base_year!(value::HVDCTransportTechnology, val) = value.base_year = val
 """Set [`HVDCTransportTechnology`](@ref) `existing_line_capacity`."""
