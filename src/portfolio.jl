@@ -87,7 +87,13 @@ Construct an empty `Portfolio` specifying aggregation. Useful for building a Por
 """
 function Portfolio(aggregation; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(aggregation, data, Dict(), IS.InfrastructureSystemsInternal())
+    return Portfolio(
+        aggregation,
+        data,
+        Dict(),
+        IS.InfrastructureSystemsInternal();
+        kwargs...,
+    )
 end
 
 """
@@ -106,6 +112,7 @@ function Portfolio(base_year, discount_rate, inflation_rate, interest_rate; kwar
             inflation_rate,
             interest_rate,
         ),
+        kwargs...,
     )
 end
 

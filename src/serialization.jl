@@ -5,6 +5,7 @@ const MODULE_KEY = "module"
 const PARAMETERS_KEY = "parameters"
 const CONSTRUCT_WITH_PARAMETERS_KEY = "construct_with_parameters"
 const FUNCTION_KEY = "function"
+const _CONTAINS_SHOULD_ENCODE = Union{Technology, Requirement, SupplementalAttribute}
 const SYSTEM_KWARGS = Set((
     :internal,
     :runchecks,
@@ -31,6 +32,9 @@ const ENCODED_FIELDS = Set((
     :start_region,
     :end_region,
     :efficiency,
+    :eligible_regions,
+    :eligible_resources,
+    :eligible_demand,
 ))
 
 """
@@ -104,7 +108,7 @@ function deserialize(::Type{Portfolio}, filename::AbstractString; kwargs...)
     return from_dict(Portfolio, raw; kwargs...)
 end
 
-function serialize(technology::Technology)
+function serialize(technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
     api_struct = serialize_openapi_struct(technology)
 
     struct_type = typeof(technology)
@@ -112,35 +116,8 @@ function serialize(technology::Technology)
 
     # Build OpenAPI struct from modeling struct
     for field in fieldnames(api_type)
-
-        #For fields with references to other structs, serialize with
-        #the name of that struct
-        if field == :region
-            regions = getfield(technology, field)
-            value = [get_id(r) for r in regions]
-
-        elseif field == :start_region || field == :end_region
-            value = get_id(getfield(technology, field))
-
-            #convert enums to strings
-        elseif field == :prime_mover_type || field == :storage_tech
-            value = string(getfield(technology, field))
-        elseif field == :fuel
-            value = [string(f) for f in getfield(technology, field)]
-        elseif field == :heat_rate_mmbtu_per_mwh
-            fuel_params = getfield(technology, field)
-            value = Dict{String, ValueCurve}()
-            for (k, v) in fuel_params
-                value[string(k)] = v
-            end
-        elseif field == :co2 ||
-               field == :cofire_start_limits ||
-               field == :cofire_level_limits
-            fuel_params = getfield(technology, field)
-            value = Dict{String, Float64}()
-            for (k, v) in fuel_params
-                value[string(k)] = v
-            end
+        if field in ENCODED_FIELDS
+            value = serialize_custom_types(field, technology)
         else
             value = getfield(technology, field)
         end
@@ -224,6 +201,14 @@ function from_dict(
     discount_rate = get(financial_data, "discount_rate", nothing)
     interest_rate = get(financial_data, "interest_rate", nothing)
 
+    #Base system
+    sys = get(raw, "base_system", nothing)
+    if !isnothing(sys)
+        base_system = PSY.from_dict(PSY.System, sys)
+    else
+        base_system = nothing
+    end
+
     internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
     aggregation = PSY.ACBus
     investment_schedule = raw["investment_schedule"]
@@ -246,6 +231,7 @@ function from_dict(
         ),
         name=name,
         description=description,
+        base_system=base_system,
         parsed_kwargs...,
     )
 
@@ -480,8 +466,39 @@ function IS.deserialize(
 end
 
 # Handle cases where the data types in the OpenAPI struct do not match the PSIP struct
+function serialize_custom_types(field, technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
+
+    #For fields with references to other structs, serialize with
+    #the id of that struct and convert enums to strings
+    if field in [:region, :eligible_regions, :eligible_resources, :eligible_demand]
+        comps = getfield(technology, field)
+        val = [get_id(c) for c in comps]
+    elseif field in [:start_region, :end_region]
+        val = get_id(getfield(technology, field))
+    elseif field in [:prime_mover_type, :storage_tech]
+        val = string(getfield(technology, field))
+    elseif field == :fuel
+        val = [string(f) for f in getfield(technology, field)]
+    elseif field == :heat_rate_mmbtu_per_mwh
+        fuel_params = getfield(technology, field)
+        val = Dict{String, ValueCurve}()
+        for (k, v) in fuel_params
+            val[string(k)] = v
+        end
+    elseif field in [:co2, :cofire_start_limits, :cofire_level_limits]
+        fuel_params = getfield(technology, field)
+        val = Dict{String, Float64}()
+        for (k, v) in fuel_params
+            val[string(k)] = v
+        end
+    else
+        val = getfield(technology, field)
+    end
+
+    return val
+end
 function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio::Portfolio)
-    if name == :region
+    if name in [:region, :eligible_regions]
         val = collect(
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
@@ -489,16 +506,34 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
                 portfolio.data,
             ),
         )
-    elseif name == :capacity_limits ||
-           name == :capacity_power_limits ||
-           name == :capacity_energy_limits ||
-           name == :duration_limits
+    elseif name == :eligible_resources
+        val = collect(
+            IS.get_components(
+                x -> get_id(x) in getfield(base_struct, name),
+                SupplyTechnology,
+                portfolio.data,
+            ),
+        )
+    elseif name == :eligible_demand
+        val = collect(
+            IS.get_components(
+                x -> get_id(x) in getfield(base_struct, name),
+                DemandRequirement,
+                portfolio.data,
+            ),
+        )
+    elseif name in [
+        :capacity_limits,
+        :capacity_power_limits,
+        :capacity_energy_limits,
+        :duration_limits,
+    ]
         data = getfield(base_struct, name)
         val = (min=data["min"], max=data["max"])
     elseif name == :efficiency
         data = getfield(base_struct, name)
         val = (in=data["in"], out=data["out"])
-    elseif name == :start_region || name == :end_region
+    elseif name in [:start_region, :end_region]
         val = first(
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
@@ -522,7 +557,7 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         for (k, v) in data
             val[ThermalFuels(k)] = v
         end
-    elseif name == :cofire_level_limits || name == :cofire_start_limits
+    elseif name in [:cofire_level_limits, :cofire_start_limits]
         data = getfield(base_struct, name)
         val = Dict{ThermalFuels, MinMax}()
         for (k, v) in data

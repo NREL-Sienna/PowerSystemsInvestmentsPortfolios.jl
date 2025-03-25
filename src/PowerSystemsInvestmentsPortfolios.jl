@@ -60,6 +60,9 @@ export AggregateRetrofitPotential
 export ExistingCapacity
 export CarbonCaps
 export CapacityReserveMargin
+export CarbonTax
+export HourlyMatching
+export EnergyShareRequirements
 export MinimumCapacityRequirements
 export MaximumCapacityRequirements
 export Region
