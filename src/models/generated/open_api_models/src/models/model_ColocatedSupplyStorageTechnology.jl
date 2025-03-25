@@ -8,18 +8,19 @@
         id=nothing,
         power_systems_type=nothing,
         base_year=nothing,
+        base_power=nothing,
         region=nothing,
         available=nothing,
         balancing_topology=nothing,
         capital_costs_solar=nothing,
         operation_costs_solar=nothing,
-        initial_capacity_solar=nothing,
+        existing_capacity_solar=nothing,
         capacity_limits_solar=nothing,
         lifetime_solar=nothing,
         financial_data_solar=nothing,
         capital_costs_wind=nothing,
         operation_costs_wind=nothing,
-        initial_capacity_wind=nothing,
+        existing_capacity_wind=nothing,
         capacity_limits_wind=nothing,
         lifetime_wind=nothing,
         financial_data_wind=nothing,
@@ -48,18 +49,19 @@
     - id::Int64
     - power_systems_type::String
     - base_year::Int64
+    - base_power::Float64
     - region::Vector{Int64}
     - available::Bool
     - balancing_topology::String
     - capital_costs_solar::ValueCurve
     - operation_costs_solar::RenewableGenerationCost
-    - initial_capacity_solar::Float64
+    - existing_capacity_solar::Float64
     - capacity_limits_solar::MinMax
     - lifetime_solar::Int64
     - financial_data_solar::Any
     - capital_costs_wind::ValueCurve
     - operation_costs_wind::RenewableGenerationCost
-    - initial_capacity_wind::Float64
+    - existing_capacity_wind::Float64
     - capacity_limits_wind::MinMax
     - lifetime_wind::Int64
     - financial_data_wind::Any
@@ -88,18 +90,19 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
     id::Union{Nothing, Int64} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     base_year::Union{Nothing, Int64} = nothing
+    base_power::Union{Nothing, Float64} = nothing
     region::Union{Nothing, Vector{Int64}} = nothing
     available::Union{Nothing, Bool} = nothing
     balancing_topology::Union{Nothing, String} = nothing
     capital_costs_solar = nothing # spec type: Union{ Nothing, ValueCurve }
     operation_costs_solar = nothing # spec type: Union{ Nothing, RenewableGenerationCost }
-    initial_capacity_solar::Union{Nothing, Float64} = nothing
+    existing_capacity_solar::Union{Nothing, Float64} = nothing
     capacity_limits_solar = nothing # spec type: Union{ Nothing, MinMax }
     lifetime_solar::Union{Nothing, Int64} = nothing
     financial_data_solar::Union{Nothing, Any} = nothing
     capital_costs_wind = nothing # spec type: Union{ Nothing, ValueCurve }
     operation_costs_wind = nothing # spec type: Union{ Nothing, RenewableGenerationCost }
-    initial_capacity_wind::Union{Nothing, Float64} = nothing
+    existing_capacity_wind::Union{Nothing, Float64} = nothing
     capacity_limits_wind = nothing # spec type: Union{ Nothing, MinMax }
     lifetime_wind::Union{Nothing, Int64} = nothing
     financial_data_wind::Union{Nothing, Any} = nothing
@@ -128,18 +131,19 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         id,
         power_systems_type,
         base_year,
+        base_power,
         region,
         available,
         balancing_topology,
         capital_costs_solar,
         operation_costs_solar,
-        initial_capacity_solar,
+        existing_capacity_solar,
         capacity_limits_solar,
         lifetime_solar,
         financial_data_solar,
         capital_costs_wind,
         operation_costs_wind,
-        initial_capacity_wind,
+        existing_capacity_wind,
         capacity_limits_wind,
         lifetime_wind,
         financial_data_wind,
@@ -177,6 +181,11 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             ColocatedSupplyStorageTechnology,
+            Symbol("base_power"),
+            base_power,
+        )
+        OpenAPI.validate_property(
+            ColocatedSupplyStorageTechnology,
             Symbol("region"),
             region,
         )
@@ -202,8 +211,8 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             ColocatedSupplyStorageTechnology,
-            Symbol("initial_capacity_solar"),
-            initial_capacity_solar,
+            Symbol("existing_capacity_solar"),
+            existing_capacity_solar,
         )
         OpenAPI.validate_property(
             ColocatedSupplyStorageTechnology,
@@ -232,8 +241,8 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             ColocatedSupplyStorageTechnology,
-            Symbol("initial_capacity_wind"),
-            initial_capacity_wind,
+            Symbol("existing_capacity_wind"),
+            existing_capacity_wind,
         )
         OpenAPI.validate_property(
             ColocatedSupplyStorageTechnology,
@@ -350,18 +359,19 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
             id,
             power_systems_type,
             base_year,
+            base_power,
             region,
             available,
             balancing_topology,
             capital_costs_solar,
             operation_costs_solar,
-            initial_capacity_solar,
+            existing_capacity_solar,
             capacity_limits_solar,
             lifetime_solar,
             financial_data_solar,
             capital_costs_wind,
             operation_costs_wind,
-            initial_capacity_wind,
+            existing_capacity_wind,
             capacity_limits_wind,
             lifetime_wind,
             financial_data_wind,
@@ -393,18 +403,19 @@ const _property_types_ColocatedSupplyStorageTechnology = Dict{Symbol, String}(
     Symbol("id") => "Int64",
     Symbol("power_systems_type") => "String",
     Symbol("base_year") => "Int64",
+    Symbol("base_power") => "Float64",
     Symbol("region") => "Vector{Int64}",
     Symbol("available") => "Bool",
     Symbol("balancing_topology") => "String",
     Symbol("capital_costs_solar") => "ValueCurve",
     Symbol("operation_costs_solar") => "RenewableGenerationCost",
-    Symbol("initial_capacity_solar") => "Float64",
+    Symbol("existing_capacity_solar") => "Float64",
     Symbol("capacity_limits_solar") => "MinMax",
     Symbol("lifetime_solar") => "Int64",
     Symbol("financial_data_solar") => "Any",
     Symbol("capital_costs_wind") => "ValueCurve",
     Symbol("operation_costs_wind") => "RenewableGenerationCost",
-    Symbol("initial_capacity_wind") => "Float64",
+    Symbol("existing_capacity_wind") => "Float64",
     Symbol("capacity_limits_wind") => "MinMax",
     Symbol("lifetime_wind") => "Int64",
     Symbol("financial_data_wind") => "Any",

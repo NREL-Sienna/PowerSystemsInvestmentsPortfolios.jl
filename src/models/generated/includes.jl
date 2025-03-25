@@ -53,6 +53,8 @@ export get_eligible_resources
 export get_end_region
 export get_existing_capacity_energy
 export get_existing_capacity_power
+export get_existing_capacity_solar
+export get_existing_capacity_wind
 export get_existing_line_capacity
 export get_ext
 export get_financial_data
@@ -64,8 +66,6 @@ export get_generation_fraction_requirement
 export get_heat_rate_mmbtu_per_mwh
 export get_id
 export get_initial_capacity
-export get_initial_capacity_solar
-export get_initial_capacity_wind
 export get_inverter_efficiency
 export get_inverter_supply_ratio
 export get_lifetime
@@ -155,6 +155,8 @@ export set_eligible_resources!
 export set_end_region!
 export set_existing_capacity_energy!
 export set_existing_capacity_power!
+export set_existing_capacity_solar!
+export set_existing_capacity_wind!
 export set_existing_line_capacity!
 export set_ext!
 export set_financial_data!
@@ -166,8 +168,6 @@ export set_generation_fraction_requirement!
 export set_heat_rate_mmbtu_per_mwh!
 export set_id!
 export set_initial_capacity!
-export set_initial_capacity_solar!
-export set_initial_capacity_wind!
 export set_inverter_efficiency!
 export set_inverter_supply_ratio!
 export set_lifetime!

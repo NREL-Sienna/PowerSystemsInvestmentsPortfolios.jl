@@ -50,7 +50,7 @@ Candidate storage technology in a region.
 - `operations_costs_power::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a technology
 - `unit_size_power::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
 - `id::Int64`: ID for individual storage technology
-- `duration_limits::MinMax`: (default: `(min=0,max=1000)`) Minimum required durection for a storage technology
+- `duration_limits::MinMax`: (default: `(min=0,max=1000)`) Minimum required duration for a storage technology
 - `capital_costs_energy::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
 - `losses::Float64`: (default: `1.0`) Power loss (pct per hour)
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
@@ -91,7 +91,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     unit_size_power::Float64
     "ID for individual storage technology"
     id::Int64
-    "Minimum required durection for a storage technology"
+    "Minimum required duration for a storage technology"
     duration_limits::MinMax
     "Capital costs for investing in a technology."
     capital_costs_energy::PSY.ValueCurve
