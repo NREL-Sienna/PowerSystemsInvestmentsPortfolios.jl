@@ -4,56 +4,33 @@
 @doc raw"""AggregateRetirementPotential
 
     AggregateRetirementPotential(;
-        retrofit_id=0,
-        retrofit_potential=0.0,
-        retrofit_fraction=nothing,
+        retirement_potential=0.0,
     )
 
-    - retrofit_id::Int64
-    - retrofit_potential::Float64
-    - retrofit_fraction::Float64
+    - retirement_potential::Float64
 """
 Base.@kwdef mutable struct AggregateRetirementPotential <: OpenAPI.APIModel
-    retrofit_id::Union{Nothing, Int64} = 0
-    retrofit_potential::Union{Nothing, Float64} = 0.0
-    retrofit_fraction::Union{Nothing, Float64} = nothing
+    retirement_potential::Union{Nothing, Float64} = 0.0
 
-    function AggregateRetirementPotential(
-        retrofit_id,
-        retrofit_potential,
-        retrofit_fraction,
-    )
+    function AggregateRetirementPotential(retirement_potential)
         OpenAPI.validate_property(
             AggregateRetirementPotential,
-            Symbol("retrofit_id"),
-            retrofit_id,
+            Symbol("retirement_potential"),
+            retirement_potential,
         )
-        OpenAPI.validate_property(
-            AggregateRetirementPotential,
-            Symbol("retrofit_potential"),
-            retrofit_potential,
-        )
-        OpenAPI.validate_property(
-            AggregateRetirementPotential,
-            Symbol("retrofit_fraction"),
-            retrofit_fraction,
-        )
-        return new(retrofit_id, retrofit_potential, retrofit_fraction)
+        return new(retirement_potential)
     end
 end # type AggregateRetirementPotential
 
-const _property_types_AggregateRetirementPotential = Dict{Symbol, String}(
-    Symbol("retrofit_id") => "Int64",
-    Symbol("retrofit_potential") => "Float64",
-    Symbol("retrofit_fraction") => "Float64",
-)
+const _property_types_AggregateRetirementPotential =
+    Dict{Symbol, String}(Symbol("retirement_potential") => "Float64")
 OpenAPI.property_type(::Type{AggregateRetirementPotential}, name::Symbol) = Union{
     Nothing,
     eval(Base.Meta.parse(_property_types_AggregateRetirementPotential[name])),
 }
 
 function check_required(o::AggregateRetirementPotential)
-    o.retrofit_id === nothing && (return false)
+    o.retirement_potential === nothing && (return false)
     true
 end
 

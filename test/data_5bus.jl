@@ -286,6 +286,23 @@ function build_portfolio()
         financial_data=tech_financials,
     )
 
+    #############################################################
+    ######## Retirement, Retrofits, and Existing Capacity #######
+    #############################################################
+
+    thermal = collect(IS.get_components(ThermalStandard, sys))
+
+    retro1 = AggregateRetrofitPotential(retrofit_id=1, retrofit_fraction=0.5)
+
+    retire1 = AggregateRetirementPotential(retirement_potential=100.0)
+
+    retro2 = RetrofitPotential(eligible_generators=[PSY.get_name(t) for t in thermal[1:3]])
+
+    retire2 =
+        RetirementPotential(eligible_generators=[PSY.get_name(t) for t in thermal[4:5]])
+
+    existing = ExistingCapacity(eligible_generators=[PSY.get_name(t) for t in thermal[1:3]])
+
     ########################
     ######## Storage #######
     ########################
@@ -419,6 +436,14 @@ function build_portfolio()
         #peak_load=peak_load,
     )
 
+    demand_technology = DemandSideTechnology{PowerLoad}(
+        name="test_demand",
+        available=true,
+        power_systems_type="PowerLoad",
+        id=1,
+        region=[z1],
+    )
+
     ####################
     ##### Transmission #####
     #####################
@@ -428,7 +453,22 @@ function build_portfolio()
         start_region=z1,
         end_region=z2,
         existing_line_capacity=100,
-        maximum_new_capacity=900,
+        max_new_capacity=900,
+        line_loss=0.05,
+        capital_cost=LinearCurve(5000.0),
+        available=true,
+        power_systems_type="TransportTechnology",
+        id=1,
+        base_power=1.0,
+        financial_data=tech_financials,
+    )
+
+    line2 = HVDCTransportTechnology{ACBranch}(
+        name="test_branch",
+        start_region=z1,
+        end_region=z2,
+        existing_line_capacity=0.0,
+        max_new_capacity=0.0,
         line_loss=0.05,
         capital_cost=LinearCurve(5000.0),
         available=true,
@@ -449,29 +489,114 @@ function build_portfolio()
         scaling_factor_multiplier=get_initial_capacity,
     )
 
+    ########################
+    ##### Requirements #####
+    ########################
+
+    carbon_tax = CarbonTax(
+        name="test_tax",
+        id=1,
+        available=true,
+        target_year=2030,
+        eligible_regions=[z1, z2],
+    )
+    carbon_cap = CarbonCaps(
+        name="test_cap",
+        id=1,
+        available=true,
+        target_year=2030,
+        eligible_regions=[z1, z2],
+    )
+
+    crm = CapacityReserveMargin(
+        name="test_crm",
+        id=1,
+        available=true,
+        target_year=2030,
+        eligible_regions=[z1, z2],
+    )
+
+    matching = HourlyMatching(
+        name="hourly_matching",
+        id=1,
+        available=true,
+        eligible_demand=[t_demand_c, t_demand_b],
+        eligible_resources=[t_wind, t_pv1, t_pv2],
+    )
+    max_req = MaximumCapacityRequirements(
+        name="test_max",
+        id=1,
+        available=true,
+        target_year=2030,
+        eligible_resources=[t_th, t_th_exp],
+    )
+    min_req = MinimumCapacityRequirements(
+        name="test_min",
+        id=1,
+        available=true,
+        target_year=2030,
+        eligible_resources=[t_wind, t_pv1],
+    )
+
+    esr = EnergyShareRequirements(
+        name="test_esr",
+        id=1,
+        available=true,
+        eligible_regions=[z1, z2],
+        eligible_resources=[t_wind, t_pv1, t_pv2],
+    )
+
     finances = PortfolioFinancialData(2025, 0.07, 0.05, 0.03)
 
     #####################
     ##### Portfolio #####
     #####################
 
-    p_5bus = Portfolio(2025, 0.07, 0.05, 0.03)
+    # Build portfolio with base_system
+    p_5bus = Portfolio(2025, 0.07, 0.05, 0.03; base_system=sys)
 
+    #Set name to test metadata
     PSIP.set_name!(p_5bus, "test")
-    #PSIP.add_financials!(p_5bus, finances)
-    #PSIP.add_financials!(p_5bus, tech_financials)
+
+    #Regions
     PSIP.add_region!(p_5bus, z1)
     PSIP.add_region!(p_5bus, z2)
+
+    #Supply
     PSIP.add_technology!(p_5bus, t_th)
     PSIP.add_technology!(p_5bus, t_wind)
     PSIP.add_technology!(p_5bus, t_pv1)
     PSIP.add_technology!(p_5bus, t_pv2)
     PSIP.add_technology!(p_5bus, t_th_exp)
+
+    #Demands
     PSIP.add_technology!(p_5bus, t_demand_b)
     PSIP.add_technology!(p_5bus, t_demand_c)
     PSIP.add_technology!(p_5bus, t_demand_d)
+    PSIP.add_technology!(p_5bus, demand_technology)
+
+    #storage
     PSIP.add_technology!(p_5bus, t_stor)
+
+    #Transmission
     PSIP.add_technology!(p_5bus, line)
+    PSIP.add_technology!(p_5bus, line2)
+
+    #Policy requirement
+    PSIP.add_requirement!(p_5bus, carbon_tax)
+    PSIP.add_requirement!(p_5bus, carbon_cap)
+    PSIP.add_requirement!(p_5bus, crm)
+    PSIP.add_requirement!(p_5bus, matching)
+    PSIP.add_requirement!(p_5bus, min_req)
+    PSIP.add_requirement!(p_5bus, max_req)
+    PSIP.add_requirement!(p_5bus, esr)
+
+    #Supplemental attributes
+    PSIP.add_supplemental_attribute!(p_5bus, t_th_exp, retro1)
+    PSIP.add_supplemental_attribute!(p_5bus, t_th_exp, retire1)
+    PSIP.add_supplemental_attribute!(p_5bus, t_th, retro2)
+    PSIP.add_supplemental_attribute!(p_5bus, t_th, retire2)
+    PSIP.add_supplemental_attribute!(p_5bus, t_th, existing)
 
     PSIP.add_time_series!(p_5bus, t_th, ts_th_cheap_inv_capex)
     PSIP.add_time_series!(p_5bus, t_th_exp, ts_th_exp_inv_capex)

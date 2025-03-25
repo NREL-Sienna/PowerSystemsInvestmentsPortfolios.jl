@@ -7,60 +7,38 @@
         name=nothing,
         id=nothing,
         available=nothing,
-        qualified_supply=nothing,
-        qualified_demand=nothing,
-        generation_fraction=1e8,
+        eligible_resources=nothing,
+        eligible_demand=nothing,
     )
 
     - name::String
     - id::Int64
     - available::Bool
-    - qualified_supply::Vector{Int64}
-    - qualified_demand::Vector{Int64}
-    - generation_fraction::Float64
+    - eligible_resources::Vector{Int64}
+    - eligible_demand::Vector{Int64}
 """
 Base.@kwdef mutable struct HourlyMatching <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
-    qualified_supply::Union{Nothing, Vector{Int64}} = nothing
-    qualified_demand::Union{Nothing, Vector{Int64}} = nothing
-    generation_fraction::Union{Nothing, Float64} = 1e8
+    eligible_resources::Union{Nothing, Vector{Int64}} = nothing
+    eligible_demand::Union{Nothing, Vector{Int64}} = nothing
 
-    function HourlyMatching(
-        name,
-        id,
-        available,
-        qualified_supply,
-        qualified_demand,
-        generation_fraction,
-    )
+    function HourlyMatching(name, id, available, eligible_resources, eligible_demand)
         OpenAPI.validate_property(HourlyMatching, Symbol("name"), name)
         OpenAPI.validate_property(HourlyMatching, Symbol("id"), id)
         OpenAPI.validate_property(HourlyMatching, Symbol("available"), available)
         OpenAPI.validate_property(
             HourlyMatching,
-            Symbol("qualified_supply"),
-            qualified_supply,
+            Symbol("eligible_resources"),
+            eligible_resources,
         )
         OpenAPI.validate_property(
             HourlyMatching,
-            Symbol("qualified_demand"),
-            qualified_demand,
+            Symbol("eligible_demand"),
+            eligible_demand,
         )
-        OpenAPI.validate_property(
-            HourlyMatching,
-            Symbol("generation_fraction"),
-            generation_fraction,
-        )
-        return new(
-            name,
-            id,
-            available,
-            qualified_supply,
-            qualified_demand,
-            generation_fraction,
-        )
+        return new(name, id, available, eligible_resources, eligible_demand)
     end
 end # type HourlyMatching
 
@@ -68,9 +46,8 @@ const _property_types_HourlyMatching = Dict{Symbol, String}(
     Symbol("name") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
-    Symbol("qualified_supply") => "Vector{Int64}",
-    Symbol("qualified_demand") => "Vector{Int64}",
-    Symbol("generation_fraction") => "Float64",
+    Symbol("eligible_resources") => "Vector{Int64}",
+    Symbol("eligible_demand") => "Vector{Int64}",
 )
 OpenAPI.property_type(::Type{HourlyMatching}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_HourlyMatching[name]))}

@@ -10,7 +10,7 @@
         region=nothing,
         power_systems_type=nothing,
         technology_efficiency=0.0,
-        price_per_unit=0.0,
+        price_per_unit=nothing,
         min_power=0.0,
         max_demand_delay=nothing,
         max_demand_advance=nothing,
@@ -26,7 +26,7 @@
     - region::Vector{Int64}
     - power_systems_type::String
     - technology_efficiency::Float64
-    - price_per_unit::Float64
+    - price_per_unit::ValueCurve
     - min_power::Float64
     - max_demand_delay::Float64
     - max_demand_advance::Float64
@@ -42,7 +42,7 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
     region::Union{Nothing, Vector{Int64}} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     technology_efficiency::Union{Nothing, Float64} = 0.0
-    price_per_unit::Union{Nothing, Float64} = 0.0
+    price_per_unit = nothing # spec type: Union{ Nothing, ValueCurve }
     min_power::Union{Nothing, Float64} = 0.0
     max_demand_delay::Union{Nothing, Float64} = nothing
     max_demand_advance::Union{Nothing, Float64} = nothing
@@ -143,7 +143,7 @@ const _property_types_DemandSideTechnology = Dict{Symbol, String}(
     Symbol("region") => "Vector{Int64}",
     Symbol("power_systems_type") => "String",
     Symbol("technology_efficiency") => "Float64",
-    Symbol("price_per_unit") => "Float64",
+    Symbol("price_per_unit") => "ValueCurve",
     Symbol("min_power") => "Float64",
     Symbol("max_demand_delay") => "Float64",
     Symbol("max_demand_advance") => "Float64",

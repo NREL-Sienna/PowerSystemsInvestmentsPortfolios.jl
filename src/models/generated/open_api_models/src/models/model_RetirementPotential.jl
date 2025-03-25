@@ -4,31 +4,30 @@
 @doc raw"""RetirementPotential
 
     RetirementPotential(;
-        retirement_potential=nothing,
+        eligible_generators=nothing,
     )
 
-    - retirement_potential::Vector{Int64}
+    - eligible_generators::Vector{String}
 """
 Base.@kwdef mutable struct RetirementPotential <: OpenAPI.APIModel
-    retirement_potential::Union{Nothing, Vector{Int64}} = nothing
+    eligible_generators::Union{Nothing, Vector{String}} = nothing
 
-    function RetirementPotential(retirement_potential)
+    function RetirementPotential(eligible_generators)
         OpenAPI.validate_property(
             RetirementPotential,
-            Symbol("retirement_potential"),
-            retirement_potential,
+            Symbol("eligible_generators"),
+            eligible_generators,
         )
-        return new(retirement_potential)
+        return new(eligible_generators)
     end
 end # type RetirementPotential
 
 const _property_types_RetirementPotential =
-    Dict{Symbol, String}(Symbol("retirement_potential") => "Vector{Int64}")
+    Dict{Symbol, String}(Symbol("eligible_generators") => "Vector{String}")
 OpenAPI.property_type(::Type{RetirementPotential}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_RetirementPotential[name]))}
 
 function check_required(o::RetirementPotential)
-    o.retirement_potential === nothing && (return false)
     true
 end
 

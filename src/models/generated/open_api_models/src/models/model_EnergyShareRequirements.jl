@@ -9,7 +9,7 @@
         available=nothing,
         target_year=nothing,
         eligible_regions=nothing,
-        eligible_technologies=nothing,
+        eligible_resources=nothing,
         generation_fraction_requirement=0.0,
     )
 
@@ -18,7 +18,7 @@
     - available::Bool
     - target_year::Int64
     - eligible_regions::Vector{Int64}
-    - eligible_technologies::Vector{Int64}
+    - eligible_resources::Vector{Int64}
     - generation_fraction_requirement::Float64
 """
 Base.@kwdef mutable struct EnergyShareRequirements <: OpenAPI.APIModel
@@ -27,7 +27,7 @@ Base.@kwdef mutable struct EnergyShareRequirements <: OpenAPI.APIModel
     available::Union{Nothing, Bool} = nothing
     target_year::Union{Nothing, Int64} = nothing
     eligible_regions::Union{Nothing, Vector{Int64}} = nothing
-    eligible_technologies::Union{Nothing, Vector{Int64}} = nothing
+    eligible_resources::Union{Nothing, Vector{Int64}} = nothing
     generation_fraction_requirement::Union{Nothing, Float64} = 0.0
 
     function EnergyShareRequirements(
@@ -36,7 +36,7 @@ Base.@kwdef mutable struct EnergyShareRequirements <: OpenAPI.APIModel
         available,
         target_year,
         eligible_regions,
-        eligible_technologies,
+        eligible_resources,
         generation_fraction_requirement,
     )
         OpenAPI.validate_property(EnergyShareRequirements, Symbol("name"), name)
@@ -54,8 +54,8 @@ Base.@kwdef mutable struct EnergyShareRequirements <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             EnergyShareRequirements,
-            Symbol("eligible_technologies"),
-            eligible_technologies,
+            Symbol("eligible_resources"),
+            eligible_resources,
         )
         OpenAPI.validate_property(
             EnergyShareRequirements,
@@ -68,7 +68,7 @@ Base.@kwdef mutable struct EnergyShareRequirements <: OpenAPI.APIModel
             available,
             target_year,
             eligible_regions,
-            eligible_technologies,
+            eligible_resources,
             generation_fraction_requirement,
         )
     end
@@ -80,7 +80,7 @@ const _property_types_EnergyShareRequirements = Dict{Symbol, String}(
     Symbol("available") => "Bool",
     Symbol("target_year") => "Int64",
     Symbol("eligible_regions") => "Vector{Int64}",
-    Symbol("eligible_technologies") => "Vector{Int64}",
+    Symbol("eligible_resources") => "Vector{Int64}",
     Symbol("generation_fraction_requirement") => "Float64",
 )
 OpenAPI.property_type(::Type{EnergyShareRequirements}, name::Symbol) =

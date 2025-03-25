@@ -7,7 +7,7 @@
         name=nothing,
         id=nothing,
         available=nothing,
-        regions=nothing,
+        eligible_regions=nothing,
         target_year=nothing,
         capacity_reserve_fraction=0.0,
     )
@@ -15,7 +15,7 @@
     - name::String
     - id::Int64
     - available::Bool
-    - regions::Vector{Int64}
+    - eligible_regions::Vector{Int64}
     - target_year::Int64
     - capacity_reserve_fraction::Float64
 """
@@ -23,7 +23,7 @@ Base.@kwdef mutable struct CapacityReserveMargin <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
-    regions::Union{Nothing, Vector{Int64}} = nothing
+    eligible_regions::Union{Nothing, Vector{Int64}} = nothing
     target_year::Union{Nothing, Int64} = nothing
     capacity_reserve_fraction::Union{Nothing, Float64} = 0.0
 
@@ -31,21 +31,32 @@ Base.@kwdef mutable struct CapacityReserveMargin <: OpenAPI.APIModel
         name,
         id,
         available,
-        regions,
+        eligible_regions,
         target_year,
         capacity_reserve_fraction,
     )
         OpenAPI.validate_property(CapacityReserveMargin, Symbol("name"), name)
         OpenAPI.validate_property(CapacityReserveMargin, Symbol("id"), id)
         OpenAPI.validate_property(CapacityReserveMargin, Symbol("available"), available)
-        OpenAPI.validate_property(CapacityReserveMargin, Symbol("regions"), regions)
+        OpenAPI.validate_property(
+            CapacityReserveMargin,
+            Symbol("eligible_regions"),
+            eligible_regions,
+        )
         OpenAPI.validate_property(CapacityReserveMargin, Symbol("target_year"), target_year)
         OpenAPI.validate_property(
             CapacityReserveMargin,
             Symbol("capacity_reserve_fraction"),
             capacity_reserve_fraction,
         )
-        return new(name, id, available, regions, target_year, capacity_reserve_fraction)
+        return new(
+            name,
+            id,
+            available,
+            eligible_regions,
+            target_year,
+            capacity_reserve_fraction,
+        )
     end
 end # type CapacityReserveMargin
 
@@ -53,7 +64,7 @@ const _property_types_CapacityReserveMargin = Dict{Symbol, String}(
     Symbol("name") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
-    Symbol("regions") => "Vector{Int64}",
+    Symbol("eligible_regions") => "Vector{Int64}",
     Symbol("target_year") => "Int64",
     Symbol("capacity_reserve_fraction") => "Float64",
 )

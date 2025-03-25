@@ -9,7 +9,7 @@ Name | Type | Description | Notes
 **available** | **Bool** |  | [default to nothing]
 **target_year** | **Int64** |  | [optional] [default to nothing]
 **eligible_regions** | **Vector{Int64}** |  | [optional] [default to nothing]
-**eligible_technologies** | **Vector{Int64}** |  | [optional] [default to nothing]
+**eligible_resources** | **Vector{Int64}** |  | [optional] [default to nothing]
 **generation_fraction_requirement** | **Float64** |  | [optional] [default to 0.0]
 
 
