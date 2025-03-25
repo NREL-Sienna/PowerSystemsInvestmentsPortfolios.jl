@@ -48,6 +48,7 @@ export Requirement
 export FinancialData
 export Region
 export SupplyTechnology
+export ColocatedSupplyStorageTechnology
 export ACTransportTechnology
 export HVDCTransportTechnology
 export StorageTechnology
