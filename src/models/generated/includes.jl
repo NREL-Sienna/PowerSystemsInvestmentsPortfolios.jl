@@ -58,9 +58,6 @@ export get_existing_capacity_wind
 export get_existing_line_capacity
 export get_ext
 export get_financial_data
-export get_financial_data_solar
-export get_financial_data_storage
-export get_financial_data_wind
 export get_fuel
 export get_generation_fraction_requirement
 export get_heat_rate_mmbtu_per_mwh
@@ -160,9 +157,6 @@ export set_existing_capacity_wind!
 export set_existing_line_capacity!
 export set_ext!
 export set_financial_data!
-export set_financial_data_solar!
-export set_financial_data_storage!
-export set_financial_data_wind!
 export set_fuel!
 export set_generation_fraction_requirement!
 export set_heat_rate_mmbtu_per_mwh!
