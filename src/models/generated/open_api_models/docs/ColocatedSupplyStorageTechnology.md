@@ -41,6 +41,7 @@ Name | Type | Description | Notes
 **operation_costs_inverter** | [***ProductionVariableCostCurve**](ProductionVariableCostCurve.md) |  | [optional] [default to nothing]
 **inverter_efficiency** | **Float64** |  | [optional] [default to nothing]
 **inverter_supply_ratio** | **Float64** |  | [optional] [default to nothing]
+**existing_capacity_inverter** | **Float64** |  | [optional] [default to nothing]
 
 
 [[Back to Model list]](../README.md#models) [[Back to API list]](../README.md#api-endpoints) [[Back to README]](../README.md)

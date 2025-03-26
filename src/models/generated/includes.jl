@@ -1,4 +1,3 @@
-include("Zone.jl")
 include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
@@ -11,6 +10,7 @@ include("CapacityReserveMargin.jl")
 include("DemandSideTechnology.jl")
 include("EnergyShareRequirements.jl")
 include("AggregateRetirementPotential.jl")
+include("Zone.jl")
 include("HVDCTransportTechnology.jl")
 include("StorageTechnology.jl")
 include("CarbonCaps.jl")
@@ -52,6 +52,7 @@ export get_eligible_regions
 export get_eligible_resources
 export get_end_region
 export get_existing_capacity_energy
+export get_existing_capacity_inverter
 export get_existing_capacity_power
 export get_existing_capacity_solar
 export get_existing_capacity_wind
@@ -151,6 +152,7 @@ export set_eligible_regions!
 export set_eligible_resources!
 export set_end_region!
 export set_existing_capacity_energy!
+export set_existing_capacity_inverter!
 export set_existing_capacity_power!
 export set_existing_capacity_solar!
 export set_existing_capacity_wind!

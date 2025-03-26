@@ -8,6 +8,7 @@ This file is auto-generated. Do not edit.
     mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: Technology
         base_power::Float64
         operation_costs_power::PSY.OperationalCost
+        existing_capacity_inverter::Float64
         lifetime_storage::Int
         available::Bool
         operation_costs_solar::PSY.OperationalCost
@@ -52,6 +53,7 @@ Supply Technology that supports a StorageTechnology co-located with wind and sol
 # Arguments
 - `base_power::Float64`: Base power
 - `operation_costs_power::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a storage technology
+- `existing_capacity_inverter::Float64`: (default: `0.0`) Pre-existing capacity for a technology
 - `lifetime_storage::Int`: (default: `100`) Maximum number of years a technology can be active once installed
 - `available::Bool`: (default: `True`) identifies whether the technology is available
 - `operation_costs_solar::PSY.OperationalCost`: (default: `ThermalGenerationCost()`) Fixed and variable O&M costs for a technology
@@ -95,6 +97,8 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: Technolog
     base_power::Float64
     "Fixed and variable O&M costs for a storage technology"
     operation_costs_power::PSY.OperationalCost
+    "Pre-existing capacity for a technology"
+    existing_capacity_inverter::Float64
     "Maximum number of years a technology can be active once installed"
     lifetime_storage::Int
     "identifies whether the technology is available"
@@ -172,14 +176,16 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: Technolog
 end
 
 
-function ColocatedSupplyStorageTechnology{T}(; base_power, operation_costs_power=StorageCost(), lifetime_storage=100, available=True, operation_costs_solar=ThermalGenerationCost(), capacity_limits_wind=(min=0, max=1e8), name, capital_costs_power=LinearCurve(0.0), capacity_power_limits=(min=0,max=1e8), lifetime_wind=100, capacity_energy_limits=(min=0,max=1e8), duration_limits=(min=0,max=1000), min_inverter_capacity=1e8, id, existing_capacity_solar=0.0, capital_costs_energy=LinearCurve(0.0), operation_costs_energy=StorageCost(), financial_data, operation_costs_inverter, inverter_efficiency, existing_capacity_wind=0.0, existing_capacity_power=0.0, power_systems_type, capacity_limits_solar=(min=0, max=1e8), internal=InfrastructureSystemsInternal(), operation_costs_wind=ThermalGenerationCost(), balancing_topology, efficiency_storage=(in=1, out=1), region=Vector(), losses_storage=1.0, inverter_supply_ratio, ext=Dict(), capital_costs_wind=LinearCurve(0.0), lifetime_solar=100, base_year=2020, existing_capacity_energy=0.0, capital_costs_inverter, max_inverter_capacity=1e8, capital_costs_solar=LinearCurve(0.0), ) where T <: PSY.Generator
-    ColocatedSupplyStorageTechnology{T}(base_power, operation_costs_power, lifetime_storage, available, operation_costs_solar, capacity_limits_wind, name, capital_costs_power, capacity_power_limits, lifetime_wind, capacity_energy_limits, duration_limits, min_inverter_capacity, id, existing_capacity_solar, capital_costs_energy, operation_costs_energy, financial_data, operation_costs_inverter, inverter_efficiency, existing_capacity_wind, existing_capacity_power, power_systems_type, capacity_limits_solar, internal, operation_costs_wind, balancing_topology, efficiency_storage, region, losses_storage, inverter_supply_ratio, ext, capital_costs_wind, lifetime_solar, base_year, existing_capacity_energy, capital_costs_inverter, max_inverter_capacity, capital_costs_solar, )
+function ColocatedSupplyStorageTechnology{T}(; base_power, operation_costs_power=StorageCost(), existing_capacity_inverter=0.0, lifetime_storage=100, available=True, operation_costs_solar=ThermalGenerationCost(), capacity_limits_wind=(min=0, max=1e8), name, capital_costs_power=LinearCurve(0.0), capacity_power_limits=(min=0,max=1e8), lifetime_wind=100, capacity_energy_limits=(min=0,max=1e8), duration_limits=(min=0,max=1000), min_inverter_capacity=1e8, id, existing_capacity_solar=0.0, capital_costs_energy=LinearCurve(0.0), operation_costs_energy=StorageCost(), financial_data, operation_costs_inverter, inverter_efficiency, existing_capacity_wind=0.0, existing_capacity_power=0.0, power_systems_type, capacity_limits_solar=(min=0, max=1e8), internal=InfrastructureSystemsInternal(), operation_costs_wind=ThermalGenerationCost(), balancing_topology, efficiency_storage=(in=1, out=1), region=Vector(), losses_storage=1.0, inverter_supply_ratio, ext=Dict(), capital_costs_wind=LinearCurve(0.0), lifetime_solar=100, base_year=2020, existing_capacity_energy=0.0, capital_costs_inverter, max_inverter_capacity=1e8, capital_costs_solar=LinearCurve(0.0), ) where T <: PSY.Generator
+    ColocatedSupplyStorageTechnology{T}(base_power, operation_costs_power, existing_capacity_inverter, lifetime_storage, available, operation_costs_solar, capacity_limits_wind, name, capital_costs_power, capacity_power_limits, lifetime_wind, capacity_energy_limits, duration_limits, min_inverter_capacity, id, existing_capacity_solar, capital_costs_energy, operation_costs_energy, financial_data, operation_costs_inverter, inverter_efficiency, existing_capacity_wind, existing_capacity_power, power_systems_type, capacity_limits_solar, internal, operation_costs_wind, balancing_topology, efficiency_storage, region, losses_storage, inverter_supply_ratio, ext, capital_costs_wind, lifetime_solar, base_year, existing_capacity_energy, capital_costs_inverter, max_inverter_capacity, capital_costs_solar, )
 end
 
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `base_power`."""
 get_base_power(value::ColocatedSupplyStorageTechnology) = value.base_power
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_power`."""
 get_operation_costs_power(value::ColocatedSupplyStorageTechnology) = value.operation_costs_power
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `existing_capacity_inverter`."""
+get_existing_capacity_inverter(value::ColocatedSupplyStorageTechnology) = value.existing_capacity_inverter
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_storage`."""
 get_lifetime_storage(value::ColocatedSupplyStorageTechnology) = value.lifetime_storage
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `available`."""
@@ -259,6 +265,8 @@ get_capital_costs_solar(value::ColocatedSupplyStorageTechnology) = value.capital
 set_base_power!(value::ColocatedSupplyStorageTechnology, val) = value.base_power = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_power`."""
 set_operation_costs_power!(value::ColocatedSupplyStorageTechnology, val) = value.operation_costs_power = val
+"""Set [`ColocatedSupplyStorageTechnology`](@ref) `existing_capacity_inverter`."""
+set_existing_capacity_inverter!(value::ColocatedSupplyStorageTechnology, val) = value.existing_capacity_inverter = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_storage`."""
 set_lifetime_storage!(value::ColocatedSupplyStorageTechnology, val) = value.lifetime_storage = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `available`."""

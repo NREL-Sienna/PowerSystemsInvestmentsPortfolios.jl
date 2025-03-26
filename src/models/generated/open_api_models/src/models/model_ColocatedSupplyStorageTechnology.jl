@@ -41,6 +41,7 @@
         operation_costs_inverter=nothing,
         inverter_efficiency=nothing,
         inverter_supply_ratio=nothing,
+        existing_capacity_inverter=nothing,
     )
 
     - name::String
@@ -80,6 +81,7 @@
     - operation_costs_inverter::ProductionVariableCostCurve
     - inverter_efficiency::Float64
     - inverter_supply_ratio::Float64
+    - existing_capacity_inverter::Float64
 """
 Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
@@ -119,6 +121,7 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
     operation_costs_inverter = nothing # spec type: Union{ Nothing, ProductionVariableCostCurve }
     inverter_efficiency::Union{Nothing, Float64} = nothing
     inverter_supply_ratio::Union{Nothing, Float64} = nothing
+    existing_capacity_inverter::Union{Nothing, Float64} = nothing
 
     function ColocatedSupplyStorageTechnology(
         name,
@@ -158,6 +161,7 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         operation_costs_inverter,
         inverter_efficiency,
         inverter_supply_ratio,
+        existing_capacity_inverter,
     )
         OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("name"), name)
         OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("id"), id)
@@ -336,6 +340,11 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
             Symbol("inverter_supply_ratio"),
             inverter_supply_ratio,
         )
+        OpenAPI.validate_property(
+            ColocatedSupplyStorageTechnology,
+            Symbol("existing_capacity_inverter"),
+            existing_capacity_inverter,
+        )
         return new(
             name,
             id,
@@ -374,6 +383,7 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
             operation_costs_inverter,
             inverter_efficiency,
             inverter_supply_ratio,
+            existing_capacity_inverter,
         )
     end
 end # type ColocatedSupplyStorageTechnology
@@ -416,6 +426,7 @@ const _property_types_ColocatedSupplyStorageTechnology = Dict{Symbol, String}(
     Symbol("operation_costs_inverter") => "ProductionVariableCostCurve",
     Symbol("inverter_efficiency") => "Float64",
     Symbol("inverter_supply_ratio") => "Float64",
+    Symbol("existing_capacity_inverter") => "Float64",
 )
 OpenAPI.property_type(::Type{ColocatedSupplyStorageTechnology}, name::Symbol) = Union{
     Nothing,
