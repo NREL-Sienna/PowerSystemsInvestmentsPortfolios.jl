@@ -86,11 +86,11 @@ export get_min_inverter_capacity
 export get_min_power
 export get_name
 export get_operation_costs
+export get_operation_costs_energy
 export get_operation_costs_inverter
+export get_operation_costs_power
 export get_operation_costs_solar
 export get_operation_costs_wind
-export get_operations_costs_energy
-export get_operations_costs_power
 export get_outage_factor
 export get_peak_demand_mw
 export get_power_systems_type
@@ -185,11 +185,11 @@ export set_min_inverter_capacity!
 export set_min_power!
 export set_name!
 export set_operation_costs!
+export set_operation_costs_energy!
 export set_operation_costs_inverter!
+export set_operation_costs_power!
 export set_operation_costs_solar!
 export set_operation_costs_wind!
-export set_operations_costs_energy!
-export set_operations_costs_power!
 export set_outage_factor!
 export set_peak_demand_mw!
 export set_power_systems_type!

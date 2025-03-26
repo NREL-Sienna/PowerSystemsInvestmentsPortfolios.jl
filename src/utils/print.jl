@@ -41,7 +41,6 @@ function Base.show(io::IO, ::MIME"text/html", p::Portfolio)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", ist::Technology)
-
     print(io, summary(ist), ":")
     for name in fieldnames(typeof(ist))
         obj = getproperty(ist, name)
@@ -51,11 +50,10 @@ function Base.show(io::IO, ::MIME"text/plain", ist::Technology)
             show(io, MIME"text/plain"(), obj.units_info)
             continue
         elseif obj isa IS.InfrastructureSystemsType ||
-                obj isa Vector{<:IS.InfrastructureSystemsComponent}
+               obj isa Vector{<:IS.InfrastructureSystemsComponent}
             val = summary(getproperty(ist, name))
         elseif PSY.hasproperty(PowerSystemsInvestmentsPortfolios, getter_name)
-            getter_func =
-                PSY.getproperty(PowerSystemsInvestmentsPortfolios, getter_name)
+            getter_func = PSY.getproperty(PowerSystemsInvestmentsPortfolios, getter_name)
             #print(getter_func)
             val = getter_func(ist)
         else

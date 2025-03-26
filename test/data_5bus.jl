@@ -324,12 +324,12 @@ function build_portfolio()
         available=true,
         capital_costs_power=LinearCurve(stor_kw_capex * 1000),
         capital_costs_energy=LinearCurve(stor_kwh_capex * 1000),
-        operations_costs_energy=StorageCost(
+        operation_costs_energy=StorageCost(
             charge_variable_cost=CostCurve(LinearCurve(0.0)),
             discharge_variable_cost=CostCurve(LinearCurve(0.0)),
             fixed=0.0,
         ),
-        operations_costs_power=StorageCost(
+        operation_costs_power=StorageCost(
             charge_variable_cost=CostCurve(LinearCurve(0.0)),
             discharge_variable_cost=CostCurve(LinearCurve(0.0)),
             fixed=0.0,

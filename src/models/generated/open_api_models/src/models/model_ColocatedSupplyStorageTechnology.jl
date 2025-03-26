@@ -25,8 +25,8 @@
         lifetime_wind=nothing,
         capital_costs_energy=nothing,
         capital_costs_power=nothing,
-        operations_costs_energy=nothing,
-        operations_costs_power=nothing,
+        operation_costs_energy=nothing,
+        operation_costs_power=nothing,
         existing_capacity_power=nothing,
         existing_capacity_energy=nothing,
         capacity_power_limits=nothing,
@@ -64,8 +64,8 @@
     - lifetime_wind::Int64
     - capital_costs_energy::ValueCurve
     - capital_costs_power::ValueCurve
-    - operations_costs_energy::StorageCost
-    - operations_costs_power::StorageCost
+    - operation_costs_energy::StorageCost
+    - operation_costs_power::StorageCost
     - existing_capacity_power::Float64
     - existing_capacity_energy::Float64
     - capacity_power_limits::MinMax
@@ -103,8 +103,8 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
     lifetime_wind::Union{Nothing, Int64} = nothing
     capital_costs_energy = nothing # spec type: Union{ Nothing, ValueCurve }
     capital_costs_power = nothing # spec type: Union{ Nothing, ValueCurve }
-    operations_costs_energy = nothing # spec type: Union{ Nothing, StorageCost }
-    operations_costs_power = nothing # spec type: Union{ Nothing, StorageCost }
+    operation_costs_energy = nothing # spec type: Union{ Nothing, StorageCost }
+    operation_costs_power = nothing # spec type: Union{ Nothing, StorageCost }
     existing_capacity_power::Union{Nothing, Float64} = nothing
     existing_capacity_energy::Union{Nothing, Float64} = nothing
     capacity_power_limits = nothing # spec type: Union{ Nothing, MinMax }
@@ -142,8 +142,8 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         lifetime_wind,
         capital_costs_energy,
         capital_costs_power,
-        operations_costs_energy,
-        operations_costs_power,
+        operation_costs_energy,
+        operation_costs_power,
         existing_capacity_power,
         existing_capacity_energy,
         capacity_power_limits,
@@ -258,13 +258,13 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             ColocatedSupplyStorageTechnology,
-            Symbol("operations_costs_energy"),
-            operations_costs_energy,
+            Symbol("operation_costs_energy"),
+            operation_costs_energy,
         )
         OpenAPI.validate_property(
             ColocatedSupplyStorageTechnology,
-            Symbol("operations_costs_power"),
-            operations_costs_power,
+            Symbol("operation_costs_power"),
+            operation_costs_power,
         )
         OpenAPI.validate_property(
             ColocatedSupplyStorageTechnology,
@@ -358,8 +358,8 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
             lifetime_wind,
             capital_costs_energy,
             capital_costs_power,
-            operations_costs_energy,
-            operations_costs_power,
+            operation_costs_energy,
+            operation_costs_power,
             existing_capacity_power,
             existing_capacity_energy,
             capacity_power_limits,
@@ -400,8 +400,8 @@ const _property_types_ColocatedSupplyStorageTechnology = Dict{Symbol, String}(
     Symbol("lifetime_wind") => "Int64",
     Symbol("capital_costs_energy") => "ValueCurve",
     Symbol("capital_costs_power") => "ValueCurve",
-    Symbol("operations_costs_energy") => "StorageCost",
-    Symbol("operations_costs_power") => "StorageCost",
+    Symbol("operation_costs_energy") => "StorageCost",
+    Symbol("operation_costs_power") => "StorageCost",
     Symbol("existing_capacity_power") => "Float64",
     Symbol("existing_capacity_energy") => "Float64",
     Symbol("capacity_power_limits") => "MinMax",

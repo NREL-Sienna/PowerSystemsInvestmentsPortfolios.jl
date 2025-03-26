@@ -16,8 +16,8 @@
         storage_tech=nothing,
         capital_costs_energy=nothing,
         capital_costs_power=nothing,
-        operations_costs_energy=nothing,
-        operations_costs_power=nothing,
+        operation_costs_energy=nothing,
+        operation_costs_power=nothing,
         existing_capacity_power=0.0,
         existing_capacity_energy=0.0,
         unit_size_power=0.0,
@@ -43,8 +43,8 @@
     - storage_tech::String : defines the storage technology used in an energy Storage system, based on the options in EIA form 923.
     - capital_costs_energy::ValueCurve
     - capital_costs_power::ValueCurve
-    - operations_costs_energy::StorageCost
-    - operations_costs_power::StorageCost
+    - operation_costs_energy::StorageCost
+    - operation_costs_power::StorageCost
     - existing_capacity_power::Float64
     - existing_capacity_energy::Float64
     - unit_size_power::Float64
@@ -70,8 +70,8 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
     storage_tech::Union{Nothing, String} = nothing
     capital_costs_energy = nothing # spec type: Union{ Nothing, ValueCurve }
     capital_costs_power = nothing # spec type: Union{ Nothing, ValueCurve }
-    operations_costs_energy = nothing # spec type: Union{ Nothing, StorageCost }
-    operations_costs_power = nothing # spec type: Union{ Nothing, StorageCost }
+    operation_costs_energy = nothing # spec type: Union{ Nothing, StorageCost }
+    operation_costs_power = nothing # spec type: Union{ Nothing, StorageCost }
     existing_capacity_power::Union{Nothing, Float64} = 0.0
     existing_capacity_energy::Union{Nothing, Float64} = 0.0
     unit_size_power::Union{Nothing, Float64} = 0.0
@@ -97,8 +97,8 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         storage_tech,
         capital_costs_energy,
         capital_costs_power,
-        operations_costs_energy,
-        operations_costs_power,
+        operation_costs_energy,
+        operation_costs_power,
         existing_capacity_power,
         existing_capacity_energy,
         unit_size_power,
@@ -145,13 +145,13 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             StorageTechnology,
-            Symbol("operations_costs_energy"),
-            operations_costs_energy,
+            Symbol("operation_costs_energy"),
+            operation_costs_energy,
         )
         OpenAPI.validate_property(
             StorageTechnology,
-            Symbol("operations_costs_power"),
-            operations_costs_power,
+            Symbol("operation_costs_power"),
+            operation_costs_power,
         )
         OpenAPI.validate_property(
             StorageTechnology,
@@ -209,8 +209,8 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
             storage_tech,
             capital_costs_energy,
             capital_costs_power,
-            operations_costs_energy,
-            operations_costs_power,
+            operation_costs_energy,
+            operation_costs_power,
             existing_capacity_power,
             existing_capacity_energy,
             unit_size_power,
@@ -239,8 +239,8 @@ const _property_types_StorageTechnology = Dict{Symbol, String}(
     Symbol("storage_tech") => "String",
     Symbol("capital_costs_energy") => "ValueCurve",
     Symbol("capital_costs_power") => "ValueCurve",
-    Symbol("operations_costs_energy") => "StorageCost",
-    Symbol("operations_costs_power") => "StorageCost",
+    Symbol("operation_costs_energy") => "StorageCost",
+    Symbol("operation_costs_power") => "StorageCost",
     Symbol("existing_capacity_power") => "Float64",
     Symbol("existing_capacity_energy") => "Float64",
     Symbol("unit_size_power") => "Float64",
