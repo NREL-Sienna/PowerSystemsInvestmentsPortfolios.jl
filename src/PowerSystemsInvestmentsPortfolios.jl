@@ -50,6 +50,7 @@ export Region
 export SupplyTechnology
 export ColocatedSupplyStorageTechnology
 export ACTransportTechnology
+export NodalTransportTechnology
 export HVDCTransportTechnology
 export StorageTechnology
 export DemandRequirement
@@ -68,6 +69,7 @@ export MinimumCapacityRequirements
 export MaximumCapacityRequirements
 export Region
 export Zone
+export Node
 export PortfolioFinancialData
 export TechnologyFinancialData
 
@@ -114,7 +116,7 @@ const MU = IS.Mustache
 
 ##### Imports #####
 
-import PowerSystems: ThermalFuels, PrimeMovers, StorageTech
+import PowerSystems: ThermalFuels, PrimeMovers, StorageTech, ACBusTypes
 
 ##### Exports #####
 

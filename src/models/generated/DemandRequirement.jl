@@ -28,7 +28,7 @@ Demand requirements for a region.
 - `id::Int64`: ID for individual demand requirement
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `region::Union{Nothing, Vector{Region}}`: (default: `Vector()`) Region
-- `available::Bool`: (default: `true`) identifies whether the technology is available
+- `available::Bool`: (default: `true`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 """
 mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     "The technology name"
@@ -47,7 +47,7 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     ext::Dict
     "Region"
     region::Union{Nothing, Vector{Region}}
-    "identifies whether the technology is available"
+    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
 end
 

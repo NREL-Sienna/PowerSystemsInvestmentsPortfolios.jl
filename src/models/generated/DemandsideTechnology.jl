@@ -29,7 +29,7 @@ Represents demand side technologies such as electric vehicles or hydrogen electr
 # Arguments
 - `price_per_unit::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers
 - `variable_cost_per_mwh::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Variable operation and maintenance costs associated with flexible demand deferral
-- `available::Bool`: identifies whether the technology is available
+- `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: The technology name
 - `curtailment_cost::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Energy cost of curtailed output, USD per Mwh
 - `id::Int64`: ID for demand side technology
@@ -49,7 +49,7 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: Technology
     price_per_unit::PSY.ValueCurve
     "Variable operation and maintenance costs associated with flexible demand deferral"
     variable_cost_per_mwh::PSY.ValueCurve
-    "identifies whether the technology is available"
+    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "The technology name"
     name::String

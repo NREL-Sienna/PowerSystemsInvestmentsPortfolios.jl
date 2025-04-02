@@ -74,6 +74,8 @@ Class | Method | HTTP request | Description
  - [MaximumCapacityRequirements](docs/MaximumCapacityRequirements.md)
  - [MinMax](docs/MinMax.md)
  - [MinimumCapacityRequirements](docs/MinimumCapacityRequirements.md)
+ - [NodalTransportTechnology](docs/NodalTransportTechnology.md)
+ - [Node](docs/Node.md)
  - [PiecewiseLinearData](docs/PiecewiseLinearData.md)
  - [PiecewiseStepData](docs/PiecewiseStepData.md)
  - [ProductionVariableCostCurve](docs/ProductionVariableCostCurve.md)

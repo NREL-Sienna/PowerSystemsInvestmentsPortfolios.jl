@@ -27,7 +27,7 @@ Policy requirement that the total generation of `eligible_technologies` must be 
 - `generation_fraction_requirement::Float64`: (default: `0.0`) Fraction of total demand across all eligible zones that needs to be met by qualifying resources.
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of SupplyTechnologies that will meet the energy share requirement.
-- `available::Bool`: Availability
+- `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `eligible_regions::Vector{Region}`: (default: `Vector{Region}()`) List of regions where the EnergyShareRequirement will be applied.
 """
 mutable struct EnergyShareRequirements <: Requirement
@@ -45,7 +45,7 @@ mutable struct EnergyShareRequirements <: Requirement
     ext::Dict
     "List of SupplyTechnologies that will meet the energy share requirement."
     eligible_resources::Vector{Technology}
-    "Availability"
+    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "List of regions where the EnergyShareRequirement will be applied."
     eligible_regions::Vector{Region}

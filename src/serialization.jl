@@ -21,6 +21,7 @@ const ENCODED_FIELDS = Set((
     :capacity_limits,
     :capacity_energy_limits,
     :capacity_power_limits,
+    :angle_limits,
     :co2,
     :fuel,
     :prime_mover_type,
@@ -28,9 +29,13 @@ const ENCODED_FIELDS = Set((
     :storage_tech,
     :cofire_level_limits,
     :cofire_start_limits,
+    :bus_type,
+    :node,
     :region,
     :start_region,
     :end_region,
+    :start_node,
+    :end_node,
     :efficiency,
     :eligible_regions,
     :eligible_resources,
@@ -473,9 +478,9 @@ function serialize_custom_types(field, technology::T) where {T <: _CONTAINS_SHOU
     if field in [:region, :eligible_regions, :eligible_resources, :eligible_demand]
         comps = getfield(technology, field)
         val = [get_id(c) for c in comps]
-    elseif field in [:start_region, :end_region]
+    elseif field in [:start_region, :end_region, :start_node, :end_node]
         val = get_id(getfield(technology, field))
-    elseif field in [:prime_mover_type, :storage_tech]
+    elseif field in [:prime_mover_type, :storage_tech, :bus_type]
         val = string(getfield(technology, field))
     elseif field == :fuel
         val = [string(f) for f in getfield(technology, field)]
@@ -527,13 +532,14 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         :capacity_power_limits,
         :capacity_energy_limits,
         :duration_limits,
+        :angle_limits,
     ]
         data = getfield(base_struct, name)
         val = (min=data["min"], max=data["max"])
     elseif name == :efficiency
         data = getfield(base_struct, name)
         val = (in=data["in"], out=data["out"])
-    elseif name in [:start_region, :end_region]
+    elseif name in [:start_region, :end_region, :start_node, :end_node]
         val = first(
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
@@ -545,6 +551,8 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         val = PrimeMovers(getfield(base_struct, name))
     elseif name == :fuel
         val = [ThermalFuels(f) for f in getfield(base_struct, name)]
+    elseif name == :bus_type
+        val = ACBusTypes(getfield(base_struct, name))
     elseif name == :co2
         data = getfield(base_struct, name)
         val = Dict{ThermalFuels, Float64}()

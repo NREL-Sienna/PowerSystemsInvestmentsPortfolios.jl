@@ -55,7 +55,7 @@ Supply Technology that supports a StorageTechnology co-located with wind and sol
 - `operation_costs_power::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a storage technology
 - `existing_capacity_inverter::Float64`: (default: `0.0`) Pre-existing capacity for a technology
 - `lifetime_storage::Int`: (default: `100`) Maximum number of years a technology can be active once installed
-- `available::Bool`: (default: `True`) identifies whether the technology is available
+- `available::Bool`: (default: `True`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `operation_costs_solar::PSY.OperationalCost`: (default: `ThermalGenerationCost()`) Fixed and variable O&M costs for a technology
 - `capacity_limits_wind::MinMax`: (default: `(min=0, max=1e8)`) Maximum allowable installed capacity for a technology
 - `name::String`: The technology name
@@ -101,7 +101,7 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: Technolog
     existing_capacity_inverter::Float64
     "Maximum number of years a technology can be active once installed"
     lifetime_storage::Int
-    "identifies whether the technology is available"
+    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Fixed and variable O&M costs for a technology"
     operation_costs_solar::PSY.OperationalCost

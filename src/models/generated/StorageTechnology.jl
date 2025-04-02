@@ -42,7 +42,7 @@ Candidate storage technology in a region.
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `operation_costs_power::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a technology
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed
-- `available::Bool`: identifies whether the technology is available
+- `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: The technology name
 - `storage_tech::StorageTech`: Storage Technology Type
 - `capital_costs_power::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
@@ -75,7 +75,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     operation_costs_power::PSY.OperationalCost
     "Maximum number of years a technology can be active once installed"
     lifetime::Int
-    "identifies whether the technology is available"
+    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "The technology name"
     name::String

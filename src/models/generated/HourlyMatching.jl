@@ -24,7 +24,7 @@ Policy requirement that all DemandSideTechnologies in `qualified_demand` must ha
 - `id::Int64`: ID for individual policy
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of technologies eligible to provide hourly matching for demand side technologies.
-- `available::Bool`: Availability
+- `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 """
 mutable struct HourlyMatching <: Requirement
     "The policy name"
@@ -39,7 +39,7 @@ mutable struct HourlyMatching <: Requirement
     ext::Dict
     "List of technologies eligible to provide hourly matching for demand side technologies."
     eligible_resources::Vector{Technology}
-    "Availability"
+    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
 end
 

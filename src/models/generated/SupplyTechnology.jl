@@ -50,7 +50,7 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `dn_time::Float64`: (default: `0.0`) Minimum amount of time a resource has to remain in the shutdown state.
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed
 - `ramp_dn_percentage::Float64`: (default: `100.0`) Maximum decrease in output between operation periods. Fraction of total capacity
-- `available::Bool`: (default: `True`) identifies whether the technology is available
+- `available::Bool`: (default: `True`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `co2::Dict{ThermalFuels, Float64}`: (default: `Dict()`) Carbon Intensity of fuel
 - `name::String`: The technology name
 - `id::Int64`: ID for individual generator
@@ -91,7 +91,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     lifetime::Int
     "Maximum decrease in output between operation periods. Fraction of total capacity"
     ramp_dn_percentage::Float64
-    "identifies whether the technology is available"
+    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Carbon Intensity of fuel"
     co2::Dict{ThermalFuels, Float64}

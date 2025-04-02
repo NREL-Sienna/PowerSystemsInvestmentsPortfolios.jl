@@ -13,12 +13,13 @@
         start_region=nothing,
         end_region=nothing,
         existing_line_capacity=nothing,
-        max_new_capacity=nothing,
+        capacity_limits=nothing,
         capital_cost=nothing,
         line_loss=nothing,
+        unit_size=nothing,
         resistance=0.0,
         voltage=0.0,
-        angle_limit=0.0,
+        angle_limits=nothing,
         financial_data=nothing,
     )
 
@@ -31,12 +32,13 @@
     - start_region::Int64
     - end_region::Int64
     - existing_line_capacity::Float64
-    - max_new_capacity::Float64
+    - capacity_limits::MinMax
     - capital_cost::ValueCurve
     - line_loss::Float64
+    - unit_size::Float64
     - resistance::Float64
     - voltage::Float64
-    - angle_limit::Float64
+    - angle_limits::MinMax
     - financial_data::Any
 """
 Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
@@ -49,12 +51,13 @@ Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
     start_region::Union{Nothing, Int64} = nothing
     end_region::Union{Nothing, Int64} = nothing
     existing_line_capacity::Union{Nothing, Float64} = nothing
-    max_new_capacity::Union{Nothing, Float64} = nothing
+    capacity_limits = nothing # spec type: Union{ Nothing, MinMax }
     capital_cost = nothing # spec type: Union{ Nothing, ValueCurve }
     line_loss::Union{Nothing, Float64} = nothing
+    unit_size::Union{Nothing, Float64} = nothing
     resistance::Union{Nothing, Float64} = 0.0
     voltage::Union{Nothing, Float64} = 0.0
-    angle_limit::Union{Nothing, Float64} = 0.0
+    angle_limits = nothing # spec type: Union{ Nothing, MinMax }
     financial_data::Union{Nothing, Any} = nothing
 
     function HVDCTransportTechnology(
@@ -67,12 +70,13 @@ Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
         start_region,
         end_region,
         existing_line_capacity,
-        max_new_capacity,
+        capacity_limits,
         capital_cost,
         line_loss,
+        unit_size,
         resistance,
         voltage,
-        angle_limit,
+        angle_limits,
         financial_data,
     )
         OpenAPI.validate_property(HVDCTransportTechnology, Symbol("name"), name)
@@ -98,8 +102,8 @@ Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             HVDCTransportTechnology,
-            Symbol("max_new_capacity"),
-            max_new_capacity,
+            Symbol("capacity_limits"),
+            capacity_limits,
         )
         OpenAPI.validate_property(
             HVDCTransportTechnology,
@@ -107,12 +111,13 @@ Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
             capital_cost,
         )
         OpenAPI.validate_property(HVDCTransportTechnology, Symbol("line_loss"), line_loss)
+        OpenAPI.validate_property(HVDCTransportTechnology, Symbol("unit_size"), unit_size)
         OpenAPI.validate_property(HVDCTransportTechnology, Symbol("resistance"), resistance)
         OpenAPI.validate_property(HVDCTransportTechnology, Symbol("voltage"), voltage)
         OpenAPI.validate_property(
             HVDCTransportTechnology,
-            Symbol("angle_limit"),
-            angle_limit,
+            Symbol("angle_limits"),
+            angle_limits,
         )
         OpenAPI.validate_property(
             HVDCTransportTechnology,
@@ -129,12 +134,13 @@ Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
             start_region,
             end_region,
             existing_line_capacity,
-            max_new_capacity,
+            capacity_limits,
             capital_cost,
             line_loss,
+            unit_size,
             resistance,
             voltage,
-            angle_limit,
+            angle_limits,
             financial_data,
         )
     end
@@ -150,12 +156,13 @@ const _property_types_HVDCTransportTechnology = Dict{Symbol, String}(
     Symbol("start_region") => "Int64",
     Symbol("end_region") => "Int64",
     Symbol("existing_line_capacity") => "Float64",
-    Symbol("max_new_capacity") => "Float64",
+    Symbol("capacity_limits") => "MinMax",
     Symbol("capital_cost") => "ValueCurve",
     Symbol("line_loss") => "Float64",
+    Symbol("unit_size") => "Float64",
     Symbol("resistance") => "Float64",
     Symbol("voltage") => "Float64",
-    Symbol("angle_limit") => "Float64",
+    Symbol("angle_limits") => "MinMax",
     Symbol("financial_data") => "Any",
 )
 OpenAPI.property_type(::Type{HVDCTransportTechnology}, name::Symbol) =

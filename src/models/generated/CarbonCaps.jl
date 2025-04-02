@@ -27,7 +27,7 @@ Defines limits to the amount of carbon produced. Can be defined either by the to
 - `id::Int64`: ID for individual policy
 - `max_mtons::Float64`: (default: `1e8`) Emission limit in absolute values, in million of tons of CO2
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `available::Bool`: Availability
+- `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `eligible_regions::Vector{Region}`: (default: `Vector{Region}()`) List of regions that contribute to the carbon cap constraint.
 """
 mutable struct CarbonCaps <: Requirement
@@ -45,7 +45,7 @@ mutable struct CarbonCaps <: Requirement
     max_mtons::Float64
     "Option for providing additional data"
     ext::Dict
-    "Availability"
+    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "List of regions that contribute to the carbon cap constraint."
     eligible_regions::Vector{Region}

@@ -26,7 +26,7 @@ Policy requirement that the total capacity of all technologies in `eligible_tech
 - `min_capacity_mw::Float64`: (default: `0.0`) Minimum total capacity across all eligible resources
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of resources that contribute to the carbon cap constraint.
-- `available::Bool`: Availability
+- `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 """
 mutable struct MinimumCapacityRequirements <: Requirement
     "The requirement name"
@@ -43,7 +43,7 @@ mutable struct MinimumCapacityRequirements <: Requirement
     ext::Dict
     "List of resources that contribute to the carbon cap constraint."
     eligible_resources::Vector{Technology}
-    "Availability"
+    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
 end
 

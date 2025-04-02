@@ -26,6 +26,8 @@ docs/LinearFunctionData.md
 docs/MaximumCapacityRequirements.md
 docs/MinMax.md
 docs/MinimumCapacityRequirements.md
+docs/NodalTransportTechnology.md
+docs/Node.md
 docs/PiecewiseLinearData.md
 docs/PiecewiseStepData.md
 docs/ProductionVariableCostCurve.md
@@ -74,6 +76,8 @@ src/models/model_LinearFunctionData.jl
 src/models/model_MaximumCapacityRequirements.jl
 src/models/model_MinMax.jl
 src/models/model_MinimumCapacityRequirements.jl
+src/models/model_NodalTransportTechnology.jl
+src/models/model_Node.jl
 src/models/model_PiecewiseLinearData.jl
 src/models/model_PiecewiseStepData.jl
 src/models/model_ProductionVariableCostCurve.jl

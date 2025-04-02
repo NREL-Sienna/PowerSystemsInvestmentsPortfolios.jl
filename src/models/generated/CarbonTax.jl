@@ -25,7 +25,7 @@ Policy requirement that defines an additional cost penalty per ton of CO2 produc
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `id::Int64`: ID for individual policy
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `available::Bool`: Availability
+- `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `eligible_regions::Vector{Region}`: (default: `Vector{Region}()`) List of regions that contribute to the carbon cap constraint.
 """
 mutable struct CarbonTax <: Requirement
@@ -41,7 +41,7 @@ mutable struct CarbonTax <: Requirement
     id::Int64
     "Option for providing additional data"
     ext::Dict
-    "Availability"
+    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "List of regions that contribute to the carbon cap constraint."
     eligible_regions::Vector{Region}

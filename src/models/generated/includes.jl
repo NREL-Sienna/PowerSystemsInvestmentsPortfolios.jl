@@ -1,3 +1,5 @@
+include("Node.jl")
+include("Zone.jl")
 include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
@@ -10,20 +12,21 @@ include("CapacityReserveMargin.jl")
 include("DemandSideTechnology.jl")
 include("EnergyShareRequirements.jl")
 include("AggregateRetirementPotential.jl")
-include("Zone.jl")
 include("HVDCTransportTechnology.jl")
 include("StorageTechnology.jl")
 include("CarbonCaps.jl")
 include("CarbonTax.jl")
 include("RetrofitPotential.jl")
 include("HourlyMatching.jl")
+include("NodalTransportTechnology.jl")
 include("ColocatedSupplyStorageTechnology.jl")
 
-export get_angle_limit
+export get_angle_limits
 export get_available
 export get_balancing_topology
 export get_base_power
 export get_base_year
+export get_bus_type
 export get_capacity_energy_limits
 export get_capacity_limits
 export get_capacity_limits_solar
@@ -50,6 +53,7 @@ export get_eligible_demand
 export get_eligible_generators
 export get_eligible_regions
 export get_eligible_resources
+export get_end_node
 export get_end_region
 export get_existing_capacity_energy
 export get_existing_capacity_inverter
@@ -79,7 +83,6 @@ export get_max_demand_curtailment
 export get_max_demand_delay
 export get_max_inverter_capacity
 export get_max_mtons
-export get_max_new_capacity
 export get_max_tons_mwh
 export get_min_capacity_mw
 export get_min_generation_percentage
@@ -107,8 +110,10 @@ export get_retrofit_id
 export get_retrofit_potential
 export get_start_cost_per_mw
 export get_start_fuel_mmbtu_per_mw
+export get_start_node
 export get_start_region
 export get_storage_tech
+export get_susceptance
 export get_target_year
 export get_tax_dollars_per_ton
 export get_technology_efficiency
@@ -119,11 +124,12 @@ export get_up_time
 export get_value_of_lost_load
 export get_variable_cost_per_mwh
 export get_voltage
-export set_angle_limit!
+export set_angle_limits!
 export set_available!
 export set_balancing_topology!
 export set_base_power!
 export set_base_year!
+export set_bus_type!
 export set_capacity_energy_limits!
 export set_capacity_limits!
 export set_capacity_limits_solar!
@@ -150,6 +156,7 @@ export set_eligible_demand!
 export set_eligible_generators!
 export set_eligible_regions!
 export set_eligible_resources!
+export set_end_node!
 export set_end_region!
 export set_existing_capacity_energy!
 export set_existing_capacity_inverter!
@@ -179,7 +186,6 @@ export set_max_demand_curtailment!
 export set_max_demand_delay!
 export set_max_inverter_capacity!
 export set_max_mtons!
-export set_max_new_capacity!
 export set_max_tons_mwh!
 export set_min_capacity_mw!
 export set_min_generation_percentage!
@@ -207,8 +213,10 @@ export set_retrofit_id!
 export set_retrofit_potential!
 export set_start_cost_per_mw!
 export set_start_fuel_mmbtu_per_mw!
+export set_start_node!
 export set_start_region!
 export set_storage_tech!
+export set_susceptance!
 export set_target_year!
 export set_tax_dollars_per_ton!
 export set_technology_efficiency!

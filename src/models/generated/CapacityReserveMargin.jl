@@ -25,7 +25,7 @@ Policy requirement to enforce a minimum capacity reserve margin, such that (tota
 - `id::Int64`: ID for individual policy
 - `capacity_reserve_fraction::Float64`: (default: `0.0`) Capacity reserve requirements, represented as a fraction of peak demand in region
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `available::Bool`: Availability
+- `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `eligible_regions::Vector{Region}`: (default: `Vector{Region}()`) List of regions where this reserve margin is enforced
 """
 mutable struct CapacityReserveMargin <: Requirement
@@ -41,7 +41,7 @@ mutable struct CapacityReserveMargin <: Requirement
     capacity_reserve_fraction::Float64
     "Option for providing additional data"
     ext::Dict
-    "Availability"
+    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "List of regions where this reserve margin is enforced"
     eligible_regions::Vector{Region}

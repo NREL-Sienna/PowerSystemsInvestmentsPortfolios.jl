@@ -2,8 +2,6 @@ function build_portfolio()
     sys = build_system(PSITestSystems, "c_sys5_re")
     set_units_base_system!(sys, "NATURAL_UNITS")
 
-    ts_data = CSV.read("./data_utils/ts_data.csv", DataFrame)
-
     ###################
     ### Zones ###
     ###################
@@ -11,6 +9,8 @@ function build_portfolio()
     z1 = Zone(name="Zone_1", id=1)
 
     z2 = Zone(name="Zone_2", id=2)
+
+    n1 = Node(name="node1", id=1)
 
     ###################
     ### Time Series ###
@@ -135,7 +135,11 @@ function build_portfolio()
     #####################
 
     #### Wind ####
-    wind_ts_vec = ts_data[!, "Wind"] ./ 451.0
+    wind_ts = CSV.read(
+        "C:\\Users\\jpotts\\.julia\\dev\\PowerSystemsInvestments\\5_bus_ts_data/wind_ts_LDES.csv",
+        DataFrame,
+    )
+    wind_ts_vec = wind_ts[!, "Wind"] ./ 451.0
     renewables = collect(get_components(RenewableDispatch, sys))
     wind_op_costs =
         get_proportional_term.(
@@ -192,8 +196,12 @@ function build_portfolio()
     )
 
     #### Solar ####
-    pv1_ts = ts_data[!, "SolarPV1"] ./ 384.0
-    pv2_ts = ts_data[!, "SolarPV2"] ./ 384.0
+    pv_ts = CSV.read(
+        "C:\\Users\\jpotts\\.julia\\dev\\PowerSystemsInvestments\\5_bus_ts_data/solar_ts_LDES.csv",
+        DataFrame,
+    )
+    pv1_ts = pv_ts[!, "SolarPV1"] ./ 384.0
+    pv2_ts = pv_ts[!, "SolarPV2"] ./ 384.0
 
     pv1_op_costs = 0.0
     pv2_op_costs = 000
@@ -355,9 +363,13 @@ function build_portfolio()
 
     loads = collect(get_components(PowerLoad, sys))
 
-    load_b_ts = ts_data[!, "node_b"]
-    load_c_ts = ts_data[!, "node_c"]
-    load_d_ts = ts_data[!, "node_d"]
+    load_ts = CSV.read(
+        "C:\\Users\\jpotts\\.julia\\dev\\PowerSystemsInvestments\\5_bus_ts_data/load_ts_LDES.csv",
+        DataFrame,
+    )
+    load_b_ts = load_ts[!, "node_b"]
+    load_c_ts = load_ts[!, "node_c"]
+    load_d_ts = load_ts[!, "node_d"]
 
     ts_load_b_2024 = load_b_ts[1:24]
     ts_load_b_2028 = load_b_ts[1:24]
@@ -409,7 +421,6 @@ function build_portfolio()
         power_systems_type="PowerLoad",
         region=[z1],
         value_of_lost_load=0.0,
-
         #peak_load=peak_load,
     )
 
@@ -432,7 +443,6 @@ function build_portfolio()
         power_systems_type="PowerLoad",
         region=[z2],
         value_of_lost_load=0.0,
-
         #peak_load=peak_load,
     )
 
@@ -444,16 +454,16 @@ function build_portfolio()
         region=[z1],
     )
 
-    ####################
+    ########################
     ##### Transmission #####
-    #####################
+    ########################
 
     line = ACTransportTechnology{ACBranch}(
         name="test_branch",
         start_region=z1,
         end_region=z2,
         existing_line_capacity=100,
-        max_new_capacity=900,
+        capacity_limits=(min=0, max=900),
         line_loss=0.05,
         capital_cost=LinearCurve(5000.0),
         available=true,
@@ -468,7 +478,7 @@ function build_portfolio()
         start_region=z1,
         end_region=z2,
         existing_line_capacity=0.0,
-        max_new_capacity=0.0,
+        capacity_limits=(min=0, max=900),
         line_loss=0.05,
         capital_cost=LinearCurve(5000.0),
         available=true,
@@ -546,14 +556,13 @@ function build_portfolio()
         eligible_resources=[t_wind, t_pv1, t_pv2],
     )
 
-    finances = PortfolioFinancialData(2025, 0.07, 0.05, 0.03)
-
     #####################
     ##### Portfolio #####
     #####################
 
     # Build portfolio with base_system
     p_5bus = Portfolio(2025, 0.07, 0.05, 0.03; base_system=sys)
+    # p_5bus = Portfolio(2025,0.07,0.05,0.03)
 
     #Set name to test metadata
     PSIP.set_name!(p_5bus, "test")
@@ -561,6 +570,7 @@ function build_portfolio()
     #Regions
     PSIP.add_region!(p_5bus, z1)
     PSIP.add_region!(p_5bus, z2)
+    PSIP.add_region!(p_5bus, n1)
 
     #Supply
     PSIP.add_technology!(p_5bus, t_th)
@@ -598,6 +608,7 @@ function build_portfolio()
     PSIP.add_supplemental_attribute!(p_5bus, t_th, retire2)
     PSIP.add_supplemental_attribute!(p_5bus, t_th, existing)
 
+    #Time series
     PSIP.add_time_series!(p_5bus, t_th, ts_th_cheap_inv_capex)
     PSIP.add_time_series!(p_5bus, t_th_exp, ts_th_exp_inv_capex)
     PSIP.add_time_series!(p_5bus, t_th, ts_thermal_2024; year="2024", rep_day=1)
