@@ -41,7 +41,7 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `base_power::Float64`: Base power (MW)
 - `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
-- `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. ($/MW)
+- `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed
 - `available::Bool`: (default: `True`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `co2::Dict{ThermalFuels, Float64}`: (default: `Dict()`) Carbon Intensity of fuel
@@ -73,7 +73,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: Technology
     outage_factor::Float64
     "Prime mover for generator"
     prime_mover_type::PrimeMovers
-    "Capital costs for investing in a technology. ($/MW)"
+    "Capital costs for investing in a technology. (USD/MW)"
     capital_costs::PSY.ValueCurve
     "Maximum number of years a technology can be active once installed"
     lifetime::Int
