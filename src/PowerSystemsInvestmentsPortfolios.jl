@@ -109,6 +109,9 @@ export remove_supplemental_attribute!
 export get_supplemental_attribute
 export to_json
 export from_json
+export MinMax
+export InOut
+export UpDown
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems

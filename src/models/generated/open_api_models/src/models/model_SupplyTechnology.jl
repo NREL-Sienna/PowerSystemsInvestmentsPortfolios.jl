@@ -14,7 +14,6 @@
         base_power=nothing,
         prime_mover_type="OT",
         fuel=nothing,
-        heat_rate_mmbtu_per_mwh=nothing,
         co2=nothing,
         cofire_start_limits=nothing,
         cofire_level_limits=nothing,
@@ -25,11 +24,8 @@
         capacity_limits=nothing,
         outage_factor=1.0,
         min_generation_percentage=0.0,
-        ramp_up_percentage=100.0,
-        ramp_dn_percentage=100.0,
-        up_time=0.0,
-        dn_time=0.0,
-        start_cost_per_mw=0.0,
+        ramp_limits=nothing,
+        time_limits=nothing,
         start_fuel_mmbtu_per_mw=0.0,
         lifetime=100,
         financial_data=nothing,
@@ -45,7 +41,6 @@
     - base_power::Float64
     - prime_mover_type::String
     - fuel::Vector{String}
-    - heat_rate_mmbtu_per_mwh::Dict{String, ValueCurve}
     - co2::Dict{String, Float64}
     - cofire_start_limits::Dict{String, MinMax}
     - cofire_level_limits::Dict{String, MinMax}
@@ -56,11 +51,8 @@
     - capacity_limits::MinMax
     - outage_factor::Float64
     - min_generation_percentage::Float64
-    - ramp_up_percentage::Float64
-    - ramp_dn_percentage::Float64
-    - up_time::Float64
-    - dn_time::Float64
-    - start_cost_per_mw::Float64
+    - ramp_limits::UpDown
+    - time_limits::UpDown
     - start_fuel_mmbtu_per_mw::Float64
     - lifetime::Int64
     - financial_data::Any
@@ -76,7 +68,6 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     base_power::Union{Nothing, Float64} = nothing
     prime_mover_type::Union{Nothing, String} = "OT"
     fuel::Union{Nothing, Vector{String}} = nothing
-    heat_rate_mmbtu_per_mwh::Union{Nothing, Dict} = nothing # spec type: Union{ Nothing, Dict{String, ValueCurve} }
     co2::Union{Nothing, Dict{String, Float64}} = nothing
     cofire_start_limits::Union{Nothing, Dict} = nothing # spec type: Union{ Nothing, Dict{String, MinMax} }
     cofire_level_limits::Union{Nothing, Dict} = nothing # spec type: Union{ Nothing, Dict{String, MinMax} }
@@ -87,11 +78,8 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     capacity_limits = nothing # spec type: Union{ Nothing, MinMax }
     outage_factor::Union{Nothing, Float64} = 1.0
     min_generation_percentage::Union{Nothing, Float64} = 0.0
-    ramp_up_percentage::Union{Nothing, Float64} = 100.0
-    ramp_dn_percentage::Union{Nothing, Float64} = 100.0
-    up_time::Union{Nothing, Float64} = 0.0
-    dn_time::Union{Nothing, Float64} = 0.0
-    start_cost_per_mw::Union{Nothing, Float64} = 0.0
+    ramp_limits = nothing # spec type: Union{ Nothing, UpDown }
+    time_limits = nothing # spec type: Union{ Nothing, UpDown }
     start_fuel_mmbtu_per_mw::Union{Nothing, Float64} = 0.0
     lifetime::Union{Nothing, Int64} = 100
     financial_data::Union{Nothing, Any} = nothing
@@ -107,7 +95,6 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
         base_power,
         prime_mover_type,
         fuel,
-        heat_rate_mmbtu_per_mwh,
         co2,
         cofire_start_limits,
         cofire_level_limits,
@@ -118,11 +105,8 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
         capacity_limits,
         outage_factor,
         min_generation_percentage,
-        ramp_up_percentage,
-        ramp_dn_percentage,
-        up_time,
-        dn_time,
-        start_cost_per_mw,
+        ramp_limits,
+        time_limits,
         start_fuel_mmbtu_per_mw,
         lifetime,
         financial_data,
@@ -149,11 +133,6 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
             prime_mover_type,
         )
         OpenAPI.validate_property(SupplyTechnology, Symbol("fuel"), fuel)
-        OpenAPI.validate_property(
-            SupplyTechnology,
-            Symbol("heat_rate_mmbtu_per_mwh"),
-            heat_rate_mmbtu_per_mwh,
-        )
         OpenAPI.validate_property(SupplyTechnology, Symbol("co2"), co2)
         OpenAPI.validate_property(
             SupplyTechnology,
@@ -188,23 +167,8 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
             Symbol("min_generation_percentage"),
             min_generation_percentage,
         )
-        OpenAPI.validate_property(
-            SupplyTechnology,
-            Symbol("ramp_up_percentage"),
-            ramp_up_percentage,
-        )
-        OpenAPI.validate_property(
-            SupplyTechnology,
-            Symbol("ramp_dn_percentage"),
-            ramp_dn_percentage,
-        )
-        OpenAPI.validate_property(SupplyTechnology, Symbol("up_time"), up_time)
-        OpenAPI.validate_property(SupplyTechnology, Symbol("dn_time"), dn_time)
-        OpenAPI.validate_property(
-            SupplyTechnology,
-            Symbol("start_cost_per_mw"),
-            start_cost_per_mw,
-        )
+        OpenAPI.validate_property(SupplyTechnology, Symbol("ramp_limits"), ramp_limits)
+        OpenAPI.validate_property(SupplyTechnology, Symbol("time_limits"), time_limits)
         OpenAPI.validate_property(
             SupplyTechnology,
             Symbol("start_fuel_mmbtu_per_mw"),
@@ -227,7 +191,6 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
             base_power,
             prime_mover_type,
             fuel,
-            heat_rate_mmbtu_per_mwh,
             co2,
             cofire_start_limits,
             cofire_level_limits,
@@ -238,11 +201,8 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
             capacity_limits,
             outage_factor,
             min_generation_percentage,
-            ramp_up_percentage,
-            ramp_dn_percentage,
-            up_time,
-            dn_time,
-            start_cost_per_mw,
+            ramp_limits,
+            time_limits,
             start_fuel_mmbtu_per_mw,
             lifetime,
             financial_data,
@@ -261,7 +221,6 @@ const _property_types_SupplyTechnology = Dict{Symbol, String}(
     Symbol("base_power") => "Float64",
     Symbol("prime_mover_type") => "String",
     Symbol("fuel") => "Vector{String}",
-    Symbol("heat_rate_mmbtu_per_mwh") => "Dict{String, ValueCurve}",
     Symbol("co2") => "Dict{String, Float64}",
     Symbol("cofire_start_limits") => "Dict{String, MinMax}",
     Symbol("cofire_level_limits") => "Dict{String, MinMax}",
@@ -272,11 +231,8 @@ const _property_types_SupplyTechnology = Dict{Symbol, String}(
     Symbol("capacity_limits") => "MinMax",
     Symbol("outage_factor") => "Float64",
     Symbol("min_generation_percentage") => "Float64",
-    Symbol("ramp_up_percentage") => "Float64",
-    Symbol("ramp_dn_percentage") => "Float64",
-    Symbol("up_time") => "Float64",
-    Symbol("dn_time") => "Float64",
-    Symbol("start_cost_per_mw") => "Float64",
+    Symbol("ramp_limits") => "UpDown",
+    Symbol("time_limits") => "UpDown",
     Symbol("start_fuel_mmbtu_per_mw") => "Float64",
     Symbol("lifetime") => "Int64",
     Symbol("financial_data") => "Any",

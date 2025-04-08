@@ -1,3 +1,4 @@
+.openapi-generator-ignore
 README.md
 docs/ACTransportTechnology.md
 docs/AggregateRetirementPotential.md
@@ -44,6 +45,7 @@ docs/SupplyTechnology.md
 docs/SupplyTechnologyOperationCosts.md
 docs/ThermalGenerationCost.md
 docs/ThermalGenerationCostStartUp.md
+docs/UpDown.md
 docs/ValueCurve.md
 docs/XYCoords.md
 docs/Zone.md
@@ -94,6 +96,7 @@ src/models/model_SupplyTechnology.jl
 src/models/model_SupplyTechnologyOperationCosts.jl
 src/models/model_ThermalGenerationCost.jl
 src/models/model_ThermalGenerationCostStartUp.jl
+src/models/model_UpDown.jl
 src/models/model_ValueCurve.jl
 src/models/model_XYCoords.jl
 src/models/model_Zone.jl
