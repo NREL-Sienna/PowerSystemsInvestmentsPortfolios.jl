@@ -25,7 +25,7 @@ export get_angle_limits
 export get_available
 export get_balancing_topology
 export get_base_power
-export get_base_year
+export get_build_year
 export get_bus_type
 export get_capacity_energy_limits
 export get_capacity_limits
@@ -75,6 +75,7 @@ export get_id
 export get_initial_capacity
 export get_inverter_efficiency
 export get_inverter_supply_ratio
+export get_length_km
 export get_lifetime
 export get_lifetime_solar
 export get_lifetime_storage
@@ -90,6 +91,7 @@ export get_max_inverter_capacity
 export get_max_mtons
 export get_max_tons_mwh
 export get_min_capacity_mw
+export get_min_discharge_percentage
 export get_min_generation_percentage
 export get_min_inverter_capacity
 export get_min_power
@@ -132,7 +134,7 @@ export set_angle_limits!
 export set_available!
 export set_balancing_topology!
 export set_base_power!
-export set_base_year!
+export set_build_year!
 export set_bus_type!
 export set_capacity_energy_limits!
 export set_capacity_limits!
@@ -182,6 +184,7 @@ export set_id!
 export set_initial_capacity!
 export set_inverter_efficiency!
 export set_inverter_supply_ratio!
+export set_length_km!
 export set_lifetime!
 export set_lifetime_solar!
 export set_lifetime_storage!
@@ -197,6 +200,7 @@ export set_max_inverter_capacity!
 export set_max_mtons!
 export set_max_tons_mwh!
 export set_min_capacity_mw!
+export set_min_discharge_percentage!
 export set_min_generation_percentage!
 export set_min_inverter_capacity!
 export set_min_power!

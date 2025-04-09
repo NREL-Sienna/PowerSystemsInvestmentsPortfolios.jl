@@ -8,6 +8,7 @@ This file is auto-generated. Do not edit.
     mutable struct NodalTransportTechnology{T <: PSY.Device} <: Technology
         base_power::Float64
         capital_cost::PSY.ValueCurve
+        build_year::Union{Nothing, Int}
         available::Bool
         name::String
         end_node::Node
@@ -18,9 +19,9 @@ This file is auto-generated. Do not edit.
         susceptance::Float64
         internal::InfrastructureSystemsInternal
         ext::Dict
+        length_km::Union{Nothing, Int}
         resistance::Float64
         voltage::Float64
-        base_year::Int
         unit_size::Float64
         existing_line_capacity::Float64
         angle_limits::MinMax
@@ -33,6 +34,7 @@ An aggregated representation of candidate AC transmission lines between two regi
 # Arguments
 - `base_power::Float64`: Base power
 - `capital_cost::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line.
+- `build_year::Union{Nothing, Int}`: (default: `nothing`) Year in which the existing technology is built. Default to nothing for new technologies
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
 - `end_node::Node`: End node for transport technology
@@ -43,9 +45,9 @@ An aggregated representation of candidate AC transmission lines between two regi
 - `susceptance::Float64`: Series susceptance for a line, defined as the reciprocal of the series reactance
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `length_km::Union{Nothing, Int}`: (default: `nothing`) Length of a transmission line in kilometers.
 - `resistance::Float64`: (default: `0.0`) Technology resistance in Ohms
 - `voltage::Float64`: (default: `0.0`) Technology voltage in Volts
-- `base_year::Int`: (default: `2020`) Reference year for technology data
 - `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
 - `existing_line_capacity::Float64`: (default: `0.0`) Existing capacity of transport technology (MW)
 - `angle_limits::MinMax`: (default: `(min=0, max=6.28)`) Voltage angle limit (radians)
@@ -57,6 +59,8 @@ mutable struct NodalTransportTechnology{T <: PSY.Device} <: Technology
     base_power::Float64
     "Cost of adding new capacity to the nodal transmission line."
     capital_cost::PSY.ValueCurve
+    "Year in which the existing technology is built. Default to nothing for new technologies"
+    build_year::Union{Nothing, Int}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Name"
@@ -77,12 +81,12 @@ mutable struct NodalTransportTechnology{T <: PSY.Device} <: Technology
     internal::InfrastructureSystemsInternal
     "Option for providing additional data"
     ext::Dict
+    "Length of a transmission line in kilometers."
+    length_km::Union{Nothing, Int}
     "Technology resistance in Ohms"
     resistance::Float64
     "Technology voltage in Volts"
     voltage::Float64
-    "Reference year for technology data"
-    base_year::Int
     "Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)"
     unit_size::Float64
     "Existing capacity of transport technology (MW)"
@@ -96,14 +100,16 @@ mutable struct NodalTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function NodalTransportTechnology{T}(; base_power, capital_cost=LinearCurve(0.0), available, name, end_node, id, financial_data, start_node, power_systems_type, susceptance, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, base_year=2020, unit_size=1, existing_line_capacity=0.0, angle_limits=(min=0, max=6.28), line_loss, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
-    NodalTransportTechnology{T}(base_power, capital_cost, available, name, end_node, id, financial_data, start_node, power_systems_type, susceptance, internal, ext, resistance, voltage, base_year, unit_size, existing_line_capacity, angle_limits, line_loss, capacity_limits, )
+function NodalTransportTechnology{T}(; base_power, capital_cost=LinearCurve(0.0), build_year=nothing, available, name, end_node, id, financial_data, start_node, power_systems_type, susceptance, internal=InfrastructureSystemsInternal(), ext=Dict(), length_km=nothing, resistance=0.0, voltage=0.0, unit_size=1, existing_line_capacity=0.0, angle_limits=(min=0, max=6.28), line_loss, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+    NodalTransportTechnology{T}(base_power, capital_cost, build_year, available, name, end_node, id, financial_data, start_node, power_systems_type, susceptance, internal, ext, length_km, resistance, voltage, unit_size, existing_line_capacity, angle_limits, line_loss, capacity_limits, )
 end
 
 """Get [`NodalTransportTechnology`](@ref) `base_power`."""
 get_base_power(value::NodalTransportTechnology) = value.base_power
 """Get [`NodalTransportTechnology`](@ref) `capital_cost`."""
 get_capital_cost(value::NodalTransportTechnology) = value.capital_cost
+"""Get [`NodalTransportTechnology`](@ref) `build_year`."""
+get_build_year(value::NodalTransportTechnology) = value.build_year
 """Get [`NodalTransportTechnology`](@ref) `available`."""
 get_available(value::NodalTransportTechnology) = value.available
 """Get [`NodalTransportTechnology`](@ref) `name`."""
@@ -124,12 +130,12 @@ get_susceptance(value::NodalTransportTechnology) = value.susceptance
 get_internal(value::NodalTransportTechnology) = value.internal
 """Get [`NodalTransportTechnology`](@ref) `ext`."""
 get_ext(value::NodalTransportTechnology) = value.ext
+"""Get [`NodalTransportTechnology`](@ref) `length_km`."""
+get_length_km(value::NodalTransportTechnology) = value.length_km
 """Get [`NodalTransportTechnology`](@ref) `resistance`."""
 get_resistance(value::NodalTransportTechnology) = value.resistance
 """Get [`NodalTransportTechnology`](@ref) `voltage`."""
 get_voltage(value::NodalTransportTechnology) = value.voltage
-"""Get [`NodalTransportTechnology`](@ref) `base_year`."""
-get_base_year(value::NodalTransportTechnology) = value.base_year
 """Get [`NodalTransportTechnology`](@ref) `unit_size`."""
 get_unit_size(value::NodalTransportTechnology) = value.unit_size
 """Get [`NodalTransportTechnology`](@ref) `existing_line_capacity`."""
@@ -145,6 +151,8 @@ get_capacity_limits(value::NodalTransportTechnology) = value.capacity_limits
 set_base_power!(value::NodalTransportTechnology, val) = value.base_power = val
 """Set [`NodalTransportTechnology`](@ref) `capital_cost`."""
 set_capital_cost!(value::NodalTransportTechnology, val) = value.capital_cost = val
+"""Set [`NodalTransportTechnology`](@ref) `build_year`."""
+set_build_year!(value::NodalTransportTechnology, val) = value.build_year = val
 """Set [`NodalTransportTechnology`](@ref) `available`."""
 set_available!(value::NodalTransportTechnology, val) = value.available = val
 """Set [`NodalTransportTechnology`](@ref) `name`."""
@@ -165,12 +173,12 @@ set_susceptance!(value::NodalTransportTechnology, val) = value.susceptance = val
 set_internal!(value::NodalTransportTechnology, val) = value.internal = val
 """Set [`NodalTransportTechnology`](@ref) `ext`."""
 set_ext!(value::NodalTransportTechnology, val) = value.ext = val
+"""Set [`NodalTransportTechnology`](@ref) `length_km`."""
+set_length_km!(value::NodalTransportTechnology, val) = value.length_km = val
 """Set [`NodalTransportTechnology`](@ref) `resistance`."""
 set_resistance!(value::NodalTransportTechnology, val) = value.resistance = val
 """Set [`NodalTransportTechnology`](@ref) `voltage`."""
 set_voltage!(value::NodalTransportTechnology, val) = value.voltage = val
-"""Set [`NodalTransportTechnology`](@ref) `base_year`."""
-set_base_year!(value::NodalTransportTechnology, val) = value.base_year = val
 """Set [`NodalTransportTechnology`](@ref) `unit_size`."""
 set_unit_size!(value::NodalTransportTechnology, val) = value.unit_size = val
 """Set [`NodalTransportTechnology`](@ref) `existing_line_capacity`."""

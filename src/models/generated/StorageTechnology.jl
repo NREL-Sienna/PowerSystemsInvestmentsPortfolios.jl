@@ -8,8 +8,10 @@ This file is auto-generated. Do not edit.
     mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
         base_power::Float64
         prime_mover_type::PrimeMovers
+        build_year::Union{Nothing, Int}
         lifetime::Int
         available::Bool
+        min_discharge_percentage::Float64
         capacity_limits_charge::Union{Nothing, MinMax}
         name::String
         storage_tech::StorageTech
@@ -29,7 +31,6 @@ This file is auto-generated. Do not edit.
         unit_size_energy::Float64
         existing_capacity_charge::Union{Nothing, Float64}
         unit_size_charge::Union{Nothing, Float64}
-        base_year::Int
         existing_capacity_energy::Float64
         efficiency::InOut
         unit_size_discharge::Float64
@@ -43,8 +44,10 @@ Candidate storage technology in a region.
 # Arguments
 - `base_power::Float64`: Base power
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
+- `build_year::Union{Nothing, Int}`: (default: `nothing`) Year in which the existing technology is built. Default to nothing for new technologies
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
+- `min_discharge_percentage::Float64`: (default: `0.0`) Minimum discharge as a fraction of total discharge capacity
 - `capacity_limits_charge::Union{Nothing, MinMax}`: (default: `nothing`) allowable installed power capacity for a storage technology
 - `name::String`: The technology name
 - `storage_tech::StorageTech`: Storage Technology Type
@@ -64,7 +67,6 @@ Candidate storage technology in a region.
 - `unit_size_energy::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
 - `existing_capacity_charge::Union{Nothing, Float64}`: (default: `nothing`) Pre-existing power capacity for a technology (MW)
 - `unit_size_charge::Union{Nothing, Float64}`: (default: `nothing`) Used for discrete investment decisions. Unit size of charging capacity (MW)
-- `base_year::Int`: (default: `2020`) Reference year for technology data
 - `existing_capacity_energy::Float64`: (default: `0.0`) Pre-existing energy capacity for a technology (MWh)
 - `efficiency::InOut`: (default: `(in=1, out=1)`) Efficiency of charging storage
 - `unit_size_discharge::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit of discharging capacity being built (MW)
@@ -77,10 +79,14 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     base_power::Float64
     "Prime mover for generator"
     prime_mover_type::PrimeMovers
+    "Year in which the existing technology is built. Default to nothing for new technologies"
+    build_year::Union{Nothing, Int}
     "Maximum number of years a technology can be active once installed"
     lifetime::Int
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
+    "Minimum discharge as a fraction of total discharge capacity"
+    min_discharge_percentage::Float64
     "allowable installed power capacity for a storage technology"
     capacity_limits_charge::Union{Nothing, MinMax}
     "The technology name"
@@ -119,8 +125,6 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     existing_capacity_charge::Union{Nothing, Float64}
     "Used for discrete investment decisions. Unit size of charging capacity (MW)"
     unit_size_charge::Union{Nothing, Float64}
-    "Reference year for technology data"
-    base_year::Int
     "Pre-existing energy capacity for a technology (MWh)"
     existing_capacity_energy::Float64
     "Efficiency of charging storage"
@@ -136,18 +140,22 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
 end
 
 
-function StorageTechnology{T}(; base_power, prime_mover_type=PrimeMovers.OT, lifetime=100, available, capacity_limits_charge=nothing, name, storage_tech, duration_limits=(min=0,max=1000.0), id, losses=0.01, capital_costs_energy=LinearCurve(0.0), financial_data, operation_costs=StorageCost(), power_systems_type, existing_capacity_discharge=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=Vector(), capacity_limits_energy=(min=0,max=1e8), unit_size_energy=0.0, existing_capacity_charge=nothing, unit_size_charge=nothing, base_year=2020, existing_capacity_energy=0.0, efficiency=(in=1, out=1), unit_size_discharge=0.0, capacity_limits_discharge=(min=0,max=1e8), capital_costs_charge=LinearCurve(0.0), capital_costs_discharge=nothing, ) where T <: PSY.Storage
-    StorageTechnology{T}(base_power, prime_mover_type, lifetime, available, capacity_limits_charge, name, storage_tech, duration_limits, id, losses, capital_costs_energy, financial_data, operation_costs, power_systems_type, existing_capacity_discharge, internal, ext, balancing_topology, region, capacity_limits_energy, unit_size_energy, existing_capacity_charge, unit_size_charge, base_year, existing_capacity_energy, efficiency, unit_size_discharge, capacity_limits_discharge, capital_costs_charge, capital_costs_discharge, )
+function StorageTechnology{T}(; base_power, prime_mover_type=PrimeMovers.OT, build_year=nothing, lifetime=100, available, min_discharge_percentage=0.0, capacity_limits_charge=nothing, name, storage_tech, duration_limits=(min=0,max=1000.0), id, losses=0.01, capital_costs_energy=LinearCurve(0.0), financial_data, operation_costs=StorageCost(), power_systems_type, existing_capacity_discharge=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=Vector(), capacity_limits_energy=(min=0,max=1e8), unit_size_energy=0.0, existing_capacity_charge=nothing, unit_size_charge=nothing, existing_capacity_energy=0.0, efficiency=(in=1, out=1), unit_size_discharge=0.0, capacity_limits_discharge=(min=0,max=1e8), capital_costs_charge=LinearCurve(0.0), capital_costs_discharge=nothing, ) where T <: PSY.Storage
+    StorageTechnology{T}(base_power, prime_mover_type, build_year, lifetime, available, min_discharge_percentage, capacity_limits_charge, name, storage_tech, duration_limits, id, losses, capital_costs_energy, financial_data, operation_costs, power_systems_type, existing_capacity_discharge, internal, ext, balancing_topology, region, capacity_limits_energy, unit_size_energy, existing_capacity_charge, unit_size_charge, existing_capacity_energy, efficiency, unit_size_discharge, capacity_limits_discharge, capital_costs_charge, capital_costs_discharge, )
 end
 
 """Get [`StorageTechnology`](@ref) `base_power`."""
 get_base_power(value::StorageTechnology) = value.base_power
 """Get [`StorageTechnology`](@ref) `prime_mover_type`."""
 get_prime_mover_type(value::StorageTechnology) = value.prime_mover_type
+"""Get [`StorageTechnology`](@ref) `build_year`."""
+get_build_year(value::StorageTechnology) = value.build_year
 """Get [`StorageTechnology`](@ref) `lifetime`."""
 get_lifetime(value::StorageTechnology) = value.lifetime
 """Get [`StorageTechnology`](@ref) `available`."""
 get_available(value::StorageTechnology) = value.available
+"""Get [`StorageTechnology`](@ref) `min_discharge_percentage`."""
+get_min_discharge_percentage(value::StorageTechnology) = value.min_discharge_percentage
 """Get [`StorageTechnology`](@ref) `capacity_limits_charge`."""
 get_capacity_limits_charge(value::StorageTechnology) = value.capacity_limits_charge
 """Get [`StorageTechnology`](@ref) `name`."""
@@ -186,8 +194,6 @@ get_unit_size_energy(value::StorageTechnology) = value.unit_size_energy
 get_existing_capacity_charge(value::StorageTechnology) = value.existing_capacity_charge
 """Get [`StorageTechnology`](@ref) `unit_size_charge`."""
 get_unit_size_charge(value::StorageTechnology) = value.unit_size_charge
-"""Get [`StorageTechnology`](@ref) `base_year`."""
-get_base_year(value::StorageTechnology) = value.base_year
 """Get [`StorageTechnology`](@ref) `existing_capacity_energy`."""
 get_existing_capacity_energy(value::StorageTechnology) = value.existing_capacity_energy
 """Get [`StorageTechnology`](@ref) `efficiency`."""
@@ -205,10 +211,14 @@ get_capital_costs_discharge(value::StorageTechnology) = value.capital_costs_disc
 set_base_power!(value::StorageTechnology, val) = value.base_power = val
 """Set [`StorageTechnology`](@ref) `prime_mover_type`."""
 set_prime_mover_type!(value::StorageTechnology, val) = value.prime_mover_type = val
+"""Set [`StorageTechnology`](@ref) `build_year`."""
+set_build_year!(value::StorageTechnology, val) = value.build_year = val
 """Set [`StorageTechnology`](@ref) `lifetime`."""
 set_lifetime!(value::StorageTechnology, val) = value.lifetime = val
 """Set [`StorageTechnology`](@ref) `available`."""
 set_available!(value::StorageTechnology, val) = value.available = val
+"""Set [`StorageTechnology`](@ref) `min_discharge_percentage`."""
+set_min_discharge_percentage!(value::StorageTechnology, val) = value.min_discharge_percentage = val
 """Set [`StorageTechnology`](@ref) `capacity_limits_charge`."""
 set_capacity_limits_charge!(value::StorageTechnology, val) = value.capacity_limits_charge = val
 """Set [`StorageTechnology`](@ref) `name`."""
@@ -247,8 +257,6 @@ set_unit_size_energy!(value::StorageTechnology, val) = value.unit_size_energy = 
 set_existing_capacity_charge!(value::StorageTechnology, val) = value.existing_capacity_charge = val
 """Set [`StorageTechnology`](@ref) `unit_size_charge`."""
 set_unit_size_charge!(value::StorageTechnology, val) = value.unit_size_charge = val
-"""Set [`StorageTechnology`](@ref) `base_year`."""
-set_base_year!(value::StorageTechnology, val) = value.base_year = val
 """Set [`StorageTechnology`](@ref) `existing_capacity_energy`."""
 set_existing_capacity_energy!(value::StorageTechnology, val) = value.existing_capacity_energy = val
 """Set [`StorageTechnology`](@ref) `efficiency`."""

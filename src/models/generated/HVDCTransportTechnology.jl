@@ -9,6 +9,7 @@ This file is auto-generated. Do not edit.
         base_power::Float64
         capital_cost::PSY.ValueCurve
         start_region::Region
+        build_year::Union{Nothing, Int}
         available::Bool
         name::String
         id::Int64
@@ -17,9 +18,9 @@ This file is auto-generated. Do not edit.
         power_systems_type::String
         internal::InfrastructureSystemsInternal
         ext::Dict
+        length_km::Union{Nothing, Int}
         resistance::Float64
         voltage::Float64
-        base_year::Int
         unit_size::Float64
         existing_line_capacity::Float64
         angle_limits::MinMax
@@ -33,6 +34,7 @@ An aggregated representation of candidate HVDC transmission lines between two re
 - `base_power::Float64`: Base power
 - `capital_cost::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line.
 - `start_region::Region`: Start region for transport technology
+- `build_year::Union{Nothing, Int}`: (default: `nothing`) Year in which the existing technology is built. Default to nothing for new technologies
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
 - `id::Int64`: Numerical Index for HVDC lines
@@ -41,9 +43,9 @@ An aggregated representation of candidate HVDC transmission lines between two re
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `length_km::Union{Nothing, Int}`: (default: `nothing`) Length of a transmission line in kilometers.
 - `resistance::Float64`: (default: `0.0`) Technology resistance in Ohms
 - `voltage::Float64`: (default: `0.0`) Technology voltage in V
-- `base_year::Int`: (default: `2020`) Reference year for technology data
 - `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
 - `existing_line_capacity::Float64`: (default: `0.0`) Existing capacity of transport technology (MW)
 - `angle_limits::MinMax`: (default: `(min=0, max=6.28)`) Voltage angle limit (radians)
@@ -57,6 +59,8 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
     capital_cost::PSY.ValueCurve
     "Start region for transport technology"
     start_region::Region
+    "Year in which the existing technology is built. Default to nothing for new technologies"
+    build_year::Union{Nothing, Int}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Name"
@@ -73,12 +77,12 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
     internal::InfrastructureSystemsInternal
     "Option for providing additional data"
     ext::Dict
+    "Length of a transmission line in kilometers."
+    length_km::Union{Nothing, Int}
     "Technology resistance in Ohms"
     resistance::Float64
     "Technology voltage in V"
     voltage::Float64
-    "Reference year for technology data"
-    base_year::Int
     "Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)"
     unit_size::Float64
     "Existing capacity of transport technology (MW)"
@@ -92,8 +96,8 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function HVDCTransportTechnology{T}(; base_power, capital_cost=LinearCurve(0.0), start_region, available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, base_year=2020, unit_size=1, existing_line_capacity=0.0, angle_limits=(min=0, max=6.28), line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
-    HVDCTransportTechnology{T}(base_power, capital_cost, start_region, available, name, id, end_region, financial_data, power_systems_type, internal, ext, resistance, voltage, base_year, unit_size, existing_line_capacity, angle_limits, line_loss, capacity_limits, )
+function HVDCTransportTechnology{T}(; base_power, capital_cost=LinearCurve(0.0), start_region, build_year=nothing, available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), length_km=nothing, resistance=0.0, voltage=0.0, unit_size=1, existing_line_capacity=0.0, angle_limits=(min=0, max=6.28), line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+    HVDCTransportTechnology{T}(base_power, capital_cost, start_region, build_year, available, name, id, end_region, financial_data, power_systems_type, internal, ext, length_km, resistance, voltage, unit_size, existing_line_capacity, angle_limits, line_loss, capacity_limits, )
 end
 
 """Get [`HVDCTransportTechnology`](@ref) `base_power`."""
@@ -102,6 +106,8 @@ get_base_power(value::HVDCTransportTechnology) = value.base_power
 get_capital_cost(value::HVDCTransportTechnology) = value.capital_cost
 """Get [`HVDCTransportTechnology`](@ref) `start_region`."""
 get_start_region(value::HVDCTransportTechnology) = value.start_region
+"""Get [`HVDCTransportTechnology`](@ref) `build_year`."""
+get_build_year(value::HVDCTransportTechnology) = value.build_year
 """Get [`HVDCTransportTechnology`](@ref) `available`."""
 get_available(value::HVDCTransportTechnology) = value.available
 """Get [`HVDCTransportTechnology`](@ref) `name`."""
@@ -118,12 +124,12 @@ get_power_systems_type(value::HVDCTransportTechnology) = value.power_systems_typ
 get_internal(value::HVDCTransportTechnology) = value.internal
 """Get [`HVDCTransportTechnology`](@ref) `ext`."""
 get_ext(value::HVDCTransportTechnology) = value.ext
+"""Get [`HVDCTransportTechnology`](@ref) `length_km`."""
+get_length_km(value::HVDCTransportTechnology) = value.length_km
 """Get [`HVDCTransportTechnology`](@ref) `resistance`."""
 get_resistance(value::HVDCTransportTechnology) = value.resistance
 """Get [`HVDCTransportTechnology`](@ref) `voltage`."""
 get_voltage(value::HVDCTransportTechnology) = value.voltage
-"""Get [`HVDCTransportTechnology`](@ref) `base_year`."""
-get_base_year(value::HVDCTransportTechnology) = value.base_year
 """Get [`HVDCTransportTechnology`](@ref) `unit_size`."""
 get_unit_size(value::HVDCTransportTechnology) = value.unit_size
 """Get [`HVDCTransportTechnology`](@ref) `existing_line_capacity`."""
@@ -141,6 +147,8 @@ set_base_power!(value::HVDCTransportTechnology, val) = value.base_power = val
 set_capital_cost!(value::HVDCTransportTechnology, val) = value.capital_cost = val
 """Set [`HVDCTransportTechnology`](@ref) `start_region`."""
 set_start_region!(value::HVDCTransportTechnology, val) = value.start_region = val
+"""Set [`HVDCTransportTechnology`](@ref) `build_year`."""
+set_build_year!(value::HVDCTransportTechnology, val) = value.build_year = val
 """Set [`HVDCTransportTechnology`](@ref) `available`."""
 set_available!(value::HVDCTransportTechnology, val) = value.available = val
 """Set [`HVDCTransportTechnology`](@ref) `name`."""
@@ -157,12 +165,12 @@ set_power_systems_type!(value::HVDCTransportTechnology, val) = value.power_syste
 set_internal!(value::HVDCTransportTechnology, val) = value.internal = val
 """Set [`HVDCTransportTechnology`](@ref) `ext`."""
 set_ext!(value::HVDCTransportTechnology, val) = value.ext = val
+"""Set [`HVDCTransportTechnology`](@ref) `length_km`."""
+set_length_km!(value::HVDCTransportTechnology, val) = value.length_km = val
 """Set [`HVDCTransportTechnology`](@ref) `resistance`."""
 set_resistance!(value::HVDCTransportTechnology, val) = value.resistance = val
 """Set [`HVDCTransportTechnology`](@ref) `voltage`."""
 set_voltage!(value::HVDCTransportTechnology, val) = value.voltage = val
-"""Set [`HVDCTransportTechnology`](@ref) `base_year`."""
-set_base_year!(value::HVDCTransportTechnology, val) = value.base_year = val
 """Set [`HVDCTransportTechnology`](@ref) `unit_size`."""
 set_unit_size!(value::HVDCTransportTechnology, val) = value.unit_size = val
 """Set [`HVDCTransportTechnology`](@ref) `existing_line_capacity`."""

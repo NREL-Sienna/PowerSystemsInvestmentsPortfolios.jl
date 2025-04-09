@@ -9,6 +9,7 @@ This file is auto-generated. Do not edit.
         base_power::Float64
         capital_cost::PSY.ValueCurve
         start_region::Region
+        build_year::Union{Nothing, Int}
         available::Bool
         name::String
         id::Int64
@@ -17,9 +18,9 @@ This file is auto-generated. Do not edit.
         power_systems_type::String
         internal::InfrastructureSystemsInternal
         ext::Dict
+        length_km::Union{Nothing, Int}
         resistance::Float64
         voltage::Float64
-        base_year::Int
         unit_size::Float64
         existing_line_capacity::Float64
         angle_limits::MinMax
@@ -33,6 +34,7 @@ An aggregated representation of candidate AC transmission lines between two regi
 - `base_power::Float64`: Base power
 - `capital_cost::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line.
 - `start_region::Region`: Start region for transport technology
+- `build_year::Union{Nothing, Int}`: (default: `nothing`) Year in which the existing technology is built. Default to nothing for new technologies
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
 - `id::Int64`: Numerical Index for AC transport technologies
@@ -41,9 +43,9 @@ An aggregated representation of candidate AC transmission lines between two regi
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `length_km::Union{Nothing, Int}`: (default: `nothing`) Length of a transmission line in kilometers.
 - `resistance::Float64`: (default: `0.0`) Line resistance in Ohms
 - `voltage::Float64`: (default: `0.0`) Rated line voltage in Volts
-- `base_year::Int`: (default: `2020`) Reference year for technology data
 - `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
 - `existing_line_capacity::Float64`: (default: `0.0`) Existing capacity of transport technology (MW)
 - `angle_limits::MinMax`: (default: `(min=0, max=6.28)`) Voltage angle limit (radians)
@@ -57,6 +59,8 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     capital_cost::PSY.ValueCurve
     "Start region for transport technology"
     start_region::Region
+    "Year in which the existing technology is built. Default to nothing for new technologies"
+    build_year::Union{Nothing, Int}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Name"
@@ -73,12 +77,12 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
     internal::InfrastructureSystemsInternal
     "Option for providing additional data"
     ext::Dict
+    "Length of a transmission line in kilometers."
+    length_km::Union{Nothing, Int}
     "Line resistance in Ohms"
     resistance::Float64
     "Rated line voltage in Volts"
     voltage::Float64
-    "Reference year for technology data"
-    base_year::Int
     "Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)"
     unit_size::Float64
     "Existing capacity of transport technology (MW)"
@@ -92,8 +96,8 @@ mutable struct ACTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function ACTransportTechnology{T}(; base_power, capital_cost=LinearCurve(0.0), start_region, available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), resistance=0.0, voltage=0.0, base_year=2020, unit_size=1, existing_line_capacity=0.0, angle_limits=(min=0, max=6.28), line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
-    ACTransportTechnology{T}(base_power, capital_cost, start_region, available, name, id, end_region, financial_data, power_systems_type, internal, ext, resistance, voltage, base_year, unit_size, existing_line_capacity, angle_limits, line_loss, capacity_limits, )
+function ACTransportTechnology{T}(; base_power, capital_cost=LinearCurve(0.0), start_region, build_year=nothing, available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), length_km=nothing, resistance=0.0, voltage=0.0, unit_size=1, existing_line_capacity=0.0, angle_limits=(min=0, max=6.28), line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+    ACTransportTechnology{T}(base_power, capital_cost, start_region, build_year, available, name, id, end_region, financial_data, power_systems_type, internal, ext, length_km, resistance, voltage, unit_size, existing_line_capacity, angle_limits, line_loss, capacity_limits, )
 end
 
 """Get [`ACTransportTechnology`](@ref) `base_power`."""
@@ -102,6 +106,8 @@ get_base_power(value::ACTransportTechnology) = value.base_power
 get_capital_cost(value::ACTransportTechnology) = value.capital_cost
 """Get [`ACTransportTechnology`](@ref) `start_region`."""
 get_start_region(value::ACTransportTechnology) = value.start_region
+"""Get [`ACTransportTechnology`](@ref) `build_year`."""
+get_build_year(value::ACTransportTechnology) = value.build_year
 """Get [`ACTransportTechnology`](@ref) `available`."""
 get_available(value::ACTransportTechnology) = value.available
 """Get [`ACTransportTechnology`](@ref) `name`."""
@@ -118,12 +124,12 @@ get_power_systems_type(value::ACTransportTechnology) = value.power_systems_type
 get_internal(value::ACTransportTechnology) = value.internal
 """Get [`ACTransportTechnology`](@ref) `ext`."""
 get_ext(value::ACTransportTechnology) = value.ext
+"""Get [`ACTransportTechnology`](@ref) `length_km`."""
+get_length_km(value::ACTransportTechnology) = value.length_km
 """Get [`ACTransportTechnology`](@ref) `resistance`."""
 get_resistance(value::ACTransportTechnology) = value.resistance
 """Get [`ACTransportTechnology`](@ref) `voltage`."""
 get_voltage(value::ACTransportTechnology) = value.voltage
-"""Get [`ACTransportTechnology`](@ref) `base_year`."""
-get_base_year(value::ACTransportTechnology) = value.base_year
 """Get [`ACTransportTechnology`](@ref) `unit_size`."""
 get_unit_size(value::ACTransportTechnology) = value.unit_size
 """Get [`ACTransportTechnology`](@ref) `existing_line_capacity`."""
@@ -141,6 +147,8 @@ set_base_power!(value::ACTransportTechnology, val) = value.base_power = val
 set_capital_cost!(value::ACTransportTechnology, val) = value.capital_cost = val
 """Set [`ACTransportTechnology`](@ref) `start_region`."""
 set_start_region!(value::ACTransportTechnology, val) = value.start_region = val
+"""Set [`ACTransportTechnology`](@ref) `build_year`."""
+set_build_year!(value::ACTransportTechnology, val) = value.build_year = val
 """Set [`ACTransportTechnology`](@ref) `available`."""
 set_available!(value::ACTransportTechnology, val) = value.available = val
 """Set [`ACTransportTechnology`](@ref) `name`."""
@@ -157,12 +165,12 @@ set_power_systems_type!(value::ACTransportTechnology, val) = value.power_systems
 set_internal!(value::ACTransportTechnology, val) = value.internal = val
 """Set [`ACTransportTechnology`](@ref) `ext`."""
 set_ext!(value::ACTransportTechnology, val) = value.ext = val
+"""Set [`ACTransportTechnology`](@ref) `length_km`."""
+set_length_km!(value::ACTransportTechnology, val) = value.length_km = val
 """Set [`ACTransportTechnology`](@ref) `resistance`."""
 set_resistance!(value::ACTransportTechnology, val) = value.resistance = val
 """Set [`ACTransportTechnology`](@ref) `voltage`."""
 set_voltage!(value::ACTransportTechnology, val) = value.voltage = val
-"""Set [`ACTransportTechnology`](@ref) `base_year`."""
-set_base_year!(value::ACTransportTechnology, val) = value.base_year = val
 """Set [`ACTransportTechnology`](@ref) `unit_size`."""
 set_unit_size!(value::ACTransportTechnology, val) = value.unit_size = val
 """Set [`ACTransportTechnology`](@ref) `existing_line_capacity`."""
