@@ -11,12 +11,12 @@
 
     - eligible_generators::Vector{String}
     - planned_retirement_year::Dict{String, Int64}
-    - build_year::Dict{String, Float64}
+    - build_year::Dict{String, Int64}
 """
 Base.@kwdef mutable struct RetirementPotential <: OpenAPI.APIModel
     eligible_generators::Union{Nothing, Vector{String}} = nothing
     planned_retirement_year::Union{Nothing, Dict{String, Int64}} = nothing
-    build_year::Union{Nothing, Dict{String, Float64}} = nothing
+    build_year::Union{Nothing, Dict{String, Int64}} = nothing
 
     function RetirementPotential(eligible_generators, planned_retirement_year, build_year)
         OpenAPI.validate_property(
@@ -37,7 +37,7 @@ end # type RetirementPotential
 const _property_types_RetirementPotential = Dict{Symbol, String}(
     Symbol("eligible_generators") => "Vector{String}",
     Symbol("planned_retirement_year") => "Dict{String, Int64}",
-    Symbol("build_year") => "Dict{String, Float64}",
+    Symbol("build_year") => "Dict{String, Int64}",
 )
 OpenAPI.property_type(::Type{RetirementPotential}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_RetirementPotential[name]))}

@@ -20,11 +20,12 @@
         capital_costs_energy=nothing,
         capital_costs_charge=nothing,
         capital_costs_discharge=nothing,
-        operation_cost=nothing,
+        operation_costs=nothing,
         existing_capacity_charge=0.0,
         existing_capacity_discharge=0.0,
         existing_capacity_energy=0.0,
-        unit_size_power=0.0,
+        unit_size_discharge=0.0,
+        unit_size_charge=0.0,
         unit_size_energy=0.0,
         capacity_limits_charge=nothing,
         capacity_limits_discharge=nothing,
@@ -52,11 +53,12 @@
     - capital_costs_energy::ValueCurve
     - capital_costs_charge::ValueCurve
     - capital_costs_discharge::ValueCurve
-    - operation_cost::StorageCost
+    - operation_costs::StorageCost
     - existing_capacity_charge::Float64
     - existing_capacity_discharge::Float64
     - existing_capacity_energy::Float64
-    - unit_size_power::Float64
+    - unit_size_discharge::Float64
+    - unit_size_charge::Float64
     - unit_size_energy::Float64
     - capacity_limits_charge::MinMax
     - capacity_limits_discharge::MinMax
@@ -84,11 +86,12 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
     capital_costs_energy = nothing # spec type: Union{ Nothing, ValueCurve }
     capital_costs_charge = nothing # spec type: Union{ Nothing, ValueCurve }
     capital_costs_discharge = nothing # spec type: Union{ Nothing, ValueCurve }
-    operation_cost = nothing # spec type: Union{ Nothing, StorageCost }
+    operation_costs = nothing # spec type: Union{ Nothing, StorageCost }
     existing_capacity_charge::Union{Nothing, Float64} = 0.0
     existing_capacity_discharge::Union{Nothing, Float64} = 0.0
     existing_capacity_energy::Union{Nothing, Float64} = 0.0
-    unit_size_power::Union{Nothing, Float64} = 0.0
+    unit_size_discharge::Union{Nothing, Float64} = 0.0
+    unit_size_charge::Union{Nothing, Float64} = 0.0
     unit_size_energy::Union{Nothing, Float64} = 0.0
     capacity_limits_charge = nothing # spec type: Union{ Nothing, MinMax }
     capacity_limits_discharge = nothing # spec type: Union{ Nothing, MinMax }
@@ -116,11 +119,12 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         capital_costs_energy,
         capital_costs_charge,
         capital_costs_discharge,
-        operation_cost,
+        operation_costs,
         existing_capacity_charge,
         existing_capacity_discharge,
         existing_capacity_energy,
-        unit_size_power,
+        unit_size_discharge,
+        unit_size_charge,
         unit_size_energy,
         capacity_limits_charge,
         capacity_limits_discharge,
@@ -185,8 +189,8 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             StorageTechnology,
-            Symbol("operation_cost"),
-            operation_cost,
+            Symbol("operation_costs"),
+            operation_costs,
         )
         OpenAPI.validate_property(
             StorageTechnology,
@@ -205,8 +209,13 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             StorageTechnology,
-            Symbol("unit_size_power"),
-            unit_size_power,
+            Symbol("unit_size_discharge"),
+            unit_size_discharge,
+        )
+        OpenAPI.validate_property(
+            StorageTechnology,
+            Symbol("unit_size_charge"),
+            unit_size_charge,
         )
         OpenAPI.validate_property(
             StorageTechnology,
@@ -258,11 +267,12 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
             capital_costs_energy,
             capital_costs_charge,
             capital_costs_discharge,
-            operation_cost,
+            operation_costs,
             existing_capacity_charge,
             existing_capacity_discharge,
             existing_capacity_energy,
-            unit_size_power,
+            unit_size_discharge,
+            unit_size_charge,
             unit_size_energy,
             capacity_limits_charge,
             capacity_limits_discharge,
@@ -293,11 +303,12 @@ const _property_types_StorageTechnology = Dict{Symbol, String}(
     Symbol("capital_costs_energy") => "ValueCurve",
     Symbol("capital_costs_charge") => "ValueCurve",
     Symbol("capital_costs_discharge") => "ValueCurve",
-    Symbol("operation_cost") => "StorageCost",
+    Symbol("operation_costs") => "StorageCost",
     Symbol("existing_capacity_charge") => "Float64",
     Symbol("existing_capacity_discharge") => "Float64",
     Symbol("existing_capacity_energy") => "Float64",
-    Symbol("unit_size_power") => "Float64",
+    Symbol("unit_size_discharge") => "Float64",
+    Symbol("unit_size_charge") => "Float64",
     Symbol("unit_size_energy") => "Float64",
     Symbol("capacity_limits_charge") => "MinMax",
     Symbol("capacity_limits_discharge") => "MinMax",

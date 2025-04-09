@@ -20,7 +20,7 @@ Name | Type | Description | Notes
 **capital_costs_energy** | [***ValueCurve**](ValueCurve.md) |  | [optional] [default to nothing]
 **capital_costs_charge** | [***ValueCurve**](ValueCurve.md) |  | [optional] [default to nothing]
 **capital_costs_discharge** | [***ValueCurve**](ValueCurve.md) |  | [optional] [default to nothing]
-**operation_cost** | [***StorageCost**](StorageCost.md) |  | [optional] [default to nothing]
+**operation_costs** | [***StorageCost**](StorageCost.md) |  | [optional] [default to nothing]
 **existing_capacity_charge** | **Float64** |  | [optional] [default to 0.0]
 **existing_capacity_discharge** | **Float64** |  | [optional] [default to 0.0]
 **existing_capacity_energy** | **Float64** |  | [optional] [default to 0.0]

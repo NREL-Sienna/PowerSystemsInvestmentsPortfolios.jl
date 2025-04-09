@@ -25,8 +25,9 @@ const SYSTEM_KWARGS = Set((
 const ENCODED_FIELDS = Set((
     :duration_limits,
     :capacity_limits,
-    :capacity_energy_limits,
-    :capacity_power_limits,
+    :capacity_limits_energy,
+    :capacity_limits_discharge,
+    :capacity_limits_charge,
     :angle_limits,
     :co2,
     :fuel,
@@ -43,9 +44,12 @@ const ENCODED_FIELDS = Set((
     :start_node,
     :end_node,
     :efficiency,
+    :ramp_limits,
+    :time_limits,
     :eligible_regions,
     :eligible_resources,
     :eligible_demand,
+    :eligible_technologies,
 ))
 
 """
@@ -361,7 +365,7 @@ function deserialize_components!(portfolio::Portfolio, raw)
     regions = OrderedDict{Any, Vector{Dict}}()
     for component in raw["components"]
         type = IS.get_type_from_serialization_data(component)
-        if type <: Region
+        if type <: RegionTopology
             components = get(regions, type, nothing)
             if components === nothing
                 components = Vector{Dict}()
@@ -481,7 +485,13 @@ function serialize_custom_types(field, technology::T) where {T <: _CONTAINS_SHOU
 
     #For fields with references to other structs, serialize with
     #the id of that struct and convert enums to strings
-    if field in [:region, :eligible_regions, :eligible_resources, :eligible_demand]
+    if field in [
+        :region,
+        :eligible_regions,
+        :eligible_resources,
+        :eligible_technologies,
+        :eligible_demand,
+    ]
         comps = getfield(technology, field)
         val = [get_id(c) for c in comps]
     elseif field in [:start_region, :end_region, :start_node, :end_node]
@@ -513,7 +523,7 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         val = collect(
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
-                Region,
+                RegionTopology,
                 portfolio.data,
             ),
         )
@@ -522,6 +532,14 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
                 SupplyTechnology,
+                portfolio.data,
+            ),
+        )
+    elseif name == :eligible_technologies
+        val = collect(
+            IS.get_components(
+                x -> get_id(x) in getfield(base_struct, name),
+                Technology,
                 portfolio.data,
             ),
         )
@@ -535,21 +553,29 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         )
     elseif name in [
         :capacity_limits,
-        :capacity_power_limits,
-        :capacity_energy_limits,
+        :capacity_limits_discharge,
+        :capacity_limits_charge,
+        :capacity_limits_energy,
         :duration_limits,
         :angle_limits,
     ]
         data = getfield(base_struct, name)
-        val = (min=data["min"], max=data["max"])
+        if isnothing(data)
+            val = nothing
+        else
+            val = (min=data["min"], max=data["max"])
+        end
     elseif name == :efficiency
         data = getfield(base_struct, name)
         val = (in=data["in"], out=data["out"])
+    elseif name in [:ramp_limits, :time_limits]
+        data = getfield(base_struct, name)
+        val = (up=data["up"], down=data["down"])
     elseif name in [:start_region, :end_region, :start_node, :end_node]
         val = first(
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
-                Region,
+                RegionTopology,
                 portfolio.data,
             ),
         )

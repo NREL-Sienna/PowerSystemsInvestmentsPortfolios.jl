@@ -135,7 +135,6 @@ export get_unit_size_energy
 export get_value_of_lost_load
 export get_variable_cost_per_mwh
 export get_voltage
-export get_year
 export set_angle_limits!
 export set_available!
 export set_balancing_topology!
@@ -250,4 +249,3 @@ export set_unit_size_energy!
 export set_value_of_lost_load!
 export set_variable_cost_per_mwh!
 export set_voltage!
-export set_year!
