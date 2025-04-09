@@ -665,7 +665,7 @@ end
 ################################
 
 """
-Add a region to the portfolio.
+Add a RegionTopology to the portfolio.
 
 Throws ArgumentError if the region's name is already stored for its concrete type.
 Throws ArgumentError if any region-specific rule is violated.
@@ -690,7 +690,7 @@ function add_region!(
     zone::T;
     skip_validation=false,
     kwargs...,
-) where {T <: Region}
+) where {T <: RegionTopology}
     deserialization_in_progress = _is_deserialization_in_progress(portfolio)
     IS.add_component!(
         portfolio.data,
@@ -710,14 +710,13 @@ Call collect on the result if an array is desired.
 # Examples
 
 ```julia
-iter = Portfolio.get_regions(Zone, portfolio)
-iter = Portfolio.get_regions(Region, portfolio)
-regions = collect(Portfolio.get_regions(Region, portfolio))
+iter = Portfolio.get_regions(RegionTopology, portfolio)
+regions = collect(Portfolio.get_regions(RegionTopology, portfolio))
 ```
 
 """
 
-function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: Region}
+function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: RegionTopology}
     return IS.get_components(T, portfolio.data)
 end
 
@@ -725,7 +724,7 @@ function get_region(
     ::Type{T},
     portfolio::Portfolio,
     name::AbstractString,
-) where {T <: Region}
+) where {T <: RegionTopology}
     return IS.get_component(T, portfolio.data, name)
 end
 

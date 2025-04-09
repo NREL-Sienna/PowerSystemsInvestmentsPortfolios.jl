@@ -44,6 +44,9 @@ using StringEncodings
 
 export Portfolio
 export Technology
+export ResourceTechnology
+export DemandTechnology
+export TransmissionTechnology
 export Requirement
 export FinancialData
 export Region
@@ -67,7 +70,7 @@ export HourlyMatching
 export EnergyShareRequirements
 export MinimumCapacityRequirements
 export MaximumCapacityRequirements
-export Region
+export RegionTopology
 export Zone
 export Node
 export PortfolioFinancialData

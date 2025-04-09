@@ -12,6 +12,10 @@ Required fields for a technology Type
 """
 abstract type Technology <: IS.InfrastructureSystemsComponent end
 
+abstract type ResourceTechnology <: Technology end
+abstract type TransmissionTechnology <: Technology end
+abstract type DemandTechnology <: Technology end
+
 get_name(val::Technology) = val.name
 get_available(val::Technology) = val.available
 get_power_systems_type(val::Technology) = val.power_systems_type
