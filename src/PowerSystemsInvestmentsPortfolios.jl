@@ -72,6 +72,7 @@ export Zone
 export Node
 export PortfolioFinancialData
 export TechnologyFinancialData
+export TimeMapping
 
 export get_name
 export get_description
@@ -141,6 +142,7 @@ include("models/requirements.jl")
 include("models/generated/includes.jl")
 
 include("portfolio.jl")
+include("time_mapping.jl")
 include("serialization.jl")
 include("generate_structs.jl")
 include("db_parser.jl")
