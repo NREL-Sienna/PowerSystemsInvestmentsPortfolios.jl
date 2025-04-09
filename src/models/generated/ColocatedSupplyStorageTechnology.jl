@@ -32,8 +32,6 @@ This file is auto-generated. Do not edit.
         existing_capacity_power::Float64
         power_systems_type::String
         capacity_limits_solar::MinMax
-        max_operation_reserves_percentage::Float64
-        max_regulatory_reserves_percentage::Float64
         internal::InfrastructureSystemsInternal
         operation_costs_wind::PSY.OperationalCost
         balancing_topology::String
@@ -79,8 +77,6 @@ Supply Technology that supports a StorageTechnology co-located with wind and sol
 - `existing_capacity_power::Float64`: (default: `0.0`) Pre-existing power capacity for a storagetechnology (MW)
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `capacity_limits_solar::MinMax`: (default: `(min=0, max=1e8)`) Maximum allowable installed capacity for a technology
-- `max_operation_reserves_percentage::Float64`: (default: `0.0`) Maximum fraction of nameplate capacity that can contribute to operation reservers.
-- `max_regulatory_reserves_percentage::Float64`: (default: `0.0`) Maximum fraction of nameplate capacity that can contribute to regulatory reservers.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `operation_costs_wind::PSY.OperationalCost`: (default: `ThermalGenerationCost()`) Fixed and variable O&M costs for a technology
 - `balancing_topology::String`: Set of balancing nodes
@@ -149,10 +145,6 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: ResourceT
     power_systems_type::String
     "Maximum allowable installed capacity for a technology"
     capacity_limits_solar::MinMax
-    "Maximum fraction of nameplate capacity that can contribute to operation reservers."
-    max_operation_reserves_percentage::Float64
-    "Maximum fraction of nameplate capacity that can contribute to regulatory reservers."
-    max_regulatory_reserves_percentage::Float64
     "Internal field"
     internal::InfrastructureSystemsInternal
     "Fixed and variable O&M costs for a technology"
@@ -184,8 +176,8 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: ResourceT
 end
 
 
-function ColocatedSupplyStorageTechnology{T}(; base_power, operation_costs_power=StorageCost(), existing_capacity_inverter=0.0, lifetime_storage=100, build_year=nothing, available=True, operation_costs_solar=ThermalGenerationCost(), capacity_limits_wind=(min=0, max=1e8), name, capital_costs_power=LinearCurve(0.0), capacity_power_limits=(min=0,max=1e8), lifetime_wind=100, capacity_energy_limits=(min=0,max=1e8), duration_limits=(min=0,max=1000), min_inverter_capacity=1e8, id, existing_capacity_solar=0.0, capital_costs_energy=LinearCurve(0.0), operation_costs_energy=StorageCost(), financial_data, operation_costs_inverter, inverter_efficiency, existing_capacity_wind=0.0, existing_capacity_power=0.0, power_systems_type, capacity_limits_solar=(min=0, max=1e8), max_operation_reserves_percentage=0.0, max_regulatory_reserves_percentage=0.0, internal=InfrastructureSystemsInternal(), operation_costs_wind=ThermalGenerationCost(), balancing_topology, efficiency_storage=(in=1, out=1), region=Vector(), losses_storage=1.0, inverter_supply_ratio, ext=Dict(), capital_costs_wind=LinearCurve(0.0), lifetime_solar=100, existing_capacity_energy=0.0, capital_costs_inverter, max_inverter_capacity=1e8, capital_costs_solar=LinearCurve(0.0), ) where T <: PSY.Generator
-    ColocatedSupplyStorageTechnology{T}(base_power, operation_costs_power, existing_capacity_inverter, lifetime_storage, build_year, available, operation_costs_solar, capacity_limits_wind, name, capital_costs_power, capacity_power_limits, lifetime_wind, capacity_energy_limits, duration_limits, min_inverter_capacity, id, existing_capacity_solar, capital_costs_energy, operation_costs_energy, financial_data, operation_costs_inverter, inverter_efficiency, existing_capacity_wind, existing_capacity_power, power_systems_type, capacity_limits_solar, max_operation_reserves_percentage, max_regulatory_reserves_percentage, internal, operation_costs_wind, balancing_topology, efficiency_storage, region, losses_storage, inverter_supply_ratio, ext, capital_costs_wind, lifetime_solar, existing_capacity_energy, capital_costs_inverter, max_inverter_capacity, capital_costs_solar, )
+function ColocatedSupplyStorageTechnology{T}(; base_power, operation_costs_power=StorageCost(), existing_capacity_inverter=0.0, lifetime_storage=100, build_year=nothing, available=True, operation_costs_solar=ThermalGenerationCost(), capacity_limits_wind=(min=0, max=1e8), name, capital_costs_power=LinearCurve(0.0), capacity_power_limits=(min=0,max=1e8), lifetime_wind=100, capacity_energy_limits=(min=0,max=1e8), duration_limits=(min=0,max=1000), min_inverter_capacity=1e8, id, existing_capacity_solar=0.0, capital_costs_energy=LinearCurve(0.0), operation_costs_energy=StorageCost(), financial_data, operation_costs_inverter, inverter_efficiency, existing_capacity_wind=0.0, existing_capacity_power=0.0, power_systems_type, capacity_limits_solar=(min=0, max=1e8), internal=InfrastructureSystemsInternal(), operation_costs_wind=ThermalGenerationCost(), balancing_topology, efficiency_storage=(in=1, out=1), region=Vector(), losses_storage=1.0, inverter_supply_ratio, ext=Dict(), capital_costs_wind=LinearCurve(0.0), lifetime_solar=100, existing_capacity_energy=0.0, capital_costs_inverter, max_inverter_capacity=1e8, capital_costs_solar=LinearCurve(0.0), ) where T <: PSY.Generator
+    ColocatedSupplyStorageTechnology{T}(base_power, operation_costs_power, existing_capacity_inverter, lifetime_storage, build_year, available, operation_costs_solar, capacity_limits_wind, name, capital_costs_power, capacity_power_limits, lifetime_wind, capacity_energy_limits, duration_limits, min_inverter_capacity, id, existing_capacity_solar, capital_costs_energy, operation_costs_energy, financial_data, operation_costs_inverter, inverter_efficiency, existing_capacity_wind, existing_capacity_power, power_systems_type, capacity_limits_solar, internal, operation_costs_wind, balancing_topology, efficiency_storage, region, losses_storage, inverter_supply_ratio, ext, capital_costs_wind, lifetime_solar, existing_capacity_energy, capital_costs_inverter, max_inverter_capacity, capital_costs_solar, )
 end
 
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `base_power`."""
@@ -240,10 +232,6 @@ get_existing_capacity_power(value::ColocatedSupplyStorageTechnology) = value.exi
 get_power_systems_type(value::ColocatedSupplyStorageTechnology) = value.power_systems_type
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_limits_solar`."""
 get_capacity_limits_solar(value::ColocatedSupplyStorageTechnology) = value.capacity_limits_solar
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `max_operation_reserves_percentage`."""
-get_max_operation_reserves_percentage(value::ColocatedSupplyStorageTechnology) = value.max_operation_reserves_percentage
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `max_regulatory_reserves_percentage`."""
-get_max_regulatory_reserves_percentage(value::ColocatedSupplyStorageTechnology) = value.max_regulatory_reserves_percentage
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `internal`."""
 get_internal(value::ColocatedSupplyStorageTechnology) = value.internal
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_wind`."""
@@ -325,10 +313,6 @@ set_existing_capacity_power!(value::ColocatedSupplyStorageTechnology, val) = val
 set_power_systems_type!(value::ColocatedSupplyStorageTechnology, val) = value.power_systems_type = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capacity_limits_solar`."""
 set_capacity_limits_solar!(value::ColocatedSupplyStorageTechnology, val) = value.capacity_limits_solar = val
-"""Set [`ColocatedSupplyStorageTechnology`](@ref) `max_operation_reserves_percentage`."""
-set_max_operation_reserves_percentage!(value::ColocatedSupplyStorageTechnology, val) = value.max_operation_reserves_percentage = val
-"""Set [`ColocatedSupplyStorageTechnology`](@ref) `max_regulatory_reserves_percentage`."""
-set_max_regulatory_reserves_percentage!(value::ColocatedSupplyStorageTechnology, val) = value.max_regulatory_reserves_percentage = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `internal`."""
 set_internal!(value::ColocatedSupplyStorageTechnology, val) = value.internal = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_wind`."""

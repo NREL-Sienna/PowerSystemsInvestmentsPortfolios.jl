@@ -10,7 +10,6 @@
         available=nothing,
         base_power=nothing,
         length_km=nothing,
-        reserves_derating=nothing,
         power_systems_type=nothing,
         start_region=nothing,
         end_region=nothing,
@@ -31,7 +30,6 @@
     - available::Bool
     - base_power::Float64
     - length_km::Float64
-    - reserves_derating::Float64
     - power_systems_type::String
     - start_region::Int64
     - end_region::Int64
@@ -52,7 +50,6 @@ Base.@kwdef mutable struct ACTransportTechnology <: OpenAPI.APIModel
     available::Union{Nothing, Bool} = nothing
     base_power::Union{Nothing, Float64} = nothing
     length_km::Union{Nothing, Float64} = nothing
-    reserves_derating::Union{Nothing, Float64} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     start_region::Union{Nothing, Int64} = nothing
     end_region::Union{Nothing, Int64} = nothing
@@ -73,7 +70,6 @@ Base.@kwdef mutable struct ACTransportTechnology <: OpenAPI.APIModel
         available,
         base_power,
         length_km,
-        reserves_derating,
         power_systems_type,
         start_region,
         end_region,
@@ -93,11 +89,6 @@ Base.@kwdef mutable struct ACTransportTechnology <: OpenAPI.APIModel
         OpenAPI.validate_property(ACTransportTechnology, Symbol("available"), available)
         OpenAPI.validate_property(ACTransportTechnology, Symbol("base_power"), base_power)
         OpenAPI.validate_property(ACTransportTechnology, Symbol("length_km"), length_km)
-        OpenAPI.validate_property(
-            ACTransportTechnology,
-            Symbol("reserves_derating"),
-            reserves_derating,
-        )
         OpenAPI.validate_property(
             ACTransportTechnology,
             Symbol("power_systems_type"),
@@ -145,7 +136,6 @@ Base.@kwdef mutable struct ACTransportTechnology <: OpenAPI.APIModel
             available,
             base_power,
             length_km,
-            reserves_derating,
             power_systems_type,
             start_region,
             end_region,
@@ -169,7 +159,6 @@ const _property_types_ACTransportTechnology = Dict{Symbol, String}(
     Symbol("available") => "Bool",
     Symbol("base_power") => "Float64",
     Symbol("length_km") => "Float64",
-    Symbol("reserves_derating") => "Float64",
     Symbol("power_systems_type") => "String",
     Symbol("start_region") => "Int64",
     Symbol("end_region") => "Int64",

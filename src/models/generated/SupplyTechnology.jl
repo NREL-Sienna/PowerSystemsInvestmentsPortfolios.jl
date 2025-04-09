@@ -24,8 +24,6 @@ This file is auto-generated. Do not edit.
         fuel::Vector{ThermalFuels}
         power_systems_type::String
         cofire_level_limits::Dict{ThermalFuels, MinMax}
-        max_operation_reserves_percentage::Float64
-        max_regulatory_reserves_percentage::Float64
         internal::InfrastructureSystemsInternal
         ext::Dict
         balancing_topology::String
@@ -58,8 +56,6 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `fuel::Vector{ThermalFuels}`: (default: `[ThermalFuels.OTHER]`) Fuel type according to IEA
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `cofire_level_limits::Dict{ThermalFuels, MinMax}`: (default: `Dict()`) Minimum and maximum blending level (%) of each fuel during normal generation process for multi-fuel generator
-- `max_operation_reserves_percentage::Float64`: (default: `0.0`) Maximum fraction of nameplate capacity that can contribute to operation reservers.
-- `max_regulatory_reserves_percentage::Float64`: (default: `0.0`) Maximum fraction of nameplate capacity that can contribute to regulatory reservers.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `balancing_topology::String`: Set of balancing nodes
@@ -107,10 +103,6 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
     power_systems_type::String
     "Minimum and maximum blending level (%) of each fuel during normal generation process for multi-fuel generator"
     cofire_level_limits::Dict{ThermalFuels, MinMax}
-    "Maximum fraction of nameplate capacity that can contribute to operation reservers."
-    max_operation_reserves_percentage::Float64
-    "Maximum fraction of nameplate capacity that can contribute to regulatory reservers."
-    max_regulatory_reserves_percentage::Float64
     "Internal field"
     internal::InfrastructureSystemsInternal
     "Option for providing additional data"
@@ -132,8 +124,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
 end
 
 
-function SupplyTechnology{T}(; base_power, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, capital_costs=LinearCurve(0.0), build_year=nothing, lifetime=100, available=True, co2=Dict(), name, id, initial_capacity=0.0, cofire_start_limits=Dict(), financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=[ThermalFuels.OTHER], power_systems_type, cofire_level_limits=Dict(), max_operation_reserves_percentage=0.0, max_regulatory_reserves_percentage=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=Vector(), time_limits=(up=1.0, down=1.0), unit_size=0.0, min_generation_percentage=0.0, ramp_limits=(up=1.0, down=1.0), capacity_limits=(min=0, max=1e8), ) where T <: PSY.Generator
-    SupplyTechnology{T}(base_power, outage_factor, prime_mover_type, capital_costs, build_year, lifetime, available, co2, name, id, initial_capacity, cofire_start_limits, financial_data, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_limits, max_operation_reserves_percentage, max_regulatory_reserves_percentage, internal, ext, balancing_topology, region, time_limits, unit_size, min_generation_percentage, ramp_limits, capacity_limits, )
+function SupplyTechnology{T}(; base_power, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, capital_costs=LinearCurve(0.0), build_year=nothing, lifetime=100, available=True, co2=Dict(), name, id, initial_capacity=0.0, cofire_start_limits=Dict(), financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=[ThermalFuels.OTHER], power_systems_type, cofire_level_limits=Dict(), internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=Vector(), time_limits=(up=1.0, down=1.0), unit_size=0.0, min_generation_percentage=0.0, ramp_limits=(up=1.0, down=1.0), capacity_limits=(min=0, max=1e8), ) where T <: PSY.Generator
+    SupplyTechnology{T}(base_power, outage_factor, prime_mover_type, capital_costs, build_year, lifetime, available, co2, name, id, initial_capacity, cofire_start_limits, financial_data, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_limits, internal, ext, balancing_topology, region, time_limits, unit_size, min_generation_percentage, ramp_limits, capacity_limits, )
 end
 
 """Get [`SupplyTechnology`](@ref) `base_power`."""
@@ -172,10 +164,6 @@ get_fuel(value::SupplyTechnology) = value.fuel
 get_power_systems_type(value::SupplyTechnology) = value.power_systems_type
 """Get [`SupplyTechnology`](@ref) `cofire_level_limits`."""
 get_cofire_level_limits(value::SupplyTechnology) = value.cofire_level_limits
-"""Get [`SupplyTechnology`](@ref) `max_operation_reserves_percentage`."""
-get_max_operation_reserves_percentage(value::SupplyTechnology) = value.max_operation_reserves_percentage
-"""Get [`SupplyTechnology`](@ref) `max_regulatory_reserves_percentage`."""
-get_max_regulatory_reserves_percentage(value::SupplyTechnology) = value.max_regulatory_reserves_percentage
 """Get [`SupplyTechnology`](@ref) `internal`."""
 get_internal(value::SupplyTechnology) = value.internal
 """Get [`SupplyTechnology`](@ref) `ext`."""
@@ -231,10 +219,6 @@ set_fuel!(value::SupplyTechnology, val) = value.fuel = val
 set_power_systems_type!(value::SupplyTechnology, val) = value.power_systems_type = val
 """Set [`SupplyTechnology`](@ref) `cofire_level_limits`."""
 set_cofire_level_limits!(value::SupplyTechnology, val) = value.cofire_level_limits = val
-"""Set [`SupplyTechnology`](@ref) `max_operation_reserves_percentage`."""
-set_max_operation_reserves_percentage!(value::SupplyTechnology, val) = value.max_operation_reserves_percentage = val
-"""Set [`SupplyTechnology`](@ref) `max_regulatory_reserves_percentage`."""
-set_max_regulatory_reserves_percentage!(value::SupplyTechnology, val) = value.max_regulatory_reserves_percentage = val
 """Set [`SupplyTechnology`](@ref) `internal`."""
 set_internal!(value::SupplyTechnology, val) = value.internal = val
 """Set [`SupplyTechnology`](@ref) `ext`."""

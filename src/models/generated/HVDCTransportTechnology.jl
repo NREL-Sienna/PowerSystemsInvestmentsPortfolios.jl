@@ -24,7 +24,6 @@ This file is auto-generated. Do not edit.
         unit_size::Float64
         existing_line_capacity::Float64
         angle_limits::MinMax
-        reserves_derating::Float64
         line_loss::Float64
         capacity_limits::MinMax
     end
@@ -50,7 +49,6 @@ An aggregated representation of candidate HVDC transmission lines between two re
 - `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
 - `existing_line_capacity::Float64`: (default: `0.0`) Existing capacity of transport technology (MW)
 - `angle_limits::MinMax`: (default: `(min=0, max=6.28)`) Voltage angle limit (radians)
-- `reserves_derating::Float64`: (default: `1.0`) Factor from [0,1] to derate the contribution of transmission line flows to capacity reserve margins.
 - `line_loss::Float64`: (default: `1.0`) Transmission loss for each transport technology (%)
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Allowable capacity for a transmission line (MW)
 """
@@ -91,8 +89,6 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: TransmissionTechnolog
     existing_line_capacity::Float64
     "Voltage angle limit (radians)"
     angle_limits::MinMax
-    "Factor from [0,1] to derate the contribution of transmission line flows to capacity reserve margins."
-    reserves_derating::Float64
     "Transmission loss for each transport technology (%)"
     line_loss::Float64
     "Allowable capacity for a transmission line (MW)"
@@ -100,8 +96,8 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: TransmissionTechnolog
 end
 
 
-function HVDCTransportTechnology{T}(; base_power, capital_cost=LinearCurve(0.0), start_region, build_year=nothing, available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), length_km=nothing, resistance=0.0, voltage=0.0, unit_size=1, existing_line_capacity=0.0, angle_limits=(min=0, max=6.28), reserves_derating=1.0, line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
-    HVDCTransportTechnology{T}(base_power, capital_cost, start_region, build_year, available, name, id, end_region, financial_data, power_systems_type, internal, ext, length_km, resistance, voltage, unit_size, existing_line_capacity, angle_limits, reserves_derating, line_loss, capacity_limits, )
+function HVDCTransportTechnology{T}(; base_power, capital_cost=LinearCurve(0.0), start_region, build_year=nothing, available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), length_km=nothing, resistance=0.0, voltage=0.0, unit_size=1, existing_line_capacity=0.0, angle_limits=(min=0, max=6.28), line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+    HVDCTransportTechnology{T}(base_power, capital_cost, start_region, build_year, available, name, id, end_region, financial_data, power_systems_type, internal, ext, length_km, resistance, voltage, unit_size, existing_line_capacity, angle_limits, line_loss, capacity_limits, )
 end
 
 """Get [`HVDCTransportTechnology`](@ref) `base_power`."""
@@ -140,8 +136,6 @@ get_unit_size(value::HVDCTransportTechnology) = value.unit_size
 get_existing_line_capacity(value::HVDCTransportTechnology) = value.existing_line_capacity
 """Get [`HVDCTransportTechnology`](@ref) `angle_limits`."""
 get_angle_limits(value::HVDCTransportTechnology) = value.angle_limits
-"""Get [`HVDCTransportTechnology`](@ref) `reserves_derating`."""
-get_reserves_derating(value::HVDCTransportTechnology) = value.reserves_derating
 """Get [`HVDCTransportTechnology`](@ref) `line_loss`."""
 get_line_loss(value::HVDCTransportTechnology) = value.line_loss
 """Get [`HVDCTransportTechnology`](@ref) `capacity_limits`."""
@@ -183,8 +177,6 @@ set_unit_size!(value::HVDCTransportTechnology, val) = value.unit_size = val
 set_existing_line_capacity!(value::HVDCTransportTechnology, val) = value.existing_line_capacity = val
 """Set [`HVDCTransportTechnology`](@ref) `angle_limits`."""
 set_angle_limits!(value::HVDCTransportTechnology, val) = value.angle_limits = val
-"""Set [`HVDCTransportTechnology`](@ref) `reserves_derating`."""
-set_reserves_derating!(value::HVDCTransportTechnology, val) = value.reserves_derating = val
 """Set [`HVDCTransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::HVDCTransportTechnology, val) = value.line_loss = val
 """Set [`HVDCTransportTechnology`](@ref) `capacity_limits`."""

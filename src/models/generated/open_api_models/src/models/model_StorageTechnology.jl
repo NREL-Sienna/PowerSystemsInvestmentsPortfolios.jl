@@ -13,8 +13,6 @@
         balancing_topology=nothing,
         base_power=nothing,
         min_discharge_percentage=0.0,
-        max_operation_reserves_percentage=0.0,
-        max_regulatory_reserves_percentage=0.0,
         prime_mover_type="OT",
         storage_tech=nothing,
         capital_costs_energy=nothing,
@@ -46,8 +44,6 @@
     - balancing_topology::String
     - base_power::Float64
     - min_discharge_percentage::Float64
-    - max_operation_reserves_percentage::Float64
-    - max_regulatory_reserves_percentage::Float64
     - prime_mover_type::String
     - storage_tech::String : defines the storage technology used in an energy Storage system, based on the options in EIA form 923.
     - capital_costs_energy::ValueCurve
@@ -79,8 +75,6 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
     balancing_topology::Union{Nothing, String} = nothing
     base_power::Union{Nothing, Float64} = nothing
     min_discharge_percentage::Union{Nothing, Float64} = 0.0
-    max_operation_reserves_percentage::Union{Nothing, Float64} = 0.0
-    max_regulatory_reserves_percentage::Union{Nothing, Float64} = 0.0
     prime_mover_type::Union{Nothing, String} = "OT"
     storage_tech::Union{Nothing, String} = nothing
     capital_costs_energy = nothing # spec type: Union{ Nothing, ValueCurve }
@@ -112,8 +106,6 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         balancing_topology,
         base_power,
         min_discharge_percentage,
-        max_operation_reserves_percentage,
-        max_regulatory_reserves_percentage,
         prime_mover_type,
         storage_tech,
         capital_costs_energy,
@@ -155,16 +147,6 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
             StorageTechnology,
             Symbol("min_discharge_percentage"),
             min_discharge_percentage,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("max_operation_reserves_percentage"),
-            max_operation_reserves_percentage,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("max_regulatory_reserves_percentage"),
-            max_regulatory_reserves_percentage,
         )
         OpenAPI.validate_property(
             StorageTechnology,
@@ -260,8 +242,6 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
             balancing_topology,
             base_power,
             min_discharge_percentage,
-            max_operation_reserves_percentage,
-            max_regulatory_reserves_percentage,
             prime_mover_type,
             storage_tech,
             capital_costs_energy,
@@ -296,8 +276,6 @@ const _property_types_StorageTechnology = Dict{Symbol, String}(
     Symbol("balancing_topology") => "String",
     Symbol("base_power") => "Float64",
     Symbol("min_discharge_percentage") => "Float64",
-    Symbol("max_operation_reserves_percentage") => "Float64",
-    Symbol("max_regulatory_reserves_percentage") => "Float64",
     Symbol("prime_mover_type") => "String",
     Symbol("storage_tech") => "String",
     Symbol("capital_costs_energy") => "ValueCurve",

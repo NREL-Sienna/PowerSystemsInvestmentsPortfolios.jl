@@ -10,7 +10,6 @@ Name | Type | Description | Notes
 **available** | **Bool** |  | [default to nothing]
 **base_power** | **Float64** |  | [optional] [default to nothing]
 **length_km** | **Float64** |  | [optional] [default to nothing]
-**reserves_derating** | **Float64** |  | [optional] [default to nothing]
 **power_systems_type** | **String** |  | [optional] [default to nothing]
 **start_region** | **Int64** |  | [optional] [default to nothing]
 **end_region** | **Int64** |  | [optional] [default to nothing]

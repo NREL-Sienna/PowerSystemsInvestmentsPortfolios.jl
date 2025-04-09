@@ -90,8 +90,6 @@ export get_max_demand_curtailment
 export get_max_demand_delay
 export get_max_inverter_capacity
 export get_max_mtons
-export get_max_operation_reserves_percentage
-export get_max_regulatory_reserves_percentage
 export get_max_tons_mwh
 export get_min_capacity_mw
 export get_min_discharge_percentage
@@ -113,7 +111,6 @@ export get_price_per_unit
 export get_prime_mover_type
 export get_ramp_limits
 export get_region
-export get_reserves_derating
 export get_resistance
 export get_retirement_potential
 export get_retrofit_fraction
@@ -204,8 +201,6 @@ export set_max_demand_curtailment!
 export set_max_demand_delay!
 export set_max_inverter_capacity!
 export set_max_mtons!
-export set_max_operation_reserves_percentage!
-export set_max_regulatory_reserves_percentage!
 export set_max_tons_mwh!
 export set_min_capacity_mw!
 export set_min_discharge_percentage!
@@ -227,7 +222,6 @@ export set_price_per_unit!
 export set_prime_mover_type!
 export set_ramp_limits!
 export set_region!
-export set_reserves_derating!
 export set_resistance!
 export set_retirement_potential!
 export set_retrofit_fraction!
