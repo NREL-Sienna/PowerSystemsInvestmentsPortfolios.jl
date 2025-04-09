@@ -5,25 +5,40 @@
 
     RetirementPotential(;
         eligible_generators=nothing,
+        planned_retirement_year=nothing,
+        build_year=nothing,
     )
 
     - eligible_generators::Vector{String}
+    - planned_retirement_year::Dict{String, Int64}
+    - build_year::Dict{String, Float64}
 """
 Base.@kwdef mutable struct RetirementPotential <: OpenAPI.APIModel
     eligible_generators::Union{Nothing, Vector{String}} = nothing
+    planned_retirement_year::Union{Nothing, Dict{String, Int64}} = nothing
+    build_year::Union{Nothing, Dict{String, Float64}} = nothing
 
-    function RetirementPotential(eligible_generators)
+    function RetirementPotential(eligible_generators, planned_retirement_year, build_year)
         OpenAPI.validate_property(
             RetirementPotential,
             Symbol("eligible_generators"),
             eligible_generators,
         )
-        return new(eligible_generators)
+        OpenAPI.validate_property(
+            RetirementPotential,
+            Symbol("planned_retirement_year"),
+            planned_retirement_year,
+        )
+        OpenAPI.validate_property(RetirementPotential, Symbol("build_year"), build_year)
+        return new(eligible_generators, planned_retirement_year, build_year)
     end
 end # type RetirementPotential
 
-const _property_types_RetirementPotential =
-    Dict{Symbol, String}(Symbol("eligible_generators") => "Vector{String}")
+const _property_types_RetirementPotential = Dict{Symbol, String}(
+    Symbol("eligible_generators") => "Vector{String}",
+    Symbol("planned_retirement_year") => "Dict{String, Int64}",
+    Symbol("build_year") => "Dict{String, Float64}",
+)
 OpenAPI.property_type(::Type{RetirementPotential}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_RetirementPotential[name]))}
 

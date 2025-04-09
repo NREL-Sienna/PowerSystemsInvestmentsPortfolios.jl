@@ -5,13 +5,16 @@
 
     StorageTechnology(;
         name=nothing,
-        base_year=nothing,
+        build_year=nothing,
         region=nothing,
         id=nothing,
         available=nothing,
         power_systems_type=nothing,
         balancing_topology=nothing,
         base_power=nothing,
+        min_discharge_percentage=0.0,
+        max_operation_reserves_percentage=0.0,
+        max_regulatory_reserves_percentage=0.0,
         prime_mover_type="OT",
         storage_tech=nothing,
         capital_costs_energy=nothing,
@@ -34,13 +37,16 @@
     )
 
     - name::String
-    - base_year::Int64
+    - build_year::Int64
     - region::Vector{Int64}
     - id::Int64
     - available::Bool
     - power_systems_type::String
     - balancing_topology::String
     - base_power::Float64
+    - min_discharge_percentage::Float64
+    - max_operation_reserves_percentage::Float64
+    - max_regulatory_reserves_percentage::Float64
     - prime_mover_type::String
     - storage_tech::String : defines the storage technology used in an energy Storage system, based on the options in EIA form 923.
     - capital_costs_energy::ValueCurve
@@ -63,13 +69,16 @@
 """
 Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
-    base_year::Union{Nothing, Int64} = nothing
+    build_year::Union{Nothing, Int64} = nothing
     region::Union{Nothing, Vector{Int64}} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     balancing_topology::Union{Nothing, String} = nothing
     base_power::Union{Nothing, Float64} = nothing
+    min_discharge_percentage::Union{Nothing, Float64} = 0.0
+    max_operation_reserves_percentage::Union{Nothing, Float64} = 0.0
+    max_regulatory_reserves_percentage::Union{Nothing, Float64} = 0.0
     prime_mover_type::Union{Nothing, String} = "OT"
     storage_tech::Union{Nothing, String} = nothing
     capital_costs_energy = nothing # spec type: Union{ Nothing, ValueCurve }
@@ -92,13 +101,16 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
 
     function StorageTechnology(
         name,
-        base_year,
+        build_year,
         region,
         id,
         available,
         power_systems_type,
         balancing_topology,
         base_power,
+        min_discharge_percentage,
+        max_operation_reserves_percentage,
+        max_regulatory_reserves_percentage,
         prime_mover_type,
         storage_tech,
         capital_costs_energy,
@@ -120,7 +132,7 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         financial_data,
     )
         OpenAPI.validate_property(StorageTechnology, Symbol("name"), name)
-        OpenAPI.validate_property(StorageTechnology, Symbol("base_year"), base_year)
+        OpenAPI.validate_property(StorageTechnology, Symbol("build_year"), build_year)
         OpenAPI.validate_property(StorageTechnology, Symbol("region"), region)
         OpenAPI.validate_property(StorageTechnology, Symbol("id"), id)
         OpenAPI.validate_property(StorageTechnology, Symbol("available"), available)
@@ -135,6 +147,21 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
             balancing_topology,
         )
         OpenAPI.validate_property(StorageTechnology, Symbol("base_power"), base_power)
+        OpenAPI.validate_property(
+            StorageTechnology,
+            Symbol("min_discharge_percentage"),
+            min_discharge_percentage,
+        )
+        OpenAPI.validate_property(
+            StorageTechnology,
+            Symbol("max_operation_reserves_percentage"),
+            max_operation_reserves_percentage,
+        )
+        OpenAPI.validate_property(
+            StorageTechnology,
+            Symbol("max_regulatory_reserves_percentage"),
+            max_regulatory_reserves_percentage,
+        )
         OpenAPI.validate_property(
             StorageTechnology,
             Symbol("prime_mover_type"),
@@ -216,13 +243,16 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         )
         return new(
             name,
-            base_year,
+            build_year,
             region,
             id,
             available,
             power_systems_type,
             balancing_topology,
             base_power,
+            min_discharge_percentage,
+            max_operation_reserves_percentage,
+            max_regulatory_reserves_percentage,
             prime_mover_type,
             storage_tech,
             capital_costs_energy,
@@ -248,13 +278,16 @@ end # type StorageTechnology
 
 const _property_types_StorageTechnology = Dict{Symbol, String}(
     Symbol("name") => "String",
-    Symbol("base_year") => "Int64",
+    Symbol("build_year") => "Int64",
     Symbol("region") => "Vector{Int64}",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("power_systems_type") => "String",
     Symbol("balancing_topology") => "String",
     Symbol("base_power") => "Float64",
+    Symbol("min_discharge_percentage") => "Float64",
+    Symbol("max_operation_reserves_percentage") => "Float64",
+    Symbol("max_regulatory_reserves_percentage") => "Float64",
     Symbol("prime_mover_type") => "String",
     Symbol("storage_tech") => "String",
     Symbol("capital_costs_energy") => "ValueCurve",

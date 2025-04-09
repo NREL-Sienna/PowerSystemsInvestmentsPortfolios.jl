@@ -5,7 +5,13 @@ const MODULE_KEY = "module"
 const PARAMETERS_KEY = "parameters"
 const CONSTRUCT_WITH_PARAMETERS_KEY = "construct_with_parameters"
 const FUNCTION_KEY = "function"
-const _CONTAINS_SHOULD_ENCODE = Union{ResourceTechnology, DemandTechnology, TransmissionTechnology, Requirement, SupplementalAttribute}
+const _CONTAINS_SHOULD_ENCODE = Union{
+    ResourceTechnology,
+    DemandTechnology,
+    TransmissionTechnology,
+    Requirement,
+    SupplementalAttribute,
+}
 const SYSTEM_KWARGS = Set((
     :internal,
     :runchecks,

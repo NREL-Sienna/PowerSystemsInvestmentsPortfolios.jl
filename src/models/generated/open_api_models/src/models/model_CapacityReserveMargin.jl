@@ -8,6 +8,7 @@
         id=nothing,
         available=nothing,
         eligible_regions=nothing,
+        eligible_technologies=nothing,
         target_year=nothing,
         capacity_reserve_fraction=0.0,
     )
@@ -16,6 +17,7 @@
     - id::Int64
     - available::Bool
     - eligible_regions::Vector{Int64}
+    - eligible_technologies::Vector{Int64}
     - target_year::Int64
     - capacity_reserve_fraction::Float64
 """
@@ -24,6 +26,7 @@ Base.@kwdef mutable struct CapacityReserveMargin <: OpenAPI.APIModel
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     eligible_regions::Union{Nothing, Vector{Int64}} = nothing
+    eligible_technologies::Union{Nothing, Vector{Int64}} = nothing
     target_year::Union{Nothing, Int64} = nothing
     capacity_reserve_fraction::Union{Nothing, Float64} = 0.0
 
@@ -32,6 +35,7 @@ Base.@kwdef mutable struct CapacityReserveMargin <: OpenAPI.APIModel
         id,
         available,
         eligible_regions,
+        eligible_technologies,
         target_year,
         capacity_reserve_fraction,
     )
@@ -42,6 +46,11 @@ Base.@kwdef mutable struct CapacityReserveMargin <: OpenAPI.APIModel
             CapacityReserveMargin,
             Symbol("eligible_regions"),
             eligible_regions,
+        )
+        OpenAPI.validate_property(
+            CapacityReserveMargin,
+            Symbol("eligible_technologies"),
+            eligible_technologies,
         )
         OpenAPI.validate_property(CapacityReserveMargin, Symbol("target_year"), target_year)
         OpenAPI.validate_property(
@@ -54,6 +63,7 @@ Base.@kwdef mutable struct CapacityReserveMargin <: OpenAPI.APIModel
             id,
             available,
             eligible_regions,
+            eligible_technologies,
             target_year,
             capacity_reserve_fraction,
         )
@@ -65,6 +75,7 @@ const _property_types_CapacityReserveMargin = Dict{Symbol, String}(
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("eligible_regions") => "Vector{Int64}",
+    Symbol("eligible_technologies") => "Vector{Int64}",
     Symbol("target_year") => "Int64",
     Symbol("capacity_reserve_fraction") => "Float64",
 )

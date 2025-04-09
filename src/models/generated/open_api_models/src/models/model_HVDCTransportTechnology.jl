@@ -5,10 +5,12 @@
 
     HVDCTransportTechnology(;
         name=nothing,
-        base_year=2020,
+        build_year=2020,
         id=nothing,
         available=nothing,
         base_power=nothing,
+        length_km=nothing,
+        reserves_derating=nothing,
         power_systems_type=nothing,
         start_region=nothing,
         end_region=nothing,
@@ -24,10 +26,12 @@
     )
 
     - name::String
-    - base_year::Int64
+    - build_year::Int64
     - id::Int64
     - available::Bool
     - base_power::Float64
+    - length_km::Float64
+    - reserves_derating::Float64
     - power_systems_type::String
     - start_region::Int64
     - end_region::Int64
@@ -43,10 +47,12 @@
 """
 Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
-    base_year::Union{Nothing, Int64} = 2020
+    build_year::Union{Nothing, Int64} = 2020
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     base_power::Union{Nothing, Float64} = nothing
+    length_km::Union{Nothing, Float64} = nothing
+    reserves_derating::Union{Nothing, Float64} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     start_region::Union{Nothing, Int64} = nothing
     end_region::Union{Nothing, Int64} = nothing
@@ -62,10 +68,12 @@ Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
 
     function HVDCTransportTechnology(
         name,
-        base_year,
+        build_year,
         id,
         available,
         base_power,
+        length_km,
+        reserves_derating,
         power_systems_type,
         start_region,
         end_region,
@@ -80,10 +88,16 @@ Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
         financial_data,
     )
         OpenAPI.validate_property(HVDCTransportTechnology, Symbol("name"), name)
-        OpenAPI.validate_property(HVDCTransportTechnology, Symbol("base_year"), base_year)
+        OpenAPI.validate_property(HVDCTransportTechnology, Symbol("build_year"), build_year)
         OpenAPI.validate_property(HVDCTransportTechnology, Symbol("id"), id)
         OpenAPI.validate_property(HVDCTransportTechnology, Symbol("available"), available)
         OpenAPI.validate_property(HVDCTransportTechnology, Symbol("base_power"), base_power)
+        OpenAPI.validate_property(HVDCTransportTechnology, Symbol("length_km"), length_km)
+        OpenAPI.validate_property(
+            HVDCTransportTechnology,
+            Symbol("reserves_derating"),
+            reserves_derating,
+        )
         OpenAPI.validate_property(
             HVDCTransportTechnology,
             Symbol("power_systems_type"),
@@ -126,10 +140,12 @@ Base.@kwdef mutable struct HVDCTransportTechnology <: OpenAPI.APIModel
         )
         return new(
             name,
-            base_year,
+            build_year,
             id,
             available,
             base_power,
+            length_km,
+            reserves_derating,
             power_systems_type,
             start_region,
             end_region,
@@ -148,10 +164,12 @@ end # type HVDCTransportTechnology
 
 const _property_types_HVDCTransportTechnology = Dict{Symbol, String}(
     Symbol("name") => "String",
-    Symbol("base_year") => "Int64",
+    Symbol("build_year") => "Int64",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("base_power") => "Float64",
+    Symbol("length_km") => "Float64",
+    Symbol("reserves_derating") => "Float64",
     Symbol("power_systems_type") => "String",
     Symbol("start_region") => "Int64",
     Symbol("end_region") => "Int64",

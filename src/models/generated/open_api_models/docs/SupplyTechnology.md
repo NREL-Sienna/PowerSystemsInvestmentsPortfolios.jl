@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | **String** |  | [default to nothing]
 **power_systems_type** | **String** |  | [default to nothing]
-**base_year** | **Int64** |  | [optional] [default to 2020]
+**build_year** | **Int64** |  | [optional] [default to 2020]
 **region** | **Vector{Int64}** |  | [optional] [default to nothing]
 **id** | **Int64** |  | [optional] [default to nothing]
 **available** | **Bool** |  | [default to nothing]
@@ -24,6 +24,8 @@ Name | Type | Description | Notes
 **capacity_limits** | [***MinMax**](MinMax.md) |  | [optional] [default to nothing]
 **outage_factor** | **Float64** |  | [optional] [default to 1.0]
 **min_generation_percentage** | **Float64** |  | [optional] [default to 0.0]
+**max_operation_reserves_percentage** | **Float64** |  | [optional] [default to 0.0]
+**max_regulatory_reserves_percentage** | **Float64** |  | [optional] [default to 0.0]
 **ramp_limits** | [***UpDown**](UpDown.md) |  | [optional] [default to nothing]
 **time_limits** | [***UpDown**](UpDown.md) |  | [optional] [default to nothing]
 **start_fuel_mmbtu_per_mw** | **Float64** |  | [optional] [default to 0.0]

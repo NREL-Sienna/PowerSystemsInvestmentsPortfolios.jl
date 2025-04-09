@@ -5,13 +5,16 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | **String** |  | [default to nothing]
-**base_year** | **Int64** |  | [optional] [default to nothing]
+**build_year** | **Int64** |  | [optional] [default to nothing]
 **region** | **Vector{Int64}** |  | [optional] [default to nothing]
 **id** | **Int64** |  | [optional] [default to nothing]
 **available** | **Bool** |  | [default to nothing]
 **power_systems_type** | **String** |  | [default to nothing]
 **balancing_topology** | **String** |  | [optional] [default to nothing]
 **base_power** | **Float64** |  | [optional] [default to nothing]
+**min_discharge_percentage** | **Float64** |  | [optional] [default to 0.0]
+**max_operation_reserves_percentage** | **Float64** |  | [optional] [default to 0.0]
+**max_regulatory_reserves_percentage** | **Float64** |  | [optional] [default to 0.0]
 **prime_mover_type** | **String** |  | [optional] [default to "OT"]
 **storage_tech** | **String** | defines the storage technology used in an energy Storage system, based on the options in EIA form 923. | [optional] [default to nothing]
 **capital_costs_energy** | [***ValueCurve**](ValueCurve.md) |  | [optional] [default to nothing]
