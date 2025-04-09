@@ -5,15 +5,15 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
+    mutable struct HVDCTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
         base_power::Float64
         capital_cost::PSY.ValueCurve
-        start_region::Region
+        start_region::RegionTopology
         build_year::Union{Nothing, Int}
         available::Bool
         name::String
         id::Int64
-        end_region::Region
+        end_region::RegionTopology
         financial_data::TechnologyFinancialData
         power_systems_type::String
         internal::InfrastructureSystemsInternal
@@ -24,6 +24,7 @@ This file is auto-generated. Do not edit.
         unit_size::Float64
         existing_line_capacity::Float64
         angle_limits::MinMax
+        reserves_derating::Float64
         line_loss::Float64
         capacity_limits::MinMax
     end
@@ -33,12 +34,12 @@ An aggregated representation of candidate HVDC transmission lines between two re
 # Arguments
 - `base_power::Float64`: Base power
 - `capital_cost::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line.
-- `start_region::Region`: Start region for transport technology
+- `start_region::RegionTopology`: Start region for transport technology
 - `build_year::Union{Nothing, Int}`: (default: `nothing`) Year in which the existing technology is built. Default to nothing for new technologies
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
 - `id::Int64`: Numerical Index for HVDC lines
-- `end_region::Region`: End region for transport technology
+- `end_region::RegionTopology`: End region for transport technology
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
@@ -49,16 +50,17 @@ An aggregated representation of candidate HVDC transmission lines between two re
 - `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
 - `existing_line_capacity::Float64`: (default: `0.0`) Existing capacity of transport technology (MW)
 - `angle_limits::MinMax`: (default: `(min=0, max=6.28)`) Voltage angle limit (radians)
+- `reserves_derating::Float64`: (default: `1.0`) Factor from [0,1] to derate the contribution of transmission line flows to capacity reserve margins.
 - `line_loss::Float64`: (default: `1.0`) Transmission loss for each transport technology (%)
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Allowable capacity for a transmission line (MW)
 """
-mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
+mutable struct HVDCTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
     "Base power"
     base_power::Float64
     "Cost of adding new capacity to the nodal transmission line."
     capital_cost::PSY.ValueCurve
     "Start region for transport technology"
-    start_region::Region
+    start_region::RegionTopology
     "Year in which the existing technology is built. Default to nothing for new technologies"
     build_year::Union{Nothing, Int}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
@@ -68,7 +70,7 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
     "Numerical Index for HVDC lines"
     id::Int64
     "End region for transport technology"
-    end_region::Region
+    end_region::RegionTopology
     "Struct containing relevant financial information for a technology"
     financial_data::TechnologyFinancialData
     "maps to a valid PowerSystems.jl for PCM modeling"
@@ -89,6 +91,8 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
     existing_line_capacity::Float64
     "Voltage angle limit (radians)"
     angle_limits::MinMax
+    "Factor from [0,1] to derate the contribution of transmission line flows to capacity reserve margins."
+    reserves_derating::Float64
     "Transmission loss for each transport technology (%)"
     line_loss::Float64
     "Allowable capacity for a transmission line (MW)"
@@ -96,8 +100,8 @@ mutable struct HVDCTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function HVDCTransportTechnology{T}(; base_power, capital_cost=LinearCurve(0.0), start_region, build_year=nothing, available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), length_km=nothing, resistance=0.0, voltage=0.0, unit_size=1, existing_line_capacity=0.0, angle_limits=(min=0, max=6.28), line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
-    HVDCTransportTechnology{T}(base_power, capital_cost, start_region, build_year, available, name, id, end_region, financial_data, power_systems_type, internal, ext, length_km, resistance, voltage, unit_size, existing_line_capacity, angle_limits, line_loss, capacity_limits, )
+function HVDCTransportTechnology{T}(; base_power, capital_cost=LinearCurve(0.0), start_region, build_year=nothing, available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), length_km=nothing, resistance=0.0, voltage=0.0, unit_size=1, existing_line_capacity=0.0, angle_limits=(min=0, max=6.28), reserves_derating=1.0, line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+    HVDCTransportTechnology{T}(base_power, capital_cost, start_region, build_year, available, name, id, end_region, financial_data, power_systems_type, internal, ext, length_km, resistance, voltage, unit_size, existing_line_capacity, angle_limits, reserves_derating, line_loss, capacity_limits, )
 end
 
 """Get [`HVDCTransportTechnology`](@ref) `base_power`."""
@@ -136,6 +140,8 @@ get_unit_size(value::HVDCTransportTechnology) = value.unit_size
 get_existing_line_capacity(value::HVDCTransportTechnology) = value.existing_line_capacity
 """Get [`HVDCTransportTechnology`](@ref) `angle_limits`."""
 get_angle_limits(value::HVDCTransportTechnology) = value.angle_limits
+"""Get [`HVDCTransportTechnology`](@ref) `reserves_derating`."""
+get_reserves_derating(value::HVDCTransportTechnology) = value.reserves_derating
 """Get [`HVDCTransportTechnology`](@ref) `line_loss`."""
 get_line_loss(value::HVDCTransportTechnology) = value.line_loss
 """Get [`HVDCTransportTechnology`](@ref) `capacity_limits`."""
@@ -177,6 +183,8 @@ set_unit_size!(value::HVDCTransportTechnology, val) = value.unit_size = val
 set_existing_line_capacity!(value::HVDCTransportTechnology, val) = value.existing_line_capacity = val
 """Set [`HVDCTransportTechnology`](@ref) `angle_limits`."""
 set_angle_limits!(value::HVDCTransportTechnology, val) = value.angle_limits = val
+"""Set [`HVDCTransportTechnology`](@ref) `reserves_derating`."""
+set_reserves_derating!(value::HVDCTransportTechnology, val) = value.reserves_derating = val
 """Set [`HVDCTransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::HVDCTransportTechnology, val) = value.line_loss = val
 """Set [`HVDCTransportTechnology`](@ref) `capacity_limits`."""

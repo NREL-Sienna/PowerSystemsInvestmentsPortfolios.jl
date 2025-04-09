@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
+    mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
         base_power::Float64
         prime_mover_type::PrimeMovers
         build_year::Union{Nothing, Int}
@@ -23,10 +23,12 @@ This file is auto-generated. Do not edit.
         operation_costs::PSY.OperationalCost
         power_systems_type::String
         existing_capacity_discharge::Float64
+        max_operation_reserves_percentage::Float64
+        max_regulatory_reserves_percentage::Float64
         internal::InfrastructureSystemsInternal
         ext::Dict
         balancing_topology::String
-        region::Vector{Region}
+        region::Vector{RegionTopology}
         capacity_limits_energy::MinMax
         unit_size_energy::Float64
         existing_capacity_charge::Union{Nothing, Float64}
@@ -59,10 +61,12 @@ Candidate storage technology in a region.
 - `operation_costs::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a technology
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `existing_capacity_discharge::Float64`: (default: `0.0`) Pre-existing power capacity for a technology (MW)
+- `max_operation_reserves_percentage::Float64`: (default: `0.0`) Maximum fraction of nameplate capacity that can contribute to operation reservers.
+- `max_regulatory_reserves_percentage::Float64`: (default: `0.0`) Maximum fraction of nameplate capacity that can contribute to regulatory reservers.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `balancing_topology::String`: Set of balancing nodes
-- `region::Vector{Region}`: (default: `Vector()`) Region
+- `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology is operated
 - `capacity_limits_energy::MinMax`: (default: `(min=0,max=1e8)`) allowable installed energy capacity for a storage technology
 - `unit_size_energy::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
 - `existing_capacity_charge::Union{Nothing, Float64}`: (default: `nothing`) Pre-existing power capacity for a technology (MW)
@@ -74,7 +78,7 @@ Candidate storage technology in a region.
 - `capital_costs_charge::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
 - `capital_costs_discharge::Union{Nothing, PSY.ValueCurve}`: (default: `nothing`) Capital costs for investing in a technology.
 """
-mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
+mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
     "Base power"
     base_power::Float64
     "Prime mover for generator"
@@ -109,14 +113,18 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
     power_systems_type::String
     "Pre-existing power capacity for a technology (MW)"
     existing_capacity_discharge::Float64
+    "Maximum fraction of nameplate capacity that can contribute to operation reservers."
+    max_operation_reserves_percentage::Float64
+    "Maximum fraction of nameplate capacity that can contribute to regulatory reservers."
+    max_regulatory_reserves_percentage::Float64
     "Internal field"
     internal::InfrastructureSystemsInternal
     "Option for providing additional data"
     ext::Dict
     "Set of balancing nodes"
     balancing_topology::String
-    "Region"
-    region::Vector{Region}
+    "Location where technology is operated"
+    region::Vector{RegionTopology}
     "allowable installed energy capacity for a storage technology"
     capacity_limits_energy::MinMax
     "Used for discrete investment decisions. Size of each unit being built (MW)"
@@ -140,8 +148,8 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: Technology
 end
 
 
-function StorageTechnology{T}(; base_power, prime_mover_type=PrimeMovers.OT, build_year=nothing, lifetime=100, available, min_discharge_percentage=0.0, capacity_limits_charge=nothing, name, storage_tech, duration_limits=(min=0,max=1000.0), id, losses=0.01, capital_costs_energy=LinearCurve(0.0), financial_data, operation_costs=StorageCost(), power_systems_type, existing_capacity_discharge=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=Vector(), capacity_limits_energy=(min=0,max=1e8), unit_size_energy=0.0, existing_capacity_charge=nothing, unit_size_charge=nothing, existing_capacity_energy=0.0, efficiency=(in=1, out=1), unit_size_discharge=0.0, capacity_limits_discharge=(min=0,max=1e8), capital_costs_charge=LinearCurve(0.0), capital_costs_discharge=nothing, ) where T <: PSY.Storage
-    StorageTechnology{T}(base_power, prime_mover_type, build_year, lifetime, available, min_discharge_percentage, capacity_limits_charge, name, storage_tech, duration_limits, id, losses, capital_costs_energy, financial_data, operation_costs, power_systems_type, existing_capacity_discharge, internal, ext, balancing_topology, region, capacity_limits_energy, unit_size_energy, existing_capacity_charge, unit_size_charge, existing_capacity_energy, efficiency, unit_size_discharge, capacity_limits_discharge, capital_costs_charge, capital_costs_discharge, )
+function StorageTechnology{T}(; base_power, prime_mover_type=PrimeMovers.OT, build_year=nothing, lifetime=100, available, min_discharge_percentage=0.0, capacity_limits_charge=nothing, name, storage_tech, duration_limits=(min=0,max=1000.0), id, losses=0.01, capital_costs_energy=LinearCurve(0.0), financial_data, operation_costs=StorageCost(), power_systems_type, existing_capacity_discharge=0.0, max_operation_reserves_percentage=0.0, max_regulatory_reserves_percentage=0.0, internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=Vector(), capacity_limits_energy=(min=0,max=1e8), unit_size_energy=0.0, existing_capacity_charge=nothing, unit_size_charge=nothing, existing_capacity_energy=0.0, efficiency=(in=1, out=1), unit_size_discharge=0.0, capacity_limits_discharge=(min=0,max=1e8), capital_costs_charge=LinearCurve(0.0), capital_costs_discharge=nothing, ) where T <: PSY.Storage
+    StorageTechnology{T}(base_power, prime_mover_type, build_year, lifetime, available, min_discharge_percentage, capacity_limits_charge, name, storage_tech, duration_limits, id, losses, capital_costs_energy, financial_data, operation_costs, power_systems_type, existing_capacity_discharge, max_operation_reserves_percentage, max_regulatory_reserves_percentage, internal, ext, balancing_topology, region, capacity_limits_energy, unit_size_energy, existing_capacity_charge, unit_size_charge, existing_capacity_energy, efficiency, unit_size_discharge, capacity_limits_discharge, capital_costs_charge, capital_costs_discharge, )
 end
 
 """Get [`StorageTechnology`](@ref) `base_power`."""
@@ -178,6 +186,10 @@ get_operation_costs(value::StorageTechnology) = value.operation_costs
 get_power_systems_type(value::StorageTechnology) = value.power_systems_type
 """Get [`StorageTechnology`](@ref) `existing_capacity_discharge`."""
 get_existing_capacity_discharge(value::StorageTechnology) = value.existing_capacity_discharge
+"""Get [`StorageTechnology`](@ref) `max_operation_reserves_percentage`."""
+get_max_operation_reserves_percentage(value::StorageTechnology) = value.max_operation_reserves_percentage
+"""Get [`StorageTechnology`](@ref) `max_regulatory_reserves_percentage`."""
+get_max_regulatory_reserves_percentage(value::StorageTechnology) = value.max_regulatory_reserves_percentage
 """Get [`StorageTechnology`](@ref) `internal`."""
 get_internal(value::StorageTechnology) = value.internal
 """Get [`StorageTechnology`](@ref) `ext`."""
@@ -241,6 +253,10 @@ set_operation_costs!(value::StorageTechnology, val) = value.operation_costs = va
 set_power_systems_type!(value::StorageTechnology, val) = value.power_systems_type = val
 """Set [`StorageTechnology`](@ref) `existing_capacity_discharge`."""
 set_existing_capacity_discharge!(value::StorageTechnology, val) = value.existing_capacity_discharge = val
+"""Set [`StorageTechnology`](@ref) `max_operation_reserves_percentage`."""
+set_max_operation_reserves_percentage!(value::StorageTechnology, val) = value.max_operation_reserves_percentage = val
+"""Set [`StorageTechnology`](@ref) `max_regulatory_reserves_percentage`."""
+set_max_regulatory_reserves_percentage!(value::StorageTechnology, val) = value.max_regulatory_reserves_percentage = val
 """Set [`StorageTechnology`](@ref) `internal`."""
 set_internal!(value::StorageTechnology, val) = value.internal = val
 """Set [`StorageTechnology`](@ref) `ext`."""

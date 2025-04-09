@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct NodalTransportTechnology{T <: PSY.Device} <: Technology
+    mutable struct NodalTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
         base_power::Float64
         capital_cost::PSY.ValueCurve
         build_year::Union{Nothing, Int}
@@ -25,6 +25,7 @@ This file is auto-generated. Do not edit.
         unit_size::Float64
         existing_line_capacity::Float64
         angle_limits::MinMax
+        reserves_derating::Float64
         line_loss::Float64
         capacity_limits::MinMax
     end
@@ -51,10 +52,11 @@ An aggregated representation of candidate AC transmission lines between two regi
 - `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
 - `existing_line_capacity::Float64`: (default: `0.0`) Existing capacity of transport technology (MW)
 - `angle_limits::MinMax`: (default: `(min=0, max=6.28)`) Voltage angle limit (radians)
+- `reserves_derating::Float64`: (default: `1.0`) Factor from [0,1] to derate the contribution of transmission line flows to capacity reserve margins.
 - `line_loss::Float64`: Transmission loss for each transport technology (%)
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Allowable capacity for a transmission line (MW)
 """
-mutable struct NodalTransportTechnology{T <: PSY.Device} <: Technology
+mutable struct NodalTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
     "Base power"
     base_power::Float64
     "Cost of adding new capacity to the nodal transmission line."
@@ -93,6 +95,8 @@ mutable struct NodalTransportTechnology{T <: PSY.Device} <: Technology
     existing_line_capacity::Float64
     "Voltage angle limit (radians)"
     angle_limits::MinMax
+    "Factor from [0,1] to derate the contribution of transmission line flows to capacity reserve margins."
+    reserves_derating::Float64
     "Transmission loss for each transport technology (%)"
     line_loss::Float64
     "Allowable capacity for a transmission line (MW)"
@@ -100,8 +104,8 @@ mutable struct NodalTransportTechnology{T <: PSY.Device} <: Technology
 end
 
 
-function NodalTransportTechnology{T}(; base_power, capital_cost=LinearCurve(0.0), build_year=nothing, available, name, end_node, id, financial_data, start_node, power_systems_type, susceptance, internal=InfrastructureSystemsInternal(), ext=Dict(), length_km=nothing, resistance=0.0, voltage=0.0, unit_size=1, existing_line_capacity=0.0, angle_limits=(min=0, max=6.28), line_loss, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
-    NodalTransportTechnology{T}(base_power, capital_cost, build_year, available, name, end_node, id, financial_data, start_node, power_systems_type, susceptance, internal, ext, length_km, resistance, voltage, unit_size, existing_line_capacity, angle_limits, line_loss, capacity_limits, )
+function NodalTransportTechnology{T}(; base_power, capital_cost=LinearCurve(0.0), build_year=nothing, available, name, end_node, id, financial_data, start_node, power_systems_type, susceptance, internal=InfrastructureSystemsInternal(), ext=Dict(), length_km=nothing, resistance=0.0, voltage=0.0, unit_size=1, existing_line_capacity=0.0, angle_limits=(min=0, max=6.28), reserves_derating=1.0, line_loss, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+    NodalTransportTechnology{T}(base_power, capital_cost, build_year, available, name, end_node, id, financial_data, start_node, power_systems_type, susceptance, internal, ext, length_km, resistance, voltage, unit_size, existing_line_capacity, angle_limits, reserves_derating, line_loss, capacity_limits, )
 end
 
 """Get [`NodalTransportTechnology`](@ref) `base_power`."""
@@ -142,6 +146,8 @@ get_unit_size(value::NodalTransportTechnology) = value.unit_size
 get_existing_line_capacity(value::NodalTransportTechnology) = value.existing_line_capacity
 """Get [`NodalTransportTechnology`](@ref) `angle_limits`."""
 get_angle_limits(value::NodalTransportTechnology) = value.angle_limits
+"""Get [`NodalTransportTechnology`](@ref) `reserves_derating`."""
+get_reserves_derating(value::NodalTransportTechnology) = value.reserves_derating
 """Get [`NodalTransportTechnology`](@ref) `line_loss`."""
 get_line_loss(value::NodalTransportTechnology) = value.line_loss
 """Get [`NodalTransportTechnology`](@ref) `capacity_limits`."""
@@ -185,6 +191,8 @@ set_unit_size!(value::NodalTransportTechnology, val) = value.unit_size = val
 set_existing_line_capacity!(value::NodalTransportTechnology, val) = value.existing_line_capacity = val
 """Set [`NodalTransportTechnology`](@ref) `angle_limits`."""
 set_angle_limits!(value::NodalTransportTechnology, val) = value.angle_limits = val
+"""Set [`NodalTransportTechnology`](@ref) `reserves_derating`."""
+set_reserves_derating!(value::NodalTransportTechnology, val) = value.reserves_derating = val
 """Set [`NodalTransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::NodalTransportTechnology, val) = value.line_loss = val
 """Set [`NodalTransportTechnology`](@ref) `capacity_limits`."""
