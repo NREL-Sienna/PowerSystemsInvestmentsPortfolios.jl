@@ -5,6 +5,8 @@ const DATA_FORMAT_VERSION = "0.1.0"
 
 const DEFAULT_AGGREGATION = PSY.ACBus
 
+const DEFAULT_SYSTEM = System(100.0)
+
 mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
     description::Union{Nothing, String}
@@ -25,21 +27,21 @@ end
 struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     data::IS.SystemData # Inputs to the model
+    base_system::System #Base system storing existing data
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     time_series_directory::Union{Nothing, String}
     financial_data::Union{Nothing, PortfolioFinancialData}
-    base_system::Union{Nothing, System}
     metadata::PortfolioMetadata
     internal::IS.InfrastructureSystemsInternal
 
     function Portfolio(
         aggregation,
         data,
+        base_system,
         investment_schedule::Dict,
         internal::IS.InfrastructureSystemsInternal;
         time_series_directory=nothing,
         financial_data=nothing,
-        base_system=nothing,
         name=nothing,
         description=nothing,
         data_source=nothing,
@@ -58,10 +60,10 @@ struct Portfolio <: IS.InfrastructureSystemsType
         return new(
             aggregation,
             data,
+            base_system,
             investment_schedule,
             time_series_directory,
             financial_data,
-            base_system,
             PortfolioMetadata(name, description, data_source),
             internal,
         )
@@ -76,6 +78,7 @@ function Portfolio(; kwargs...)
     return Portfolio(
         DEFAULT_AGGREGATION,
         data,
+        DEFAULT_SYSTEM,
         Dict(),
         IS.InfrastructureSystemsInternal();
         kwargs...,
@@ -90,6 +93,7 @@ function Portfolio(aggregation; kwargs...)
     return Portfolio(
         aggregation,
         data,
+        DEFAULT_SYSTEM,
         Dict(),
         IS.InfrastructureSystemsInternal();
         kwargs...,
@@ -104,6 +108,7 @@ function Portfolio(base_year, discount_rate, inflation_rate, interest_rate; kwar
     return Portfolio(
         DEFAULT_AGGREGATION,
         data,
+        DEFAULT_SYSTEM,
         Dict(),
         InfrastructureSystemsInternal();
         financial_data=PortfolioFinancialData(
@@ -125,6 +130,11 @@ IS.get_internal(val::Portfolio) = val.internal
 Return a user-modifiable dictionary to store extra information.
 """
 get_ext(val::Portfolio) = IS.get_ext(val.internal)
+
+"""
+Get the base system of the portfolio.
+"""
+get_base_system(val::Portfolio) = val.base_system
 
 """
 Set the name of the portfolio.
