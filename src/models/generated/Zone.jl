@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct Zone <: Region
+    mutable struct Zone <: RegionTopology
         name::String
         internal::InfrastructureSystemsInternal
         id::Int64
@@ -20,7 +20,7 @@ A unit of spatial aggregation for zonal capacity expansion models. Used to defin
 - `id::Int64`: A unique zone identification number
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 """
-mutable struct Zone <: Region
+mutable struct Zone <: RegionTopology
     "Name of region"
     name::String
     "Internal field"

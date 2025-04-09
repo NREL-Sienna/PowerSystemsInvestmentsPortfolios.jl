@@ -57,6 +57,7 @@ export get_eligible_demand
 export get_eligible_generators
 export get_eligible_regions
 export get_eligible_resources
+export get_eligible_technologies
 export get_end_node
 export get_end_region
 export get_existing_capacity_charge
@@ -89,6 +90,8 @@ export get_max_demand_curtailment
 export get_max_demand_delay
 export get_max_inverter_capacity
 export get_max_mtons
+export get_max_operation_reserves_percentage
+export get_max_regulatory_reserves_percentage
 export get_max_tons_mwh
 export get_min_capacity_mw
 export get_min_discharge_percentage
@@ -104,11 +107,13 @@ export get_operation_costs_solar
 export get_operation_costs_wind
 export get_outage_factor
 export get_peak_demand_mw
+export get_planned_retirement_year
 export get_power_systems_type
 export get_price_per_unit
 export get_prime_mover_type
 export get_ramp_limits
 export get_region
+export get_reserves_derating
 export get_resistance
 export get_retirement_potential
 export get_retrofit_fraction
@@ -130,6 +135,7 @@ export get_unit_size_energy
 export get_value_of_lost_load
 export get_variable_cost_per_mwh
 export get_voltage
+export get_year
 export set_angle_limits!
 export set_available!
 export set_balancing_topology!
@@ -166,6 +172,7 @@ export set_eligible_demand!
 export set_eligible_generators!
 export set_eligible_regions!
 export set_eligible_resources!
+export set_eligible_technologies!
 export set_end_node!
 export set_end_region!
 export set_existing_capacity_charge!
@@ -198,6 +205,8 @@ export set_max_demand_curtailment!
 export set_max_demand_delay!
 export set_max_inverter_capacity!
 export set_max_mtons!
+export set_max_operation_reserves_percentage!
+export set_max_regulatory_reserves_percentage!
 export set_max_tons_mwh!
 export set_min_capacity_mw!
 export set_min_discharge_percentage!
@@ -213,11 +222,13 @@ export set_operation_costs_solar!
 export set_operation_costs_wind!
 export set_outage_factor!
 export set_peak_demand_mw!
+export set_planned_retirement_year!
 export set_power_systems_type!
 export set_price_per_unit!
 export set_prime_mover_type!
 export set_ramp_limits!
 export set_region!
+export set_reserves_derating!
 export set_resistance!
 export set_retirement_potential!
 export set_retrofit_fraction!
@@ -239,3 +250,4 @@ export set_unit_size_energy!
 export set_value_of_lost_load!
 export set_variable_cost_per_mwh!
 export set_voltage!
+export set_year!

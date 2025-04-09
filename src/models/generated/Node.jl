@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct Node <: Region
+    mutable struct Node <: RegionTopology
         name::String
         bus_type::ACBusTypes
         internal::InfrastructureSystemsInternal
@@ -22,7 +22,7 @@ A unit of spatial aggregation for nodal capacity expansion models. Used to defin
 - `id::Int64`: A unique node identification number
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 """
-mutable struct Node <: Region
+mutable struct Node <: RegionTopology
     "Name of region"
     name::String
     "AC Bus Type for a node"

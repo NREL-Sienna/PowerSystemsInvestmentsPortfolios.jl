@@ -14,7 +14,7 @@ This file is auto-generated. Do not edit.
         max_mtons::Float64
         ext::Dict
         available::Bool
-        eligible_regions::Vector{Region}
+        eligible_regions::Vector{RegionTopology}
     end
 
 Defines limits to the amount of carbon produced. Can be defined either by the total amount of carbon produced (tons CO2) or by the carbon intensity of the portfolio (tons CO2 per MWh of electricity)
@@ -28,7 +28,7 @@ Defines limits to the amount of carbon produced. Can be defined either by the to
 - `max_mtons::Float64`: (default: `1e8`) Emission limit in absolute values, in million of tons of CO2
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
-- `eligible_regions::Vector{Region}`: (default: `Vector{Region}()`) List of regions that contribute to the carbon cap constraint.
+- `eligible_regions::Vector{RegionTopology}`: (default: `Vector{RegionTopology}()`) List of regions that contribute to the carbon cap constraint.
 """
 mutable struct CarbonCaps <: Requirement
     "The requirement name"
@@ -48,11 +48,11 @@ mutable struct CarbonCaps <: Requirement
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "List of regions that contribute to the carbon cap constraint."
-    eligible_regions::Vector{Region}
+    eligible_regions::Vector{RegionTopology}
 end
 
 
-function CarbonCaps(; name, max_tons_mwh=1.0, target_year=2050, internal=InfrastructureSystemsInternal(), id, max_mtons=1e8, ext=Dict(), available, eligible_regions=Vector{Region}(), )
+function CarbonCaps(; name, max_tons_mwh=1.0, target_year=2050, internal=InfrastructureSystemsInternal(), id, max_mtons=1e8, ext=Dict(), available, eligible_regions=Vector{RegionTopology}(), )
     CarbonCaps(name, max_tons_mwh, target_year, internal, id, max_mtons, ext, available, eligible_regions, )
 end
 

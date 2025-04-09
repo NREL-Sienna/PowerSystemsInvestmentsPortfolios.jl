@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
+    mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
         name::String
         value_of_lost_load::Float64
         power_systems_type::String
@@ -13,7 +13,7 @@ This file is auto-generated. Do not edit.
         internal::InfrastructureSystemsInternal
         id::Int64
         ext::Dict
-        region::Union{Nothing, Vector{Region}}
+        region::Vector{RegionTopology}
         available::Bool
     end
 
@@ -27,10 +27,10 @@ Demand requirements for a region.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `id::Int64`: ID for individual demand requirement
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `region::Union{Nothing, Vector{Region}}`: (default: `Vector()`) Region
+- `region::Vector{RegionTopology}`: (default: `Vector()`) Location of the demand
 - `available::Bool`: (default: `true`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 """
-mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
+mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
     "The technology name"
     name::String
     "Value of unserved load, USD/MWh"
@@ -45,8 +45,8 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: Technology
     id::Int64
     "Option for providing additional data"
     ext::Dict
-    "Region"
-    region::Union{Nothing, Vector{Region}}
+    "Location of the demand"
+    region::Vector{RegionTopology}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
 end

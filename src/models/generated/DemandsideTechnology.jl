@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: Technology
+    mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnology
         price_per_unit::PSY.ValueCurve
         variable_cost_per_mwh::PSY.ValueCurve
         available::Bool
@@ -20,7 +20,7 @@ This file is auto-generated. Do not edit.
         power_systems_type::String
         internal::InfrastructureSystemsInternal
         ext::Dict
-        region::Union{Nothing, Vector{Region}}
+        region::Vector{RegionTopology}
         min_power::Float64
     end
 
@@ -41,10 +41,10 @@ Represents demand side technologies such as electric vehicles or hydrogen electr
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `region::Union{Nothing, Vector{Region}}`: (default: `Vector()`) Region
+- `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology is operated
 - `min_power::Float64`: (default: `0.0`) Minimum operation of demandside unit as a fraction of total capacity
 """
-mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: Technology
+mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnology
     "Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers"
     price_per_unit::PSY.ValueCurve
     "Variable operation and maintenance costs associated with flexible demand deferral"
@@ -73,8 +73,8 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: Technology
     internal::InfrastructureSystemsInternal
     "Option for providing additional data"
     ext::Dict
-    "Region"
-    region::Union{Nothing, Vector{Region}}
+    "Location where technology is operated"
+    region::Vector{RegionTopology}
     "Minimum operation of demandside unit as a fraction of total capacity"
     min_power::Float64
 end
