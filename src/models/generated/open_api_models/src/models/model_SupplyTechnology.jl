@@ -6,11 +6,9 @@
     SupplyTechnology(;
         name=nothing,
         power_systems_type=nothing,
-        build_year=2020,
         region=nothing,
         id=nothing,
         available=nothing,
-        balancing_topology=nothing,
         base_power=nothing,
         prime_mover_type="OT",
         fuel=nothing,
@@ -23,7 +21,7 @@
         unit_size=0.0,
         capacity_limits=nothing,
         outage_factor=1.0,
-        min_generation_percentage=0.0,
+        min_generation_fraction=0.0,
         ramp_limits=nothing,
         time_limits=nothing,
         start_fuel_mmbtu_per_mw=0.0,
@@ -33,11 +31,9 @@
 
     - name::String
     - power_systems_type::String
-    - build_year::Int64
     - region::Vector{Int64}
     - id::Int64
     - available::Bool
-    - balancing_topology::String
     - base_power::Float64
     - prime_mover_type::String
     - fuel::Vector{String}
@@ -50,7 +46,7 @@
     - unit_size::Float64
     - capacity_limits::MinMax
     - outage_factor::Float64
-    - min_generation_percentage::Float64
+    - min_generation_fraction::Float64
     - ramp_limits::UpDown
     - time_limits::UpDown
     - start_fuel_mmbtu_per_mw::Float64
@@ -60,11 +56,9 @@
 Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
     power_systems_type::Union{Nothing, String} = nothing
-    build_year::Union{Nothing, Int64} = 2020
     region::Union{Nothing, Vector{Int64}} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
-    balancing_topology::Union{Nothing, String} = nothing
     base_power::Union{Nothing, Float64} = nothing
     prime_mover_type::Union{Nothing, String} = "OT"
     fuel::Union{Nothing, Vector{String}} = nothing
@@ -77,7 +71,7 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     unit_size::Union{Nothing, Float64} = 0.0
     capacity_limits = nothing # spec type: Union{ Nothing, MinMax }
     outage_factor::Union{Nothing, Float64} = 1.0
-    min_generation_percentage::Union{Nothing, Float64} = 0.0
+    min_generation_fraction::Union{Nothing, Float64} = 0.0
     ramp_limits = nothing # spec type: Union{ Nothing, UpDown }
     time_limits = nothing # spec type: Union{ Nothing, UpDown }
     start_fuel_mmbtu_per_mw::Union{Nothing, Float64} = 0.0
@@ -87,11 +81,9 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     function SupplyTechnology(
         name,
         power_systems_type,
-        build_year,
         region,
         id,
         available,
-        balancing_topology,
         base_power,
         prime_mover_type,
         fuel,
@@ -104,7 +96,7 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
         unit_size,
         capacity_limits,
         outage_factor,
-        min_generation_percentage,
+        min_generation_fraction,
         ramp_limits,
         time_limits,
         start_fuel_mmbtu_per_mw,
@@ -117,15 +109,9 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
             Symbol("power_systems_type"),
             power_systems_type,
         )
-        OpenAPI.validate_property(SupplyTechnology, Symbol("build_year"), build_year)
         OpenAPI.validate_property(SupplyTechnology, Symbol("region"), region)
         OpenAPI.validate_property(SupplyTechnology, Symbol("id"), id)
         OpenAPI.validate_property(SupplyTechnology, Symbol("available"), available)
-        OpenAPI.validate_property(
-            SupplyTechnology,
-            Symbol("balancing_topology"),
-            balancing_topology,
-        )
         OpenAPI.validate_property(SupplyTechnology, Symbol("base_power"), base_power)
         OpenAPI.validate_property(
             SupplyTechnology,
@@ -164,8 +150,8 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
         OpenAPI.validate_property(SupplyTechnology, Symbol("outage_factor"), outage_factor)
         OpenAPI.validate_property(
             SupplyTechnology,
-            Symbol("min_generation_percentage"),
-            min_generation_percentage,
+            Symbol("min_generation_fraction"),
+            min_generation_fraction,
         )
         OpenAPI.validate_property(SupplyTechnology, Symbol("ramp_limits"), ramp_limits)
         OpenAPI.validate_property(SupplyTechnology, Symbol("time_limits"), time_limits)
@@ -183,11 +169,9 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
         return new(
             name,
             power_systems_type,
-            build_year,
             region,
             id,
             available,
-            balancing_topology,
             base_power,
             prime_mover_type,
             fuel,
@@ -200,7 +184,7 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
             unit_size,
             capacity_limits,
             outage_factor,
-            min_generation_percentage,
+            min_generation_fraction,
             ramp_limits,
             time_limits,
             start_fuel_mmbtu_per_mw,
@@ -213,11 +197,9 @@ end # type SupplyTechnology
 const _property_types_SupplyTechnology = Dict{Symbol, String}(
     Symbol("name") => "String",
     Symbol("power_systems_type") => "String",
-    Symbol("build_year") => "Int64",
     Symbol("region") => "Vector{Int64}",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
-    Symbol("balancing_topology") => "String",
     Symbol("base_power") => "Float64",
     Symbol("prime_mover_type") => "String",
     Symbol("fuel") => "Vector{String}",
@@ -230,7 +212,7 @@ const _property_types_SupplyTechnology = Dict{Symbol, String}(
     Symbol("unit_size") => "Float64",
     Symbol("capacity_limits") => "MinMax",
     Symbol("outage_factor") => "Float64",
-    Symbol("min_generation_percentage") => "Float64",
+    Symbol("min_generation_fraction") => "Float64",
     Symbol("ramp_limits") => "UpDown",
     Symbol("time_limits") => "UpDown",
     Symbol("start_fuel_mmbtu_per_mw") => "Float64",

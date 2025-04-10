@@ -21,8 +21,11 @@ import InfrastructureSystems:
     InfrastructureSystemsComponent,
     InfrastructureSystemsType
 
-import PowerSystems
-import PowerSystems: StorageCost, ThermalGenerationCost
+#import PowerSystems
+#import PowerSystems: StorageCost, ThermalGenerationCost
+
+# Using PowerSystems in order to support deserializing with PSY parametric typing
+using PowerSystems
 
 import JSONSchema
 import JSON3

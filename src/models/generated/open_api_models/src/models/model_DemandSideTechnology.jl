@@ -12,10 +12,11 @@
         technology_efficiency=0.0,
         price_per_unit=nothing,
         min_power=0.0,
+        peak_demand_mw=0.0,
         max_demand_delay=nothing,
         max_demand_advance=nothing,
         demand_energy_efficiency=nothing,
-        variable_cost_per_mwh=nothing,
+        shift_variable_cost=nothing,
         curtailment_cost=nothing,
         max_demand_curtailment=nothing,
     )
@@ -28,10 +29,11 @@
     - technology_efficiency::Float64
     - price_per_unit::ValueCurve
     - min_power::Float64
+    - peak_demand_mw::Float64
     - max_demand_delay::Float64
     - max_demand_advance::Float64
     - demand_energy_efficiency::Float64
-    - variable_cost_per_mwh::ValueCurve
+    - shift_variable_cost::ValueCurve
     - curtailment_cost::ValueCurve
     - max_demand_curtailment::Float64
 """
@@ -44,10 +46,11 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
     technology_efficiency::Union{Nothing, Float64} = 0.0
     price_per_unit = nothing # spec type: Union{ Nothing, ValueCurve }
     min_power::Union{Nothing, Float64} = 0.0
+    peak_demand_mw::Union{Nothing, Float64} = 0.0
     max_demand_delay::Union{Nothing, Float64} = nothing
     max_demand_advance::Union{Nothing, Float64} = nothing
     demand_energy_efficiency::Union{Nothing, Float64} = nothing
-    variable_cost_per_mwh = nothing # spec type: Union{ Nothing, ValueCurve }
+    shift_variable_cost = nothing # spec type: Union{ Nothing, ValueCurve }
     curtailment_cost = nothing # spec type: Union{ Nothing, ValueCurve }
     max_demand_curtailment::Union{Nothing, Float64} = nothing
 
@@ -60,10 +63,11 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
         technology_efficiency,
         price_per_unit,
         min_power,
+        peak_demand_mw,
         max_demand_delay,
         max_demand_advance,
         demand_energy_efficiency,
-        variable_cost_per_mwh,
+        shift_variable_cost,
         curtailment_cost,
         max_demand_curtailment,
     )
@@ -89,6 +93,11 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
         OpenAPI.validate_property(DemandSideTechnology, Symbol("min_power"), min_power)
         OpenAPI.validate_property(
             DemandSideTechnology,
+            Symbol("peak_demand_mw"),
+            peak_demand_mw,
+        )
+        OpenAPI.validate_property(
+            DemandSideTechnology,
             Symbol("max_demand_delay"),
             max_demand_delay,
         )
@@ -104,8 +113,8 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             DemandSideTechnology,
-            Symbol("variable_cost_per_mwh"),
-            variable_cost_per_mwh,
+            Symbol("shift_variable_cost"),
+            shift_variable_cost,
         )
         OpenAPI.validate_property(
             DemandSideTechnology,
@@ -126,10 +135,11 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
             technology_efficiency,
             price_per_unit,
             min_power,
+            peak_demand_mw,
             max_demand_delay,
             max_demand_advance,
             demand_energy_efficiency,
-            variable_cost_per_mwh,
+            shift_variable_cost,
             curtailment_cost,
             max_demand_curtailment,
         )
@@ -145,10 +155,11 @@ const _property_types_DemandSideTechnology = Dict{Symbol, String}(
     Symbol("technology_efficiency") => "Float64",
     Symbol("price_per_unit") => "ValueCurve",
     Symbol("min_power") => "Float64",
+    Symbol("peak_demand_mw") => "Float64",
     Symbol("max_demand_delay") => "Float64",
     Symbol("max_demand_advance") => "Float64",
     Symbol("demand_energy_efficiency") => "Float64",
-    Symbol("variable_cost_per_mwh") => "ValueCurve",
+    Symbol("shift_variable_cost") => "ValueCurve",
     Symbol("curtailment_cost") => "ValueCurve",
     Symbol("max_demand_curtailment") => "Float64",
 )

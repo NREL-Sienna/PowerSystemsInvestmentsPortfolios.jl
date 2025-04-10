@@ -236,6 +236,7 @@ function from_dict(
     portfolio = Portfolio(
         aggregation,
         data,
+        base_system,
         investment_schedule,
         internal;
         financial_data=PortfolioFinancialData(
@@ -246,7 +247,6 @@ function from_dict(
         ),
         name=name,
         description=description,
-        base_system=base_system,
         parsed_kwargs...,
     )
 
