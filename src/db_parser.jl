@@ -35,14 +35,14 @@ function db_to_dataframes(db_path::String)
     tables = SQLite.tables(db)
 
     # Create a dictionary to store DataFrames for each table
-    dfs = Dict{String, DataFrame}()
+    dfs = Dict{String, DataFrames.DataFrame}()
 
     #Will adjust queries to only pull a subset of data
     for table in tables
         table_name = table.name
         # Read each table into a DataFrame
         query = "SELECT * FROM $table_name"
-        df = DataFrame(DBInterface.execute(db, query))
+        df = DataFrames.DataFrame(DBInterface.execute(db, query))
         dfs[table_name] = df
     end
 
@@ -131,7 +131,7 @@ function parse_timestamps_and_values(json_str::String)
     return timestamps, values
 end
 
-function parse_timestamps_and_values(df::DataFrame)
+function parse_timestamps_and_values(df::DataFrames.DataFrame)
     # Initialize arrays to store timestamps and values
     timestamps = String[]
     values = Float64[]

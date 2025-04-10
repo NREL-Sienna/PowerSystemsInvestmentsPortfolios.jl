@@ -5,7 +5,7 @@ const DATA_FORMAT_VERSION = "0.1.0"
 
 const DEFAULT_AGGREGATION = PSY.ACBus
 
-const DEFAULT_SYSTEM = System(100.0)
+const DEFAULT_SYSTEM() = PSY.System(100.0)
 
 mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
@@ -27,7 +27,7 @@ end
 struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     data::IS.SystemData # Inputs to the model
-    base_system::System #Base system storing existing data
+    base_system::PSY.System #Base system storing existing data
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     time_series_directory::Union{Nothing, String}
     financial_data::Union{Nothing, PortfolioFinancialData}
@@ -37,7 +37,7 @@ struct Portfolio <: IS.InfrastructureSystemsType
     function Portfolio(
         aggregation,
         data,
-        base_system,
+        base_system::PSY.System,
         investment_schedule::Dict,
         internal::IS.InfrastructureSystemsInternal;
         time_series_directory=nothing,
@@ -78,7 +78,7 @@ function Portfolio(; kwargs...)
     return Portfolio(
         DEFAULT_AGGREGATION,
         data,
-        DEFAULT_SYSTEM,
+        DEFAULT_SYSTEM(),
         Dict(),
         IS.InfrastructureSystemsInternal();
         kwargs...,
@@ -93,7 +93,22 @@ function Portfolio(aggregation; kwargs...)
     return Portfolio(
         aggregation,
         data,
-        DEFAULT_SYSTEM,
+        DEFAULT_SYSTEM(),
+        Dict(),
+        IS.InfrastructureSystemsInternal();
+        kwargs...,
+    )
+end
+
+"""
+Construct an empty `Portfolio` specifying base_system. Useful for building a Portfolio from scratch.
+"""
+function Portfolio(base_system::PSY.System; kwargs...)
+    data = PSY._create_system_data_from_kwargs(; kwargs...)
+    return Portfolio(
+        DEFAULT_AGGREGATION,
+        data,
+        base_system,
         Dict(),
         IS.InfrastructureSystemsInternal();
         kwargs...,
@@ -108,7 +123,7 @@ function Portfolio(base_year, discount_rate, inflation_rate, interest_rate; kwar
     return Portfolio(
         DEFAULT_AGGREGATION,
         data,
-        DEFAULT_SYSTEM,
+        DEFAULT_SYSTEM(),
         Dict(),
         InfrastructureSystemsInternal();
         financial_data=PortfolioFinancialData(

@@ -34,13 +34,7 @@ import TimeSeries
 import Dates
 import DataStructures: OrderedDict, SortedDict
 import OpenAPI
-
-# Temporary, imports not working properly for some reason?
-using DataFrames
-using PowerSystems
-using Dates
-using TimeSeries
-using StringEncodings
+import StringEncodings
 
 export Portfolio
 export Technology
@@ -49,12 +43,12 @@ export DemandTechnology
 export TransmissionTechnology
 export Requirement
 export FinancialData
-export Region
+export RegionTopology
 export SupplyTechnology
 export ColocatedSupplyStorageTechnology
-export ACTransportTechnology
-export NodalTransportTechnology
-export HVDCTransportTechnology
+export NodalACTransportTechnology
+export AggregateTransportTechnology
+export NodalHVDCTransportTechnology
 export StorageTechnology
 export DemandRequirement
 export DemandSideTechnology

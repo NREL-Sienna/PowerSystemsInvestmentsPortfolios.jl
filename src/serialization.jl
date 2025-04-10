@@ -10,7 +10,7 @@ const _CONTAINS_SHOULD_ENCODE = Union{
     DemandTechnology,
     TransmissionTechnology,
     Requirement,
-    SupplementalAttribute,
+    IS.SupplementalAttribute,
 }
 const SYSTEM_KWARGS = Set((
     :internal,
@@ -341,7 +341,7 @@ function deserialize(
         supplemental_attribute_manager,
         internal,
     )
-    attributes_by_uuid = Dict{Base.UUID, SupplementalAttribute}()
+    attributes_by_uuid = Dict{Base.UUID, IS.SupplementalAttribute}()
     for attr_dict in values(supplemental_attribute_manager.data)
         for attr in values(attr_dict)
             uuid = IS.get_uuid(attr)
