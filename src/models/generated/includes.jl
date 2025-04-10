@@ -3,27 +3,25 @@ include("Zone.jl")
 include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
+include("NodalACTransportTechnology.jl")
 include("RetirementPotential.jl")
 include("ExistingCapacity.jl")
-include("ACTransportTechnology.jl")
 include("AggregateRetrofitPotential.jl")
 include("MaximumCapacityRequirements.jl")
 include("CapacityReserveMargin.jl")
+include("NodalHVDCTransportTechnology.jl")
 include("DemandSideTechnology.jl")
 include("EnergyShareRequirements.jl")
 include("AggregateRetirementPotential.jl")
-include("HVDCTransportTechnology.jl")
+include("AggregateTransportTechnology.jl")
 include("StorageTechnology.jl")
 include("CarbonCaps.jl")
 include("CarbonTax.jl")
 include("RetrofitPotential.jl")
 include("HourlyMatching.jl")
-include("NodalTransportTechnology.jl")
 include("ColocatedSupplyStorageTechnology.jl")
 
-export get_angle_limits
 export get_available
-export get_balancing_topology
 export get_base_power
 export get_build_year
 export get_bus_type
@@ -67,7 +65,7 @@ export get_existing_capacity_inverter
 export get_existing_capacity_power
 export get_existing_capacity_solar
 export get_existing_capacity_wind
-export get_existing_line_capacity
+export get_existing_technologies
 export get_ext
 export get_financial_data
 export get_fuel
@@ -76,7 +74,6 @@ export get_id
 export get_initial_capacity
 export get_inverter_efficiency
 export get_inverter_supply_ratio
-export get_length_km
 export get_lifetime
 export get_lifetime_solar
 export get_lifetime_storage
@@ -92,8 +89,8 @@ export get_max_inverter_capacity
 export get_max_mtons
 export get_max_tons_mwh
 export get_min_capacity_mw
-export get_min_discharge_percentage
-export get_min_generation_percentage
+export get_min_discharge_fraction
+export get_min_generation_fraction
 export get_min_inverter_capacity
 export get_min_power
 export get_name
@@ -110,17 +107,18 @@ export get_power_systems_type
 export get_price_per_unit
 export get_prime_mover_type
 export get_ramp_limits
+export get_reactance
 export get_region
 export get_resistance
 export get_retirement_potential
 export get_retrofit_fraction
 export get_retrofit_id
 export get_retrofit_potential
+export get_shift_variable_cost
 export get_start_fuel_mmbtu_per_mw
 export get_start_node
 export get_start_region
 export get_storage_tech
-export get_susceptance
 export get_target_year
 export get_tax_dollars_per_ton
 export get_technology_efficiency
@@ -130,11 +128,8 @@ export get_unit_size_charge
 export get_unit_size_discharge
 export get_unit_size_energy
 export get_value_of_lost_load
-export get_variable_cost_per_mwh
 export get_voltage
-export set_angle_limits!
 export set_available!
-export set_balancing_topology!
 export set_base_power!
 export set_build_year!
 export set_bus_type!
@@ -178,7 +173,7 @@ export set_existing_capacity_inverter!
 export set_existing_capacity_power!
 export set_existing_capacity_solar!
 export set_existing_capacity_wind!
-export set_existing_line_capacity!
+export set_existing_technologies!
 export set_ext!
 export set_financial_data!
 export set_fuel!
@@ -187,7 +182,6 @@ export set_id!
 export set_initial_capacity!
 export set_inverter_efficiency!
 export set_inverter_supply_ratio!
-export set_length_km!
 export set_lifetime!
 export set_lifetime_solar!
 export set_lifetime_storage!
@@ -203,8 +197,8 @@ export set_max_inverter_capacity!
 export set_max_mtons!
 export set_max_tons_mwh!
 export set_min_capacity_mw!
-export set_min_discharge_percentage!
-export set_min_generation_percentage!
+export set_min_discharge_fraction!
+export set_min_generation_fraction!
 export set_min_inverter_capacity!
 export set_min_power!
 export set_name!
@@ -221,17 +215,18 @@ export set_power_systems_type!
 export set_price_per_unit!
 export set_prime_mover_type!
 export set_ramp_limits!
+export set_reactance!
 export set_region!
 export set_resistance!
 export set_retirement_potential!
 export set_retrofit_fraction!
 export set_retrofit_id!
 export set_retrofit_potential!
+export set_shift_variable_cost!
 export set_start_fuel_mmbtu_per_mw!
 export set_start_node!
 export set_start_region!
 export set_storage_tech!
-export set_susceptance!
 export set_target_year!
 export set_tax_dollars_per_ton!
 export set_technology_efficiency!
@@ -241,5 +236,4 @@ export set_unit_size_charge!
 export set_unit_size_discharge!
 export set_unit_size_energy!
 export set_value_of_lost_load!
-export set_variable_cost_per_mwh!
 export set_voltage!

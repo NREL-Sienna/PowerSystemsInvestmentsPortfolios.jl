@@ -7,9 +7,9 @@ This file is auto-generated. Do not edit.
 """
     mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnology
         price_per_unit::PSY.ValueCurve
-        variable_cost_per_mwh::PSY.ValueCurve
         available::Bool
         name::String
+        shift_variable_cost::PSY.ValueCurve
         curtailment_cost::PSY.ValueCurve
         id::Int64
         technology_efficiency::Float64
@@ -22,16 +22,17 @@ This file is auto-generated. Do not edit.
         ext::Dict
         region::Vector{RegionTopology}
         min_power::Float64
+        peak_demand_mw::Float64
     end
 
 Represents demand side technologies such as electric vehicles or hydrogen electrolyzers.
 
 # Arguments
 - `price_per_unit::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers
-- `variable_cost_per_mwh::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Variable operation and maintenance costs associated with flexible demand deferral
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: The technology name
-- `curtailment_cost::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Energy cost of curtailed output, USD per Mwh
+- `shift_variable_cost::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Variable operation and maintenance costs associated with flexible demand deferral/advancement
+- `curtailment_cost::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Energy cost of curtailed demand, USD per Mwh
 - `id::Int64`: ID for demand side technology
 - `technology_efficiency::Float64`: (default: `0.0`) MWh of electricity per unit of output. Ex: MWh per ton of hydrogen for electrolyzers
 - `max_demand_advance::Float64`: (default: `0.0`) Maximum number of hours that demand can be scheduled in advance of the original schedule (hours).
@@ -42,18 +43,19 @@ Represents demand side technologies such as electric vehicles or hydrogen electr
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 - `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology is operated
-- `min_power::Float64`: (default: `0.0`) Minimum operation of demandside unit as a fraction of total capacity
+- `min_power::Float64`: (default: `0.0`) Minimum operation of demandside unit as a fraction of peak demand
+- `peak_demand_mw::Float64`: (default: `0.0`) Peak demand value in MW
 """
 mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnology
     "Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers"
     price_per_unit::PSY.ValueCurve
-    "Variable operation and maintenance costs associated with flexible demand deferral"
-    variable_cost_per_mwh::PSY.ValueCurve
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "The technology name"
     name::String
-    "Energy cost of curtailed output, USD per Mwh"
+    "Variable operation and maintenance costs associated with flexible demand deferral/advancement"
+    shift_variable_cost::PSY.ValueCurve
+    "Energy cost of curtailed demand, USD per Mwh"
     curtailment_cost::PSY.ValueCurve
     "ID for demand side technology"
     id::Int64
@@ -75,23 +77,25 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnolog
     ext::Dict
     "Location where technology is operated"
     region::Vector{RegionTopology}
-    "Minimum operation of demandside unit as a fraction of total capacity"
+    "Minimum operation of demandside unit as a fraction of peak demand"
     min_power::Float64
+    "Peak demand value in MW"
+    peak_demand_mw::Float64
 end
 
 
-function DemandSideTechnology{T}(; price_per_unit=LinearCurve(0.0), variable_cost_per_mwh=LinearCurve(0.0), available, name, curtailment_cost=LinearCurve(0.0), id, technology_efficiency=0.0, max_demand_advance=0.0, demand_energy_efficiency=0.0, max_demand_curtailment=0.0, max_demand_delay=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), min_power=0.0, ) where T <: PSY.StaticInjection
-    DemandSideTechnology{T}(price_per_unit, variable_cost_per_mwh, available, name, curtailment_cost, id, technology_efficiency, max_demand_advance, demand_energy_efficiency, max_demand_curtailment, max_demand_delay, power_systems_type, internal, ext, region, min_power, )
+function DemandSideTechnology{T}(; price_per_unit=LinearCurve(0.0), available, name, shift_variable_cost=LinearCurve(0.0), curtailment_cost=LinearCurve(0.0), id, technology_efficiency=0.0, max_demand_advance=0.0, demand_energy_efficiency=0.0, max_demand_curtailment=0.0, max_demand_delay=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), min_power=0.0, peak_demand_mw=0.0, ) where T <: PSY.StaticInjection
+    DemandSideTechnology{T}(price_per_unit, available, name, shift_variable_cost, curtailment_cost, id, technology_efficiency, max_demand_advance, demand_energy_efficiency, max_demand_curtailment, max_demand_delay, power_systems_type, internal, ext, region, min_power, peak_demand_mw, )
 end
 
 """Get [`DemandSideTechnology`](@ref) `price_per_unit`."""
 get_price_per_unit(value::DemandSideTechnology) = value.price_per_unit
-"""Get [`DemandSideTechnology`](@ref) `variable_cost_per_mwh`."""
-get_variable_cost_per_mwh(value::DemandSideTechnology) = value.variable_cost_per_mwh
 """Get [`DemandSideTechnology`](@ref) `available`."""
 get_available(value::DemandSideTechnology) = value.available
 """Get [`DemandSideTechnology`](@ref) `name`."""
 get_name(value::DemandSideTechnology) = value.name
+"""Get [`DemandSideTechnology`](@ref) `shift_variable_cost`."""
+get_shift_variable_cost(value::DemandSideTechnology) = value.shift_variable_cost
 """Get [`DemandSideTechnology`](@ref) `curtailment_cost`."""
 get_curtailment_cost(value::DemandSideTechnology) = value.curtailment_cost
 """Get [`DemandSideTechnology`](@ref) `id`."""
@@ -116,15 +120,17 @@ get_ext(value::DemandSideTechnology) = value.ext
 get_region(value::DemandSideTechnology) = value.region
 """Get [`DemandSideTechnology`](@ref) `min_power`."""
 get_min_power(value::DemandSideTechnology) = value.min_power
+"""Get [`DemandSideTechnology`](@ref) `peak_demand_mw`."""
+get_peak_demand_mw(value::DemandSideTechnology) = value.peak_demand_mw
 
 """Set [`DemandSideTechnology`](@ref) `price_per_unit`."""
 set_price_per_unit!(value::DemandSideTechnology, val) = value.price_per_unit = val
-"""Set [`DemandSideTechnology`](@ref) `variable_cost_per_mwh`."""
-set_variable_cost_per_mwh!(value::DemandSideTechnology, val) = value.variable_cost_per_mwh = val
 """Set [`DemandSideTechnology`](@ref) `available`."""
 set_available!(value::DemandSideTechnology, val) = value.available = val
 """Set [`DemandSideTechnology`](@ref) `name`."""
 set_name!(value::DemandSideTechnology, val) = value.name = val
+"""Set [`DemandSideTechnology`](@ref) `shift_variable_cost`."""
+set_shift_variable_cost!(value::DemandSideTechnology, val) = value.shift_variable_cost = val
 """Set [`DemandSideTechnology`](@ref) `curtailment_cost`."""
 set_curtailment_cost!(value::DemandSideTechnology, val) = value.curtailment_cost = val
 """Set [`DemandSideTechnology`](@ref) `id`."""
@@ -149,6 +155,8 @@ set_ext!(value::DemandSideTechnology, val) = value.ext = val
 set_region!(value::DemandSideTechnology, val) = value.region = val
 """Set [`DemandSideTechnology`](@ref) `min_power`."""
 set_min_power!(value::DemandSideTechnology, val) = value.min_power = val
+"""Set [`DemandSideTechnology`](@ref) `peak_demand_mw`."""
+set_peak_demand_mw!(value::DemandSideTechnology, val) = value.peak_demand_mw = val
 
 function serialize_openapi_struct(technology::DemandSideTechnology{T}, vals...) where T <: PSY.StaticInjection
     base_struct = APIServer.DemandSideTechnology(; vals...)

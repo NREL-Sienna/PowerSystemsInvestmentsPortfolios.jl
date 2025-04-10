@@ -10,7 +10,6 @@ This file is auto-generated. Do not edit.
         outage_factor::Float64
         prime_mover_type::PrimeMovers
         capital_costs::PSY.ValueCurve
-        build_year::Union{Nothing, Int}
         lifetime::Int
         available::Bool
         co2::Dict{ThermalFuels, Float64}
@@ -26,11 +25,10 @@ This file is auto-generated. Do not edit.
         cofire_level_limits::Dict{ThermalFuels, MinMax}
         internal::InfrastructureSystemsInternal
         ext::Dict
-        balancing_topology::String
         region::Vector{RegionTopology}
+        min_generation_fraction::Float64
         time_limits::UpDown
         unit_size::Float64
-        min_generation_percentage::Float64
         ramp_limits::UpDown
         capacity_limits::MinMax
     end
@@ -42,7 +40,6 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
-- `build_year::Union{Nothing, Int}`: (default: `nothing`) Year in which the existing technology is built. Default to nothing for new technologies
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed
 - `available::Bool`: (default: `True`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `co2::Dict{ThermalFuels, Float64}`: (default: `Dict()`) Carbon Intensity of fuel
@@ -58,12 +55,11 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `cofire_level_limits::Dict{ThermalFuels, MinMax}`: (default: `Dict()`) Minimum and maximum blending level (%) of each fuel during normal generation process for multi-fuel generator
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `balancing_topology::String`: Set of balancing nodes
 - `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology operates. Can be a zone or node.
+- `min_generation_fraction::Float64`: (default: `0.0`) Minimum generation as a fraction of total capacity
 - `time_limits::UpDown`: (default: `(up=1.0, down=1.0)`) Minimum amount of time a resource has to stay in the committed or shutdown state.
 - `unit_size::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
-- `min_generation_percentage::Float64`: (default: `0.0`) Minimum generation as a fraction of total capacity
-- `ramp_limits::UpDown`: (default: `(up=1.0, down=1.0)`) Maximum decrease and increase in output between operation periods. Fraction of total capacity
+- `ramp_limits::UpDown`: (default: `(up=1.0, down=1.0)`) Maximum decrease and increase in output between operation periods. Fraction of nameplate capacity per hour
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Minimum and maximum allowable installed capacity for a technology (MW)
 """
 mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
@@ -75,8 +71,6 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
     prime_mover_type::PrimeMovers
     "Capital costs for investing in a technology. (USD/MW)"
     capital_costs::PSY.ValueCurve
-    "Year in which the existing technology is built. Default to nothing for new technologies"
-    build_year::Union{Nothing, Int}
     "Maximum number of years a technology can be active once installed"
     lifetime::Int
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
@@ -107,25 +101,23 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
     internal::InfrastructureSystemsInternal
     "Option for providing additional data"
     ext::Dict
-    "Set of balancing nodes"
-    balancing_topology::String
     "Location where technology operates. Can be a zone or node."
     region::Vector{RegionTopology}
+    "Minimum generation as a fraction of total capacity"
+    min_generation_fraction::Float64
     "Minimum amount of time a resource has to stay in the committed or shutdown state."
     time_limits::UpDown
     "Used for discrete investment decisions. Size of each unit being built (MW)"
     unit_size::Float64
-    "Minimum generation as a fraction of total capacity"
-    min_generation_percentage::Float64
-    "Maximum decrease and increase in output between operation periods. Fraction of total capacity"
+    "Maximum decrease and increase in output between operation periods. Fraction of nameplate capacity per hour"
     ramp_limits::UpDown
     "Minimum and maximum allowable installed capacity for a technology (MW)"
     capacity_limits::MinMax
 end
 
 
-function SupplyTechnology{T}(; base_power, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, capital_costs=LinearCurve(0.0), build_year=nothing, lifetime=100, available=True, co2=Dict(), name, id, initial_capacity=0.0, cofire_start_limits=Dict(), financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=[ThermalFuels.OTHER], power_systems_type, cofire_level_limits=Dict(), internal=InfrastructureSystemsInternal(), ext=Dict(), balancing_topology, region=Vector(), time_limits=(up=1.0, down=1.0), unit_size=0.0, min_generation_percentage=0.0, ramp_limits=(up=1.0, down=1.0), capacity_limits=(min=0, max=1e8), ) where T <: PSY.Generator
-    SupplyTechnology{T}(base_power, outage_factor, prime_mover_type, capital_costs, build_year, lifetime, available, co2, name, id, initial_capacity, cofire_start_limits, financial_data, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_limits, internal, ext, balancing_topology, region, time_limits, unit_size, min_generation_percentage, ramp_limits, capacity_limits, )
+function SupplyTechnology{T}(; base_power, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, capital_costs=LinearCurve(0.0), lifetime=100, available=True, co2=Dict(), name, id, initial_capacity=0.0, cofire_start_limits=Dict(), financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=[ThermalFuels.OTHER], power_systems_type, cofire_level_limits=Dict(), internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), min_generation_fraction=0.0, time_limits=(up=1.0, down=1.0), unit_size=0.0, ramp_limits=(up=1.0, down=1.0), capacity_limits=(min=0, max=1e8), ) where T <: PSY.Generator
+    SupplyTechnology{T}(base_power, outage_factor, prime_mover_type, capital_costs, lifetime, available, co2, name, id, initial_capacity, cofire_start_limits, financial_data, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_limits, internal, ext, region, min_generation_fraction, time_limits, unit_size, ramp_limits, capacity_limits, )
 end
 
 """Get [`SupplyTechnology`](@ref) `base_power`."""
@@ -136,8 +128,6 @@ get_outage_factor(value::SupplyTechnology) = value.outage_factor
 get_prime_mover_type(value::SupplyTechnology) = value.prime_mover_type
 """Get [`SupplyTechnology`](@ref) `capital_costs`."""
 get_capital_costs(value::SupplyTechnology) = value.capital_costs
-"""Get [`SupplyTechnology`](@ref) `build_year`."""
-get_build_year(value::SupplyTechnology) = value.build_year
 """Get [`SupplyTechnology`](@ref) `lifetime`."""
 get_lifetime(value::SupplyTechnology) = value.lifetime
 """Get [`SupplyTechnology`](@ref) `available`."""
@@ -168,16 +158,14 @@ get_cofire_level_limits(value::SupplyTechnology) = value.cofire_level_limits
 get_internal(value::SupplyTechnology) = value.internal
 """Get [`SupplyTechnology`](@ref) `ext`."""
 get_ext(value::SupplyTechnology) = value.ext
-"""Get [`SupplyTechnology`](@ref) `balancing_topology`."""
-get_balancing_topology(value::SupplyTechnology) = value.balancing_topology
 """Get [`SupplyTechnology`](@ref) `region`."""
 get_region(value::SupplyTechnology) = value.region
+"""Get [`SupplyTechnology`](@ref) `min_generation_fraction`."""
+get_min_generation_fraction(value::SupplyTechnology) = value.min_generation_fraction
 """Get [`SupplyTechnology`](@ref) `time_limits`."""
 get_time_limits(value::SupplyTechnology) = value.time_limits
 """Get [`SupplyTechnology`](@ref) `unit_size`."""
 get_unit_size(value::SupplyTechnology) = value.unit_size
-"""Get [`SupplyTechnology`](@ref) `min_generation_percentage`."""
-get_min_generation_percentage(value::SupplyTechnology) = value.min_generation_percentage
 """Get [`SupplyTechnology`](@ref) `ramp_limits`."""
 get_ramp_limits(value::SupplyTechnology) = value.ramp_limits
 """Get [`SupplyTechnology`](@ref) `capacity_limits`."""
@@ -191,8 +179,6 @@ set_outage_factor!(value::SupplyTechnology, val) = value.outage_factor = val
 set_prime_mover_type!(value::SupplyTechnology, val) = value.prime_mover_type = val
 """Set [`SupplyTechnology`](@ref) `capital_costs`."""
 set_capital_costs!(value::SupplyTechnology, val) = value.capital_costs = val
-"""Set [`SupplyTechnology`](@ref) `build_year`."""
-set_build_year!(value::SupplyTechnology, val) = value.build_year = val
 """Set [`SupplyTechnology`](@ref) `lifetime`."""
 set_lifetime!(value::SupplyTechnology, val) = value.lifetime = val
 """Set [`SupplyTechnology`](@ref) `available`."""
@@ -223,16 +209,14 @@ set_cofire_level_limits!(value::SupplyTechnology, val) = value.cofire_level_limi
 set_internal!(value::SupplyTechnology, val) = value.internal = val
 """Set [`SupplyTechnology`](@ref) `ext`."""
 set_ext!(value::SupplyTechnology, val) = value.ext = val
-"""Set [`SupplyTechnology`](@ref) `balancing_topology`."""
-set_balancing_topology!(value::SupplyTechnology, val) = value.balancing_topology = val
 """Set [`SupplyTechnology`](@ref) `region`."""
 set_region!(value::SupplyTechnology, val) = value.region = val
+"""Set [`SupplyTechnology`](@ref) `min_generation_fraction`."""
+set_min_generation_fraction!(value::SupplyTechnology, val) = value.min_generation_fraction = val
 """Set [`SupplyTechnology`](@ref) `time_limits`."""
 set_time_limits!(value::SupplyTechnology, val) = value.time_limits = val
 """Set [`SupplyTechnology`](@ref) `unit_size`."""
 set_unit_size!(value::SupplyTechnology, val) = value.unit_size = val
-"""Set [`SupplyTechnology`](@ref) `min_generation_percentage`."""
-set_min_generation_percentage!(value::SupplyTechnology, val) = value.min_generation_percentage = val
 """Set [`SupplyTechnology`](@ref) `ramp_limits`."""
 set_ramp_limits!(value::SupplyTechnology, val) = value.ramp_limits = val
 """Set [`SupplyTechnology`](@ref) `capacity_limits`."""

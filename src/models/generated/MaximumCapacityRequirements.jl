@@ -12,7 +12,7 @@ This file is auto-generated. Do not edit.
         internal::InfrastructureSystemsInternal
         id::Int64
         ext::Dict
-        eligible_resources::Vector{Technology}
+        eligible_resources::Vector{ResourceTechnology}
         available::Bool
     end
 
@@ -25,7 +25,7 @@ Policy requirement that the total capacity of all technologies in `eligible_reso
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `id::Int64`: ID for individual policy
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of technologies that contribute to the carbon cap constraint.
+- `eligible_resources::Vector{ResourceTechnology}`: (default: `Vector{ResourceTechnology}()`) List of technologies that contribute to the carbon cap constraint.
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 """
 mutable struct MaximumCapacityRequirements <: Requirement
@@ -42,13 +42,13 @@ mutable struct MaximumCapacityRequirements <: Requirement
     "Option for providing additional data"
     ext::Dict
     "List of technologies that contribute to the carbon cap constraint."
-    eligible_resources::Vector{Technology}
+    eligible_resources::Vector{ResourceTechnology}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
 end
 
 
-function MaximumCapacityRequirements(; name, max_capacity_mw=0.0, target_year=2050, internal=InfrastructureSystemsInternal(), id, ext=Dict(), eligible_resources=Vector{Technology}(), available, )
+function MaximumCapacityRequirements(; name, max_capacity_mw=0.0, target_year=2050, internal=InfrastructureSystemsInternal(), id, ext=Dict(), eligible_resources=Vector{ResourceTechnology}(), available, )
     MaximumCapacityRequirements(name, max_capacity_mw, target_year, internal, id, ext, eligible_resources, available, )
 end
 

@@ -12,7 +12,7 @@ This file is auto-generated. Do not edit.
         id::Int64
         min_capacity_mw::Float64
         ext::Dict
-        eligible_resources::Vector{Technology}
+        eligible_resources::Vector{ResourceTechnology}
         available::Bool
     end
 
@@ -25,7 +25,7 @@ Policy requirement that the total capacity of all technologies in `eligible_tech
 - `id::Int64`: ID for individual policy
 - `min_capacity_mw::Float64`: (default: `0.0`) Minimum total capacity across all eligible resources
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of resources that contribute to the carbon cap constraint.
+- `eligible_resources::Vector{ResourceTechnology}`: (default: `Vector{ResourceTechnology}()`) List of resources that contribute to the capacity requirement.
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 """
 mutable struct MinimumCapacityRequirements <: Requirement
@@ -41,14 +41,14 @@ mutable struct MinimumCapacityRequirements <: Requirement
     min_capacity_mw::Float64
     "Option for providing additional data"
     ext::Dict
-    "List of resources that contribute to the carbon cap constraint."
-    eligible_resources::Vector{Technology}
+    "List of resources that contribute to the capacity requirement."
+    eligible_resources::Vector{ResourceTechnology}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
 end
 
 
-function MinimumCapacityRequirements(; name, target_year=2050, internal=InfrastructureSystemsInternal(), id, min_capacity_mw=0.0, ext=Dict(), eligible_resources=Vector{Technology}(), available, )
+function MinimumCapacityRequirements(; name, target_year=2050, internal=InfrastructureSystemsInternal(), id, min_capacity_mw=0.0, ext=Dict(), eligible_resources=Vector{ResourceTechnology}(), available, )
     MinimumCapacityRequirements(name, target_year, internal, id, min_capacity_mw, ext, eligible_resources, available, )
 end
 
