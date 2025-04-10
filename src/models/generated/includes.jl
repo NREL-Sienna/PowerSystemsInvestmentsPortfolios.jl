@@ -1,5 +1,5 @@
-include("Node.jl")
 include("Zone.jl")
+include("Node.jl")
 include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
@@ -58,13 +58,6 @@ export get_eligible_resources
 export get_eligible_technologies
 export get_end_node
 export get_end_region
-export get_existing_capacity_charge
-export get_existing_capacity_discharge
-export get_existing_capacity_energy
-export get_existing_capacity_inverter
-export get_existing_capacity_power
-export get_existing_capacity_solar
-export get_existing_capacity_wind
 export get_existing_technologies
 export get_ext
 export get_financial_data
@@ -166,13 +159,6 @@ export set_eligible_resources!
 export set_eligible_technologies!
 export set_end_node!
 export set_end_region!
-export set_existing_capacity_charge!
-export set_existing_capacity_discharge!
-export set_existing_capacity_energy!
-export set_existing_capacity_inverter!
-export set_existing_capacity_power!
-export set_existing_capacity_solar!
-export set_existing_capacity_wind!
 export set_existing_technologies!
 export set_ext!
 export set_financial_data!

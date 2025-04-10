@@ -311,8 +311,6 @@ function build_portfolio()
         id=1,
         region=[z1],
         storage_tech=StorageTech.LIB,
-        existing_capacity_energy=0.0,
-        existing_capacity_discharge=0.0,
         capacity_limits_discharge=(0.0, 300.0),
         capacity_limits_energy=(0.0, 1000.0),
         power_systems_type="EnergyReservoirStorage",

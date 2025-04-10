@@ -17,9 +17,6 @@
         capital_costs_charge=nothing,
         capital_costs_discharge=nothing,
         operation_costs=nothing,
-        existing_capacity_charge=0.0,
-        existing_capacity_discharge=0.0,
-        existing_capacity_energy=0.0,
         unit_size_discharge=0.0,
         unit_size_charge=0.0,
         unit_size_energy=0.0,
@@ -46,9 +43,6 @@
     - capital_costs_charge::ValueCurve
     - capital_costs_discharge::ValueCurve
     - operation_costs::StorageCost
-    - existing_capacity_charge::Float64
-    - existing_capacity_discharge::Float64
-    - existing_capacity_energy::Float64
     - unit_size_discharge::Float64
     - unit_size_charge::Float64
     - unit_size_energy::Float64
@@ -75,9 +69,6 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
     capital_costs_charge = nothing # spec type: Union{ Nothing, ValueCurve }
     capital_costs_discharge = nothing # spec type: Union{ Nothing, ValueCurve }
     operation_costs = nothing # spec type: Union{ Nothing, StorageCost }
-    existing_capacity_charge::Union{Nothing, Float64} = 0.0
-    existing_capacity_discharge::Union{Nothing, Float64} = 0.0
-    existing_capacity_energy::Union{Nothing, Float64} = 0.0
     unit_size_discharge::Union{Nothing, Float64} = 0.0
     unit_size_charge::Union{Nothing, Float64} = 0.0
     unit_size_energy::Union{Nothing, Float64} = 0.0
@@ -104,9 +95,6 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         capital_costs_charge,
         capital_costs_discharge,
         operation_costs,
-        existing_capacity_charge,
-        existing_capacity_discharge,
-        existing_capacity_energy,
         unit_size_discharge,
         unit_size_charge,
         unit_size_energy,
@@ -159,21 +147,6 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
             StorageTechnology,
             Symbol("operation_costs"),
             operation_costs,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("existing_capacity_charge"),
-            existing_capacity_charge,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("existing_capacity_discharge"),
-            existing_capacity_discharge,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("existing_capacity_energy"),
-            existing_capacity_energy,
         )
         OpenAPI.validate_property(
             StorageTechnology,
@@ -232,9 +205,6 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
             capital_costs_charge,
             capital_costs_discharge,
             operation_costs,
-            existing_capacity_charge,
-            existing_capacity_discharge,
-            existing_capacity_energy,
             unit_size_discharge,
             unit_size_charge,
             unit_size_energy,
@@ -264,9 +234,6 @@ const _property_types_StorageTechnology = Dict{Symbol, String}(
     Symbol("capital_costs_charge") => "ValueCurve",
     Symbol("capital_costs_discharge") => "ValueCurve",
     Symbol("operation_costs") => "StorageCost",
-    Symbol("existing_capacity_charge") => "Float64",
-    Symbol("existing_capacity_discharge") => "Float64",
-    Symbol("existing_capacity_energy") => "Float64",
     Symbol("unit_size_discharge") => "Float64",
     Symbol("unit_size_charge") => "Float64",
     Symbol("unit_size_energy") => "Float64",

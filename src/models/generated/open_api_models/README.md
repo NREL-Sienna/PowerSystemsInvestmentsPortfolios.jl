@@ -47,9 +47,9 @@ Class | Method | HTTP request | Description
 
 ## Models
 
- - [ACTransportTechnology](docs/ACTransportTechnology.md)
  - [AggregateRetirementPotential](docs/AggregateRetirementPotential.md)
  - [AggregateRetrofitPotential](docs/AggregateRetrofitPotential.md)
+ - [AggregateTransportTechnology](docs/AggregateTransportTechnology.md)
  - [AverageRateCurve](docs/AverageRateCurve.md)
  - [AverageRateCurveFunctionData](docs/AverageRateCurveFunctionData.md)
  - [CapacityReserveMargin](docs/CapacityReserveMargin.md)
@@ -63,7 +63,6 @@ Class | Method | HTTP request | Description
  - [ExistingCapacity](docs/ExistingCapacity.md)
  - [FuelCurve](docs/FuelCurve.md)
  - [FuelCurveFuelCost](docs/FuelCurveFuelCost.md)
- - [HVDCTransportTechnology](docs/HVDCTransportTechnology.md)
  - [HourlyMatching](docs/HourlyMatching.md)
  - [InOut](docs/InOut.md)
  - [IncrementalCurve](docs/IncrementalCurve.md)
@@ -74,7 +73,8 @@ Class | Method | HTTP request | Description
  - [MaximumCapacityRequirements](docs/MaximumCapacityRequirements.md)
  - [MinMax](docs/MinMax.md)
  - [MinimumCapacityRequirements](docs/MinimumCapacityRequirements.md)
- - [NodalTransportTechnology](docs/NodalTransportTechnology.md)
+ - [NodalACTransportTechnology](docs/NodalACTransportTechnology.md)
+ - [NodalHVDCTransportTechnology](docs/NodalHVDCTransportTechnology.md)
  - [Node](docs/Node.md)
  - [PiecewiseLinearData](docs/PiecewiseLinearData.md)
  - [PiecewiseStepData](docs/PiecewiseStepData.md)
