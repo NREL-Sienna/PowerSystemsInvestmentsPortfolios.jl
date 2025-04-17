@@ -221,7 +221,7 @@ function from_dict(
     if !isnothing(sys)
         base_system = PSY.from_dict(PSY.System, sys)
     else
-        base_system = nothing
+        base_system = PSY.System(100.0)
     end
 
     internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
