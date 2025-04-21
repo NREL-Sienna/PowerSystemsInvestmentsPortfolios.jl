@@ -11,6 +11,7 @@
         peak_demand_mw=0.0,
         region=nothing,
         value_of_lost_load=nothing,
+        unserved_demand_curve=nothing,
     )
 
     - name::String
@@ -20,6 +21,7 @@
     - peak_demand_mw::Float64
     - region::Vector{Int64}
     - value_of_lost_load::Float64
+    - unserved_demand_curve::ValueCurve
 """
 Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
@@ -29,6 +31,7 @@ Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
     peak_demand_mw::Union{Nothing, Float64} = 0.0
     region::Union{Nothing, Vector{Int64}} = nothing
     value_of_lost_load::Union{Nothing, Float64} = nothing
+    unserved_demand_curve = nothing # spec type: Union{ Nothing, ValueCurve }
 
     function DemandRequirement(
         name,
@@ -38,6 +41,7 @@ Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
         peak_demand_mw,
         region,
         value_of_lost_load,
+        unserved_demand_curve,
     )
         OpenAPI.validate_property(DemandRequirement, Symbol("name"), name)
         OpenAPI.validate_property(DemandRequirement, Symbol("id"), id)
@@ -58,6 +62,11 @@ Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
             Symbol("value_of_lost_load"),
             value_of_lost_load,
         )
+        OpenAPI.validate_property(
+            DemandRequirement,
+            Symbol("unserved_demand_curve"),
+            unserved_demand_curve,
+        )
         return new(
             name,
             id,
@@ -66,6 +75,7 @@ Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
             peak_demand_mw,
             region,
             value_of_lost_load,
+            unserved_demand_curve,
         )
     end
 end # type DemandRequirement
@@ -78,6 +88,7 @@ const _property_types_DemandRequirement = Dict{Symbol, String}(
     Symbol("peak_demand_mw") => "Float64",
     Symbol("region") => "Vector{Int64}",
     Symbol("value_of_lost_load") => "Float64",
+    Symbol("unserved_demand_curve") => "ValueCurve",
 )
 OpenAPI.property_type(::Type{DemandRequirement}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_DemandRequirement[name]))}

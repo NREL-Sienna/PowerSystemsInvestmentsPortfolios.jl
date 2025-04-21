@@ -10,6 +10,7 @@ This file is auto-generated. Do not edit.
         value_of_lost_load::Float64
         power_systems_type::String
         peak_demand_mw::Float64
+        unserved_demand_curve::PSY.ValueCurve
         internal::InfrastructureSystemsInternal
         id::Int64
         ext::Dict
@@ -24,6 +25,7 @@ Demand requirements for a region.
 - `value_of_lost_load::Float64`: Value of unserved load, USD/MWh
 - `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
 - `peak_demand_mw::Float64`: (default: `0.0`) Peak demand value in MW
+- `unserved_demand_curve::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Piecewise curve to scale the cost of unserved load based on the value of lost load
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `id::Int64`: ID for individual demand requirement
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
@@ -39,6 +41,8 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
     power_systems_type::String
     "Peak demand value in MW"
     peak_demand_mw::Float64
+    "Piecewise curve to scale the cost of unserved load based on the value of lost load"
+    unserved_demand_curve::PSY.ValueCurve
     "Internal field"
     internal::InfrastructureSystemsInternal
     "ID for individual demand requirement"
@@ -52,8 +56,8 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
 end
 
 
-function DemandRequirement{T}(; name, value_of_lost_load, power_systems_type, peak_demand_mw=0.0, internal=InfrastructureSystemsInternal(), id, ext=Dict(), region=Vector(), available=true, ) where T <: PSY.StaticInjection
-    DemandRequirement{T}(name, value_of_lost_load, power_systems_type, peak_demand_mw, internal, id, ext, region, available, )
+function DemandRequirement{T}(; name, value_of_lost_load, power_systems_type, peak_demand_mw=0.0, unserved_demand_curve=LinearCurve(0.0), internal=InfrastructureSystemsInternal(), id, ext=Dict(), region=Vector(), available=true, ) where T <: PSY.StaticInjection
+    DemandRequirement{T}(name, value_of_lost_load, power_systems_type, peak_demand_mw, unserved_demand_curve, internal, id, ext, region, available, )
 end
 
 """Get [`DemandRequirement`](@ref) `name`."""
@@ -64,6 +68,8 @@ get_value_of_lost_load(value::DemandRequirement) = value.value_of_lost_load
 get_power_systems_type(value::DemandRequirement) = value.power_systems_type
 """Get [`DemandRequirement`](@ref) `peak_demand_mw`."""
 get_peak_demand_mw(value::DemandRequirement) = value.peak_demand_mw
+"""Get [`DemandRequirement`](@ref) `unserved_demand_curve`."""
+get_unserved_demand_curve(value::DemandRequirement) = value.unserved_demand_curve
 """Get [`DemandRequirement`](@ref) `internal`."""
 get_internal(value::DemandRequirement) = value.internal
 """Get [`DemandRequirement`](@ref) `id`."""
@@ -83,6 +89,8 @@ set_value_of_lost_load!(value::DemandRequirement, val) = value.value_of_lost_loa
 set_power_systems_type!(value::DemandRequirement, val) = value.power_systems_type = val
 """Set [`DemandRequirement`](@ref) `peak_demand_mw`."""
 set_peak_demand_mw!(value::DemandRequirement, val) = value.peak_demand_mw = val
+"""Set [`DemandRequirement`](@ref) `unserved_demand_curve`."""
+set_unserved_demand_curve!(value::DemandRequirement, val) = value.unserved_demand_curve = val
 """Set [`DemandRequirement`](@ref) `internal`."""
 set_internal!(value::DemandRequirement, val) = value.internal = val
 """Set [`DemandRequirement`](@ref) `id`."""
