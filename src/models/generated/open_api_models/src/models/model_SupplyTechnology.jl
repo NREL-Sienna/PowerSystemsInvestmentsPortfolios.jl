@@ -17,7 +17,6 @@
         cofire_level_limits=nothing,
         capital_costs=nothing,
         operation_costs=nothing,
-        initial_capacity=0.0,
         unit_size=0.0,
         capacity_limits=nothing,
         outage_factor=1.0,
@@ -42,7 +41,6 @@
     - cofire_level_limits::Dict{String, MinMax}
     - capital_costs::ValueCurve
     - operation_costs::SupplyTechnologyOperationCosts
-    - initial_capacity::Float64
     - unit_size::Float64
     - capacity_limits::MinMax
     - outage_factor::Float64
@@ -67,7 +65,6 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     cofire_level_limits::Union{Nothing, Dict} = nothing # spec type: Union{ Nothing, Dict{String, MinMax} }
     capital_costs = nothing # spec type: Union{ Nothing, ValueCurve }
     operation_costs = nothing # spec type: Union{ Nothing, SupplyTechnologyOperationCosts }
-    initial_capacity::Union{Nothing, Float64} = 0.0
     unit_size::Union{Nothing, Float64} = 0.0
     capacity_limits = nothing # spec type: Union{ Nothing, MinMax }
     outage_factor::Union{Nothing, Float64} = 1.0
@@ -92,7 +89,6 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
         cofire_level_limits,
         capital_costs,
         operation_costs,
-        initial_capacity,
         unit_size,
         capacity_limits,
         outage_factor,
@@ -136,11 +132,6 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
             Symbol("operation_costs"),
             operation_costs,
         )
-        OpenAPI.validate_property(
-            SupplyTechnology,
-            Symbol("initial_capacity"),
-            initial_capacity,
-        )
         OpenAPI.validate_property(SupplyTechnology, Symbol("unit_size"), unit_size)
         OpenAPI.validate_property(
             SupplyTechnology,
@@ -180,7 +171,6 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
             cofire_level_limits,
             capital_costs,
             operation_costs,
-            initial_capacity,
             unit_size,
             capacity_limits,
             outage_factor,
@@ -208,7 +198,6 @@ const _property_types_SupplyTechnology = Dict{Symbol, String}(
     Symbol("cofire_level_limits") => "Dict{String, MinMax}",
     Symbol("capital_costs") => "ValueCurve",
     Symbol("operation_costs") => "SupplyTechnologyOperationCosts",
-    Symbol("initial_capacity") => "Float64",
     Symbol("unit_size") => "Float64",
     Symbol("capacity_limits") => "MinMax",
     Symbol("outage_factor") => "Float64",

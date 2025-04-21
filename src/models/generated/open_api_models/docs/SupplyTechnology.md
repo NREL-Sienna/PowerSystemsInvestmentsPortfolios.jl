@@ -17,7 +17,6 @@ Name | Type | Description | Notes
 **cofire_level_limits** | [**Dict{String, MinMax}**](MinMax.md) |  | [optional] [default to nothing]
 **capital_costs** | [***ValueCurve**](ValueCurve.md) |  | [optional] [default to nothing]
 **operation_costs** | [***SupplyTechnologyOperationCosts**](SupplyTechnologyOperationCosts.md) |  | [optional] [default to nothing]
-**initial_capacity** | **Float64** |  | [optional] [default to 0.0]
 **unit_size** | **Float64** |  | [optional] [default to 0.0]
 **capacity_limits** | [***MinMax**](MinMax.md) |  | [optional] [default to nothing]
 **outage_factor** | **Float64** |  | [optional] [default to 1.0]

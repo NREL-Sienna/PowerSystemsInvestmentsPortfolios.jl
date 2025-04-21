@@ -15,7 +15,6 @@ This file is auto-generated. Do not edit.
         co2::Dict{ThermalFuels, Float64}
         name::String
         id::Int64
-        initial_capacity::Float64
         cofire_start_limits::Dict{ThermalFuels, MinMax}
         financial_data::TechnologyFinancialData
         start_fuel_mmbtu_per_mw::Float64
@@ -45,7 +44,6 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `co2::Dict{ThermalFuels, Float64}`: (default: `Dict()`) Carbon Intensity of fuel
 - `name::String`: The technology name
 - `id::Int64`: ID for individual technology
-- `initial_capacity::Float64`: (default: `0.0`) Pre-existing capacity for a technology (MW)
 - `cofire_start_limits::Dict{ThermalFuels, MinMax}`: (default: `Dict()`) Minimum and maximum blending level (%) of each fuel during start-up process for multi-fuel generator
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `start_fuel_mmbtu_per_mw::Float64`: (default: `0.0`) Startup fuel use per MW of nameplate capacity of each generator (MMBtu/MW per start)
@@ -81,8 +79,6 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
     name::String
     "ID for individual technology"
     id::Int64
-    "Pre-existing capacity for a technology (MW)"
-    initial_capacity::Float64
     "Minimum and maximum blending level (%) of each fuel during start-up process for multi-fuel generator"
     cofire_start_limits::Dict{ThermalFuels, MinMax}
     "Struct containing relevant financial information for a technology"
@@ -116,8 +112,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
 end
 
 
-function SupplyTechnology{T}(; base_power, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, capital_costs=LinearCurve(0.0), lifetime=100, available=True, co2=Dict(), name, id, initial_capacity=0.0, cofire_start_limits=Dict(), financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=[ThermalFuels.OTHER], power_systems_type, cofire_level_limits=Dict(), internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), min_generation_fraction=0.0, time_limits=(up=1.0, down=1.0), unit_size=0.0, ramp_limits=(up=1.0, down=1.0), capacity_limits=(min=0, max=1e8), ) where T <: PSY.Generator
-    SupplyTechnology{T}(base_power, outage_factor, prime_mover_type, capital_costs, lifetime, available, co2, name, id, initial_capacity, cofire_start_limits, financial_data, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_limits, internal, ext, region, min_generation_fraction, time_limits, unit_size, ramp_limits, capacity_limits, )
+function SupplyTechnology{T}(; base_power, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, capital_costs=LinearCurve(0.0), lifetime=100, available=True, co2=Dict(), name, id, cofire_start_limits=Dict(), financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=[ThermalFuels.OTHER], power_systems_type, cofire_level_limits=Dict(), internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), min_generation_fraction=0.0, time_limits=(up=1.0, down=1.0), unit_size=0.0, ramp_limits=(up=1.0, down=1.0), capacity_limits=(min=0, max=1e8), ) where T <: PSY.Generator
+    SupplyTechnology{T}(base_power, outage_factor, prime_mover_type, capital_costs, lifetime, available, co2, name, id, cofire_start_limits, financial_data, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_limits, internal, ext, region, min_generation_fraction, time_limits, unit_size, ramp_limits, capacity_limits, )
 end
 
 """Get [`SupplyTechnology`](@ref) `base_power`."""
@@ -138,8 +134,6 @@ get_co2(value::SupplyTechnology) = value.co2
 get_name(value::SupplyTechnology) = value.name
 """Get [`SupplyTechnology`](@ref) `id`."""
 get_id(value::SupplyTechnology) = value.id
-"""Get [`SupplyTechnology`](@ref) `initial_capacity`."""
-get_initial_capacity(value::SupplyTechnology) = value.initial_capacity
 """Get [`SupplyTechnology`](@ref) `cofire_start_limits`."""
 get_cofire_start_limits(value::SupplyTechnology) = value.cofire_start_limits
 """Get [`SupplyTechnology`](@ref) `financial_data`."""
@@ -189,8 +183,6 @@ set_co2!(value::SupplyTechnology, val) = value.co2 = val
 set_name!(value::SupplyTechnology, val) = value.name = val
 """Set [`SupplyTechnology`](@ref) `id`."""
 set_id!(value::SupplyTechnology, val) = value.id = val
-"""Set [`SupplyTechnology`](@ref) `initial_capacity`."""
-set_initial_capacity!(value::SupplyTechnology, val) = value.initial_capacity = val
 """Set [`SupplyTechnology`](@ref) `cofire_start_limits`."""
 set_cofire_start_limits!(value::SupplyTechnology, val) = value.cofire_start_limits = val
 """Set [`SupplyTechnology`](@ref) `financial_data`."""

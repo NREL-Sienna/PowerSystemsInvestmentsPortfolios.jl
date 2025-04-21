@@ -1,5 +1,3 @@
-include("Zone.jl")
-include("Node.jl")
 include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
@@ -14,9 +12,11 @@ include("DemandSideTechnology.jl")
 include("NodalHVDCTransportTechnology.jl")
 include("EnergyShareRequirements.jl")
 include("AggregateRetirementPotential.jl")
+include("Zone.jl")
 include("AggregateTransportTechnology.jl")
 include("StorageTechnology.jl")
 include("CarbonCaps.jl")
+include("Node.jl")
 include("CarbonTax.jl")
 include("RetrofitPotential.jl")
 include("HourlyMatching.jl")
@@ -66,7 +66,6 @@ export get_financial_data
 export get_fuel
 export get_generation_fraction_requirement
 export get_id
-export get_initial_capacity
 export get_inverter_efficiency
 export get_inverter_supply_ratio
 export get_lifetime
@@ -169,7 +168,6 @@ export set_financial_data!
 export set_fuel!
 export set_generation_fraction_requirement!
 export set_id!
-export set_initial_capacity!
 export set_inverter_efficiency!
 export set_inverter_supply_ratio!
 export set_lifetime!
