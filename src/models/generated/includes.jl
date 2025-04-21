@@ -8,9 +8,10 @@ include("RetirementPotential.jl")
 include("ExistingCapacity.jl")
 include("AggregateRetrofitPotential.jl")
 include("MaximumCapacityRequirements.jl")
+include("TopologyMapping.jl")
 include("CapacityReserveMargin.jl")
-include("NodalHVDCTransportTechnology.jl")
 include("DemandSideTechnology.jl")
+include("NodalHVDCTransportTechnology.jl")
 include("EnergyShareRequirements.jl")
 include("AggregateRetirementPotential.jl")
 include("AggregateTransportTechnology.jl")
@@ -25,6 +26,7 @@ export get_available
 export get_base_power
 export get_build_year
 export get_bus_type
+export get_buses
 export get_capacity_energy_limits
 export get_capacity_limits
 export get_capacity_limits_charge
@@ -120,12 +122,14 @@ export get_unit_size
 export get_unit_size_charge
 export get_unit_size_discharge
 export get_unit_size_energy
+export get_unserved_demand_curve
 export get_value_of_lost_load
 export get_voltage
 export set_available!
 export set_base_power!
 export set_build_year!
 export set_bus_type!
+export set_buses!
 export set_capacity_energy_limits!
 export set_capacity_limits!
 export set_capacity_limits_charge!
@@ -221,5 +225,6 @@ export set_unit_size!
 export set_unit_size_charge!
 export set_unit_size_discharge!
 export set_unit_size_energy!
+export set_unserved_demand_curve!
 export set_value_of_lost_load!
 export set_voltage!

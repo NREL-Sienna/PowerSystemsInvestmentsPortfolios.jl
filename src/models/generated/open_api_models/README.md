@@ -92,6 +92,7 @@ Class | Method | HTTP request | Description
  - [SupplyTechnologyOperationCosts](docs/SupplyTechnologyOperationCosts.md)
  - [ThermalGenerationCost](docs/ThermalGenerationCost.md)
  - [ThermalGenerationCostStartUp](docs/ThermalGenerationCostStartUp.md)
+ - [TopologyMapping](docs/TopologyMapping.md)
  - [UpDown](docs/UpDown.md)
  - [ValueCurve](docs/ValueCurve.md)
  - [XYCoords](docs/XYCoords.md)

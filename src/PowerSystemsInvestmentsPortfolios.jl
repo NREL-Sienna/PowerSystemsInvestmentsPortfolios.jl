@@ -60,6 +60,7 @@ export AggregateRetirementPotential
 export RetrofitPotential
 export AggregateRetrofitPotential
 export ExistingCapacity
+export TopologyMapping
 export CarbonCaps
 export CapacityReserveMargin
 export CarbonTax
