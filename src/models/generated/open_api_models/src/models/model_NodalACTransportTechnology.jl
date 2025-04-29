@@ -11,7 +11,6 @@
         power_systems_type=nothing,
         start_node=nothing,
         end_node=nothing,
-        existing_line_capacity=nothing,
         capacity_limits=nothing,
         capital_cost=nothing,
         resistance=0.0,
@@ -27,7 +26,6 @@
     - power_systems_type::String
     - start_node::Int64
     - end_node::Int64
-    - existing_line_capacity::Float64
     - capacity_limits::MinMax
     - capital_cost::ValueCurve
     - resistance::Float64
@@ -43,7 +41,6 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
     power_systems_type::Union{Nothing, String} = nothing
     start_node::Union{Nothing, Int64} = nothing
     end_node::Union{Nothing, Int64} = nothing
-    existing_line_capacity::Union{Nothing, Float64} = nothing
     capacity_limits = nothing # spec type: Union{ Nothing, MinMax }
     capital_cost = nothing # spec type: Union{ Nothing, ValueCurve }
     resistance::Union{Nothing, Float64} = 0.0
@@ -59,7 +56,6 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
         power_systems_type,
         start_node,
         end_node,
-        existing_line_capacity,
         capacity_limits,
         capital_cost,
         resistance,
@@ -90,11 +86,6 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
             start_node,
         )
         OpenAPI.validate_property(NodalACTransportTechnology, Symbol("end_node"), end_node)
-        OpenAPI.validate_property(
-            NodalACTransportTechnology,
-            Symbol("existing_line_capacity"),
-            existing_line_capacity,
-        )
         OpenAPI.validate_property(
             NodalACTransportTechnology,
             Symbol("capacity_limits"),
@@ -129,7 +120,6 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
             power_systems_type,
             start_node,
             end_node,
-            existing_line_capacity,
             capacity_limits,
             capital_cost,
             resistance,
@@ -148,7 +138,6 @@ const _property_types_NodalACTransportTechnology = Dict{Symbol, String}(
     Symbol("power_systems_type") => "String",
     Symbol("start_node") => "Int64",
     Symbol("end_node") => "Int64",
-    Symbol("existing_line_capacity") => "Float64",
     Symbol("capacity_limits") => "MinMax",
     Symbol("capital_cost") => "ValueCurve",
     Symbol("resistance") => "Float64",

@@ -571,11 +571,19 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
     elseif name in [:ramp_limits, :time_limits]
         data = getfield(base_struct, name)
         val = (up=data["up"], down=data["down"])
-    elseif name in [:start_region, :end_region, :start_node, :end_node]
+    elseif name in [:start_region, :end_region,]
         val = first(
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
-                RegionTopology,
+                Zone,
+                portfolio.data,
+            ),
+        )
+    elseif name in [:start_node, :end_node]
+        val = first(
+            IS.get_components(
+                x -> get_id(x) in getfield(base_struct, name),
+                Node,
                 portfolio.data,
             ),
         )
