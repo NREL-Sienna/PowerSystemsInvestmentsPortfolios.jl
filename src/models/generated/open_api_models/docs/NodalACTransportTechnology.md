@@ -5,7 +5,6 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | **String** |  | [default to nothing]
-**build_year** | **Int64** |  | [optional] [default to 2020]
 **id** | **Int64** |  | [optional] [default to nothing]
 **available** | **Bool** |  | [default to nothing]
 **base_power** | **Float64** |  | [optional] [default to nothing]
