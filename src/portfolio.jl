@@ -826,6 +826,18 @@ function get_supplemental_attribute(p::Portfolio, uuid::Base.UUID)
 end
 
 """
+Return a vector of supplemental attributes of the given type
+
+Throws ArgumentError if the attribute is not stored.
+"""
+function get_supplemental_attributes(
+    ::Type{T},
+    p::Portfolio,
+) where {T <: IS.SupplementalAttribute}
+    return IS.get_supplemental_attributes(T, p.data)
+end
+
+"""
 Return the internal of a supplemental attribute, required to add to IS for SupplementalAttributes to work
 """
 IS.get_internal(val::IS.SupplementalAttribute) = val.internal
