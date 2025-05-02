@@ -838,6 +838,24 @@ function get_supplemental_attributes(
 end
 
 """
+Return a Vector of supplemental_attributes. T can be concrete or abstract.
+
+# Arguments
+
+  - `T`: supplemental_attribute type
+  - `supplemental_attributes::SupplementalAttributes`: SupplementalAttributes in the system
+  - `filter_func::Union{Nothing, Function} = nothing`: Optional function that accepts a component
+    of type T and returns a Bool. Apply this function to each component and only return components
+    where the result is true.
+"""
+function get_supplemental_attributes(
+    ::Type{T},
+    component::IS.InfrastructureSystemsComponent,
+) where {T <: IS.SupplementalAttribute}
+    return IS.get_supplemental_attributes(T, component)
+end
+
+"""
 Return the internal of a supplemental attribute, required to add to IS for SupplementalAttributes to work
 """
 IS.get_internal(val::IS.SupplementalAttribute) = val.internal
