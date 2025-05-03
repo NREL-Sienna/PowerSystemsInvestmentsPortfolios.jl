@@ -12,7 +12,7 @@
         start_region=nothing,
         end_region=nothing,
         capacity_limits=nothing,
-        capital_cost=nothing,
+        capital_costs=nothing,
         line_loss=nothing,
         unit_size=nothing,
         financial_data=nothing,
@@ -26,7 +26,7 @@
     - start_region::Int64
     - end_region::Int64
     - capacity_limits::MinMax
-    - capital_cost::ValueCurve
+    - capital_costs::ValueCurve
     - line_loss::Float64
     - unit_size::Float64
     - financial_data::Any
@@ -40,7 +40,7 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
     start_region::Union{Nothing, Int64} = nothing
     end_region::Union{Nothing, Int64} = nothing
     capacity_limits = nothing # spec type: Union{ Nothing, MinMax }
-    capital_cost = nothing # spec type: Union{ Nothing, ValueCurve }
+    capital_costs = nothing # spec type: Union{ Nothing, ValueCurve }
     line_loss::Union{Nothing, Float64} = nothing
     unit_size::Union{Nothing, Float64} = nothing
     financial_data::Union{Nothing, Any} = nothing
@@ -54,7 +54,7 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
         start_region,
         end_region,
         capacity_limits,
-        capital_cost,
+        capital_costs,
         line_loss,
         unit_size,
         financial_data,
@@ -93,8 +93,8 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             AggregateTransportTechnology,
-            Symbol("capital_cost"),
-            capital_cost,
+            Symbol("capital_costs"),
+            capital_costs,
         )
         OpenAPI.validate_property(
             AggregateTransportTechnology,
@@ -120,7 +120,7 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
             start_region,
             end_region,
             capacity_limits,
-            capital_cost,
+            capital_costs,
             line_loss,
             unit_size,
             financial_data,
@@ -137,7 +137,7 @@ const _property_types_AggregateTransportTechnology = Dict{Symbol, String}(
     Symbol("start_region") => "Int64",
     Symbol("end_region") => "Int64",
     Symbol("capacity_limits") => "MinMax",
-    Symbol("capital_cost") => "ValueCurve",
+    Symbol("capital_costs") => "ValueCurve",
     Symbol("line_loss") => "Float64",
     Symbol("unit_size") => "Float64",
     Symbol("financial_data") => "Any",

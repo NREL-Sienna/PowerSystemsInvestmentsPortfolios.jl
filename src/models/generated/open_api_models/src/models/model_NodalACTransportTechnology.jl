@@ -12,7 +12,7 @@
         start_node=nothing,
         end_node=nothing,
         capacity_limits=nothing,
-        capital_cost=nothing,
+        capital_costs=nothing,
         resistance=0.0,
         voltage=0.0,
         reactance=0.0,
@@ -27,7 +27,7 @@
     - start_node::Int64
     - end_node::Int64
     - capacity_limits::MinMax
-    - capital_cost::ValueCurve
+    - capital_costs::ValueCurve
     - resistance::Float64
     - voltage::Float64
     - reactance::Float64
@@ -42,7 +42,7 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
     start_node::Union{Nothing, Int64} = nothing
     end_node::Union{Nothing, Int64} = nothing
     capacity_limits = nothing # spec type: Union{ Nothing, MinMax }
-    capital_cost = nothing # spec type: Union{ Nothing, ValueCurve }
+    capital_costs = nothing # spec type: Union{ Nothing, ValueCurve }
     resistance::Union{Nothing, Float64} = 0.0
     voltage::Union{Nothing, Float64} = 0.0
     reactance::Union{Nothing, Float64} = 0.0
@@ -57,7 +57,7 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
         start_node,
         end_node,
         capacity_limits,
-        capital_cost,
+        capital_costs,
         resistance,
         voltage,
         reactance,
@@ -93,8 +93,8 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_property(
             NodalACTransportTechnology,
-            Symbol("capital_cost"),
-            capital_cost,
+            Symbol("capital_costs"),
+            capital_costs,
         )
         OpenAPI.validate_property(
             NodalACTransportTechnology,
@@ -121,7 +121,7 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
             start_node,
             end_node,
             capacity_limits,
-            capital_cost,
+            capital_costs,
             resistance,
             voltage,
             reactance,
@@ -139,7 +139,7 @@ const _property_types_NodalACTransportTechnology = Dict{Symbol, String}(
     Symbol("start_node") => "Int64",
     Symbol("end_node") => "Int64",
     Symbol("capacity_limits") => "MinMax",
-    Symbol("capital_cost") => "ValueCurve",
+    Symbol("capital_costs") => "ValueCurve",
     Symbol("resistance") => "Float64",
     Symbol("voltage") => "Float64",
     Symbol("reactance") => "Float64",

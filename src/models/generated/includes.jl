@@ -36,7 +36,6 @@ export get_capacity_limits_solar
 export get_capacity_limits_wind
 export get_capacity_power_limits
 export get_capacity_reserve_fraction
-export get_capital_cost
 export get_capital_costs
 export get_capital_costs_charge
 export get_capital_costs_discharge
@@ -138,7 +137,6 @@ export set_capacity_limits_solar!
 export set_capacity_limits_wind!
 export set_capacity_power_limits!
 export set_capacity_reserve_fraction!
-export set_capital_cost!
 export set_capital_costs!
 export set_capital_costs_charge!
 export set_capital_costs_discharge!

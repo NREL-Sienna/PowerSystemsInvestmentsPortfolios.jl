@@ -7,7 +7,7 @@ This file is auto-generated. Do not edit.
 """
     mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
         base_power::Float64
-        capital_cost::PSY.ValueCurve
+        capital_costs::PSY.ValueCurve
         available::Bool
         name::String
         end_node::Node
@@ -28,7 +28,7 @@ Nodal representation of candidate AC transmission lines between two regions.
 
 # Arguments
 - `base_power::Float64`: Base power
-- `capital_cost::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line.
+- `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line.
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
 - `end_node::Node`: End node for transport technology
@@ -48,7 +48,7 @@ mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechno
     "Base power"
     base_power::Float64
     "Cost of adding new capacity to the nodal transmission line."
-    capital_cost::PSY.ValueCurve
+    capital_costs::PSY.ValueCurve
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Name"
@@ -80,14 +80,14 @@ mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechno
 end
 
 
-function NodalACTransportTechnology{T}(; base_power, capital_cost=LinearCurve(0.0), available, name, end_node, id, financial_data, start_node, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), reactance, resistance=0.0, voltage=0.0, unit_size=1, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
-    NodalACTransportTechnology{T}(base_power, capital_cost, available, name, end_node, id, financial_data, start_node, power_systems_type, internal, ext, reactance, resistance, voltage, unit_size, capacity_limits, )
+function NodalACTransportTechnology{T}(; base_power, capital_costs=LinearCurve(0.0), available, name, end_node, id, financial_data, start_node, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), reactance, resistance=0.0, voltage=0.0, unit_size=1, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+    NodalACTransportTechnology{T}(base_power, capital_costs, available, name, end_node, id, financial_data, start_node, power_systems_type, internal, ext, reactance, resistance, voltage, unit_size, capacity_limits, )
 end
 
 """Get [`NodalACTransportTechnology`](@ref) `base_power`."""
 get_base_power(value::NodalACTransportTechnology) = value.base_power
-"""Get [`NodalACTransportTechnology`](@ref) `capital_cost`."""
-get_capital_cost(value::NodalACTransportTechnology) = value.capital_cost
+"""Get [`NodalACTransportTechnology`](@ref) `capital_costs`."""
+get_capital_costs(value::NodalACTransportTechnology) = value.capital_costs
 """Get [`NodalACTransportTechnology`](@ref) `available`."""
 get_available(value::NodalACTransportTechnology) = value.available
 """Get [`NodalACTransportTechnology`](@ref) `name`."""
@@ -119,8 +119,8 @@ get_capacity_limits(value::NodalACTransportTechnology) = value.capacity_limits
 
 """Set [`NodalACTransportTechnology`](@ref) `base_power`."""
 set_base_power!(value::NodalACTransportTechnology, val) = value.base_power = val
-"""Set [`NodalACTransportTechnology`](@ref) `capital_cost`."""
-set_capital_cost!(value::NodalACTransportTechnology, val) = value.capital_cost = val
+"""Set [`NodalACTransportTechnology`](@ref) `capital_costs`."""
+set_capital_costs!(value::NodalACTransportTechnology, val) = value.capital_costs = val
 """Set [`NodalACTransportTechnology`](@ref) `available`."""
 set_available!(value::NodalACTransportTechnology, val) = value.available = val
 """Set [`NodalACTransportTechnology`](@ref) `name`."""

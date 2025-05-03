@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **start_region** | **Int64** |  | [optional] [default to nothing]
 **end_region** | **Int64** |  | [optional] [default to nothing]
 **capacity_limits** | [***MinMax**](MinMax.md) |  | [optional] [default to nothing]
-**capital_cost** | [***ValueCurve**](ValueCurve.md) |  | [optional] [default to nothing]
+**capital_costs** | [***ValueCurve**](ValueCurve.md) |  | [optional] [default to nothing]
 **line_loss** | **Float64** |  | [optional] [default to nothing]
 **unit_size** | **Float64** |  | [optional] [default to nothing]
 **financial_data** | **Any** |  | [optional] [default to nothing]
