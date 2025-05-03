@@ -116,6 +116,18 @@ export MinMax
 export InOut
 export UpDown
 
+export get_existing_capacity_mw
+export get_existing_capacity_mwh
+export is_new
+export get_heat_rate
+export get_fuel_cost
+export get_variable_cost
+export get_variable_cost_charge
+export get_variable_cost_discharge
+export get_fixed_cost
+export get_fixed_cost_charge
+export get_fixed_cost_discharge
+
 const PSY = PowerSystems
 const IS = InfrastructureSystems
 const MU = IS.Mustache
@@ -149,6 +161,7 @@ include("serialization.jl")
 include("generate_structs.jl")
 include("db_parser.jl")
 include("utils/print.jl")
+include("utils/getters.jl")
 
 using DocStringExtensions
 
