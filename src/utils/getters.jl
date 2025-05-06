@@ -10,8 +10,8 @@ get_min(x::MinMax) = x.min
 get_in(x::InOut) = x.in
 get_out(x::InOut) = x.out
 
-get_parameter_type(t::SupplyTechnology{T}) where T = T
-get_parameter_type(t::StorageTechnology{T}) where T = T
+get_parameter_type(t::SupplyTechnology{T}) where {T} = T
+get_parameter_type(t::StorageTechnology{T}) where {T} = T
 
 function get_existing_capacity_mw(
     p::Portfolio,
@@ -55,7 +55,7 @@ get_heat_rate(t::SupplyTechnology) =
 Get constant fuel cost from FuelCurve stored in a SupplyTechnology
 """
 get_fuel_cost(t::SupplyTechnology) =
-    PSY.get_fuel_cost(PSY.get_variable(get_operation_costs(t)))
+    IS.get_fuel_cost(PSY.get_variable(get_operation_costs(t)))
 
 """
 Get constant variable OM costs from OperationalCost in a SupplyTechnology
