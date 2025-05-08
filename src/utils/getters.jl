@@ -17,11 +17,27 @@ function get_existing_capacity_mw(
     p::Portfolio,
     t::Union{ResourceTechnology, TransmissionTechnology},
 )
+    if typeof(t) <: ColocatedSupplyStorageTechnology
+        @warn "Co-located technologies are not supported for ExistingCapacity, assuming an existing capacity of 0"
+        return 0.0
+    end
+
     if !is_new(t)
-        gen_names = get_existing_technologies(
-            IS.get_supplemental_attributes(ExistingCapacity, t)[1],
-        )
+        attr = IS.get_supplemental_attributes(ExistingCapacity, t)
+        if length(attr) > 1
+            @warn "Multiple ExistingCapacity attributes are attached to this technology, assuming a capacity of 0.0"
+            return 0.0
+        end
+
+        gen_names = get_existing_technologies(only(attr))
         comp = PSY.get_component.(get_parameter_type(t), Ref(p.base_system), gen_names)
+
+        # Check if any of the components returned nothing
+        filtered_comp = filter(x -> !isnothing(x), comp)
+        if length(filtered_comp) != length(gen_names)
+            @error "Not all names in ExistingCapacity matched generators in the base system"
+        end
+
         return sum(PSY.get_rating(t) for t in comp)
     else
         return 0.0
@@ -30,10 +46,20 @@ end
 
 function get_existing_capacity_mwh(p::Portfolio, t::StorageTechnology)
     if !is_new(t)
-        gen_names = IS.get_existing_technologies(
-            IS.get_supplemental_attributes(ExistingCapacity, t)[1],
-        )
+        attr = IS.get_supplemental_attributes(ExistingCapacity, t)
+        if length(attr) > 1
+            @warn "Multiple ExistingCapacity attributes are attached to this technology, assuming a capacity of 0.0"
+            return 0.0
+        end
+        gen_names = get_existing_technologies(only(attr))
         comp = PSY.get_component.(get_parameter_type(t), Ref(p.base_system), gen_names)
+
+        # Check if any of the components returned nothing
+        filtered_comp = filter(x -> !isnothing(x), comp)
+        if length(filtered_comp) != length(gen_names)
+            @error "Not all names in ExistingCapacity matched generators in the base system"
+        end
+
         return sum(PSY.get_storage_capacity(t) for t in comp)
     else
         return 0.0
