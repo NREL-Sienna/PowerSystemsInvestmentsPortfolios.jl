@@ -11,6 +11,7 @@ const _CONTAINS_SHOULD_ENCODE = Union{
     TransmissionTechnology,
     Requirement,
     IS.SupplementalAttribute,
+    RegionTopology,
 }
 const SYSTEM_KWARGS = Set((
     :internal,
@@ -50,6 +51,7 @@ const ENCODED_FIELDS = Set((
     :eligible_resources,
     :eligible_demand,
     :eligible_technologies,
+    :uuid,
 ))
 
 """
@@ -435,6 +437,11 @@ function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{St
             vals[name] = getfield(base_struct, name)
         end
     end
+
+    #Build internal from uuid and remove uuid entry
+    vals[:internal] = IS.InfrastructureSystemsInternal(; uuid=vals[:uuid])
+    delete!(vals, :uuid)
+
     struct_type_string = metadata["type"]
     struct_type = getproperty(PowerSystemsInvestmentsPortfolios, Symbol(struct_type_string))
     if haskey(metadata, "parameters")
@@ -512,6 +519,8 @@ function serialize_custom_types(field, technology::T) where {T <: _CONTAINS_SHOU
         for (k, v) in fuel_params
             val[string(k)] = v
         end
+    elseif field == :uuid
+        val = string(IS.get_uuid(technology))
     else
         val = getfield(technology, field)
     end
@@ -613,6 +622,8 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         end
     elseif name == :storage_tech
         val = StorageTech(getfield(base_struct, name))
+    elseif name == :uuid
+        val = Base.UUID(getfield(base_struct, name))
     end
 
     return val

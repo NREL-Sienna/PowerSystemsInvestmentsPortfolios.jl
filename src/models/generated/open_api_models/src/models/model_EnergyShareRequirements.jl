@@ -5,6 +5,7 @@
 
     EnergyShareRequirements(;
         name=nothing,
+        uuid=nothing,
         id=nothing,
         available=nothing,
         target_year=nothing,
@@ -14,6 +15,7 @@
     )
 
     - name::String
+    - uuid::String
     - id::Int64
     - available::Bool
     - target_year::Int64
@@ -23,6 +25,7 @@
 """
 Base.@kwdef mutable struct EnergyShareRequirements <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
+    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     target_year::Union{Nothing, Int64} = nothing
@@ -32,6 +35,7 @@ Base.@kwdef mutable struct EnergyShareRequirements <: OpenAPI.APIModel
 
     function EnergyShareRequirements(
         name,
+        uuid,
         id,
         available,
         target_year,
@@ -40,6 +44,7 @@ Base.@kwdef mutable struct EnergyShareRequirements <: OpenAPI.APIModel
         generation_fraction_requirement,
     )
         OpenAPI.validate_property(EnergyShareRequirements, Symbol("name"), name)
+        OpenAPI.validate_property(EnergyShareRequirements, Symbol("uuid"), uuid)
         OpenAPI.validate_property(EnergyShareRequirements, Symbol("id"), id)
         OpenAPI.validate_property(EnergyShareRequirements, Symbol("available"), available)
         OpenAPI.validate_property(
@@ -64,6 +69,7 @@ Base.@kwdef mutable struct EnergyShareRequirements <: OpenAPI.APIModel
         )
         return new(
             name,
+            uuid,
             id,
             available,
             target_year,
@@ -76,6 +82,7 @@ end # type EnergyShareRequirements
 
 const _property_types_EnergyShareRequirements = Dict{Symbol, String}(
     Symbol("name") => "String",
+    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("target_year") => "Int64",

@@ -5,6 +5,7 @@
 
     AggregateTransportTechnology(;
         name=nothing,
+        uuid=nothing,
         id=nothing,
         available=nothing,
         base_power=nothing,
@@ -19,6 +20,7 @@
     )
 
     - name::String
+    - uuid::String
     - id::Int64
     - available::Bool
     - base_power::Float64
@@ -33,6 +35,7 @@
 """
 Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
+    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     base_power::Union{Nothing, Float64} = nothing
@@ -47,6 +50,7 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
 
     function AggregateTransportTechnology(
         name,
+        uuid,
         id,
         available,
         base_power,
@@ -60,6 +64,7 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
         financial_data,
     )
         OpenAPI.validate_property(AggregateTransportTechnology, Symbol("name"), name)
+        OpenAPI.validate_property(AggregateTransportTechnology, Symbol("uuid"), uuid)
         OpenAPI.validate_property(AggregateTransportTechnology, Symbol("id"), id)
         OpenAPI.validate_property(
             AggregateTransportTechnology,
@@ -113,6 +118,7 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
         )
         return new(
             name,
+            uuid,
             id,
             available,
             base_power,
@@ -130,6 +136,7 @@ end # type AggregateTransportTechnology
 
 const _property_types_AggregateTransportTechnology = Dict{Symbol, String}(
     Symbol("name") => "String",
+    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("base_power") => "Float64",

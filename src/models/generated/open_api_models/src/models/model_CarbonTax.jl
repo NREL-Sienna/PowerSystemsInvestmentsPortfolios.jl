@@ -5,6 +5,7 @@
 
     CarbonTax(;
         name=nothing,
+        uuid=nothing,
         id=nothing,
         available=nothing,
         target_year=nothing,
@@ -13,6 +14,7 @@
     )
 
     - name::String
+    - uuid::String
     - id::Int64
     - available::Bool
     - target_year::Int64
@@ -21,6 +23,7 @@
 """
 Base.@kwdef mutable struct CarbonTax <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
+    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     target_year::Union{Nothing, Int64} = nothing
@@ -29,6 +32,7 @@ Base.@kwdef mutable struct CarbonTax <: OpenAPI.APIModel
 
     function CarbonTax(
         name,
+        uuid,
         id,
         available,
         target_year,
@@ -36,6 +40,7 @@ Base.@kwdef mutable struct CarbonTax <: OpenAPI.APIModel
         tax_dollars_per_ton,
     )
         OpenAPI.validate_property(CarbonTax, Symbol("name"), name)
+        OpenAPI.validate_property(CarbonTax, Symbol("uuid"), uuid)
         OpenAPI.validate_property(CarbonTax, Symbol("id"), id)
         OpenAPI.validate_property(CarbonTax, Symbol("available"), available)
         OpenAPI.validate_property(CarbonTax, Symbol("target_year"), target_year)
@@ -45,12 +50,21 @@ Base.@kwdef mutable struct CarbonTax <: OpenAPI.APIModel
             Symbol("tax_dollars_per_ton"),
             tax_dollars_per_ton,
         )
-        return new(name, id, available, target_year, eligible_regions, tax_dollars_per_ton)
+        return new(
+            name,
+            uuid,
+            id,
+            available,
+            target_year,
+            eligible_regions,
+            tax_dollars_per_ton,
+        )
     end
 end # type CarbonTax
 
 const _property_types_CarbonTax = Dict{Symbol, String}(
     Symbol("name") => "String",
+    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("target_year") => "Int64",

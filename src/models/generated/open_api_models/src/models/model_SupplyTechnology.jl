@@ -5,6 +5,7 @@
 
     SupplyTechnology(;
         name=nothing,
+        uuid=nothing,
         power_systems_type=nothing,
         region=nothing,
         id=nothing,
@@ -29,6 +30,7 @@
     )
 
     - name::String
+    - uuid::String
     - power_systems_type::String
     - region::Vector{Int64}
     - id::Int64
@@ -53,6 +55,7 @@
 """
 Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
+    uuid::Union{Nothing, String} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     region::Union{Nothing, Vector{Int64}} = nothing
     id::Union{Nothing, Int64} = nothing
@@ -77,6 +80,7 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
 
     function SupplyTechnology(
         name,
+        uuid,
         power_systems_type,
         region,
         id,
@@ -100,6 +104,7 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
         financial_data,
     )
         OpenAPI.validate_property(SupplyTechnology, Symbol("name"), name)
+        OpenAPI.validate_property(SupplyTechnology, Symbol("uuid"), uuid)
         OpenAPI.validate_property(
             SupplyTechnology,
             Symbol("power_systems_type"),
@@ -159,6 +164,7 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
         )
         return new(
             name,
+            uuid,
             power_systems_type,
             region,
             id,
@@ -186,6 +192,7 @@ end # type SupplyTechnology
 
 const _property_types_SupplyTechnology = Dict{Symbol, String}(
     Symbol("name") => "String",
+    Symbol("uuid") => "String",
     Symbol("power_systems_type") => "String",
     Symbol("region") => "Vector{Int64}",
     Symbol("id") => "Int64",

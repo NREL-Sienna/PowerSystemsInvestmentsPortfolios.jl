@@ -5,6 +5,7 @@
 
     DemandRequirement(;
         name=nothing,
+        uuid=nothing,
         id=nothing,
         available=true,
         power_systems_type=nothing,
@@ -15,6 +16,7 @@
     )
 
     - name::String
+    - uuid::String
     - id::Int64
     - available::Bool
     - power_systems_type::String
@@ -25,6 +27,7 @@
 """
 Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
+    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = true
     power_systems_type::Union{Nothing, String} = nothing
@@ -35,6 +38,7 @@ Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
 
     function DemandRequirement(
         name,
+        uuid,
         id,
         available,
         power_systems_type,
@@ -44,6 +48,7 @@ Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
         unserved_demand_curve,
     )
         OpenAPI.validate_property(DemandRequirement, Symbol("name"), name)
+        OpenAPI.validate_property(DemandRequirement, Symbol("uuid"), uuid)
         OpenAPI.validate_property(DemandRequirement, Symbol("id"), id)
         OpenAPI.validate_property(DemandRequirement, Symbol("available"), available)
         OpenAPI.validate_property(
@@ -69,6 +74,7 @@ Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
         )
         return new(
             name,
+            uuid,
             id,
             available,
             power_systems_type,
@@ -82,6 +88,7 @@ end # type DemandRequirement
 
 const _property_types_DemandRequirement = Dict{Symbol, String}(
     Symbol("name") => "String",
+    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("power_systems_type") => "String",

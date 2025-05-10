@@ -5,6 +5,7 @@
 
     ColocatedSupplyStorageTechnology(;
         name=nothing,
+        uuid=nothing,
         id=nothing,
         power_systems_type=nothing,
         base_year=nothing,
@@ -40,6 +41,7 @@
     )
 
     - name::String
+    - uuid::String
     - id::Int64
     - power_systems_type::String
     - base_year::Int64
@@ -75,6 +77,7 @@
 """
 Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
+    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     base_year::Union{Nothing, Int64} = nothing
@@ -110,6 +113,7 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
 
     function ColocatedSupplyStorageTechnology(
         name,
+        uuid,
         id,
         power_systems_type,
         base_year,
@@ -144,6 +148,7 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         inverter_supply_ratio,
     )
         OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("name"), name)
+        OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("uuid"), uuid)
         OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("id"), id)
         OpenAPI.validate_property(
             ColocatedSupplyStorageTechnology,
@@ -302,6 +307,7 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         )
         return new(
             name,
+            uuid,
             id,
             power_systems_type,
             base_year,
@@ -340,6 +346,7 @@ end # type ColocatedSupplyStorageTechnology
 
 const _property_types_ColocatedSupplyStorageTechnology = Dict{Symbol, String}(
     Symbol("name") => "String",
+    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("power_systems_type") => "String",
     Symbol("base_year") => "Int64",

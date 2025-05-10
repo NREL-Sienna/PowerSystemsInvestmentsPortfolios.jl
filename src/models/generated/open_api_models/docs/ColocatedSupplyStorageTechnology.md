@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | **String** |  | [default to nothing]
+**uuid** | **String** |  | [optional] [default to nothing]
 **id** | **Int64** |  | [optional] [default to nothing]
 **power_systems_type** | **String** |  | [default to nothing]
 **base_year** | **Int64** |  | [optional] [default to nothing]

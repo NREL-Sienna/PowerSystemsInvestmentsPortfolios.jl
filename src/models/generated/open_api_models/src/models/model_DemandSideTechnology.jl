@@ -5,6 +5,7 @@
 
     DemandSideTechnology(;
         name=nothing,
+        uuid=nothing,
         id=nothing,
         available=nothing,
         region=nothing,
@@ -22,6 +23,7 @@
     )
 
     - name::String
+    - uuid::String
     - id::Int64
     - available::Bool
     - region::Vector{Int64}
@@ -39,6 +41,7 @@
 """
 Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
+    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     region::Union{Nothing, Vector{Int64}} = nothing
@@ -56,6 +59,7 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
 
     function DemandSideTechnology(
         name,
+        uuid,
         id,
         available,
         region,
@@ -72,6 +76,7 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
         max_demand_curtailment,
     )
         OpenAPI.validate_property(DemandSideTechnology, Symbol("name"), name)
+        OpenAPI.validate_property(DemandSideTechnology, Symbol("uuid"), uuid)
         OpenAPI.validate_property(DemandSideTechnology, Symbol("id"), id)
         OpenAPI.validate_property(DemandSideTechnology, Symbol("available"), available)
         OpenAPI.validate_property(DemandSideTechnology, Symbol("region"), region)
@@ -128,6 +133,7 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
         )
         return new(
             name,
+            uuid,
             id,
             available,
             region,
@@ -148,6 +154,7 @@ end # type DemandSideTechnology
 
 const _property_types_DemandSideTechnology = Dict{Symbol, String}(
     Symbol("name") => "String",
+    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("region") => "Vector{Int64}",

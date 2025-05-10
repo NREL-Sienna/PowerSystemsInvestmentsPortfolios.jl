@@ -5,6 +5,7 @@
 
     NodalACTransportTechnology(;
         name=nothing,
+        uuid=nothing,
         id=nothing,
         available=nothing,
         base_power=nothing,
@@ -20,6 +21,7 @@
     )
 
     - name::String
+    - uuid::String
     - id::Int64
     - available::Bool
     - base_power::Float64
@@ -35,6 +37,7 @@
 """
 Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
+    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     base_power::Union{Nothing, Float64} = nothing
@@ -50,6 +53,7 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
 
     function NodalACTransportTechnology(
         name,
+        uuid,
         id,
         available,
         base_power,
@@ -64,6 +68,7 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
         financial_data,
     )
         OpenAPI.validate_property(NodalACTransportTechnology, Symbol("name"), name)
+        OpenAPI.validate_property(NodalACTransportTechnology, Symbol("uuid"), uuid)
         OpenAPI.validate_property(NodalACTransportTechnology, Symbol("id"), id)
         OpenAPI.validate_property(
             NodalACTransportTechnology,
@@ -114,6 +119,7 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
         )
         return new(
             name,
+            uuid,
             id,
             available,
             base_power,
@@ -132,6 +138,7 @@ end # type NodalACTransportTechnology
 
 const _property_types_NodalACTransportTechnology = Dict{Symbol, String}(
     Symbol("name") => "String",
+    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("base_power") => "Float64",

@@ -5,6 +5,7 @@
 
     StorageTechnology(;
         name=nothing,
+        uuid=nothing,
         region=nothing,
         id=nothing,
         available=nothing,
@@ -31,6 +32,7 @@
     )
 
     - name::String
+    - uuid::String
     - region::Vector{Int64}
     - id::Int64
     - available::Bool
@@ -57,6 +59,7 @@
 """
 Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
+    uuid::Union{Nothing, String} = nothing
     region::Union{Nothing, Vector{Int64}} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
@@ -83,6 +86,7 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
 
     function StorageTechnology(
         name,
+        uuid,
         region,
         id,
         available,
@@ -108,6 +112,7 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         financial_data,
     )
         OpenAPI.validate_property(StorageTechnology, Symbol("name"), name)
+        OpenAPI.validate_property(StorageTechnology, Symbol("uuid"), uuid)
         OpenAPI.validate_property(StorageTechnology, Symbol("region"), region)
         OpenAPI.validate_property(StorageTechnology, Symbol("id"), id)
         OpenAPI.validate_property(StorageTechnology, Symbol("available"), available)
@@ -193,6 +198,7 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         )
         return new(
             name,
+            uuid,
             region,
             id,
             available,
@@ -222,6 +228,7 @@ end # type StorageTechnology
 
 const _property_types_StorageTechnology = Dict{Symbol, String}(
     Symbol("name") => "String",
+    Symbol("uuid") => "String",
     Symbol("region") => "Vector{Int64}",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",

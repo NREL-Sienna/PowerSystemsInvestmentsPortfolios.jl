@@ -5,29 +5,34 @@
 
     Node(;
         name=nothing,
+        uuid=nothing,
         id=nothing,
         bus_type="PQ",
     )
 
     - name::String
+    - uuid::String
     - id::Int64
     - bus_type::String
 """
 Base.@kwdef mutable struct Node <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
+    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     bus_type::Union{Nothing, String} = "PQ"
 
-    function Node(name, id, bus_type)
+    function Node(name, uuid, id, bus_type)
         OpenAPI.validate_property(Node, Symbol("name"), name)
+        OpenAPI.validate_property(Node, Symbol("uuid"), uuid)
         OpenAPI.validate_property(Node, Symbol("id"), id)
         OpenAPI.validate_property(Node, Symbol("bus_type"), bus_type)
-        return new(name, id, bus_type)
+        return new(name, uuid, id, bus_type)
     end
 end # type Node
 
 const _property_types_Node = Dict{Symbol, String}(
     Symbol("name") => "String",
+    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("bus_type") => "String",
 )

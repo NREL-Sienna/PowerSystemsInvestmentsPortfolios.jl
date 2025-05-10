@@ -5,6 +5,7 @@
 
     MinimumCapacityRequirements(;
         name=nothing,
+        uuid=nothing,
         id=nothing,
         available=nothing,
         target_year=nothing,
@@ -13,6 +14,7 @@
     )
 
     - name::String
+    - uuid::String
     - id::Int64
     - available::Bool
     - target_year::Int64
@@ -21,6 +23,7 @@
 """
 Base.@kwdef mutable struct MinimumCapacityRequirements <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
+    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     target_year::Union{Nothing, Int64} = nothing
@@ -29,6 +32,7 @@ Base.@kwdef mutable struct MinimumCapacityRequirements <: OpenAPI.APIModel
 
     function MinimumCapacityRequirements(
         name,
+        uuid,
         id,
         available,
         target_year,
@@ -36,6 +40,7 @@ Base.@kwdef mutable struct MinimumCapacityRequirements <: OpenAPI.APIModel
         min_capacity_mw,
     )
         OpenAPI.validate_property(MinimumCapacityRequirements, Symbol("name"), name)
+        OpenAPI.validate_property(MinimumCapacityRequirements, Symbol("uuid"), uuid)
         OpenAPI.validate_property(MinimumCapacityRequirements, Symbol("id"), id)
         OpenAPI.validate_property(
             MinimumCapacityRequirements,
@@ -57,12 +62,21 @@ Base.@kwdef mutable struct MinimumCapacityRequirements <: OpenAPI.APIModel
             Symbol("min_capacity_mw"),
             min_capacity_mw,
         )
-        return new(name, id, available, target_year, eligible_resources, min_capacity_mw)
+        return new(
+            name,
+            uuid,
+            id,
+            available,
+            target_year,
+            eligible_resources,
+            min_capacity_mw,
+        )
     end
 end # type MinimumCapacityRequirements
 
 const _property_types_MinimumCapacityRequirements = Dict{Symbol, String}(
     Symbol("name") => "String",
+    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("target_year") => "Int64",
