@@ -12,6 +12,11 @@ get_out(x::InOut) = x.out
 
 get_parameter_type(t::SupplyTechnology{T}) where {T} = T
 get_parameter_type(t::StorageTechnology{T}) where {T} = T
+get_parameter_type(t::AggregateTransportTechnology{T}) where {T} = T
+get_parameter_type(t::NodalACTransportTechnology{T}) where {T} = T
+get_parameter_type(t::NodalHVDCTransportTechnology{T}) where {T} = T
+get_parameter_type(t::DemandRequirement{T}) where {T} = T
+get_parameter_type(t::DemandSideTechnology{T}) where {T} = T
 
 function get_existing_capacity_mw(
     p::Portfolio,
@@ -30,6 +35,11 @@ function get_existing_capacity_mw(
         end
 
         gen_names = get_existing_technologies(only(attr))
+        if length(gen_names)==0
+            @warn  "No names listed in ExistingCapacity attribute, returning capacity of 0.0."
+            return 0.0
+        end
+        
         comp = PSY.get_component.(get_parameter_type(t), Ref(p.base_system), gen_names)
 
         # Check if any of the components returned nothing
