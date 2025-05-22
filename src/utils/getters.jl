@@ -35,11 +35,11 @@ function get_existing_capacity_mw(
         end
 
         gen_names = get_existing_technologies(only(attr))
-        if length(gen_names)==0
-            @warn  "No names listed in ExistingCapacity attribute, returning capacity of 0.0."
+        if length(gen_names) == 0
+            @warn "No names listed in ExistingCapacity attribute, returning capacity of 0.0."
             return 0.0
         end
-        
+
         comp = PSY.get_component.(get_parameter_type(t), Ref(p.base_system), gen_names)
 
         # Check if any of the components returned nothing

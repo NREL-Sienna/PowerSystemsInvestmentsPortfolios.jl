@@ -251,7 +251,16 @@ function from_dict(
         description=description,
         parsed_kwargs...,
     )
-
+    portfolio.data.supplemental_attribute_manager = deserialize_attributes(
+        portfolio,
+        IS.SupplementalAttributeManager,
+        get(
+            raw["data"],
+            "supplemental_attribute_manager",
+            Dict("attributes" => [], "associations" => []),
+        ),
+        portfolio.data.time_series_manager,
+    )
     if raw["data_format_version"] != DATA_FORMAT_VERSION
         pre_deserialize_conversion!(raw, portfolio)
     end
@@ -320,14 +329,12 @@ function deserialize(
         metadata_store=time_series_metadata_store,
     )
     subsystems = Dict(k => Set(Base.UUID.(v)) for (k, v) in raw["subsystems"])
-    supplemental_attribute_manager = IS.deserialize(
-        IS.SupplementalAttributeManager,
-        get(
-            raw,
-            "supplemental_attribute_manager",
-            Dict("attributes" => [], "associations" => []),
-        ),
-        time_series_manager,
+
+    # Deserialize with empty supplemental_attribute_manager to start, will be
+    # deserialized later after Portfolio is initialized
+    supplemental_attribute_manager = IS.SupplementalAttributeManager(
+        IS.SupplementalAttributesByType(IS.SupplementalAttributesByType()),
+        IS.from_records(IS.SupplementalAttributeAssociations, []),
     )
     internal = IS.deserialize(IS.InfrastructureSystemsInternal, raw["internal"])
     validation_descriptors = if isnothing(validation_descriptor_file)
@@ -357,6 +364,46 @@ function deserialize(
     # Note: components need to be deserialized by the parent so that they can go through
     # the proper checks.
     return sys
+end
+
+# Function copied over from IS. This version of the function is modified to deserialize using openAPI structs for PSIP supplemental attributes
+# This is necessary since the openAPI structs do not have an internal field by default, so new UUIDs are given to supplemental attributes
+# when deserialized with the IS version and the associations with PSIP components are broken
+function deserialize_attributes(
+    portfolio::Portfolio,
+    ::Type{IS.SupplementalAttributeManager},
+    data::Dict,
+    time_series_manager::IS.TimeSeriesManager,
+)
+    mgr = IS.SupplementalAttributeManager(
+        IS.SupplementalAttributesByType(IS.SupplementalAttributesByType()),
+        IS.from_records(IS.SupplementalAttributeAssociations, data["associations"]),
+    )
+    refs = IS.SharedSystemReferences(;
+        supplemental_attribute_manager=mgr,
+        time_series_manager=time_series_manager,
+    )
+    for attr_dict in data["attributes"]
+        type = IS.get_type_from_serialization_metadata(
+            IS.get_serialization_metadata(attr_dict),
+        )
+        if !haskey(mgr.data, type)
+            mgr.data[type] = Dict{Base.UUID, SupplementalAttribute}()
+        end
+        #attr = deserialize(type, attr_dict)
+
+        api_attr = deserialize_openapi_struct(type, attr_dict)
+        attr = build_model_struct(api_attr, portfolio, attr_dict["__metadata__"])
+
+        uuid = IS.get_uuid(attr)
+        if haskey(mgr.data[type], uuid)
+            error("Bug: duplicate UUID in attributes container: type=$type uuid=$uuid")
+        end
+        mgr.data[type][uuid] = attr
+        IS.set_shared_system_references!(attr, refs)
+    end
+
+    return mgr
 end
 
 function deserialize_components!(portfolio::Portfolio, raw)
