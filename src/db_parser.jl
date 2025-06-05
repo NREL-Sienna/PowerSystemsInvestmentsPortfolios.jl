@@ -1,194 +1,145 @@
+"""
+This PoC is if a dictionary of queries is maintained, then the database can be read in and the structs can be generated.
+"""
+
+"""
+Set of queries to extract relevant data from the database. Need to be maintained to be consistent with the most recent version of the database
+"""
+
+"""
+Relevant info:
+entity_id is the IDs within a table (equivalent to unit_id, technology_id, etc.)
+id in entities table across *all* generation, storage, and reserve entries
+
+Can access an attribute for a specific generator using their entity ID and entity_type
+    - If value is a single entry, can be pulled from table. Otherwise we need to take entity_attribute_id and get JSON blob from time_series or piecewise_linear table
+
+Linkages appears to be mapping individual generators to what reserves they can contribute to
+"""
+
+QUERIES = Dict(
+    #some uncertainty about the zone id
+    :zones => """
+         SELECT name, description FROM areas
+       """,
+    :balancing_topologies => """
+          SELECT name, description FROM balancing_topologies
+        """,
+    :topology_to_area => """
+          SELECT area FROM balancing_topologies WHERE name = ?
+        """,
+    :aggregate_lines => """
+          SELECT ROWID, area_from, area_to, max_flow_from, max_flow_to FROM transmission_interchange
+        """,
+    :transmission_lines => """
+          SELECT ROWID, balancing_topology_from, balancing_topology_to, continuous_rating FROM transmission_lines
+        """,
+    :supply_technologies => """
+          SELECT technology_id, prime_mover, fuel_type, technology_class, scenario, area, balancing_topology FROM supply_technologies
+        """,
+    :demand_requirements => """
+          SELECT entity_attribute_id, peak_load, area, balancing_topology FROM demand_requirements
+        """,
+    :entities => """
+          SELECT id FROM entities WHERE entity_id = ? AND entity_type = ?
+        """,
+    :time_series => """
+          SELECT time_series_blob FROM time_series WHERE entity_attribute_id = ?
+        """,
+    :piecewise_linear => """
+          SELECT piecewise_linear_blob FROM piecewise_linear WHERE entity_attribute_id = ? AND description LIKE ?
+        """,
+    :attributes => """
+          SELECT * FROM attributes WHERE entity_id = ? AND entity_type = ? AND data_type = ?
+        """,
+    # add additional queries here as needed
+
+)
+
+# Remove later, or make this optional later depending on what is in the dataset
+const DEFAULT_FINANCIAL_DATA = TechnologyFinancialData(;
+    capital_recovery_period=30,
+    interest_rate=0.06,
+    technology_base_year=2025,
+)
 
 """
 The following function imports from the database and generates the structs for a portfolio
 @input database_filepath::AbstractString: The path to the database file
-@input schema_JSON_filepath::AbstractString: The path to the schema JSON file
 """
-function db_to_portfolio_parser(database_filepath::AbstractString)
+function db_to_portfolio_parser(
+    database_filepath::AbstractString;
+    aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}=DEFAULT_AGGREGATION,
+    discount_rate=0.07,
+    inflation_rate=0.05,
+    interest_rate=0.02,
+    base_year=2025,
+    system::PSY.System=PSY.System(100.0),
+)
 
     #Goal will be be able to read in database and populate structs simultaneously
 
-    dfs = db_to_dataframes(database_filepath)
-    portfolio = dataframe_to_structs(dfs)
+    p = initialize_portfolio(
+        aggregation,
+        discount_rate,
+        inflation_rate,
+        interest_rate,
+        base_year,
+        system,
+    )
+    portfolio = database_to_structs(database_filepath, p)
 
     return portfolio
 end
 
-"""
-The following function imports from the database and creates a dictionary
-of DataFrames for each table in the database
+function initialize_portfolio(
+    aggregation,
+    discount_rate::Float64,
+    inflation_rate::Float64,
+    interest_rate::Float64,
+    base_year::Int64,
+    system::PSY.System,
+)
+    #Initialize Portfolio
+    p = Portfolio(
+        aggregation,
+        discount_rate=discount_rate,
+        inflation_rate=inflation_rate,
+        interest_rate=interest_rate,
+        base_year=base_year;
+        base_system=system,
+    )
 
-# Example usage:
+    return p
+end
 
-db_path = "/Users/prao/GitHub_Repos/SiennaInvest/PowerSystemsInvestmentsPortfoliosTestData/RTS_GMLC.db"
-dataframes_all = db_to_dataframes(db_path)
-
-# Access a specific DataFrame
-
-supply_technologies_df = dataframes_all["supply_technologies"]
-"""
-function db_to_dataframes(db_path::String)
+function database_to_structs(db_path::AbstractString, p::Portfolio)
     # Connect to the SQLite database
     db = SQLite.DB(db_path)
 
-    # Get a list of tables in the database
-    tables = SQLite.tables(db)
+    # Add zones and lines, shouldn't add both aggregate lines and nodal lines to the same DB
+    # User can provide a desired aggregation level and then we can select based on that
 
-    # Create a dictionary to store DataFrames for each table
-    dfs = Dict{String, DataFrames.DataFrame}()
-
-    #Will adjust queries to only pull a subset of data
-    for table in tables
-        table_name = table.name
-        # Read each table into a DataFrame
-        query = "SELECT * FROM $table_name"
-        df = DataFrames.DataFrame(DBInterface.execute(db, query))
-        dfs[table_name] = df
+    # Add zones to the portfolio
+    if get_aggregation(p) == PSY.Area
+        add_zones!(p, db)
+        add_aggregate_lines!(p, db)
+    elseif get_aggregation(p) == PSY.ACBus
+        add_nodes!(p, db)
+        add_nodal_lines!(p, db)
     end
 
-    # Close the database connection
-    SQLite.close(db)
+    # Add technologies to Portfolio
 
-    return dfs
-end
+    add_supply_technologies!(p, db)
+    add_storage_technologies!(p, db)
 
-# TODO: Figure out more permanent solution for mapping prime movers
-"""
-Function to map prime mover types to PrimeMovers
-"""
-function map_prime_mover(prime_mover::String)
-    mapping_dict = Dict(
-        "CT" => PrimeMovers.CT,
-        "STEAM" => PrimeMovers.ST,
-        "CC" => PrimeMovers.CC,
-        "SYNC_COND" => PrimeMovers.OT,
-        "NUCLEAR" => PrimeMovers.ST,
-        "HYDRO" => PrimeMovers.HA,
-        "ROR" => PrimeMovers.IC,
-        "PV" => PrimeMovers.PVe,
-        "CSP" => PrimeMovers.CP,
-        "RTPV" => PrimeMovers.PVe,
-        "WIND" => PrimeMovers.WT,
-        "Wind" => PrimeMovers.WT,
-        "STORAGE" => PrimeMovers.BA,
-    )
+    add_demand_technologies!(p, db)
+    add_demand_requirements!(p, db)
 
-    return mapping_dict[prime_mover]
-end
+    # Add units to base_systems
 
-"""
-Function to map fuel string to ThermalFuels
-"""
-function map_fuel(fuel::String)
-    mapping_dict = Dict(
-        "NG" => ThermalFuels.NATURAL_GAS,
-        "Nuclear" => ThermalFuels.NUCLEAR,
-        "Coal" => ThermalFuels.COAL,
-        "Oil" => ThermalFuels.DISTILLATE_FUEL_OIL,
-    )
-    if haskey(mapping_dict, fuel)
-        return mapping_dict[fuel]
-    else
-        return ThermalFuels.OTHER
-    end
-end
-
-function map_prime_mover_to_parametric(prime_mover::String)
-    mapping_dict = Dict(
-        "CT" => PSY.ThermalStandard,
-        "STEAM" => PSY.ThermalStandard,
-        "CC" => PSY.ThermalStandard,
-        "SYNC_COND" => PSY.ThermalStandard,
-        "NUCLEAR" => PSY.ThermalStandard,
-        "HYDRO" => PSY.ThermalStandard,
-        "ROR" => PSY.RenewableDispatch,
-        "PV" => PSY.RenewableDispatch,
-        "CSP" => PSY.RenewableDispatch,
-        "RTPV" => PSY.RenewableDispatch,
-        "WIND" => PSY.RenewableDispatch,
-        "Wind" => PSY.RenewableDispatch,
-    )
-    return mapping_dict[prime_mover]
-end
-
-function parse_timestamps_and_values(json_str::String)
-    # Parse the JSON string into a Julia object
-    data = JSON3.read(json_str)
-
-    # Initialize arrays to store timestamps and values
-    timestamps = String[]
-    values = Float64[]
-
-    # Iterate over each dictionary in the parsed JSON data
-    for item in data
-        # Append the timestamp to the timestamps array
-        push!(timestamps, item["timestamp"])
-
-        # Append the value to the values array
-        push!(values, item["value"])
-    end
-
-    return timestamps, values
-end
-
-function parse_timestamps_and_values(df::DataFrames.DataFrame)
-    # Initialize arrays to store timestamps and values
-    timestamps = String[]
-    values = Float64[]
-    type = ""
-
-    # Check if the timestamps are within the hours of the day
-    is_within_hours =
-        all(row -> parse(Int, split(row["timestamp"], "-")[end]) in 1:24, eachrow(df))
-
-    if is_within_hours
-        type = "Real Time"
-        # Iterate over each row in the DataFrame
-        for row in eachrow(df)
-            # Append the timestamp to the timestamps array
-            push!(timestamps, row["timestamp"])
-
-            # Append the value to the values array
-            push!(values, row["value"])
-        end
-    else
-        type = "Forecast"
-        # Create a dictionary to store daily values
-        daily_values = Dict{String, Vector{Float64}}()
-
-        # Iterate over each row in the DataFrame
-        for row in eachrow(df)
-            # Extract the date part of the timestamp
-            date_part = join(split(row["timestamp"], "-")[1:3], "-")
-
-            # Initialize the daily values array if not already present
-            if !haskey(daily_values, date_part)
-                daily_values[date_part] = Float64[]
-            end
-
-            # Append the value to the daily values array
-            push!(daily_values[date_part], row["value"])
-        end
-
-        # Calculate the average values for each day and create 24-hour profiles
-        for (date, vals) in daily_values
-            avg_value = sum(vals) / length(vals)
-            for hour in 1:24
-                push!(timestamps, "$date-$hour")
-                push!(values, avg_value)
-            end
-        end
-    end
-
-    # Parse timestamps into DateTime objects
-    parsed_timestamps = DateTime.(timestamps, "yyyy-m-d-H")
-
-    # Sort the parsed timestamps and values
-    sorted_indices = sortperm(parsed_timestamps)
-    sorted_timestamps = parsed_timestamps[sorted_indices]
-    sorted_values = values[sorted_indices]
-
-    return sorted_timestamps, sorted_values, type
+    return p
 end
 
 function parse_json_to_arrays(json_str::String)
@@ -227,7 +178,7 @@ function parse_json_to_arrays(json_str::String)
     return unique(xy_values)
 end
 
-function parse_heatrate_to_array(json_str::String)
+function parse_jason_to_heatrate(json_str::String)
     xy_vector = parse_json_to_arrays(json_str)
 
     # Validation: Check if there are at least two distinct x-coordinates
@@ -239,259 +190,255 @@ function parse_heatrate_to_array(json_str::String)
     return InputOutputCurve(function_data=PiecewiseLinearData(points=xy_vector))
 end
 
-function dataframe_to_system(df_dict::Dict)
-    system = PSY.System(100.0)
+# TODO: Split timeseries up into representative days
+function parse_json_to_time_array(json_str::String)
+    # Replace invalid JSON values
+    cleaned_str = replace(json_str, "NaN" => "null")
 
-    buses = []
-    # TODO: Add angle, bustype, etc. to database
-    for row_bus in eachrow(df_dict["balancing_topologies"])
-        b = PSY.ACBus(;
-            name=string("bus_", row_bus["name"]),
-            number=parse(Int64, row_bus["name"]),
-            angle=0.1,
-            bustype=ACBusTypes.PQ,
-            magnitude=1.0,
-            voltage_limits=(0.0, 2.0),
-            base_voltage=100.0,
-        )
-        add_component!(system, b)
-        push!(buses, b)
-    end
+    # Parse the cleaned JSON string into a Julia object
+    data = JSON3.read(cleaned_str)
 
-    #Transmission Lines
-    lines = df_dict["transmission_lines"]
-    for row in eachrow(lines)
-        arc = PSY.Arc(;
-            from=filter(b -> contains(b.name, row["balancing_topology_from"]), buses)[1],
-            to=filter(b -> contains(b.name, row["balancing_topology_to"]), buses)[1],
-        )
+    # Initialize arrays to store timestamps and values
+    timestamps = String[]
+    values = Float64[]
+    type = ""
 
-        tx = Line(;
-            name=string("line_", rownumber(row)),
-            available=true,
-            active_power_flow=0.0,
-            reactive_power_flow=0.0,
-            arc=arc,
-            r=1.0,
-            x=1.0,
-            b=(from=1.0, to=1.0),
-            rating=row["continuous_rating"],
-            angle_limits=(-1.5, 1.5),
-        )
-        add_component!(system, tx)
-    end
+    # Check if the timestamps are within the hours of the day
+    is_within_hours =
+        all(row -> parse(Int, split(row["timestamp"], "-")[end]) in 1:24, data)
 
-    # Get existing generation units
-    for row in eachrow(df_dict["generation_units"])
+    if is_within_hours
+        type = "Real Time"
+        # Iterate over each row in the DataFrame
+        for row in data
+            # Append the timestamp to the timestamps array
+            push!(timestamps, row["timestamp"])
 
-        #extract area
-        #area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
-        #area_int = parse(Int64, area)
+            # Append the value to the values array
+            push!(values, row["value"])
+        end
+    else
+        type = "Forecast"
+        # Create a dictionary to store daily values
+        daily_values = Dict{String, Vector{Float64}}()
 
-        # This will return all rows where entity_id matches any value in the tech_id vector
-        tech_id = row["unit_id"]
+        # Iterate over each row in the DataFrame
+        for row in data
+            # Extract the date part of the timestamp
+            date_part = join(split(row["timestamp"], "-")[1:3], "-")
 
-        op_data = filter(row -> row[:unit_id] == tech_id, df_dict["operational_data"])
-        variable_om = op_data[!, "vom_cost"][1]
-
-        parametric = map_prime_mover_to_parametric(row["prime_mover"])
-
-        if row["fuel_type"] == "Solar" || row["fuel_type"] == "Wind"
-            t = RenewableDispatch(;
-                name=row["name"],
-                available=true,
-                bus=filter(b -> contains(b.name, row["balancing_topology"]), buses)[1],
-                active_power=row["rating"],
-                reactive_power=0.0,
-                rating=row["rating"],
-                reactive_power_limits=nothing,
-                power_factor=0.5,
-                operation_cost=RenewableGenerationCost(
-                    variable=CostCurve(LinearCurve(variable_om)),
-                ),
-                base_power=row["base_power"],
-                prime_mover_type=map_prime_mover(row["prime_mover"]),
-            )
-            add_component!(system, t)
-            # Put in time series for the solar and Wind
-            eaid = row["unit_id"]
-            ts_index =
-                filter("entity_id" => isequal(eaid), df_dict["entities"])[!, "entity_id"]
-            if length(ts_index) == 0
-                continue
-            else
-                # TODO: All real-time timeseries
-                for time_series in ts_index
-                    ts = filter("entity_id" => isequal(time_series), df_dict["time_series"])
-                    # TODO: Remove this hacky fix once database has been corrected to have unique timestamps
-                    # ts = unique(ts,:timestamp)
-                    timestamps, values, type = parse_timestamps_and_values(ts)
-                    # dates = DateTime.(timestamps, "yyyy-m-d-H")
-                    time_series_array = TimeArray(timestamps, values)
-                    if type == "Forecast"
-                        ts = SingleTimeSeries(string(eaid), time_series_array)
-                        PSY.add_time_series!(system, t, ts)
-                        # TODO: Remove once we have decided real time data handling
-                        break
-                    elseif type == "Real Time"
-                        # TODO: For now, skipping this. But need to add later for real-time data
-                        # ts = SingleTimeSeries(string(time_series), time_series_array)
-                        # IS.add_time_series!(p.data, t, ts)
-                    end
-                    # ts = SingleTimeSeries(string(time_series), time_series_array)
-                    # IS.add_time_series!(p.data, t, ts)
-
-                end
-                @warn "Only day ahead added for unit_id: $eaid"
+            # Initialize the daily values array if not already present
+            if !haskey(daily_values, date_part)
+                daily_values[date_part] = Float64[]
             end
-        elseif row["fuel_type"] == "Hydro"
-            continue
-        else
-            t = ThermalStandard(;
-                name=row["name"],
-                available=true,
-                status=true,
-                bus=filter(b -> contains(b.name, row["balancing_topology"]), buses)[1],
-                active_power=row["rating"],
-                reactive_power=0.0,
-                rating=row["rating"],
-                active_power_limits=(0.0, row["rating"]),
-                reactive_power_limits=nothing,
-                ramp_limits=nothing,
-                operation_cost=ThermalGenerationCost(
-                    variable=CostCurve(LinearCurve(variable_om)),
-                    fixed=op_data[!, "fom_cost"][1],
-                    start_up=0.0,
-                    shut_down=0.0,
-                ),
-                base_power=row["base_power"],
-                prime_mover_type=map_prime_mover(row["prime_mover"]),
-                fuel=map_fuel(row["fuel_type"]),
-            )
-            add_component!(system, t)
+
+            # Append the value to the daily values array
+            push!(daily_values[date_part], row["value"])
+        end
+
+        # Calculate the average values for each day and create 24-hour profiles
+        for (date, vals) in daily_values
+            avg_value = sum(vals) / length(vals)
+            for hour in 1:24
+                push!(timestamps, "$date-$hour")
+                push!(values, avg_value)
+            end
         end
     end
 
-    # Get storage units
-    for row in eachrow(df_dict["storage_units"])
+    # Parse timestamps into DateTime objects
+    parsed_timestamps = Dates.DateTime.(timestamps, "yyyy-m-d-H")
 
-        #extract area
-        #area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
-        #area_int = parse(Int64, area)
+    # Sort the parsed timestamps and values
+    sorted_indices = sortperm(parsed_timestamps)
+    sorted_timestamps = parsed_timestamps[sorted_indices]
+    sorted_values = values[sorted_indices]
 
-        s = EnergyReservoirStorage(;
-            name=row["name"],
-            available=true,
-            bus=filter(b -> contains(b.name, row["balancing_topology"]), buses)[1],
-            prime_mover_type=map_prime_mover(row["prime_mover"]),
-            storage_technology_type=StorageTech.LIB,
-            storage_capacity=row["max_capacity"],
-            storage_level_limits=(0.0, 1.0),
-            initial_storage_capacity_level=0.0,
-            rating=row["rating"],
-            active_power=row["rating"],
-            input_active_power_limits=(0.0, row["rating"]),
-            output_active_power_limits=(0.0, row["rating"]),
-            efficiency=(in=row["charging_efficiency"], out=row["discharge_efficiency"]),
-            reactive_power=0.0,
-            reactive_power_limits=nothing,
-            base_power=row["base_power"],
-            operation_cost=StorageCost(
-                charge_variable_cost=CostCurve(LinearCurve(0.0)),
-                discharge_variable_cost=CostCurve(LinearCurve(0.0)),
-                fixed=0.0,
-                start_up=0.0,
-                shut_down=0.0,
-            ),
-        )
-        PSY.add_component!(system, s)
-    end
-
-    return system
+    return sorted_timestamps, sorted_values, type
 end
 
-function dataframe_to_structs(df_dict::Dict)
-
-    #Initialize Portfolio
-    system = dataframe_to_system(df_dict)
-
-    p = Portfolio(
-        discount_rate=0.07,
-        inflation_rate=0.05,
-        interest_rate=0.02,
-        base_year=2025;
-        base_system=system,
+# TODO: Figure out more permanent solution for mapping prime movers
+"""
+Function to map prime mover types to PrimeMovers
+"""
+function map_prime_mover(prime_mover::String)
+    mapping_dict = Dict(
+        "CT" => PrimeMovers.CT,
+        "STEAM" => PrimeMovers.ST,
+        "CC" => PrimeMovers.CC,
+        "SYNC_COND" => PrimeMovers.OT,
+        "NUCLEAR" => PrimeMovers.ST,
+        "HYDRO" => PrimeMovers.HA,
+        "ROR" => PrimeMovers.IC,
+        "PV" => PrimeMovers.PVe,
+        "CSP" => PrimeMovers.CP,
+        "RTPV" => PrimeMovers.PVe,
+        "WIND" => PrimeMovers.WT,
+        "Wind" => PrimeMovers.WT,
+        "STORAGE" => PrimeMovers.BA,
     )
 
-    tech_financials =
-        TechnologyFinancialData(; capital_recovery_period=30, technology_base_year=2025)
+    return mapping_dict[prime_mover]
+end
 
-    #initialize Zone structs
-    zones = []
-    for row_zone in eachrow(df_dict["areas"])
-        z = Zone(name=string("zone_", row_zone["name"]), id=parse(Int64, row_zone["name"]))
-        push!(zones, z)
+"""
+Function to map fuel string to ThermalFuels
+"""
+function map_fuel(fuel::String)
+    mapping_dict = Dict(
+        "NG" => ThermalFuels.NATURAL_GAS,
+        "Nuclear" => ThermalFuels.NUCLEAR,
+        "Coal" => ThermalFuels.COAL,
+        "Oil" => ThermalFuels.DISTILLATE_FUEL_OIL,
+    )
+
+    fuel_enum = haskey(mapping_dict, fuel) ? mapping_dict[fuel] : ThermalFuels.OTHER
+
+    return fuel_enum
+end
+
+function map_prime_mover_to_parametric(prime_mover::String)
+    mapping_dict = Dict(
+        "CT" => PSY.ThermalStandard,
+        "STEAM" => PSY.ThermalStandard,
+        "CC" => PSY.ThermalStandard,
+        "SYNC_COND" => PSY.ThermalStandard,
+        "NUCLEAR" => PSY.ThermalStandard,
+        "HYDRO" => PSY.ThermalStandard,
+        "ROR" => PSY.RenewableDispatch,
+        "PV" => PSY.RenewableDispatch,
+        "CSP" => PSY.RenewableDispatch,
+        "RTPV" => PSY.RenewableDispatch,
+        "WIND" => PSY.RenewableDispatch,
+        "Wind" => PSY.RenewableDispatch,
+    )
+
+    return mapping_dict[prime_mover]
+end
+
+function add_zones!(p::Portfolio, db::SQLite.DB)
+
+    # Confirm if we should be using balancing_topologies or areas for Zones
+
+    # stream straight through the table
+    for rec in DBInterface.execute(db, QUERIES[:zones])
+        # only build an ext‐dict if we actually have extras
+        ext =
+            rec.description !== nothing ? Dict(:description => rec.description) :
+            Dict{Symbol, Any}()
+
+        # build and immediately insert
+        z = Zone(; name=rec.name, id=parse(Int64, rec.name), ext=ext)
+        add_region!(p, z)
     end
-    #Populate SupplyTechnology structs from database (new builds)
-    topologies = df_dict["balancing_topologies"]
-    supply_curves_full =
-        filter("entity_type" => contains("supply_technologies"), df_dict["attributes"])
-    supply_curves = filter("name" => contains("supply"), supply_curves_full)
+end
 
-    # TODO: Add fields for reinforcement distances
-    reinforcement_distances =
-        filter("name" => contains("reinforcement"), supply_curves_full)
-    for row_pw in eachrow(supply_curves)
+function add_nodes!(p::Portfolio, db::SQLite.DB)
+end
 
-        # Extract supply curves and IDs
-        eaid = row_pw["entity_attribute_id"]
-        supply_curve = row_pw["value"]
-        supply_curve = decode(supply_curve, "UTF-8")
+function add_aggregate_lines!(p::Portfolio, db::SQLite.DB)
 
-        id = eaid
+    # Are max_flows only indicative of existing line capacity, or is it an overall limit? Double check this
+    # How are we handling parametric typing
 
-        # Find corresponding supply technology for that supply curve
-        # TODO: Add check to only do the rest of this is this returns a real (and not an empty dataframe)
-        row = df_dict["supply_technologies"][
-            df_dict["supply_technologies"][!, "technology_id"] .== id,
-            :,
-        ]
+    # Add in optional parameters later when needed
 
-        # @show eaid, row_pw, supply_curve, topologies[topologies.name .== row[!, "balancing_topology"][1], "area"][1]
+    for rec in DBInterface.execute(db, QUERIES[:aggregate_lines])
+
+        # build and immediately insert
+        t = AggregateTransportTechnology{ACBranch}(;
+            name=string(rec.rowid),
+            id=rec.rowid,
+            available=true,
+            base_power=100.0,
+            power_systems_type=string(ACBranch),
+            financial_data=DEFAULT_FINANCIAL_DATA,
+            start_region=collect(
+                IS.get_components(
+                    x -> get_id(x) == parse(Int64, rec.area_from),
+                    RegionTopology,
+                    p.data,
+                ),
+            )[1],
+            end_region=collect(
+                IS.get_components(
+                    x -> get_id(x) == parse(Int64, rec.area_to),
+                    RegionTopology,
+                    p.data,
+                ),
+            )[1],
+            capacity_limits=(min=0.0, max=max(rec.max_flow_from, rec.max_flow_to)),
+        )
+        add_technology!(p, t)
+    end
+end
+
+function add_nodal_lines!(p::Portfolio, db::SQLite.DB)
+end
+
+function add_supply_technologies!(p::Portfolio, db::SQLite.DB)
+    # stream straight through the table
+    for rec in DBInterface.execute(db, QUERIES[:supply_technologies])
+
+        # build and immediately insert
+
+        # Select appropriate parametric type
+        parametric = map_prime_mover_to_parametric(rec.prime_mover)
+
+        # Determine area based on balancing topology
+        # Generalize in the future if the database later supports technologies in multiple areas
+        area =
+            first(
+                DBInterface.execute(
+                    db,
+                    QUERIES[:topology_to_area],
+                    [rec.balancing_topology],
+                ),
+            ).area
+
+        # Get Entity Attribute ID for supply curve
+        # Where is the reinforcement curve used?
+        supply_curve_eaid =
+            first(
+                DBInterface.execute(
+                    db,
+                    QUERIES[:attributes],
+                    [rec.technology_id, "supply_technologies", "piecewise_linear"],
+                ),
+            ).entity_attribute_id
+
+        # Get supply curve for capital costs
+        supply_curve =
+            first(
+                DBInterface.execute(
+                    db,
+                    QUERIES[:piecewise_linear],
+                    [supply_curve_eaid, "Supply curve%"],
+                ),
+            ).piecewise_linear_blob
         supply_curve_parsed = parse_json_to_arrays(supply_curve)
-        #extract area
-        if !isempty(row)
-            area =
-                topologies[topologies.name .== row[!, "balancing_topology"][1], "area"][1]
-            area_int = parse(Int64, area)
-
-        else
-            continue
-        end
-        #extract supply curve, does every supply_technology have a supply curve?
-        #id = row["technology_id"]
-        #eaid = df_dict["attributes"][df_dict["attributes"] .== id, "entity_attribute_id"][1]
-        #supply_curve = df_dict["time_series"][df_dict["entity_attribute_id"] .== eaid, "piecewise_linear_blob"][1]
-        #Now just need to parse the blob
-
-        parametric = map_prime_mover_to_parametric(row[!, "prime_mover"][1])
-        f = row[!, "fuel_type"][1]
+        #@show supply_curve_parsed
         t = SupplyTechnology{parametric}(;
             #Data pulled from DB
-            name=string(row[!, "technology_id"][1]),
-            id=row[!, "technology_id"][1],
+            name=rec.prime_mover * string(rec.technology_id),
+            id=rec.technology_id,
             capital_costs=InputOutputCurve(PiecewiseLinearData(supply_curve_parsed)),
-            balancing_topology=string(row[!, "balancing_topology"][1]),
-            prime_mover_type=map_prime_mover(row[!, "prime_mover"][1]),
-            fuel=[map_fuel(f)],
-            region=[zones[area_int]],
-            financial_data=tech_financials,
-
-            #Problem ones, need to write functions to extract
+            prime_mover_type=map_prime_mover(rec.prime_mover),
+            fuel=[map_fuel(rec.fuel_type)],
+            region=collect(
+                IS.get_components(
+                    x -> get_id(x) == parse(Int64, area),
+                    RegionTopology,
+                    p.data,
+                ),
+            ),
+            financial_data=DEFAULT_FINANCIAL_DATA,
+            available=true,
             base_power=100.0,
-            initial_capacity=0.0,
+            power_systems_type=string(parametric),
 
-            # Data we should have but dont currently
+            #TODO: Get operational data for SupplyTechnologies, only for generation units right now
+            # Need to map between them?
             operation_costs=ThermalGenerationCost(
                 variable=CostCurve(LinearCurve(0.0)),
                 fixed=0.0,
@@ -499,109 +446,72 @@ function dataframe_to_structs(df_dict::Dict)
                 shut_down=0.0,
             ),
             start_fuel_mmbtu_per_mw=2.0,
-            start_cost_per_mw=91.0,
-            up_time=6.0,
-            dn_time=6.0,
-            heat_rate_mmbtu_per_mwh=Dict(map_fuel(f) => LinearCurve(7.43)),
-            co2=Dict(map_fuel(f) => 0.05306),
-            ramp_dn_percentage=0.64,
-            ramp_up_percentage=0.64,
-
-            #Placeholder or default values (modeling assumptions)
-            available=true,
-            min_generation_percentage=0.0,
-            power_systems_type=string(parametric),
+            co2=Dict(map_fuel(rec.fuel_type) => 0.0),
         )
         add_technology!(p, t)
-    end
 
-    #Populate DemandRequirement structs from database
-    for row in eachrow(df_dict["demand_requirements"])
-        #start in time_series
-        eaid = row["entity_attribute_id"]
-        # ts_index = filter("entity_id" => isequal(eaid), df_dict["entities"])[!, "entity_id"]
-        ts_index = filter(
-            row ->
-                row["entity_id"] == eaid && row["entity_type"] == "demand_requirements",
-            df_dict["entities"],
-        )[
-            !,
-            "entity_id",
-        ]
-
-        # Collect all rows in the time_series table that match the entity_id
-        ts = filter("entity_id" => isequal(ts_index[1]), df_dict["time_series"])
-        ts_parsed = collect(ts[:, :value])
-
-        # Parsing the timestamps into Dates
-        timestamps = DateTime.(ts[!, :timestamp], "yyyy-m-d-H")
-
-        dates = timestamps[1]:Hour(1):timestamps[end]
-        demand = ts_parsed
-        demand_array = TimeArray(dates, demand)
-        ts = SingleTimeSeries(string(row["entity_attribute_id"]), demand_array)
-
-        area_int = parse(Int64, row["area"])
-
-        #How to parse this timestamp stuff??
-
-        d = DemandRequirement{ElectricLoad}(
-            #Data pulled from DB
-            id=row["entity_attribute_id"],
-            name=string(row["entity_attribute_id"]),
-            region=[zones[area_int]],#parse(Int64, row["area"]),
-
-            #Placeholder/default values
-            available=true,
-            power_systems_type="ElectricLoad",
-            value_of_lost_load=1.0,
+        # Pull relevant TimeSeriesData
+        # Currently no timeseries in the database for SupplyTechnologies
+        for attr in DBInterface.execute(
+            db,
+            QUERIES[:attributes],
+            [rec.technology_id, "supply_technologies", "time_series"],
         )
-        add_technology!(p, d)
-        IS.add_time_series!(p.data, d, ts)
-    end
-
-    #Transmission Lines
-    lines = df_dict["transmission_lines"]
-    for row in eachrow(df_dict["transmission_interchange"])
-
-        # get list of balancing topologies that correspond to the areas for line tx
-        topologies_from = filter("area" => isequal(row["area_from"]), topologies)[!, "name"]
-        topologies_to = filter("area" => isequal(row["area_to"]), topologies)[!, "name"]
-
-        existing_capacity = 0.0
-        for from in topologies_from
-            for to in topologies_to
-                line_cap = lines[
-                    (lines[
-                        !,
-                        "balancing_topology_from",
-                    ] .== from) .& (lines[!, "balancing_topology_to"] .== to),
-                    "continuous_rating",
-                ]
-                if length(line_cap) == 1
-                    existing_capacity += line_cap[1]
-                end
+            for ts_data in
+                DBInterface.execute(db, QUERIES[:time_series], [attr.entity_attribute_id])
+                timestamps, values, type =
+                    parse_json_to_time_array(ts_data.time_series_blob)
+                time_series_array = TimeSeries.TimeArray(timestamps, values)
+                ts = SingleTimeSeries(
+                    attr.name * string(rec.entity_attribute_id),
+                    time_series_array,
+                )
+                add_time_series!(p, d, ts)
             end
         end
-
-        tx = ACTransportTechnology{Branch}(;
-            name=string(rownumber(row)),
-            id=rownumber(row),
-            base_power=100.0,
-            available=true,
-            start_region=zones[parse(Int64, row["area_from"])],
-            end_region=zones[parse(Int64, row["area_to"])],
-            capacity_limits=(min=0.0, max=row["max_flow_from"]),
-            existing_line_capacity=existing_capacity,
-
-            #stuff we don't have, but probably should
-            capital_cost=LinearCurve(19261),
-            line_loss=0.019653847,
-            power_systems_type="Branch",
-            financial_data=tech_financials,
-        )
-        add_technology!(p, tx)
     end
+end
 
-    return p
+function add_generation_units!(p::Portfolio, db::SQLite.DB)
+end
+
+function add_storage_technologies!(p::Portfolio, db::SQLite.DB)
+end
+
+function add_storage_units!(p::Portfolio, db::SQLite.DB)
+end
+
+function add_demand_requirements!(p::Portfolio, db::SQLite.DB)
+    # stream straight through the table
+    for rec in DBInterface.execute(db, QUERIES[:demand_requirements])
+
+        # build and immediately insert
+        d = DemandRequirement{StaticLoad}(;
+            name="demand_" * string(rec.entity_attribute_id),
+            id=rec.entity_attribute_id,
+            peak_demand_mw=rec.peak_load,
+            region=collect(
+                IS.get_components(
+                    x -> get_id(x) == parse(Int64, rec.area),
+                    RegionTopology,
+                    p.data,
+                ),
+            ),
+            value_of_lost_load=1e8,
+            power_systems_type="StaticLoad",
+        )
+        add_technology!(p, d)
+
+        # Pull relevant TimeSeriesData
+        for ts_data in
+            DBInterface.execute(db, QUERIES[:time_series], [rec.entity_attribute_id])
+            timestamps, values, type = parse_json_to_time_array(ts_data.time_series_blob)
+            time_series_array = TimeSeries.TimeArray(timestamps, values)
+            ts = SingleTimeSeries(string(rec.entity_attribute_id), time_series_array)
+            add_time_series!(p, d, ts)
+        end
+    end
+end
+
+function add_demand_technologies!(p::Portfolio, db::SQLite.DB)
 end
