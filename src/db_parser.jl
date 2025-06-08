@@ -37,6 +37,9 @@ QUERIES = Dict(
     :supply_technologies => """
           SELECT technology_id, prime_mover, fuel_type, technology_class, scenario, area, balancing_topology FROM supply_technologies
         """,
+    :storage_technologies => """
+          SELECT storage_unit_id, name, prime_mover, fuel_type, scenario, area, balancing_topology FROM supply_technologies
+        """,
     :demand_requirements => """
           SELECT entity_attribute_id, peak_load, area, balancing_topology FROM demand_requirements
         """,
@@ -297,6 +300,20 @@ function map_fuel(fuel::String)
     return fuel_enum
 end
 
+"""
+Function to map storage technology string to StorageTech
+"""
+function map_storage_tech(fuel::String)
+    mapping_dict = Dict(
+        "PTES" => StorageTech.PTES,
+        "LIB" => StorageTech.LIB,
+    )
+
+    fuel_enum = haskey(mapping_dict, fuel) ? mapping_dict[fuel] : StorageTech.LIB
+
+    return fuel_enum
+end
+
 function map_prime_mover_to_parametric(prime_mover::String)
     mapping_dict = Dict(
         "CT" => PSY.ThermalStandard,
@@ -311,6 +328,8 @@ function map_prime_mover_to_parametric(prime_mover::String)
         "RTPV" => PSY.RenewableDispatch,
         "WIND" => PSY.RenewableDispatch,
         "Wind" => PSY.RenewableDispatch,
+        "BA" => PSY.EnergyReservoirStorage,
+        "PS" =>  PSY.EnergyReservoirStorage
     )
 
     return mapping_dict[prime_mover]
@@ -476,9 +495,183 @@ function add_generation_units!(p::Portfolio, db::SQLite.DB)
 end
 
 function add_storage_technologies!(p::Portfolio, db::SQLite.DB)
+    # stream straight through the table
+    for rec in DBInterface.execute(db, QUERIES[:supply_technologies])
+
+        # build and immediately insert
+
+        # Select appropriate parametric type
+        parametric = map_prime_mover_to_parametric(rec.prime_mover)
+
+        # Determine area based on balancing topology
+        # Generalize in the future if the database later supports technologies in multiple areas
+        area =
+            first(
+                DBInterface.execute(
+                    db,
+                    QUERIES[:topology_to_area],
+                    [rec.balancing_topology],
+                ),
+            ).area
+
+        # Get Entity Attribute ID for supply curve
+        # Where is the reinforcement curve used?
+        supply_curve_eaid =
+            first(
+                DBInterface.execute(
+                    db,
+                    QUERIES[:attributes],
+                    [rec.technology_id, "storage_technologies", "piecewise_linear"],
+                ),
+            ).entity_attribute_id
+
+        # Get supply curve for capital costs
+        supply_curve =
+            first(
+                DBInterface.execute(
+                    db,
+                    QUERIES[:piecewise_linear],
+                    [supply_curve_eaid, "Supply curve%"],
+                ),
+            ).piecewise_linear_blob
+        supply_curve_parsed = parse_json_to_arrays(supply_curve)
+        #@show supply_curve_parsed
+        t = StorageTechnology{parametric}(;
+            #Data pulled from DB
+            name=rec.name,
+            id=rec.storage_unit_id,
+            capital_costs_discharge=InputOutputCurve(PiecewiseLinearData(supply_curve_parsed)),
+            prime_mover_type=map_prime_mover(rec.prime_mover),
+            storage_tech=map_storage_tech(rec.fuel_type),
+            region=collect(
+                IS.get_components(
+                    x -> get_id(x) == parse(Int64, area),
+                    RegionTopology,
+                    p.data,
+                ),
+            ),
+            financial_data=DEFAULT_FINANCIAL_DATA,
+            available=true,
+            base_power=100.0,
+            power_systems_type=string(parametric),
+
+            #TODO: Get operational data for StorageTechnologies, only for storage units right now
+            # Need to map between them?
+            operation_costs=StorageCost(),
+
+        )
+        add_technology!(p, t)
+
+        # Pull relevant TimeSeriesData
+        # Currently no timeseries in the database for SupplyTechnologies
+        for attr in DBInterface.execute(
+            db,
+            QUERIES[:attributes],
+            [rec.technology_id, "storage_technologies", "time_series"],
+        )
+            for ts_data in
+                DBInterface.execute(db, QUERIES[:time_series], [attr.entity_attribute_id])
+                timestamps, values, type =
+                    parse_json_to_time_array(ts_data.time_series_blob)
+                time_series_array = TimeSeries.TimeArray(timestamps, values)
+                ts = SingleTimeSeries(
+                    attr.name * string(rec.entity_attribute_id),
+                    time_series_array,
+                )
+                add_time_series!(p, d, ts)
+            end
+        end
+    end
 end
 
 function add_storage_units!(p::Portfolio, db::SQLite.DB)
+        # stream straight through the table
+        for rec in DBInterface.execute(db, QUERIES[:supply_technologies])
+
+            # build and immediately insert
+    
+            # Select appropriate parametric type
+            parametric = map_prime_mover_to_parametric(rec.prime_mover)
+    
+            # Determine area based on balancing topology
+            # Generalize in the future if the database later supports technologies in multiple areas
+            area =
+                first(
+                    DBInterface.execute(
+                        db,
+                        QUERIES[:topology_to_area],
+                        [rec.balancing_topology],
+                    ),
+                ).area
+    
+            # Get Entity Attribute ID for supply curve
+            # Where is the reinforcement curve used?
+            supply_curve_eaid =
+                first(
+                    DBInterface.execute(
+                        db,
+                        QUERIES[:attributes],
+                        [rec.technology_id, "storage_technologies", "piecewise_linear"],
+                    ),
+                ).entity_attribute_id
+    
+            # Get supply curve for capital costs
+            supply_curve =
+                first(
+                    DBInterface.execute(
+                        db,
+                        QUERIES[:piecewise_linear],
+                        [supply_curve_eaid, "Supply curve%"],
+                    ),
+                ).piecewise_linear_blob
+            supply_curve_parsed = parse_json_to_arrays(supply_curve)
+            #@show supply_curve_parsed
+            t = StorageTechnology{parametric}(;
+                #Data pulled from DB
+                name=rec.name,
+                id=rec.storage_unit_id,
+                capital_costs_discharge=InputOutputCurve(PiecewiseLinearData(supply_curve_parsed)),
+                prime_mover_type=map_prime_mover(rec.prime_mover),
+                storage_tech=map_storage_tech(rec.fuel_type),
+                region=collect(
+                    IS.get_components(
+                        x -> get_id(x) == parse(Int64, area),
+                        RegionTopology,
+                        p.data,
+                    ),
+                ),
+                financial_data=DEFAULT_FINANCIAL_DATA,
+                available=true,
+                base_power=100.0,
+                power_systems_type=string(parametric),
+    
+                #TODO: Get operational data for StorageTechnologies, only for storage units right now
+                # Need to map between them?
+                operation_costs=StorageCost(),
+    
+            )
+            add_technology!(p, t)
+    
+            # Pull relevant TimeSeriesData
+            # Currently no timeseries in the database for SupplyTechnologies
+            for attr in DBInterface.execute(
+                db,
+                QUERIES[:attributes],
+                [rec.technology_id, "storage_technologies", "time_series"],
+            )
+                for ts_data in
+                    DBInterface.execute(db, QUERIES[:time_series], [attr.entity_attribute_id])
+                    timestamps, values, type =
+                        parse_json_to_time_array(ts_data.time_series_blob)
+                    time_series_array = TimeSeries.TimeArray(timestamps, values)
+                    ts = SingleTimeSeries(
+                        attr.name * string(rec.entity_attribute_id),
+                        time_series_array,
+                    )
+                    add_time_series!(p, d, ts)
+                end
+            end
+        end
 end
 
 function add_demand_requirements!(p::Portfolio, db::SQLite.DB)
