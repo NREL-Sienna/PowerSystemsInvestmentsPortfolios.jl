@@ -157,7 +157,6 @@ function database_to_structs(db_path::AbstractString, p::Portfolio)
     add_generation_units!(p, db)
     add_storage_units!(p, db)
 
-
     return p
 end
 
@@ -295,7 +294,7 @@ function map_prime_mover(prime_mover::String)
         "WIND" => PrimeMovers.WT,
         "Wind" => PrimeMovers.WT,
         "STORAGE" => PrimeMovers.BA,
-        "CSP" => PrimeMovers.CP
+        "CSP" => PrimeMovers.CP,
     )
 
     return mapping_dict[prime_mover]
@@ -321,10 +320,7 @@ end
 Function to map storage technology string to StorageTech
 """
 function map_storage_tech(fuel::String)
-    mapping_dict = Dict(
-        "Hydro" => StorageTech.PTES,
-        "Solar" => StorageTech.OTHER_THERM,
-    )
+    mapping_dict = Dict("Hydro" => StorageTech.PTES, "Solar" => StorageTech.OTHER_THERM)
 
     fuel_enum = haskey(mapping_dict, fuel) ? mapping_dict[fuel] : StorageTech.LIB
 
@@ -346,7 +342,7 @@ function map_prime_mover_to_parametric(prime_mover::String)
         "WIND" => PSY.RenewableDispatch,
         "Wind" => PSY.RenewableDispatch,
         "BA" => PSY.EnergyReservoirStorage,
-        "PS" =>  PSY.EnergyReservoirStorage
+        "PS" => PSY.EnergyReservoirStorage,
     )
 
     return mapping_dict[prime_mover]
@@ -369,8 +365,7 @@ function add_zones!(p::Portfolio, db::SQLite.DB)
     end
 end
 
-function add_nodes!(p::Portfolio, db::SQLite.DB)
-end
+function add_nodes!(p::Portfolio, db::SQLite.DB) end
 
 function add_buses!(p::Portfolio, db::SQLite.DB)
     # stream straight through the table
@@ -381,9 +376,9 @@ function add_buses!(p::Portfolio, db::SQLite.DB)
             Dict{String, Any}()
 
         # build and immediately insert
-        b = PSY.ACBus(; 
-            name=rec.name, 
-            number=parse(Int64, rec.name), 
+        b = PSY.ACBus(;
+            name=rec.name,
+            number=parse(Int64, rec.name),
             bustype=nothing,
             angle=nothing,
             magnitude=nothing,
@@ -391,7 +386,8 @@ function add_buses!(p::Portfolio, db::SQLite.DB)
             base_voltage=nothing,
             area=nothing,
             load_zone=nothing,
-            ext=ext)
+            ext=ext,
+        )
         PSY.add_component!(p.base_system, b)
     end
 end
@@ -433,8 +429,7 @@ function add_aggregate_lines!(p::Portfolio, db::SQLite.DB)
     end
 end
 
-function add_nodal_lines!(p::Portfolio, db::SQLite.DB)
-end
+function add_nodal_lines!(p::Portfolio, db::SQLite.DB) end
 
 function add_supply_technologies!(p::Portfolio, db::SQLite.DB)
     # stream straight through the table
@@ -540,13 +535,13 @@ function add_generation_units!(p::Portfolio, db::SQLite.DB)
 
             # Get Entity Attribute ID for supply curve
             heat_rate_eaid =
-            first(
-                DBInterface.execute(
-                    db,
-                    QUERIES[:attributes],
-                    [rec.unit_id, "generation_units", "piecewise_linear"],
-                ),
-            ).entity_attribute_id
+                first(
+                    DBInterface.execute(
+                        db,
+                        QUERIES[:attributes],
+                        [rec.unit_id, "generation_units", "piecewise_linear"],
+                    ),
+                ).entity_attribute_id
 
             # Get supply curve for capital costs
             heat_rate =
@@ -558,33 +553,43 @@ function add_generation_units!(p::Portfolio, db::SQLite.DB)
                     ),
                 ).piecewise_linear_blob
             heat_rate_parsed = parse_json_to_heatrate(heat_rate)
-            ramps = first(DBInterface.execute(db, QUERIES[:float_attributes], [rec.unit_id, "generation_units", "Ramp%"]))
-            
+            ramps = first(
+                DBInterface.execute(
+                    db,
+                    QUERIES[:float_attributes],
+                    [rec.unit_id, "generation_units", "Ramp%"],
+                ),
+            )
+
             g = ThermalStandard(;
                 name=rec.name,
                 rating=rec.rating,
                 base_power=rec.base_power,
                 available=true,
                 status=true,
-                bus=PSY.get_component(PSY.ACBus, p.base_system, string(rec.balancing_topology)),
+                bus=PSY.get_component(
+                    PSY.ACBus,
+                    p.base_system,
+                    string(rec.balancing_topology),
+                ),
                 prime_mover_type=map_prime_mover(rec.prime_mover),
                 fuel=map_fuel(rec.fuel_type),
                 active_power_limits=(min=0, max=rec.rating),
-                active_power = rec.rating,
-                reactive_power = 0.0,
-                reactive_power_limits = (min=0, max=rec.rating),
-                ramp_limits = (up=ramps.value, down=ramps.value),
-                time_limits = (up=op_data.plant_uptime, down=op_data.plant_downtime),
-                operation_cost = ThermalGenerationCost(;
+                active_power=rec.rating,
+                reactive_power=0.0,
+                reactive_power_limits=(min=0, max=rec.rating),
+                ramp_limits=(up=ramps.value, down=ramps.value),
+                time_limits=(up=op_data.plant_uptime, down=op_data.plant_downtime),
+                operation_cost=ThermalGenerationCost(;
                     variable=FuelCurve(;
                         value_curve=heat_rate_parsed,
-                        fuel_cost=0.0, 
-                        vom_cost=LinearCurve(op_data.vom_cost)
+                        fuel_cost=0.0,
+                        vom_cost=LinearCurve(op_data.vom_cost),
                     ),
                     fixed=op_data.fom_cost,
                     start_up=op_data.startup_cost,
                     shut_down=0.0,
-                )
+                ),
             )
             add_component!(p.base_system, g)
 
@@ -594,8 +599,11 @@ function add_generation_units!(p::Portfolio, db::SQLite.DB)
                 QUERIES[:attributes],
                 [rec.unit_id, "generation_units", "time_series"],
             )
-                for ts_data in
-                    DBInterface.execute(db, QUERIES[:time_series], [attr.entity_attribute_id])
+                for ts_data in DBInterface.execute(
+                    db,
+                    QUERIES[:time_series],
+                    [attr.entity_attribute_id],
+                )
                     timestamps, values, type =
                         parse_json_to_time_array(ts_data.time_series_blob)
                     time_series_array = TimeSeries.TimeArray(timestamps, values)
@@ -608,23 +616,24 @@ function add_generation_units!(p::Portfolio, db::SQLite.DB)
                 end
             end
         elseif map_prime_mover_to_parametric(rec.prime_mover) == PSY.RenewableDispatch
-
             g = RenewableDispatch(;
                 name=rec.name,
                 rating=rec.rating,
                 base_power=rec.base_power,
                 available=true,
-                bus=PSY.get_component(PSY.ACBus, p.base_system, string(rec.balancing_topology)),
+                bus=PSY.get_component(
+                    PSY.ACBus,
+                    p.base_system,
+                    string(rec.balancing_topology),
+                ),
                 prime_mover_type=map_prime_mover(rec.prime_mover),
-                active_power = rec.rating,
-                reactive_power = 0.0,
-                reactive_power_limits = (min=0, max=rec.rating),
-                power_factor = 0.5,
-                operation_cost = RenewableGenerationCost(;
-                    variable=CostCurve(;
-                        value_curve=LinearCurve(op_data.vom_cost),
-                    )
-                )
+                active_power=rec.rating,
+                reactive_power=0.0,
+                reactive_power_limits=(min=0, max=rec.rating),
+                power_factor=0.5,
+                operation_cost=RenewableGenerationCost(;
+                    variable=CostCurve(; value_curve=LinearCurve(op_data.vom_cost)),
+                ),
             )
             add_component!(p.base_system, g)
 
@@ -634,8 +643,11 @@ function add_generation_units!(p::Portfolio, db::SQLite.DB)
                 QUERIES[:attributes],
                 [rec.unit_id, "generation_units", "time_series"],
             )
-                for ts_data in
-                    DBInterface.execute(db, QUERIES[:time_series], [attr.entity_attribute_id])
+                for ts_data in DBInterface.execute(
+                    db,
+                    QUERIES[:time_series],
+                    [attr.entity_attribute_id],
+                )
                     timestamps, values, type =
                         parse_json_to_time_array(ts_data.time_series_blob)
                     time_series_array = TimeSeries.TimeArray(timestamps, values)
@@ -647,11 +659,8 @@ function add_generation_units!(p::Portfolio, db::SQLite.DB)
                     #PSY.add_time_series!(p.base_system, g, ts)
                 end
             end
-
         end
-
     end
-
 end
 
 function add_storage_technologies!(p::Portfolio, db::SQLite.DB)
@@ -699,7 +708,9 @@ function add_storage_technologies!(p::Portfolio, db::SQLite.DB)
             #Data pulled from DB
             name=rec.name,
             id=rec.storage_unit_id,
-            capital_costs_discharge=InputOutputCurve(PiecewiseLinearData(supply_curve_parsed)),
+            capital_costs_discharge=InputOutputCurve(
+                PiecewiseLinearData(supply_curve_parsed),
+            ),
             prime_mover_type=map_prime_mover(rec.prime_mover),
             storage_tech=map_storage_tech(rec.fuel_type),
             region=collect(
@@ -717,7 +728,6 @@ function add_storage_technologies!(p::Portfolio, db::SQLite.DB)
             #TODO: Get operational data for StorageTechnologies, only for storage units right now
             # Need to map between them?
             operation_costs=StorageCost(),
-
         )
         add_technology!(p, t)
 
@@ -744,58 +754,58 @@ function add_storage_technologies!(p::Portfolio, db::SQLite.DB)
 end
 
 function add_storage_units!(p::Portfolio, db::SQLite.DB)
-        # stream straight through the table
-        for rec in DBInterface.execute(db, QUERIES[:storage_units])
+    # stream straight through the table
+    for rec in DBInterface.execute(db, QUERIES[:storage_units])
 
-            # build and immediately insert
+        # build and immediately insert
 
-            #What is max_capacity column in DB used for?
-            # Some of this data still missing from DB
-            t = EnergyReservoirStorage(;
-                #Data pulled from DB
-                name=rec.name,
-                rating=rec.rating,
-                base_power=rec.base_power,
-                available=true,
-                bus=PSY.get_component(PSY.ACBus, p.base_system, string(rec.balancing_topology)),
-                prime_mover_type=map_prime_mover(rec.prime_mover),
-                storage_technology_type=map_storage_tech(rec.fuel_type),
-                storage_capacity = rec.max_capacity*rec.base_power,
-                storage_level_limits = (min=0, max=1.0),
-                initial_storage_capacity_level = 0,
-                input_active_power_limits=(min=0, max=rec.rating),
-                output_active_power_limits=(min=0, max=rec.rating),
-                active_power = rec.rating,
-                reactive_power = 0.0,
-                reactive_power_limits = (min=0, max=rec.rating),
-                efficiency = (in=rec.charging_efficiency, out=rec.discharge_efficiency),
-                operation_cost=StorageCost(
-                    charge_variable_cost = CostCurve(LinearCurve(0.0)),
-                    discharge_variable_cost = CostCurve(LinearCurve(0.0))
-                ), #Add later when data is in DB
-            )
-            add_component!(p.base_system, t)
-    
-            # Pull relevant TimeSeriesData
-            for attr in DBInterface.execute(
-                db,
-                QUERIES[:attributes],
-                [rec.storage_unit_id, "storage_units", "time_series"],
-            )
-                for ts_data in
-                    DBInterface.execute(db, QUERIES[:time_series], [attr.entity_attribute_id])
-                    timestamps, values, type =
-                        parse_json_to_time_array(ts_data.time_series_blob)
-                    time_series_array = TimeSeries.TimeArray(timestamps, values)
-                    ts = SingleTimeSeries(
-                        attr.name * string(attr.entity_attribute_id),
-                        time_series_array,
-                    )
-                    #TODO: Debug duplicate timeseries?
-                    #PSY.add_time_series!(p.base_system, t, ts)
-                end
+        #What is max_capacity column in DB used for?
+        # Some of this data still missing from DB
+        t = EnergyReservoirStorage(;
+            #Data pulled from DB
+            name=rec.name,
+            rating=rec.rating,
+            base_power=rec.base_power,
+            available=true,
+            bus=PSY.get_component(PSY.ACBus, p.base_system, string(rec.balancing_topology)),
+            prime_mover_type=map_prime_mover(rec.prime_mover),
+            storage_technology_type=map_storage_tech(rec.fuel_type),
+            storage_capacity=rec.max_capacity * rec.base_power,
+            storage_level_limits=(min=0, max=1.0),
+            initial_storage_capacity_level=0,
+            input_active_power_limits=(min=0, max=rec.rating),
+            output_active_power_limits=(min=0, max=rec.rating),
+            active_power=rec.rating,
+            reactive_power=0.0,
+            reactive_power_limits=(min=0, max=rec.rating),
+            efficiency=(in=rec.charging_efficiency, out=rec.discharge_efficiency),
+            operation_cost=StorageCost(
+                charge_variable_cost=CostCurve(LinearCurve(0.0)),
+                discharge_variable_cost=CostCurve(LinearCurve(0.0)),
+            ), #Add later when data is in DB
+        )
+        add_component!(p.base_system, t)
+
+        # Pull relevant TimeSeriesData
+        for attr in DBInterface.execute(
+            db,
+            QUERIES[:attributes],
+            [rec.storage_unit_id, "storage_units", "time_series"],
+        )
+            for ts_data in
+                DBInterface.execute(db, QUERIES[:time_series], [attr.entity_attribute_id])
+                timestamps, values, type =
+                    parse_json_to_time_array(ts_data.time_series_blob)
+                time_series_array = TimeSeries.TimeArray(timestamps, values)
+                ts = SingleTimeSeries(
+                    attr.name * string(attr.entity_attribute_id),
+                    time_series_array,
+                )
+                #TODO: Debug duplicate timeseries?
+                #PSY.add_time_series!(p.base_system, t, ts)
             end
         end
+    end
 end
 
 function add_demand_requirements!(p::Portfolio, db::SQLite.DB)
@@ -830,5 +840,4 @@ function add_demand_requirements!(p::Portfolio, db::SQLite.DB)
     end
 end
 
-function add_demand_technologies!(p::Portfolio, db::SQLite.DB)
-end
+function add_demand_technologies!(p::Portfolio, db::SQLite.DB) end
