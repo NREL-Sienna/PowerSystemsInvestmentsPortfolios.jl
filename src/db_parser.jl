@@ -6,24 +6,13 @@ This PoC is if a dictionary of queries is maintained, then the database can be r
 Set of queries to extract relevant data from the database. Need to be maintained to be consistent with the most recent version of the database
 """
 
-"""
-Relevant info:
-entity_id is the IDs within a table (equivalent to unit_id, technology_id, etc.)
-id in entities table across *all* generation, storage, and reserve entries
-
-Can access an attribute for a specific generator using their entity ID and entity_type
-    - If value is a single entry, can be pulled from table. Otherwise we need to take entity_attribute_id and get JSON blob from time_series or piecewise_linear table
-
-Linkages appears to be mapping individual generators to what reserves they can contribute to
-"""
-
 QUERIES = Dict(
     #some uncertainty about the zone id
     :zones => """
          SELECT name, description FROM areas
        """,
     :balancing_topologies => """
-          SELECT name, description FROM balancing_topologies
+          SELECT * FROM balancing_topologies
         """,
     :topology_to_area => """
           SELECT area FROM balancing_topologies WHERE name = ?
@@ -46,9 +35,12 @@ QUERIES = Dict(
     :storage_units => """
           SELECT storage_unit_id, name, prime_mover, fuel_type, max_capacity, balancing_topology, charging_efficiency, discharge_efficiency, rating, base_power FROM storage_units
         """,
-    :demand_requirements => """
+    :zonal_demand_requirements => """
           SELECT entity_attribute_id, peak_load, area, balancing_topology FROM demand_requirements
         """,
+    :nodal_demand_requirements => """
+        SELECT entity_attribute_id, peak_load, area, balancing_topology FROM demand_requirements WHERE area = ?
+      """,
     :entities => """
           SELECT id FROM entities WHERE entity_id = ? AND entity_type = ?
         """,
@@ -68,7 +60,6 @@ QUERIES = Dict(
         SELECT * FROM operational_data WHERE unit_id = ? 
       """,
     # add additional queries here as needed
-
 )
 
 # Remove later, or make this optional later depending on what is in the dataset
@@ -91,9 +82,6 @@ function db_to_portfolio_parser(
     base_year=2025,
     system::PSY.System=PSY.System(100.0),
 )
-
-    #Goal will be be able to read in database and populate structs simultaneously
-
     p = initialize_portfolio(
         aggregation,
         discount_rate,
@@ -136,21 +124,21 @@ function database_to_structs(db_path::AbstractString, p::Portfolio)
     # User can provide a desired aggregation level and then we can select based on that
 
     # Add zones to the portfolio
-    if get_aggregation(p) == PSY.Area
-        add_zones!(p, db)
-        add_aggregate_lines!(p, db)
-    elseif get_aggregation(p) == PSY.ACBus
+    if get_aggregation(p) == PSY.ACBus #Nodal aggregation
         add_nodes!(p, db)
         add_nodal_lines!(p, db)
+        add_nodal_demand_requirements!(p, db)
+    else #Zonal aggregation
+        add_zones!(p, db)
+        add_aggregate_lines!(p, db)
+        add_zonal_demand_requirements!(p, db)
     end
 
     # Add technologies to Portfolio
-
     add_supply_technologies!(p, db)
     add_storage_technologies!(p, db)
 
     add_demand_technologies!(p, db)
-    add_demand_requirements!(p, db)
 
     # Add units to base_systems
     add_buses!(p, db)
@@ -350,8 +338,6 @@ end
 
 function add_zones!(p::Portfolio, db::SQLite.DB)
 
-    # Confirm if we should be using balancing_topologies or areas for Zones
-
     # stream straight through the table
     for rec in DBInterface.execute(db, QUERIES[:zones])
         # only build an ext‐dict if we actually have extras
@@ -365,7 +351,20 @@ function add_zones!(p::Portfolio, db::SQLite.DB)
     end
 end
 
-function add_nodes!(p::Portfolio, db::SQLite.DB) end
+function add_nodes!(p::Portfolio, db::SQLite.DB)
+
+    # stream straight through the table
+    for rec in DBInterface.execute(db, QUERIES[:balancing_topologies])
+        # only build an ext‐dict if we actually have extras
+        ext =
+            rec.description !== nothing ? Dict(:description => rec.description) :
+            Dict{Symbol, Any}()
+
+        # build and immediately insert
+        z = Node(; name=rec.name, id=parse(Int64, rec.name), ext=ext)
+        add_region!(p, z)
+    end
+end
 
 function add_buses!(p::Portfolio, db::SQLite.DB)
     # stream straight through the table
@@ -429,27 +428,58 @@ function add_aggregate_lines!(p::Portfolio, db::SQLite.DB)
     end
 end
 
-function add_nodal_lines!(p::Portfolio, db::SQLite.DB) end
+function add_nodal_lines!(p::Portfolio, db::SQLite.DB)
+    for rec in DBInterface.execute(db, QUERIES[:transmission_lines])
+
+        # build and immediately insert
+        t = NodalACTransportTechnology{ACBranch}(;
+            name=string(rec.rowid),
+            id=rec.rowid,
+            available=true,
+            base_power=100.0,
+            power_systems_type=string(ACBranch),
+            financial_data=DEFAULT_FINANCIAL_DATA,
+            start_node=collect(
+                IS.get_components(
+                    x -> get_id(x) == parse(Int64, rec.balancing_topology_from),
+                    RegionTopology,
+                    p.data,
+                ),
+            )[1],
+            end_node=collect(
+                IS.get_components(
+                    x -> get_id(x) == parse(Int64, rec.balancing_topology_to),
+                    RegionTopology,
+                    p.data,
+                ),
+            )[1],
+            reactance=1.0,
+        )
+        add_technology!(p, t)
+    end
+end
 
 function add_supply_technologies!(p::Portfolio, db::SQLite.DB)
     # stream straight through the table
     for rec in DBInterface.execute(db, QUERIES[:supply_technologies])
 
-        # build and immediately insert
-
         # Select appropriate parametric type
         parametric = map_prime_mover_to_parametric(rec.prime_mover)
 
-        # Determine area based on balancing topology
+        # Determine area based on balancing topology if zonal
         # Generalize in the future if the database later supports technologies in multiple areas
-        area =
-            first(
-                DBInterface.execute(
-                    db,
-                    QUERIES[:topology_to_area],
-                    [rec.balancing_topology],
-                ),
-            ).area
+        if p.aggregation == PSY.ACBus
+            area = rec.balancing_topology
+        else
+            area =
+                first(
+                    DBInterface.execute(
+                        db,
+                        QUERIES[:topology_to_area],
+                        [rec.balancing_topology],
+                    ),
+                ).area
+        end
 
         # Get Entity Attribute ID for supply curve
         # Where is the reinforcement curve used?
@@ -674,14 +704,18 @@ function add_storage_technologies!(p::Portfolio, db::SQLite.DB)
 
         # Determine area based on balancing topology
         # Generalize in the future if the database later supports technologies in multiple areas
-        area =
-            first(
-                DBInterface.execute(
-                    db,
-                    QUERIES[:topology_to_area],
-                    [rec.balancing_topology],
-                ),
-            ).area
+        if p.aggregation == PSY.ACBus
+            area = rec.balancing_topology
+        else
+            area =
+                first(
+                    DBInterface.execute(
+                        db,
+                        QUERIES[:topology_to_area],
+                        [rec.balancing_topology],
+                    ),
+                ).area
+        end
 
         # Get Entity Attribute ID for supply curve
         # Where is the reinforcement curve used?
@@ -808,9 +842,9 @@ function add_storage_units!(p::Portfolio, db::SQLite.DB)
     end
 end
 
-function add_demand_requirements!(p::Portfolio, db::SQLite.DB)
+function add_zonal_demand_requirements!(p::Portfolio, db::SQLite.DB)
     # stream straight through the table
-    for rec in DBInterface.execute(db, QUERIES[:demand_requirements])
+    for rec in DBInterface.execute(db, QUERIES[:zonal_demand_requirements])
 
         # build and immediately insert
         d = DemandRequirement{StaticLoad}(;
@@ -829,12 +863,63 @@ function add_demand_requirements!(p::Portfolio, db::SQLite.DB)
         )
         add_technology!(p, d)
 
+        if p.aggregation == PSY.ACBus
+            mult = 1
+        else
+            mult = 1
+        end
+
         # Pull relevant TimeSeriesData
         for ts_data in
             DBInterface.execute(db, QUERIES[:time_series], [rec.entity_attribute_id])
             timestamps, values, type = parse_json_to_time_array(ts_data.time_series_blob)
+            values = values * mult
             time_series_array = TimeSeries.TimeArray(timestamps, values)
             ts = SingleTimeSeries(string(rec.entity_attribute_id), time_series_array)
+            add_time_series!(p, d, ts)
+        end
+    end
+end
+
+function add_nodal_demand_requirements!(p::Portfolio, db::SQLite.DB)
+    # stream straight through the table
+    for rec in DBInterface.execute(db, QUERIES[:balancing_topologies])
+        demand =
+            first(DBInterface.execute(db, QUERIES[:nodal_demand_requirements], [rec.area]))
+
+        if p.aggregation == PSY.ACBus
+            mult = rec.participation_factor
+        else
+            mult = 1
+        end
+
+        # build and immediately insert
+        d = DemandRequirement{StaticLoad}(;
+            name="node_" * rec.name * "_demand_" * string(demand.entity_attribute_id),
+            id=parse(Int64, rec.name),
+            peak_demand_mw=demand.peak_load * mult,
+            region=collect(
+                IS.get_components(
+                    x -> get_id(x) == parse(Int64, rec.name),
+                    RegionTopology,
+                    p.data,
+                ),
+            ),
+            value_of_lost_load=1e8,
+            power_systems_type="StaticLoad",
+        )
+        add_technology!(p, d)
+
+        # Pull relevant TimeSeriesData
+        for ts_data in
+            DBInterface.execute(db, QUERIES[:time_series], [demand.entity_attribute_id])
+            timestamps, values, type = parse_json_to_time_array(ts_data.time_series_blob)
+            values = values * mult
+            time_series_array = TimeSeries.TimeArray(timestamps, values)
+            ts = SingleTimeSeries(
+                "node_" * rec.name * "_demand_" * string(demand.entity_attribute_id),
+                time_series_array,
+            )
             add_time_series!(p, d, ts)
         end
     end
