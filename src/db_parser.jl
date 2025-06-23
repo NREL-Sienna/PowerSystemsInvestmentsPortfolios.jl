@@ -468,7 +468,7 @@ function add_supply_technologies!(p::Portfolio, db::SQLite.DB)
 
         # Determine area based on balancing topology if zonal
         # Generalize in the future if the database later supports technologies in multiple areas
-        if p.aggregation == PSY.ACBus
+        if get_aggregation(p) == PSY.ACBus
             area = rec.balancing_topology
         else
             area =
@@ -704,7 +704,7 @@ function add_storage_technologies!(p::Portfolio, db::SQLite.DB)
 
         # Determine area based on balancing topology
         # Generalize in the future if the database later supports technologies in multiple areas
-        if p.aggregation == PSY.ACBus
+        if get_aggregation(p) == PSY.ACBus
             area = rec.balancing_topology
         else
             area =
@@ -863,7 +863,7 @@ function add_zonal_demand_requirements!(p::Portfolio, db::SQLite.DB)
         )
         add_technology!(p, d)
 
-        if p.aggregation == PSY.ACBus
+        if get_aggregation(p) == PSY.ACBus
             mult = 1
         else
             mult = 1
@@ -887,7 +887,7 @@ function add_nodal_demand_requirements!(p::Portfolio, db::SQLite.DB)
         demand =
             first(DBInterface.execute(db, QUERIES[:nodal_demand_requirements], [rec.area]))
 
-        if p.aggregation == PSY.ACBus
+        if get_aggregation(p) == PSY.ACBus
             mult = rec.participation_factor
         else
             mult = 1
