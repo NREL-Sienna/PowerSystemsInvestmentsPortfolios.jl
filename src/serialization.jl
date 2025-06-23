@@ -715,12 +715,44 @@ function to_json(
     portfolio::Portfolio,
     filename::AbstractString;
     user_data=nothing,
+    to_python=false,
     pretty=false,
     force=false,
     runchecks=false,
 )
     IS.prepare_for_serialization_to_file!(portfolio.data, filename; force=force)
     data = to_json(portfolio; pretty=pretty)
+
+    # Additional functionality to write the timeseries metadata, supplemental attributes, etc.
+    # to a DB file so that they can be read into a Portfolio in pyPSIP, since that is what is supported by 
+    # infrasys. Long-term, we should probably either make it so infrasys supports deserializing without a DB
+    # Or add an option to write this DB file in the serialization functions in IS
+    if to_python
+        ts_store = portfolio.data.time_series_manager.metadata_store #Is there a getter for this?
+        attr_store = portfolio.data.supplemental_attribute_manager.associations #getter?
+        dst = SQLite.DB(IS.DB_FILENAME)
+        IS.backup(dst, ts_store.db)
+
+        # Add supplemental attribute association to the same DB
+        schema = [
+            "attribute_uuid TEXT NOT NULL",
+            "attribute_type TEXT NOT NULL",
+            "component_uuid TEXT NOT NULL",
+            "component_type TEXT NOT NULL",
+        ]
+        schema_text = join(schema, ",")
+        DBInterface.execute(
+            dst,
+            "CREATE TABLE supplemental_attribute_associations ($(schema_text))",
+        )
+
+        # Would be more efficient to directly copy the table from one DB to another
+        df = DataFrames.DataFrame(
+            DBInterface.execute(attr_store.db, "SELECT * FROM supplemental_attributes"),
+        )
+        SQLite.load!(df, dst, "supplemental_attribute_associations")
+    end
+
     open(filename, "w") do io
         write(io, data)
     end
