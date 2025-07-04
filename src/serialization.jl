@@ -735,6 +735,7 @@ function to_json(
 
         # Add supplemental attribute association to the same DB
         schema = [
+            "id INTEGER PRIMARY KEY",
             "attribute_uuid TEXT NOT NULL",
             "attribute_type TEXT NOT NULL",
             "component_uuid TEXT NOT NULL",
@@ -750,7 +751,19 @@ function to_json(
         df = DataFrames.DataFrame(
             DBInterface.execute(attr_store.db, "SELECT * FROM supplemental_attributes"),
         )
+        df[!, "id"] = 1:DataFrames.nrow(df)
+
         SQLite.load!(df, dst, "supplemental_attribute_associations")
+
+        #Rename columns for timeseries metadata to be consistent with infrasys 
+        DBInterface.execute(
+            dst,
+            "ALTER TABLE time_series_associations RENAME COLUMN resolution_ms TO resolution",
+        )
+        DBInterface.execute(
+            dst,
+            "ALTER TABLE time_series_associations RENAME COLUMN horizon_ms TO horizon",
+        )
     end
 
     open(filename, "w") do io
