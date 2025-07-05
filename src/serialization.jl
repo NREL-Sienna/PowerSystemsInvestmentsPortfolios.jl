@@ -728,9 +728,11 @@ function to_json(
     # infrasys. Long-term, we should probably either make it so infrasys supports deserializing without a DB
     # Or add an option to write this DB file in the serialization functions in IS
     if to_python
+        directory = dirname(filename)
+        metadata_path = joinpath(directory, IS.DB_FILENAME)
         ts_store = portfolio.data.time_series_manager.metadata_store #Is there a getter for this?
         attr_store = portfolio.data.supplemental_attribute_manager.associations #getter?
-        dst = SQLite.DB(IS.DB_FILENAME)
+        dst = SQLite.DB(metadata_path)
         IS.backup(dst, ts_store.db)
 
         # Add supplemental attribute association to the same DB
@@ -747,7 +749,7 @@ function to_json(
             "CREATE TABLE supplemental_attribute_associations ($(schema_text))",
         )
 
-        # Would be more efficient to directly copy the table from one DB to another
+        # Would probably be better to directly copy the table from one DB to another
         df = DataFrames.DataFrame(
             DBInterface.execute(attr_store.db, "SELECT * FROM supplemental_attributes"),
         )
@@ -764,6 +766,19 @@ function to_json(
             dst,
             "ALTER TABLE time_series_associations RENAME COLUMN horizon_ms TO horizon",
         )
+
+        # Update h5 file to store this updated DB
+        metadata = open(metadata_path, "r") do io
+            read(io)
+        end
+        ts_filename = splitext(basename(filename))[1] * "_time_series_storage.h5"
+        ts_path = joinpath(directory, ts_filename)
+        HDF5.h5open(ts_path, "r+") do file
+            if IS.METADATA_TABLE_NAME in keys(file)
+                HDF5.delete_object(file, IS.HDF5_TS_METADATA_ROOT_PATH)
+            end
+            file[IS.HDF5_TS_METADATA_ROOT_PATH] = metadata
+        end
     end
 
     open(filename, "w") do io

@@ -38,6 +38,7 @@ import Dates
 import DataStructures: OrderedDict, SortedDict
 import OpenAPI
 import StringEncodings
+import HDF5
 
 export Portfolio
 export Technology
