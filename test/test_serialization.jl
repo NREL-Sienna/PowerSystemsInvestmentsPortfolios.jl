@@ -26,7 +26,6 @@ end
             technology_base_year=2020,
         ),
         power_systems_type="test",
-        balancing_topology="test",
         operation_costs=ThermalGenerationCost(;
             variable=zero(CostCurve),
             fixed=0.0,

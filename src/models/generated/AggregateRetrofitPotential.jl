@@ -13,11 +13,11 @@ This file is auto-generated. Do not edit.
         ext::Dict
     end
 
-
+Supplemental attribute used to define a total amount of capacity that can be retrofit for a SupplyTechnology
 
 # Arguments
 - `retrofit_id::Int64`: (default: `0`) Unique identifier to group retrofittable source technologies with retrofit options inside the same zone.
-- `retrofit_fraction::Float64`: (default: `Dict()`) Fraction of existing capacity that is eligible for retrofits. Alternative to retrofit_potential
+- `retrofit_fraction::Float64`: (default: `0.0`) Fraction of existing capacity that is eligible for retrofits. Alternative to retrofit_potential
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `retrofit_potential::Float64`: (default: `0.0`) Amount of existing capacity for technology that can be retrofitted
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
@@ -36,7 +36,7 @@ mutable struct AggregateRetrofitPotential <: IS.SupplementalAttribute
 end
 
 
-function AggregateRetrofitPotential(; retrofit_id=0, retrofit_fraction=Dict(), internal=InfrastructureSystemsInternal(), retrofit_potential=0.0, ext=Dict(), )
+function AggregateRetrofitPotential(; retrofit_id=0, retrofit_fraction=0.0, internal=InfrastructureSystemsInternal(), retrofit_potential=0.0, ext=Dict(), )
     AggregateRetrofitPotential(retrofit_id, retrofit_fraction, internal, retrofit_potential, ext, )
 end
 

@@ -4,31 +4,36 @@
 @doc raw"""ExistingCapacity
 
     ExistingCapacity(;
-        existing_capacity=nothing,
+        existing_technologies=nothing,
+        uuid=nothing,
     )
 
-    - existing_capacity::Vector{Int64}
+    - existing_technologies::Vector{String}
+    - uuid::String
 """
 Base.@kwdef mutable struct ExistingCapacity <: OpenAPI.APIModel
-    existing_capacity::Union{Nothing, Vector{Int64}} = nothing
+    existing_technologies::Union{Nothing, Vector{String}} = nothing
+    uuid::Union{Nothing, String} = nothing
 
-    function ExistingCapacity(existing_capacity)
+    function ExistingCapacity(existing_technologies, uuid)
         OpenAPI.validate_property(
             ExistingCapacity,
-            Symbol("existing_capacity"),
-            existing_capacity,
+            Symbol("existing_technologies"),
+            existing_technologies,
         )
-        return new(existing_capacity)
+        OpenAPI.validate_property(ExistingCapacity, Symbol("uuid"), uuid)
+        return new(existing_technologies, uuid)
     end
 end # type ExistingCapacity
 
-const _property_types_ExistingCapacity =
-    Dict{Symbol, String}(Symbol("existing_capacity") => "Vector{Int64}")
+const _property_types_ExistingCapacity = Dict{Symbol, String}(
+    Symbol("existing_technologies") => "Vector{String}",
+    Symbol("uuid") => "String",
+)
 OpenAPI.property_type(::Type{ExistingCapacity}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_ExistingCapacity[name]))}
 
 function check_required(o::ExistingCapacity)
-    o.existing_capacity === nothing && (return false)
     true
 end
 

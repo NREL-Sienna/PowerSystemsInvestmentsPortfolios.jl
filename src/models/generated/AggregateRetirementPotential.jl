@@ -11,7 +11,7 @@ This file is auto-generated. Do not edit.
         retirement_potential::Float64
     end
 
-
+Supplemental attribute used to define a total amount of existing capacity that can be retired for a technology
 
 # Arguments
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field

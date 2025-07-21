@@ -4,31 +4,55 @@
 @doc raw"""RetirementPotential
 
     RetirementPotential(;
-        retirement_potential=nothing,
+        eligible_generators=nothing,
+        planned_retirement_year=nothing,
+        build_year=nothing,
+        uuid=nothing,
     )
 
-    - retirement_potential::Vector{Int64}
+    - eligible_generators::Vector{String}
+    - planned_retirement_year::Dict{String, Int64}
+    - build_year::Dict{String, Int64}
+    - uuid::String
 """
 Base.@kwdef mutable struct RetirementPotential <: OpenAPI.APIModel
-    retirement_potential::Union{Nothing, Vector{Int64}} = nothing
+    eligible_generators::Union{Nothing, Vector{String}} = nothing
+    planned_retirement_year::Union{Nothing, Dict{String, Int64}} = nothing
+    build_year::Union{Nothing, Dict{String, Int64}} = nothing
+    uuid::Union{Nothing, String} = nothing
 
-    function RetirementPotential(retirement_potential)
+    function RetirementPotential(
+        eligible_generators,
+        planned_retirement_year,
+        build_year,
+        uuid,
+    )
         OpenAPI.validate_property(
             RetirementPotential,
-            Symbol("retirement_potential"),
-            retirement_potential,
+            Symbol("eligible_generators"),
+            eligible_generators,
         )
-        return new(retirement_potential)
+        OpenAPI.validate_property(
+            RetirementPotential,
+            Symbol("planned_retirement_year"),
+            planned_retirement_year,
+        )
+        OpenAPI.validate_property(RetirementPotential, Symbol("build_year"), build_year)
+        OpenAPI.validate_property(RetirementPotential, Symbol("uuid"), uuid)
+        return new(eligible_generators, planned_retirement_year, build_year, uuid)
     end
 end # type RetirementPotential
 
-const _property_types_RetirementPotential =
-    Dict{Symbol, String}(Symbol("retirement_potential") => "Vector{Int64}")
+const _property_types_RetirementPotential = Dict{Symbol, String}(
+    Symbol("eligible_generators") => "Vector{String}",
+    Symbol("planned_retirement_year") => "Dict{String, Int64}",
+    Symbol("build_year") => "Dict{String, Int64}",
+    Symbol("uuid") => "String",
+)
 OpenAPI.property_type(::Type{RetirementPotential}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_RetirementPotential[name]))}
 
 function check_required(o::RetirementPotential)
-    o.retirement_potential === nothing && (return false)
     true
 end
 

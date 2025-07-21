@@ -5,7 +5,7 @@ const DATA_FORMAT_VERSION = "0.1.0"
 
 const DEFAULT_AGGREGATION = PSY.ACBus
 
-const PORTFOLIO_STRUCT_DESCRIPTOR_FILE = nothing
+const DEFAULT_SYSTEM() = PSY.System(100.0)
 
 mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
@@ -27,21 +27,21 @@ end
 struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     data::IS.SystemData # Inputs to the model
+    base_system::PSY.System #Base system storing existing data
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     time_series_directory::Union{Nothing, String}
     financial_data::Union{Nothing, PortfolioFinancialData}
-    base_system::Union{Nothing, System}
     metadata::PortfolioMetadata
     internal::IS.InfrastructureSystemsInternal
 
     function Portfolio(
         aggregation,
         data,
+        base_system::PSY.System,
         investment_schedule::Dict,
         internal::IS.InfrastructureSystemsInternal;
         time_series_directory=nothing,
         financial_data=nothing,
-        base_system=nothing,
         name=nothing,
         description=nothing,
         data_source=nothing,
@@ -60,10 +60,10 @@ struct Portfolio <: IS.InfrastructureSystemsType
         return new(
             aggregation,
             data,
+            base_system,
             investment_schedule,
             time_series_directory,
             financial_data,
-            base_system,
             PortfolioMetadata(name, description, data_source),
             internal,
         )
@@ -78,6 +78,7 @@ function Portfolio(; kwargs...)
     return Portfolio(
         DEFAULT_AGGREGATION,
         data,
+        DEFAULT_SYSTEM(),
         Dict(),
         IS.InfrastructureSystemsInternal();
         kwargs...,
@@ -89,7 +90,29 @@ Construct an empty `Portfolio` specifying aggregation. Useful for building a Por
 """
 function Portfolio(aggregation; kwargs...)
     data = PSY._create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(aggregation, data, Dict(), IS.InfrastructureSystemsInternal())
+    return Portfolio(
+        aggregation,
+        data,
+        DEFAULT_SYSTEM(),
+        Dict(),
+        IS.InfrastructureSystemsInternal();
+        kwargs...,
+    )
+end
+
+"""
+Construct an empty `Portfolio` specifying base_system. Useful for building a Portfolio from scratch.
+"""
+function Portfolio(base_system::PSY.System; kwargs...)
+    data = PSY._create_system_data_from_kwargs(; kwargs...)
+    return Portfolio(
+        DEFAULT_AGGREGATION,
+        data,
+        base_system,
+        Dict(),
+        IS.InfrastructureSystemsInternal();
+        kwargs...,
+    )
 end
 
 """
@@ -100,6 +123,7 @@ function Portfolio(base_year, discount_rate, inflation_rate, interest_rate; kwar
     return Portfolio(
         DEFAULT_AGGREGATION,
         data,
+        DEFAULT_SYSTEM(),
         Dict(),
         InfrastructureSystemsInternal();
         financial_data=PortfolioFinancialData(
@@ -108,45 +132,8 @@ function Portfolio(base_year, discount_rate, inflation_rate, interest_rate; kwar
             inflation_rate,
             interest_rate,
         ),
+        kwargs...,
     )
-end
-
-"""
-Constructs a Portfolio from a file path ending with .json
-
-If the file is JSON, then `assign_new_uuids = true` will generate new UUIDs for the system
-and all components.
-"""
-function Portfolio(
-    file_path::AbstractString;
-    assign_new_uuids=false,
-    try_reimport=true,
-    kwargs...,
-)
-    ext = lowercase(splitext(file_path)[2])
-    if ext == ".json"
-        unsupported = setdiff(keys(kwargs), SYSTEM_KWARGS)
-        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
-        runchecks = get(kwargs, :runchecks, false)
-        time_series_read_only = get(kwargs, :time_series_read_only, false)
-        time_series_directory = get(kwargs, :time_series_directory, nothing)
-        portfolio = deserialize(
-            Portfolio,
-            file_path;
-            time_series_read_only=time_series_read_only,
-            # runchecks = runchecks,
-            time_series_directory=time_series_directory,
-        )
-        return portfolio
-        _post_deserialize_handling(
-            portfolio;
-            runchecks=runchecks,
-            assign_new_uuids=assign_new_uuids,
-        )
-        return portfolio
-    else
-        throw(DataFormatError("$file_path is not a supported file type"))
-    end
 end
 
 """
@@ -158,6 +145,11 @@ IS.get_internal(val::Portfolio) = val.internal
 Return a user-modifiable dictionary to store extra information.
 """
 get_ext(val::Portfolio) = IS.get_ext(val.internal)
+
+"""
+Get the base system of the portfolio.
+"""
+get_base_system(val::Portfolio) = val.base_system
 
 """
 Set the name of the portfolio.
@@ -307,24 +299,6 @@ function add_technology!(
     IS.add_component!(
         portfolio.data,
         technology;
-        allow_existing_time_series=deserialization_in_progress,
-        skip_validation=skip_validation,
-        kwargs...,
-    )
-
-    return
-end
-
-function add_region!(
-    portfolio::Portfolio,
-    region::T;
-    skip_validation=false,
-    kwargs...,
-) where {T <: Region}
-    deserialization_in_progress = _is_deserialization_in_progress(portfolio)
-    IS.add_component!(
-        portfolio.data,
-        region;
         allow_existing_time_series=deserialization_in_progress,
         skip_validation=skip_validation,
         kwargs...,
@@ -711,44 +685,12 @@ function has_technology(
     return IS.has_component(T, portfolio.data.components, name)
 end
 
-function Portfolio(file_path::AbstractString; assign_new_uuids=false, kwargs...)
-    ext = splitext(file_path)[2]
-    if lowercase(ext) in [".m", ".raw"]
-        pm_kwargs = Dict(k => v for (k, v) in kwargs if !in(k, PORTFOLIO_KWARGS))
-        sys_kwargs = Dict(k => v for (k, v) in kwargs if in(k, PORTFOLIO_KWARGS))
-        return System(PowerModelsData(file_path; pm_kwargs...); sys_kwargs...)
-    elseif lowercase(ext) == ".json"
-        unsupported = setdiff(keys(kwargs), PORTFOLIO_KWARGS)
-        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
-        runchecks = get(kwargs, :runchecks, true)
-        time_series_read_only = get(kwargs, :time_series_read_only, false)
-        time_series_directory = get(kwargs, :time_series_directory, nothing)
-        config_path = get(kwargs, :config_path, PORTFOLIO_STRUCT_DESCRIPTOR_FILE)
-        portfolio = deserialize(
-            Portfolio,
-            file_path;
-            # time_series_read_only = time_series_read_only,
-            # runchecks = runchecks,
-            # time_series_directory = time_series_directory,
-            # config_path = config_path,
-        )
-        _post_deserialize_handling(
-            portfolio;
-            runchecks=runchecks,
-            assign_new_uuids=assign_new_uuids,
-        )
-        return portfolio
-    else
-        throw(DataFormatError("$file_path is not a supported file type"))
-    end
-end
-
 ################################
 ######### Regions #########
 ################################
 
 """
-Add a region to the portfolio.
+Add a RegionTopology to the portfolio.
 
 Throws ArgumentError if the region's name is already stored for its concrete type.
 Throws ArgumentError if any region-specific rule is violated.
@@ -773,12 +715,12 @@ function add_region!(
     zone::T;
     skip_validation=false,
     kwargs...,
-) where {T <: Region}
-    #deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+) where {T <: RegionTopology}
+    deserialization_in_progress = _is_deserialization_in_progress(portfolio)
     IS.add_component!(
         portfolio.data,
         zone;
-        #allow_existing_time_series=deserialization_in_progress,
+        allow_existing_time_series=deserialization_in_progress,
         skip_validation=skip_validation,
         kwargs...,
     )
@@ -793,14 +735,13 @@ Call collect on the result if an array is desired.
 # Examples
 
 ```julia
-iter = Portfolio.get_regions(Zone, portfolio)
-iter = Portfolio.get_regions(Region, portfolio)
-regions = collect(Portfolio.get_regions(Region, portfolio))
+iter = Portfolio.get_regions(RegionTopology, portfolio)
+regions = collect(Portfolio.get_regions(RegionTopology, portfolio))
 ```
 
 """
 
-function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: Region}
+function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: RegionTopology}
     return IS.get_components(T, portfolio.data)
 end
 
@@ -808,7 +749,7 @@ function get_region(
     ::Type{T},
     portfolio::Portfolio,
     name::AbstractString,
-) where {T <: Region}
+) where {T <: RegionTopology}
     return IS.get_component(T, portfolio.data, name)
 end
 
@@ -882,6 +823,36 @@ Throws ArgumentError if the attribute is not stored.
 """
 function get_supplemental_attribute(p::Portfolio, uuid::Base.UUID)
     return IS.get_supplemental_attribute(p.data, uuid)
+end
+
+"""
+Return a vector of supplemental attributes of the given type
+
+Throws ArgumentError if the attribute is not stored.
+"""
+function get_supplemental_attributes(
+    ::Type{T},
+    p::Portfolio,
+) where {T <: IS.SupplementalAttribute}
+    return IS.get_supplemental_attributes(T, p.data)
+end
+
+"""
+Return a Vector of supplemental_attributes. T can be concrete or abstract.
+
+# Arguments
+
+  - `T`: supplemental_attribute type
+  - `supplemental_attributes::SupplementalAttributes`: SupplementalAttributes in the system
+  - `filter_func::Union{Nothing, Function} = nothing`: Optional function that accepts a component
+    of type T and returns a Bool. Apply this function to each component and only return components
+    where the result is true.
+"""
+function get_supplemental_attributes(
+    ::Type{T},
+    component::IS.InfrastructureSystemsComponent,
+) where {T <: IS.SupplementalAttribute}
+    return IS.get_supplemental_attributes(T, component)
 end
 
 """

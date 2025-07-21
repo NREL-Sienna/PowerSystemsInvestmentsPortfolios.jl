@@ -35,14 +35,14 @@ function db_to_dataframes(db_path::String)
     tables = SQLite.tables(db)
 
     # Create a dictionary to store DataFrames for each table
-    dfs = Dict{String, DataFrame}()
+    dfs = Dict{String, DataFrames.DataFrame}()
 
     #Will adjust queries to only pull a subset of data
     for table in tables
         table_name = table.name
         # Read each table into a DataFrame
         query = "SELECT * FROM $table_name"
-        df = DataFrame(DBInterface.execute(db, query))
+        df = DataFrames.DataFrame(DBInterface.execute(db, query))
         dfs[table_name] = df
     end
 
@@ -86,8 +86,11 @@ function map_fuel(fuel::String)
         "Coal" => ThermalFuels.COAL,
         "Oil" => ThermalFuels.DISTILLATE_FUEL_OIL,
     )
-
-    return mapping_dict[fuel]
+    if haskey(mapping_dict, fuel)
+        return mapping_dict[fuel]
+    else
+        return ThermalFuels.OTHER
+    end
 end
 
 function map_prime_mover_to_parametric(prime_mover::String)
@@ -105,7 +108,6 @@ function map_prime_mover_to_parametric(prime_mover::String)
         "WIND" => PSY.RenewableDispatch,
         "Wind" => PSY.RenewableDispatch,
     )
-
     return mapping_dict[prime_mover]
 end
 
@@ -129,7 +131,7 @@ function parse_timestamps_and_values(json_str::String)
     return timestamps, values
 end
 
-function parse_timestamps_and_values(df::DataFrame)
+function parse_timestamps_and_values(df::DataFrames.DataFrame)
     # Initialize arrays to store timestamps and values
     timestamps = String[]
     values = Float64[]
@@ -411,25 +413,18 @@ end
 function dataframe_to_structs(df_dict::Dict)
 
     #Initialize Portfolio
-    p = Portfolio()
-
     system = dataframe_to_system(df_dict)
-    p.base_system = system
 
-    financials = PortfolioFinancialData(;
-        name="test_name",
+    p = Portfolio(
         discount_rate=0.07,
         inflation_rate=0.05,
         interest_rate=0.02,
-        base_year=2025,
+        base_year=2025;
+        base_system=system,
     )
-    add_financials!(p, financials)
 
-    tech_financials = TechnologyFinancialData(;
-        name="test_technology_financials",
-        capital_recovery_period=30,
-        technology_base_year=2025,
-    )
+    tech_financials =
+        TechnologyFinancialData(; capital_recovery_period=30, technology_base_year=2025)
 
     #initialize Zone structs
     zones = []
@@ -488,7 +483,7 @@ function dataframe_to_structs(df_dict::Dict)
             capital_costs=InputOutputCurve(PiecewiseLinearData(supply_curve_parsed)),
             balancing_topology=string(row[!, "balancing_topology"][1]),
             prime_mover_type=map_prime_mover(row[!, "prime_mover"][1]),
-            fuel=[f],
+            fuel=[map_fuel(f)],
             region=[zones[area_int]],
             financial_data=tech_financials,
 
@@ -507,8 +502,8 @@ function dataframe_to_structs(df_dict::Dict)
             start_cost_per_mw=91.0,
             up_time=6.0,
             dn_time=6.0,
-            heat_rate_mmbtu_per_mwh=Dict(f => 7.43),
-            co2=Dict(f => 0.05306),
+            heat_rate_mmbtu_per_mwh=Dict(map_fuel(f) => LinearCurve(7.43)),
+            co2=Dict(map_fuel(f) => 0.05306),
             ramp_dn_percentage=0.64,
             ramp_up_percentage=0.64,
 
@@ -552,12 +547,14 @@ function dataframe_to_structs(df_dict::Dict)
 
         d = DemandRequirement{ElectricLoad}(
             #Data pulled from DB
+            id=row["entity_attribute_id"],
             name=string(row["entity_attribute_id"]),
-            region=zones[area_int],#parse(Int64, row["area"]),
+            region=[zones[area_int]],#parse(Int64, row["area"]),
 
             #Placeholder/default values
             available=true,
             power_systems_type="ElectricLoad",
+            value_of_lost_load=1.0,
         )
         add_technology!(p, d)
         IS.add_time_series!(p.data, d, ts)
@@ -594,7 +591,7 @@ function dataframe_to_structs(df_dict::Dict)
             available=true,
             start_region=zones[parse(Int64, row["area_from"])],
             end_region=zones[parse(Int64, row["area_to"])],
-            maximum_new_capacity=row["max_flow_from"],
+            capacity_limits=(min=0.0, max=row["max_flow_from"]),
             existing_line_capacity=existing_capacity,
 
             #stuff we don't have, but probably should

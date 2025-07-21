@@ -4,31 +4,60 @@
 @doc raw"""AggregateRetrofitPotential
 
     AggregateRetrofitPotential(;
-        retirement_potential=0.0,
+        retrofit_id=0,
+        retrofit_potential=0.0,
+        retrofit_fraction=nothing,
+        uuid=nothing,
     )
 
-    - retirement_potential::Float64
+    - retrofit_id::Int64
+    - retrofit_potential::Float64
+    - retrofit_fraction::Float64
+    - uuid::String
 """
 Base.@kwdef mutable struct AggregateRetrofitPotential <: OpenAPI.APIModel
-    retirement_potential::Union{Nothing, Float64} = 0.0
+    retrofit_id::Union{Nothing, Int64} = 0
+    retrofit_potential::Union{Nothing, Float64} = 0.0
+    retrofit_fraction::Union{Nothing, Float64} = nothing
+    uuid::Union{Nothing, String} = nothing
 
-    function AggregateRetrofitPotential(retirement_potential)
+    function AggregateRetrofitPotential(
+        retrofit_id,
+        retrofit_potential,
+        retrofit_fraction,
+        uuid,
+    )
         OpenAPI.validate_property(
             AggregateRetrofitPotential,
-            Symbol("retirement_potential"),
-            retirement_potential,
+            Symbol("retrofit_id"),
+            retrofit_id,
         )
-        return new(retirement_potential)
+        OpenAPI.validate_property(
+            AggregateRetrofitPotential,
+            Symbol("retrofit_potential"),
+            retrofit_potential,
+        )
+        OpenAPI.validate_property(
+            AggregateRetrofitPotential,
+            Symbol("retrofit_fraction"),
+            retrofit_fraction,
+        )
+        OpenAPI.validate_property(AggregateRetrofitPotential, Symbol("uuid"), uuid)
+        return new(retrofit_id, retrofit_potential, retrofit_fraction, uuid)
     end
 end # type AggregateRetrofitPotential
 
-const _property_types_AggregateRetrofitPotential =
-    Dict{Symbol, String}(Symbol("retirement_potential") => "Float64")
+const _property_types_AggregateRetrofitPotential = Dict{Symbol, String}(
+    Symbol("retrofit_id") => "Int64",
+    Symbol("retrofit_potential") => "Float64",
+    Symbol("retrofit_fraction") => "Float64",
+    Symbol("uuid") => "String",
+)
 OpenAPI.property_type(::Type{AggregateRetrofitPotential}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_AggregateRetrofitPotential[name]))}
 
 function check_required(o::AggregateRetrofitPotential)
-    o.retirement_potential === nothing && (return false)
+    o.retrofit_id === nothing && (return false)
     true
 end
 

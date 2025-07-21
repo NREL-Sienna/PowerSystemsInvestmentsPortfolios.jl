@@ -4,31 +4,36 @@
 @doc raw"""RetrofitPotential
 
     RetrofitPotential(;
-        retrofit_potential=nothing,
+        eligible_generators=nothing,
+        uuid=nothing,
     )
 
-    - retrofit_potential::Vector{String}
+    - eligible_generators::Vector{String}
+    - uuid::String
 """
 Base.@kwdef mutable struct RetrofitPotential <: OpenAPI.APIModel
-    retrofit_potential::Union{Nothing, Vector{String}} = nothing
+    eligible_generators::Union{Nothing, Vector{String}} = nothing
+    uuid::Union{Nothing, String} = nothing
 
-    function RetrofitPotential(retrofit_potential)
+    function RetrofitPotential(eligible_generators, uuid)
         OpenAPI.validate_property(
             RetrofitPotential,
-            Symbol("retrofit_potential"),
-            retrofit_potential,
+            Symbol("eligible_generators"),
+            eligible_generators,
         )
-        return new(retrofit_potential)
+        OpenAPI.validate_property(RetrofitPotential, Symbol("uuid"), uuid)
+        return new(eligible_generators, uuid)
     end
 end # type RetrofitPotential
 
-const _property_types_RetrofitPotential =
-    Dict{Symbol, String}(Symbol("retrofit_potential") => "Vector{String}")
+const _property_types_RetrofitPotential = Dict{Symbol, String}(
+    Symbol("eligible_generators") => "Vector{String}",
+    Symbol("uuid") => "String",
+)
 OpenAPI.property_type(::Type{RetrofitPotential}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_RetrofitPotential[name]))}
 
 function check_required(o::RetrofitPotential)
-    o.retrofit_potential === nothing && (return false)
     true
 end
 
