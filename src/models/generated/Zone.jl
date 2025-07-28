@@ -5,27 +5,27 @@ This file is auto-generated. Do not edit.
 #! format: off
 
 """
-    mutable struct Zone <: Region
+    mutable struct Zone <: RegionTopology
         name::String
         internal::InfrastructureSystemsInternal
         id::Int64
         ext::Dict
     end
 
-
+A unit of spatial aggregation for zonal capacity expansion models. Used to define locations for supply, demand, transport, and storage technologies and relevant policy requirements.
 
 # Arguments
 - `name::String`: Name of region
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `id::Int64`: A unique zone identification number (positive integer)
+- `id::Int64`: A unique zone identification number
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
 """
-mutable struct Zone <: Region
+mutable struct Zone <: RegionTopology
     "Name of region"
     name::String
     "Internal field"
     internal::InfrastructureSystemsInternal
-    "A unique zone identification number (positive integer)"
+    "A unique zone identification number"
     id::Int64
     "Option for providing additional data"
     ext::Dict
@@ -53,3 +53,12 @@ set_internal!(value::Zone, val) = value.internal = val
 set_id!(value::Zone, val) = value.id = val
 """Set [`Zone`](@ref) `ext`."""
 set_ext!(value::Zone, val) = value.ext = val
+
+function serialize_openapi_struct(technology::Zone, vals...)
+    base_struct = APIServer.Zone(; vals...)
+    return base_struct
+end
+
+function deserialize_openapi_struct(::Type{<:Zone}, vals::Dict)
+    return IS.deserialize_struct(APIServer.Zone, vals)
+end

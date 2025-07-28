@@ -1,12 +1,12 @@
 """
 Supertype for all portfolio requirements
 
-Requirements include policies or other regional factors that may constrain
+Requirement include policies or other regional factors that may constrain
 expansion decisions. Common requirements are carbon caps and system
 capacity requirements.
 """
 
-abstract type Requirements <: IS.InfrastructureSystemsComponent end
+abstract type Requirement <: IS.InfrastructureSystemsComponent end
 
-supports_time_series(::Requirements) = true
-supports_supplemental_attributes(::Requirements) = true
+supports_time_series(::Requirement) = true
+supports_supplemental_attributes(::Requirement) = true

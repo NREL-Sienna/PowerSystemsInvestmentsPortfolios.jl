@@ -11,7 +11,7 @@ This file is auto-generated. Do not edit.
         retirement_potential::Float64
     end
 
-
+Supplemental attribute used to define a total amount of existing capacity that can be retired for a technology
 
 # Arguments
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
@@ -54,3 +54,12 @@ set_internal!(value::AggregateRetirementPotential, val) = value.internal = val
 set_ext!(value::AggregateRetirementPotential, val) = value.ext = val
 """Set [`AggregateRetirementPotential`](@ref) `retirement_potential`."""
 set_retirement_potential!(value::AggregateRetirementPotential, val) = value.retirement_potential = val
+
+function serialize_openapi_struct(technology::AggregateRetirementPotential, vals...)
+    base_struct = APIServer.AggregateRetirementPotential(; vals...)
+    return base_struct
+end
+
+function deserialize_openapi_struct(::Type{<:AggregateRetirementPotential}, vals::Dict)
+    return IS.deserialize_struct(APIServer.AggregateRetirementPotential, vals)
+end
