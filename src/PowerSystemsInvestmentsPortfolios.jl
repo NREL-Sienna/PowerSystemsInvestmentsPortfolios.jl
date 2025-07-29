@@ -6,6 +6,7 @@ import InfrastructureSystems:
     from_json,
     serialize,
     has_time_series,
+    get_time_series_multiple,
     get_time_series_array,
     get_time_series_timestamps,
     get_time_series_values,
@@ -103,6 +104,7 @@ export add_technologies!
 export add_region!
 export add_requirement!
 export add_time_series!
+export clear_time_series!
 export read_json_data
 export generate_invest_structs
 export generate_structs
