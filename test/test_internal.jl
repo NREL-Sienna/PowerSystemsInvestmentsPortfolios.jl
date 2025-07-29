@@ -1,7 +1,5 @@
 import UUIDs
 
-include("portfolio_5bus.jl")
-
 """
 Recursively validates that the object and fields have UUIDs.
 """
