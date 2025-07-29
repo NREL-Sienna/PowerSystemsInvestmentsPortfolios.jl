@@ -41,10 +41,7 @@ end
         ),
     )
     data = wind_ts_vec[1:24]
-    ts = SingleTimeSeries(;
-        data=TimeArray(timestamps, data),
-        name=name,
-    )
+    ts = SingleTimeSeries(; data=TimeArray(timestamps, data), name=name)
 
     technology = get_technology(SupplyTechnology{RenewableDispatch}, port, technology_name)
     PSIP.add_time_series!(port, technology, ts; year="2024", rep_day=1)
@@ -54,5 +51,4 @@ end
     time_series = collect(get_time_series_multiple(port))[1]
     @test TimeSeries.timestamp(get_data(time_series)) == TimeSeries.timestamp(ta)
     @test TimeSeries.values(get_data(time_series)) == TimeSeries.values(ta)
-
 end

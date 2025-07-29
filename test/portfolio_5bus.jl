@@ -383,14 +383,10 @@ function build_portfolio()
         #peak_load=peak_load,
     )
 
-    ts_demand_d_2024 = SingleTimeSeries(
-        "ops_peak_load",
-        TimeArray(tstamp_2024_ops, ts_load_d_2024),
-    )
-    ts_demand_d_2028 = SingleTimeSeries(
-        "ops_peak_load",
-        TimeArray(tstamp_2028_ops, ts_load_d_2028),
-    )
+    ts_demand_d_2024 =
+        SingleTimeSeries("ops_peak_load", TimeArray(tstamp_2024_ops, ts_load_d_2024))
+    ts_demand_d_2028 =
+        SingleTimeSeries("ops_peak_load", TimeArray(tstamp_2028_ops, ts_load_d_2028))
 
     t_demand_d = DemandRequirement{PSY.PowerLoad}(
         name="demand_d",
@@ -528,7 +524,7 @@ function build_portfolio()
 
     # Build portfolio with base_system
     p_5bus = Portfolio(sys; financial_data=PortfolioFinancialData(2025, 0.07, 0.05, 0.03))
-    
+
     #Regions
     PSIP.add_region!(p_5bus, z1)
     PSIP.add_region!(p_5bus, z2)

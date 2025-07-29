@@ -12,7 +12,6 @@
 end
 
 @testset "Test constructors" begin
-    
     port = build_portfolio()
 
     tech = first(get_technologies(SupplyTechnology{ThermalStandard}, port))
