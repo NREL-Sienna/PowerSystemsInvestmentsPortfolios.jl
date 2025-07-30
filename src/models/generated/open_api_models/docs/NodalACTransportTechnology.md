@@ -8,7 +8,6 @@ Name | Type | Description | Notes
 **uuid** | **String** |  | [optional] [default to nothing]
 **id** | **Int64** |  | [optional] [default to nothing]
 **available** | **Bool** |  | [default to nothing]
-**base_power** | **Float64** |  | [optional] [default to nothing]
 **power_systems_type** | **String** |  | [optional] [default to nothing]
 **start_node** | **Int64** |  | [optional] [default to nothing]
 **end_node** | **Int64** |  | [optional] [default to nothing]

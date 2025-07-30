@@ -8,7 +8,6 @@
         uuid=nothing,
         id=nothing,
         available=nothing,
-        base_power=nothing,
         power_systems_type=nothing,
         start_region=nothing,
         end_region=nothing,
@@ -23,7 +22,6 @@
     - uuid::String
     - id::Int64
     - available::Bool
-    - base_power::Float64
     - power_systems_type::String
     - start_region::Int64
     - end_region::Int64
@@ -38,7 +36,6 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
     uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
-    base_power::Union{Nothing, Float64} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     start_region::Union{Nothing, Int64} = nothing
     end_region::Union{Nothing, Int64} = nothing
@@ -53,7 +50,6 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
         uuid,
         id,
         available,
-        base_power,
         power_systems_type,
         start_region,
         end_region,
@@ -70,11 +66,6 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
             AggregateTransportTechnology,
             Symbol("available"),
             available,
-        )
-        OpenAPI.validate_property(
-            AggregateTransportTechnology,
-            Symbol("base_power"),
-            base_power,
         )
         OpenAPI.validate_property(
             AggregateTransportTechnology,
@@ -121,7 +112,6 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
             uuid,
             id,
             available,
-            base_power,
             power_systems_type,
             start_region,
             end_region,
@@ -139,7 +129,6 @@ const _property_types_AggregateTransportTechnology = Dict{Symbol, String}(
     Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
-    Symbol("base_power") => "Float64",
     Symbol("power_systems_type") => "String",
     Symbol("start_region") => "Int64",
     Symbol("end_region") => "Int64",

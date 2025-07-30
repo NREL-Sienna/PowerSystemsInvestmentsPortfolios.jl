@@ -6,7 +6,6 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
-        base_power::Float64
         prime_mover_type::PrimeMovers
         lifetime::Int
         available::Bool
@@ -37,7 +36,6 @@ This file is auto-generated. Do not edit.
 Candidate storage technology in a region.
 
 # Arguments
-- `base_power::Float64`: Base power
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
@@ -65,8 +63,6 @@ Candidate storage technology in a region.
 - `capital_costs_discharge::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
 """
 mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
-    "Base power"
-    base_power::Float64
     "Prime mover for generator"
     prime_mover_type::PrimeMovers
     "Maximum number of years a technology can be active once installed"
@@ -120,12 +116,10 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
 end
 
 
-function StorageTechnology{T}(; base_power, prime_mover_type=PrimeMovers.OT, lifetime=100, available, min_discharge_fraction=0.0, capacity_limits_charge=nothing, name, storage_tech, duration_limits=(min=0,max=1000.0), id, losses=0.00, capital_costs_energy=LinearCurve(0.0), financial_data, operation_costs=StorageCost(), power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), capacity_limits_energy=(min=0,max=1e8), unit_size_energy=0.0, unit_size_charge=nothing, efficiency=(in=1, out=1), unit_size_discharge=0.0, capacity_limits_discharge=(min=0,max=1e8), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), ) where T <: PSY.Storage
-    StorageTechnology{T}(base_power, prime_mover_type, lifetime, available, min_discharge_fraction, capacity_limits_charge, name, storage_tech, duration_limits, id, losses, capital_costs_energy, financial_data, operation_costs, power_systems_type, internal, ext, region, capacity_limits_energy, unit_size_energy, unit_size_charge, efficiency, unit_size_discharge, capacity_limits_discharge, capital_costs_charge, capital_costs_discharge, )
+function StorageTechnology{T}(; prime_mover_type=PrimeMovers.OT, lifetime=100, available, min_discharge_fraction=0.0, capacity_limits_charge=nothing, name, storage_tech, duration_limits=(min=0,max=1000.0), id, losses=0.00, capital_costs_energy=LinearCurve(0.0), financial_data, operation_costs=StorageCost(), power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), capacity_limits_energy=(min=0,max=1e8), unit_size_energy=0.0, unit_size_charge=nothing, efficiency=(in=1, out=1), unit_size_discharge=0.0, capacity_limits_discharge=(min=0,max=1e8), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), ) where T <: PSY.Storage
+    StorageTechnology{T}(prime_mover_type, lifetime, available, min_discharge_fraction, capacity_limits_charge, name, storage_tech, duration_limits, id, losses, capital_costs_energy, financial_data, operation_costs, power_systems_type, internal, ext, region, capacity_limits_energy, unit_size_energy, unit_size_charge, efficiency, unit_size_discharge, capacity_limits_discharge, capital_costs_charge, capital_costs_discharge, )
 end
 
-"""Get [`StorageTechnology`](@ref) `base_power`."""
-get_base_power(value::StorageTechnology) = value.base_power
 """Get [`StorageTechnology`](@ref) `prime_mover_type`."""
 get_prime_mover_type(value::StorageTechnology) = value.prime_mover_type
 """Get [`StorageTechnology`](@ref) `lifetime`."""
@@ -177,8 +171,6 @@ get_capital_costs_charge(value::StorageTechnology) = value.capital_costs_charge
 """Get [`StorageTechnology`](@ref) `capital_costs_discharge`."""
 get_capital_costs_discharge(value::StorageTechnology) = value.capital_costs_discharge
 
-"""Set [`StorageTechnology`](@ref) `base_power`."""
-set_base_power!(value::StorageTechnology, val) = value.base_power = val
 """Set [`StorageTechnology`](@ref) `prime_mover_type`."""
 set_prime_mover_type!(value::StorageTechnology, val) = value.prime_mover_type = val
 """Set [`StorageTechnology`](@ref) `lifetime`."""

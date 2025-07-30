@@ -23,7 +23,6 @@ include("HourlyMatching.jl")
 include("ColocatedSupplyStorageTechnology.jl")
 
 export get_available
-export get_base_power
 export get_build_year
 export get_bus_type
 export get_buses
@@ -124,7 +123,6 @@ export get_unserved_demand_curve
 export get_value_of_lost_load
 export get_voltage
 export set_available!
-export set_base_power!
 export set_build_year!
 export set_bus_type!
 export set_buses!
