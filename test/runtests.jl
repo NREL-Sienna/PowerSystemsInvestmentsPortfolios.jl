@@ -21,7 +21,7 @@ Aqua.test_unbound_args(PowerSystemsInvestmentsPortfolios)
 Aqua.test_undefined_exports(PowerSystemsInvestmentsPortfolios)
 Aqua.test_ambiguities(PowerSystemsInvestmentsPortfolios)
 Aqua.test_stale_deps(PowerSystemsInvestmentsPortfolios)
-#Aqua.test_deps_compat(PowerSystemsInvestmentsPortfolios)
+Aqua.test_deps_compat(PowerSystemsInvestmentsPortfolios)
 
 LOG_FILE = "power-systems-investments-portfolio.log"
 LOG_LEVELS = Dict(
