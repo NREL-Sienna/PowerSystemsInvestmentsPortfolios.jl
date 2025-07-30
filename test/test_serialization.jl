@@ -22,7 +22,6 @@ end
         region=[zone],
         id=1,
         available=true,
-        base_power=100.0,
         financial_data=TechnologyFinancialData(;
             interest_rate=30,
             capital_recovery_period=30,

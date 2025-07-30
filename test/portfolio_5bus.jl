@@ -73,7 +73,6 @@ function build_portfolio()
     )
     #, coal_new_capex / coal_new_capex_2028
     t_th = SupplyTechnology{PSY.ThermalStandard}(;
-        base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.ST,
         capital_costs=LinearCurve(coal_igcc_capex * 1000.0),
         id=1,
@@ -95,7 +94,6 @@ function build_portfolio()
     )
 
     t_th_exp = SupplyTechnology{PSY.ThermalStandard}(;
-        base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.ST,
         capital_costs=LinearCurve(coal_new_capex * 1000.0),
         id=2,
@@ -162,7 +160,6 @@ function build_portfolio()
     )
 
     t_wind = SupplyTechnology{PSY.RenewableDispatch}(;
-        base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.WT,
         capital_costs=LinearCurve(wind_capex * 1000.0), # to $/MW
         id=3,
@@ -224,7 +221,6 @@ function build_portfolio()
     )
 
     t_pv1 = SupplyTechnology{PSY.RenewableDispatch}(;
-        base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.PVe,
         capital_costs=LinearCurve(pv_capex * 1000.0), # to $/MW
         id=4,
@@ -245,7 +241,6 @@ function build_portfolio()
     )
 
     t_pv2 = SupplyTechnology{PSY.RenewableDispatch}(;
-        base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.PVe,
         capital_costs=LinearCurve(pv_capex * 1000.0), # to $/MW
         id=5,
@@ -291,7 +286,6 @@ function build_portfolio()
     stor_kwh_capex = 745.25 #$/kW
     t_stor = StorageTechnology{PSY.EnergyReservoirStorage}(;
         name="test_storage",
-        base_power=1.0,
         id=1,
         region=[z1],
         storage_tech=StorageTech.LIB,
@@ -419,7 +413,6 @@ function build_portfolio()
         available=true,
         power_systems_type="TransportTechnology",
         id=1,
-        base_power=1.0,
         financial_data=tech_financials,
     )
 
@@ -433,7 +426,6 @@ function build_portfolio()
         available=true,
         power_systems_type="TransportTechnology",
         id=1,
-        base_power=1.0,
         financial_data=tech_financials,
     )
 
@@ -442,7 +434,6 @@ function build_portfolio()
         id=1,
         available=true,
         power_systems_type="Nodal",
-        base_power=1.0,
         capacity_limits=(min=0, max=900),
         capital_costs=LinearCurve(5000.0),
         start_node=n1,
