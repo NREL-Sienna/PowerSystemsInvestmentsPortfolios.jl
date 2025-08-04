@@ -10,7 +10,6 @@ Name | Type | Description | Notes
 **id** | **Int64** |  | [optional] [default to nothing]
 **available** | **Bool** |  | [default to nothing]
 **power_systems_type** | **String** |  | [default to nothing]
-**base_power** | **Float64** |  | [optional] [default to nothing]
 **min_discharge_fraction** | **Float64** |  | [optional] [default to 0.0]
 **prime_mover_type** | **String** |  | [optional] [default to "OT"]
 **storage_tech** | **String** | defines the storage technology used in an energy Storage system, based on the options in EIA form 923. | [optional] [default to nothing]

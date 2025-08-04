@@ -10,7 +10,6 @@
         region=nothing,
         id=nothing,
         available=nothing,
-        base_power=nothing,
         prime_mover_type="OT",
         fuel=nothing,
         co2=nothing,
@@ -35,7 +34,6 @@
     - region::Vector{Int64}
     - id::Int64
     - available::Bool
-    - base_power::Float64
     - prime_mover_type::String
     - fuel::Vector{String}
     - co2::Dict{String, Float64}
@@ -60,7 +58,6 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     region::Union{Nothing, Vector{Int64}} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
-    base_power::Union{Nothing, Float64} = nothing
     prime_mover_type::Union{Nothing, String} = "OT"
     fuel::Union{Nothing, Vector{String}} = nothing
     co2::Union{Nothing, Dict{String, Float64}} = nothing
@@ -85,7 +82,6 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
         region,
         id,
         available,
-        base_power,
         prime_mover_type,
         fuel,
         co2,
@@ -113,7 +109,6 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
         OpenAPI.validate_property(SupplyTechnology, Symbol("region"), region)
         OpenAPI.validate_property(SupplyTechnology, Symbol("id"), id)
         OpenAPI.validate_property(SupplyTechnology, Symbol("available"), available)
-        OpenAPI.validate_property(SupplyTechnology, Symbol("base_power"), base_power)
         OpenAPI.validate_property(
             SupplyTechnology,
             Symbol("prime_mover_type"),
@@ -169,7 +164,6 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
             region,
             id,
             available,
-            base_power,
             prime_mover_type,
             fuel,
             co2,
@@ -197,7 +191,6 @@ const _property_types_SupplyTechnology = Dict{Symbol, String}(
     Symbol("region") => "Vector{Int64}",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
-    Symbol("base_power") => "Float64",
     Symbol("prime_mover_type") => "String",
     Symbol("fuel") => "Vector{String}",
     Symbol("co2") => "Dict{String, Float64}",

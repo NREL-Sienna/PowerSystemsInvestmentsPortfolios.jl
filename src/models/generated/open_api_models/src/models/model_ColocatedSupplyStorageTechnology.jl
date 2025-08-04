@@ -9,7 +9,6 @@
         id=nothing,
         power_systems_type=nothing,
         base_year=nothing,
-        base_power=nothing,
         region=nothing,
         financial_data=nothing,
         available=nothing,
@@ -45,7 +44,6 @@
     - id::Int64
     - power_systems_type::String
     - base_year::Int64
-    - base_power::Float64
     - region::Vector{Int64}
     - financial_data::Any
     - available::Bool
@@ -81,7 +79,6 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
     id::Union{Nothing, Int64} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     base_year::Union{Nothing, Int64} = nothing
-    base_power::Union{Nothing, Float64} = nothing
     region::Union{Nothing, Vector{Int64}} = nothing
     financial_data::Union{Nothing, Any} = nothing
     available::Union{Nothing, Bool} = nothing
@@ -117,7 +114,6 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         id,
         power_systems_type,
         base_year,
-        base_power,
         region,
         financial_data,
         available,
@@ -159,11 +155,6 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
             ColocatedSupplyStorageTechnology,
             Symbol("base_year"),
             base_year,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("base_power"),
-            base_power,
         )
         OpenAPI.validate_property(
             ColocatedSupplyStorageTechnology,
@@ -311,7 +302,6 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
             id,
             power_systems_type,
             base_year,
-            base_power,
             region,
             financial_data,
             available,
@@ -350,7 +340,6 @@ const _property_types_ColocatedSupplyStorageTechnology = Dict{Symbol, String}(
     Symbol("id") => "Int64",
     Symbol("power_systems_type") => "String",
     Symbol("base_year") => "Int64",
-    Symbol("base_power") => "Float64",
     Symbol("region") => "Vector{Int64}",
     Symbol("financial_data") => "Any",
     Symbol("available") => "Bool",

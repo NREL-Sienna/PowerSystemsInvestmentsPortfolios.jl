@@ -6,6 +6,7 @@ import InfrastructureSystems:
     from_json,
     serialize,
     has_time_series,
+    get_time_series_multiple,
     get_time_series_array,
     get_time_series_timestamps,
     get_time_series_values,
@@ -38,6 +39,7 @@ import Dates
 import DataStructures: OrderedDict, SortedDict
 import OpenAPI
 import StringEncodings
+import HDF5
 
 export Portfolio
 export Technology
@@ -80,6 +82,9 @@ export get_description
 export get_regions
 export get_technologies
 export get_technology
+export get_available_technology
+export get_available_technologies
+export get_technologies_by_name
 export get_requirements
 export get_ext
 export get_description
@@ -99,6 +104,7 @@ export add_technologies!
 export add_region!
 export add_requirement!
 export add_time_series!
+export clear_time_series!
 export read_json_data
 export generate_invest_structs
 export generate_structs

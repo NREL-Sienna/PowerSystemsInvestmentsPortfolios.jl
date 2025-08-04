@@ -62,6 +62,7 @@ and all components.
 """
 function Portfolio(
     file_path::AbstractString;
+    from_python=false,
     assign_new_uuids=false,
     try_reimport=true,
     kwargs...,
@@ -76,6 +77,7 @@ function Portfolio(
         portfolio = deserialize(
             Portfolio,
             file_path;
+            from_python=from_python,
             time_series_read_only=time_series_read_only,
             # runchecks = runchecks,
             time_series_directory=time_series_directory,
@@ -105,7 +107,12 @@ function IS.serialize(portfolio::T) where {T <: Portfolio}
     return data
 end
 
-function deserialize(::Type{Portfolio}, filename::AbstractString; kwargs...)
+function deserialize(
+    ::Type{Portfolio},
+    filename::AbstractString;
+    from_python=false,
+    kwargs...,
+)
     raw = open(filename) do io
         JSON3.read(io, Dict)
     end
@@ -122,7 +129,7 @@ function deserialize(::Type{Portfolio}, filename::AbstractString; kwargs...)
         end
     end
 
-    return from_dict(Portfolio, raw; kwargs...)
+    return from_dict(Portfolio, raw; from_python, kwargs...)
 end
 
 function serialize(technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
@@ -178,6 +185,7 @@ clear_ext!(port::Portfolio) = IS.clear_ext!(port.internal)
 function from_dict(
     ::Type{Portfolio},
     raw::Dict{String, Any};
+    from_python=false,
     time_series_read_only=false,
     time_series_directory=nothing,
     kwargs...,
@@ -232,6 +240,7 @@ function from_dict(
     data = deserialize(
         IS.SystemData,
         raw["data"];
+        from_python=from_python,
         time_series_read_only=time_series_read_only,
         time_series_directory=time_series_directory,
     )
@@ -286,6 +295,7 @@ end
 function deserialize(
     ::Type{IS.SystemData},
     raw::Dict;
+    from_python=false,
     time_series_read_only=false,
     time_series_directory=nothing,
     validation_descriptor_file=nothing,
@@ -295,6 +305,32 @@ function deserialize(
         if !isfile(raw["time_series_storage_file"])
             error("time series file $(raw["time_series_storage_file"]) does not exist")
         end
+
+        # Additional functionality to read tiemseries metadata from a portfolio written and serialized in pyPSIP, 
+        # Long-term, we should probably either make it so infrasys supports deserializing without a DB
+        # Or add an option to write this DB file in the serialization functions in IS
+        if from_python
+            if !isnothing(time_series_directory)
+                metadata_path = joinpath(time_series_directory, IS.DB_FILENAME)
+                ts_path = joinpath(time_series_directory, "time_series_storage.h5")
+            else
+                metadata_path = joinpath(raw["time_series"]["directory"], IS.DB_FILENAME)
+                ts_path =
+                    joinpath(raw["time_series"]["directory"], "time_series_storage.h5")
+            end
+
+            # Update h5 file to store this updated DB
+            metadata = open(metadata_path, "r") do io
+                read(io)
+            end
+            HDF5.h5open(ts_path, "r+") do file
+                if IS.METADATA_TABLE_NAME in keys(file)
+                    HDF5.delete_object(file, IS.HDF5_TS_METADATA_ROOT_PATH)
+                end
+                file[IS.HDF5_TS_METADATA_ROOT_PATH] = metadata
+            end
+        end
+
         # TODO: need to address this limitation
         if IS.strip_module_name(raw["time_series_storage_type"]) ==
            "InMemoryTimeSeriesStorage"
@@ -715,12 +751,80 @@ function to_json(
     portfolio::Portfolio,
     filename::AbstractString;
     user_data=nothing,
+    to_python=false,
     pretty=false,
     force=false,
     runchecks=false,
 )
     IS.prepare_for_serialization_to_file!(portfolio.data, filename; force=force)
     data = to_json(portfolio; pretty=pretty)
+
+    # Additional functionality to write the timeseries metadata, supplemental attributes, etc.
+    # to a DB file so that they can be read into a Portfolio in pyPSIP, since that is what is supported by 
+    # infrasys. Long-term, we should probably either make it so infrasys supports deserializing without a DB
+    # Or add an option to write this DB file in the serialization functions in IS
+    if to_python
+        directory = dirname(filename)
+        metadata_path = joinpath(directory, IS.DB_FILENAME)
+        ts_store = portfolio.data.time_series_manager.metadata_store #Is there a getter for this?
+        attr_store = portfolio.data.supplemental_attribute_manager.associations #getter?
+        dst = SQLite.DB(metadata_path)
+        IS.backup(dst, ts_store.db)
+
+        # Add supplemental attribute association to the same DB
+        schema = [
+            "id INTEGER PRIMARY KEY",
+            "attribute_uuid TEXT NOT NULL",
+            "attribute_type TEXT NOT NULL",
+            "component_uuid TEXT NOT NULL",
+            "component_type TEXT NOT NULL",
+        ]
+        schema_text = join(schema, ",")
+        DBInterface.execute(
+            dst,
+            "CREATE TABLE supplemental_attribute_associations ($(schema_text))",
+        )
+
+        # Would probably be better to directly copy the table from one DB to another
+        df = DataFrames.DataFrame(
+            DBInterface.execute(attr_store.db, "SELECT * FROM supplemental_attributes"),
+        )
+        df[!, "id"] = 1:DataFrames.nrow(df)
+
+        SQLite.load!(df, dst, "supplemental_attribute_associations")
+
+        cols = DataFrames.DataFrame(
+            DBInterface.execute(dst, "PRAGMA table_info(time_series_associations)"),
+        )
+
+        #Check if timeseries metadata columns need to be renamed to be consistent with infrasys 
+        if in("resolution_ms", cols[!, "name"])
+            DBInterface.execute(
+                dst,
+                "ALTER TABLE time_series_associations RENAME COLUMN resolution_ms TO resolution",
+            )
+        end
+        if in("horizon_ms", cols[!, "name"])
+            DBInterface.execute(
+                dst,
+                "ALTER TABLE time_series_associations RENAME COLUMN horizon_ms TO horizon",
+            )
+        end
+
+        # Update h5 file to store this updated DB
+        metadata = open(metadata_path, "r") do io
+            read(io)
+        end
+        ts_filename = splitext(basename(filename))[1] * "_time_series_storage.h5"
+        ts_path = joinpath(directory, ts_filename)
+        HDF5.h5open(ts_path, "r+") do file
+            if IS.METADATA_TABLE_NAME in keys(file)
+                HDF5.delete_object(file, IS.HDF5_TS_METADATA_ROOT_PATH)
+            end
+            file[IS.HDF5_TS_METADATA_ROOT_PATH] = metadata
+        end
+    end
+
     open(filename, "w") do io
         write(io, data)
     end

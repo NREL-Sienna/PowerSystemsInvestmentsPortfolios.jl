@@ -1,6 +1,9 @@
 @testset "Test JSON serialization" begin
     portfolio = build_portfolio()
 
+    #TODO: Build this test, the IS.compare_values function does not appear to be
+    #working correctly with the openAPI serialization method
+
     #port2, result = validate_serialization(portfolio; time_series_read_only = true)
     #@test result
 
@@ -19,7 +22,6 @@ end
         region=[zone],
         id=1,
         available=true,
-        base_power=100.0,
         financial_data=TechnologyFinancialData(;
             interest_rate=30,
             capital_recovery_period=30,

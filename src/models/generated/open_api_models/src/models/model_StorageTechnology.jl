@@ -10,7 +10,6 @@
         id=nothing,
         available=nothing,
         power_systems_type=nothing,
-        base_power=nothing,
         min_discharge_fraction=0.0,
         prime_mover_type="OT",
         storage_tech=nothing,
@@ -37,7 +36,6 @@
     - id::Int64
     - available::Bool
     - power_systems_type::String
-    - base_power::Float64
     - min_discharge_fraction::Float64
     - prime_mover_type::String
     - storage_tech::String : defines the storage technology used in an energy Storage system, based on the options in EIA form 923.
@@ -64,7 +62,6 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     power_systems_type::Union{Nothing, String} = nothing
-    base_power::Union{Nothing, Float64} = nothing
     min_discharge_fraction::Union{Nothing, Float64} = 0.0
     prime_mover_type::Union{Nothing, String} = "OT"
     storage_tech::Union{Nothing, String} = nothing
@@ -91,7 +88,6 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         id,
         available,
         power_systems_type,
-        base_power,
         min_discharge_fraction,
         prime_mover_type,
         storage_tech,
@@ -203,7 +199,6 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
             id,
             available,
             power_systems_type,
-            base_power,
             min_discharge_fraction,
             prime_mover_type,
             storage_tech,
@@ -233,7 +228,6 @@ const _property_types_StorageTechnology = Dict{Symbol, String}(
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("power_systems_type") => "String",
-    Symbol("base_power") => "Float64",
     Symbol("min_discharge_fraction") => "Float64",
     Symbol("prime_mover_type") => "String",
     Symbol("storage_tech") => "String",
