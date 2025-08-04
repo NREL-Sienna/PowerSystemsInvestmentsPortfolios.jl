@@ -6,7 +6,6 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
-        base_power::Float64
         outage_factor::Float64
         prime_mover_type::PrimeMovers
         capital_costs::PSY.ValueCurve
@@ -35,7 +34,6 @@ This file is auto-generated. Do not edit.
 Candidate generation technology for a region. Can represent either a thermal or renewable generation technology
 
 # Arguments
-- `base_power::Float64`: Base power (MW)
 - `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
@@ -61,8 +59,6 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Minimum and maximum allowable installed capacity for a technology (MW)
 """
 mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
-    "Base power (MW)"
-    base_power::Float64
     "Derating factor to account for planned or forced outages of a technology"
     outage_factor::Float64
     "Prime mover for generator"
@@ -112,12 +108,10 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
 end
 
 
-function SupplyTechnology{T}(; base_power, outage_factor=1.0, prime_mover_type=PrimeMovers.OT, capital_costs=LinearCurve(0.0), lifetime=100, available=True, co2=Dict(), name, id, cofire_start_limits=Dict(), financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=[ThermalFuels.OTHER], power_systems_type, cofire_level_limits=Dict(), internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), min_generation_fraction=0.0, time_limits=(up=1.0, down=1.0), unit_size=0.0, ramp_limits=(up=1.0, down=1.0), capacity_limits=(min=0, max=1e8), ) where T <: PSY.Generator
-    SupplyTechnology{T}(base_power, outage_factor, prime_mover_type, capital_costs, lifetime, available, co2, name, id, cofire_start_limits, financial_data, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_limits, internal, ext, region, min_generation_fraction, time_limits, unit_size, ramp_limits, capacity_limits, )
+function SupplyTechnology{T}(; outage_factor=1.0, prime_mover_type=PrimeMovers.OT, capital_costs=LinearCurve(0.0), lifetime=100, available=True, co2=Dict(), name, id, cofire_start_limits=Dict(), financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=[ThermalFuels.OTHER], power_systems_type, cofire_level_limits=Dict(), internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), min_generation_fraction=0.0, time_limits=(up=1.0, down=1.0), unit_size=0.0, ramp_limits=(up=1.0, down=1.0), capacity_limits=(min=0, max=1e8), ) where T <: PSY.Generator
+    SupplyTechnology{T}(outage_factor, prime_mover_type, capital_costs, lifetime, available, co2, name, id, cofire_start_limits, financial_data, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_limits, internal, ext, region, min_generation_fraction, time_limits, unit_size, ramp_limits, capacity_limits, )
 end
 
-"""Get [`SupplyTechnology`](@ref) `base_power`."""
-get_base_power(value::SupplyTechnology) = value.base_power
 """Get [`SupplyTechnology`](@ref) `outage_factor`."""
 get_outage_factor(value::SupplyTechnology) = value.outage_factor
 """Get [`SupplyTechnology`](@ref) `prime_mover_type`."""
@@ -165,8 +159,6 @@ get_ramp_limits(value::SupplyTechnology) = value.ramp_limits
 """Get [`SupplyTechnology`](@ref) `capacity_limits`."""
 get_capacity_limits(value::SupplyTechnology) = value.capacity_limits
 
-"""Set [`SupplyTechnology`](@ref) `base_power`."""
-set_base_power!(value::SupplyTechnology, val) = value.base_power = val
 """Set [`SupplyTechnology`](@ref) `outage_factor`."""
 set_outage_factor!(value::SupplyTechnology, val) = value.outage_factor = val
 """Set [`SupplyTechnology`](@ref) `prime_mover_type`."""

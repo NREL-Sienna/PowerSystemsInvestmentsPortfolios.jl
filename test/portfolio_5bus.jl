@@ -12,6 +12,8 @@ function build_portfolio()
 
     n1 = Node(name="node1", id=1)
 
+    n2 = Node(name="node2", id=1)
+
     ###################
     ### Time Series ###
     ###################
@@ -51,8 +53,6 @@ function build_portfolio()
     cheap_th_var_cost = mean(op_cost[cheap_th_ixs])
     exp_th_var_cost = mean(op_cost[exp_th_ixs])
 
-    # initial_cap_cheap = sum(get_max_active_power.(thermals[cheap_th_ixs]))
-    # initial_cap_exp = sum(get_max_active_power.(thermals[exp_th_ixs]))
     initial_cap_cheap = 100.0
     initial_cap_exp = 100.0
     # From Conservative 2024-ABT CAPEX: year 2024
@@ -73,17 +73,15 @@ function build_portfolio()
     )
     #, coal_new_capex / coal_new_capex_2028
     t_th = SupplyTechnology{PSY.ThermalStandard}(;
-        base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.ST,
         capital_costs=LinearCurve(coal_igcc_capex * 1000.0),
         id=1,
         available=true,
         name="cheap_thermal",
-        initial_capacity=initial_cap_cheap,
         fuel=[ThermalFuels.COAL],
         power_systems_type="ThermalStandard",
         operation_costs=ThermalGenerationCost(
-            variable=CostCurve(LinearCurve(cheap_th_var_cost)),
+            variable=FuelCurve(LinearCurve(cheap_th_var_cost), 1.12),
             fixed=0.0,
             start_up=0.0,
             shut_down=0.0,
@@ -96,13 +94,11 @@ function build_portfolio()
     )
 
     t_th_exp = SupplyTechnology{PSY.ThermalStandard}(;
-        base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.ST,
         capital_costs=LinearCurve(coal_new_capex * 1000.0),
         id=2,
         available=true,
         name="expensive_thermal",
-        initial_capacity=initial_cap_exp,
         fuel=[ThermalFuels.COAL],
         power_systems_type="ThermalStandard",
         operation_costs=ThermalGenerationCost(
@@ -121,12 +117,10 @@ function build_portfolio()
     ts_thermal_2024 = SingleTimeSeries(;
         data=TimeArray(tstamp_2024_ops, ones(24)),
         name="ops_variable_cap_factor",
-        scaling_factor_multiplier=get_initial_capacity,
     )
     ts_thermal_2028 = SingleTimeSeries(;
         data=TimeArray(tstamp_2028_ops, ones(24)),
         name="ops_variable_cap_factor",
-        scaling_factor_multiplier=get_initial_capacity,
     )
     #####################
     ##### Renewable #####
@@ -154,12 +148,10 @@ function build_portfolio()
     ts_wind_2024 = SingleTimeSeries(;
         data=TimeArray(tstamp_2024_ops, ts_wind_2024_data),
         name="ops_variable_cap_factor",
-        scaling_factor_multiplier=get_initial_capacity,
     )
     ts_wind_2028 = SingleTimeSeries(;
         data=TimeArray(tstamp_2028_ops, ts_wind_2028_data),
         name="ops_variable_cap_factor",
-        scaling_factor_multiplier=get_initial_capacity,
     )
 
     ts_wind_inv_capex = SingleTimeSeries(
@@ -168,13 +160,11 @@ function build_portfolio()
     )
 
     t_wind = SupplyTechnology{PSY.RenewableDispatch}(;
-        base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.WT,
         capital_costs=LinearCurve(wind_capex * 1000.0), # to $/MW
         id=3,
         available=true,
         name="wind",
-        initial_capacity=initial_cap_wind,
         fuel=[ThermalFuels.OTHER],
         power_systems_type="RenewableDispatch",
         operation_costs=ThermalGenerationCost(
@@ -193,10 +183,6 @@ function build_portfolio()
     pv1_ts = data[!, "SolarPV1"] ./ 384.0
     pv2_ts = data[!, "SolarPV2"] ./ 384.0
 
-    pv1_op_costs = 0.0
-    pv2_op_costs = 000
-    initial_cap_pv1 = 0.0
-    initial_cap_pv2 = 0.0
     # From Conservative 2024-ABT CAPEX: year 2024 for Utility PV Class 4 
     pv_capex = 1575.766 # $/kW
     pv_capex_2028 = 1189.247 #
@@ -210,23 +196,19 @@ function build_portfolio()
     ts_pv1_2024 = SingleTimeSeries(;
         data=TimeArray(tstamp_2024_ops, ts_pv1_2024_data),
         name="ops_variable_cap_factor",
-        scaling_factor_multiplier=get_initial_capacity,
     )
     ts_pv1_2028 = SingleTimeSeries(;
         data=TimeArray(tstamp_2028_ops, ts_pv1_2028_data),
         name="ops_variable_cap_factor",
-        scaling_factor_multiplier=get_initial_capacity,
     )
 
     ts_pv2_2024 = SingleTimeSeries(;
         data=TimeArray(tstamp_2024_ops, ts_pv2_2024_data),
         name="ops_variable_cap_factor",
-        scaling_factor_multiplier=get_initial_capacity,
     )
     ts_pv2_2028 = SingleTimeSeries(;
         data=TimeArray(tstamp_2028_ops, ts_pv2_2028_data),
         name="ops_variable_cap_factor",
-        scaling_factor_multiplier=get_initial_capacity,
     )
 
     ts_pv1_inv_capex = SingleTimeSeries(
@@ -239,13 +221,11 @@ function build_portfolio()
     )
 
     t_pv1 = SupplyTechnology{PSY.RenewableDispatch}(;
-        base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.PVe,
         capital_costs=LinearCurve(pv_capex * 1000.0), # to $/MW
         id=4,
         available=true,
         name="PV1",
-        initial_capacity=initial_cap_pv1,
         fuel=[ThermalFuels.OTHER],
         power_systems_type="RenewableDispatch",
         operation_costs=ThermalGenerationCost(
@@ -261,13 +241,11 @@ function build_portfolio()
     )
 
     t_pv2 = SupplyTechnology{PSY.RenewableDispatch}(;
-        base_power=1.0, # Natural Units
         prime_mover_type=PrimeMovers.PVe,
         capital_costs=LinearCurve(pv_capex * 1000.0), # to $/MW
         id=5,
         available=true,
         name="PV2",
-        initial_capacity=initial_cap_pv2,
         fuel=[ThermalFuels.OTHER],
         power_systems_type="RenewableDispatch",
         operation_costs=ThermalGenerationCost(
@@ -299,6 +277,7 @@ function build_portfolio()
 
     existing =
         ExistingCapacity(existing_technologies=[PSY.get_name(t) for t in thermal[1:3]])
+    existing2 = ExistingCapacity(existing_technologies=["Solitude", "dummy name", "Alta"])
 
     ########################
     ######## Storage #######
@@ -307,7 +286,6 @@ function build_portfolio()
     stor_kwh_capex = 745.25 #$/kW
     t_stor = StorageTechnology{PSY.EnergyReservoirStorage}(;
         name="test_storage",
-        base_power=1.0,
         id=1,
         region=[z1],
         storage_tech=StorageTech.LIB,
@@ -330,12 +308,10 @@ function build_portfolio()
     ts_sto_2024 = SingleTimeSeries(;
         data=TimeArray(tstamp_2024_ops, ts_wind_2024_data),
         name="ops_variable_cap_factor",
-        scaling_factor_multiplier=get_initial_capacity,
     )
     ts_sto_2028 = SingleTimeSeries(;
         data=TimeArray(tstamp_2028_ops, ts_wind_2028_data),
         name="ops_variable_cap_factor",
-        scaling_factor_multiplier=get_initial_capacity,
     )
 
     #####################
@@ -401,26 +377,18 @@ function build_portfolio()
         #peak_load=peak_load,
     )
 
-    ts_demand_d_2024 = SingleTimeSeries(
-        "ops_peak_load",
-        TimeArray(tstamp_2024_ops, ts_load_d_2024),
-        #scaling_factor_multiplier=get_peak_load,
-    )
-    ts_demand_d_2028 = SingleTimeSeries(
-        "ops_peak_load",
-        TimeArray(tstamp_2028_ops, ts_load_d_2028),
-        #scaling_factor_multiplier=get_peak_load,
-    )
+    ts_demand_d_2024 =
+        SingleTimeSeries("ops_peak_load", TimeArray(tstamp_2024_ops, ts_load_d_2024))
+    ts_demand_d_2028 =
+        SingleTimeSeries("ops_peak_load", TimeArray(tstamp_2028_ops, ts_load_d_2028))
 
     t_demand_d = DemandRequirement{PSY.PowerLoad}(
-        #load_growth=0.05,
         name="demand_d",
         id=3,
         available=true,
         power_systems_type="PowerLoad",
         region=[z2],
         value_of_lost_load=0.0,
-        #peak_load=peak_load,
     )
 
     demand_technology = DemandSideTechnology{PSY.PowerLoad}(
@@ -441,11 +409,10 @@ function build_portfolio()
         end_region=z2,
         capacity_limits=(min=0, max=900),
         line_loss=0.05,
-        capital_cost=LinearCurve(5000.0),
+        capital_costs=LinearCurve(5000.0),
         available=true,
         power_systems_type="TransportTechnology",
         id=1,
-        base_power=1.0,
         financial_data=tech_financials,
     )
 
@@ -455,23 +422,33 @@ function build_portfolio()
         end_region=z2,
         capacity_limits=(min=0, max=900),
         line_loss=0.05,
-        capital_cost=LinearCurve(5000.0),
+        capital_costs=LinearCurve(5000.0),
         available=true,
         power_systems_type="TransportTechnology",
         id=1,
-        base_power=1.0,
         financial_data=tech_financials,
+    )
+
+    acline = NodalACTransportTechnology{PSY.ACBranch}(
+        name="test",
+        id=1,
+        available=true,
+        power_systems_type="Nodal",
+        capacity_limits=(min=0, max=900),
+        capital_costs=LinearCurve(5000.0),
+        start_node=n1,
+        end_node=n2,
+        financial_data=tech_financials,
+        reactance=1,
     )
 
     ts_line_2024 = SingleTimeSeries(;
         data=TimeArray(tstamp_2024_ops, ts_wind_2024_data),
         name="ops_variable_cap_factor",
-        scaling_factor_multiplier=get_initial_capacity,
     )
     ts_line_2028 = SingleTimeSeries(;
         data=TimeArray(tstamp_2028_ops, ts_wind_2028_data),
         name="ops_variable_cap_factor",
-        scaling_factor_multiplier=get_initial_capacity,
     )
 
     ########################
@@ -539,13 +516,11 @@ function build_portfolio()
     # Build portfolio with base_system
     p_5bus = Portfolio(sys; financial_data=PortfolioFinancialData(2025, 0.07, 0.05, 0.03))
 
-    # #Set name to test metadata
-    # PSIP.set_name!(p_5bus, "test")
-
     #Regions
     PSIP.add_region!(p_5bus, z1)
     PSIP.add_region!(p_5bus, z2)
     PSIP.add_region!(p_5bus, n1)
+    PSIP.add_region!(p_5bus, n2)
 
     #Supply
     PSIP.add_technology!(p_5bus, t_th)
@@ -566,6 +541,7 @@ function build_portfolio()
     #Transmission
     PSIP.add_technology!(p_5bus, line)
     PSIP.add_technology!(p_5bus, line2)
+    PSIP.add_technology!(p_5bus, acline)
 
     #Policy requirement
     PSIP.add_requirement!(p_5bus, carbon_tax)
@@ -582,6 +558,7 @@ function build_portfolio()
     PSIP.add_supplemental_attribute!(p_5bus, t_th, retro2)
     PSIP.add_supplemental_attribute!(p_5bus, t_th, retire2)
     PSIP.add_supplemental_attribute!(p_5bus, t_th, existing)
+    PSIP.add_supplemental_attribute!(p_5bus, t_th_exp, existing2)
 
     #Time series
     PSIP.add_time_series!(p_5bus, t_th, ts_th_cheap_inv_capex)
@@ -640,5 +617,6 @@ function build_portfolio()
     PSIP.add_time_series!(p_5bus, t_demand_c, ts_demand_c_2028; year="2028", rep_day=4)
     PSIP.add_time_series!(p_5bus, t_demand_d, ts_demand_d_2024; year="2024", rep_day=3)
     PSIP.add_time_series!(p_5bus, t_demand_d, ts_demand_d_2028; year="2028", rep_day=4)
+
     return p_5bus
 end

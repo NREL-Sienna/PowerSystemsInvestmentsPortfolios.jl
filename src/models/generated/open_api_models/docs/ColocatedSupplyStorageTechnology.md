@@ -9,7 +9,6 @@ Name | Type | Description | Notes
 **id** | **Int64** |  | [optional] [default to nothing]
 **power_systems_type** | **String** |  | [default to nothing]
 **base_year** | **Int64** |  | [optional] [default to nothing]
-**base_power** | **Float64** |  | [optional] [default to nothing]
 **region** | **Vector{Int64}** |  | [optional] [default to nothing]
 **financial_data** | **Any** |  | [optional] [default to nothing]
 **available** | **Bool** |  | [default to nothing]

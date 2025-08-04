@@ -424,6 +424,18 @@ function get_available_technologies(::Type{T}, portfolio::Portfolio) where {T <:
 end
 
 """
+Like [`get_technology`](@ref) but also returns `nothing` if the component is not [`get_available`](@ref).
+"""
+function get_available_technology(
+    ::Type{T},
+    port::Portfolio,
+    args...;
+    kwargs...,
+) where {T <: Technology}
+    return IS.get_available_component(T, port.data, args...; kwargs...)
+end
+
+"""
 Return true if the component is attached to the system.
 """
 function is_attached(technology::T, portfolio::Portfolio) where {T <: Technology}
@@ -559,6 +571,46 @@ Remove all time series data from the system.
 function clear_time_series!(portfolio::Portfolio)
     return IS.clear_time_series!(portfolio.data)
 end
+
+"""
+Return an iterator of time series in order of initial time.
+
+Note that passing a filter function can be much slower than the other filtering parameters
+because it reads time series data from media.
+
+Call `collect` on the result to get an array.
+
+# Arguments
+
+  - `data::SystemData`: system
+  - `filter_func = nothing`: Only return time series for which this returns true.
+  - `type = nothing`: Only return time series with this type.
+  - `name = nothing`: Only return time series matching this value.
+
+# Examples
+
+```julia
+for time_series in get_time_series_multiple(sys)
+    @show time_series
+end
+
+ts = collect(get_time_series_multiple(sys; type=SingleTimeSeries))
+```
+"""
+function IS.get_time_series_multiple(
+    port::Portfolio,
+    filter_func=nothing;
+    type=nothing,
+    name=nothing,
+)
+    return get_time_series_multiple(port.data, filter_func; type=type, name=name)
+end
+
+"""
+Returns counts of time series including attachments to components and supplemental
+attributes.
+"""
+get_time_series_counts(port::Portfolio) = IS.get_time_series_counts(port.data)
 
 """
 Remove the time series data for a component and time series type.

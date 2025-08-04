@@ -10,7 +10,6 @@ Name | Type | Description | Notes
 **region** | **Vector{Int64}** |  | [optional] [default to nothing]
 **id** | **Int64** |  | [optional] [default to nothing]
 **available** | **Bool** |  | [default to nothing]
-**base_power** | **Float64** |  | [optional] [default to nothing]
 **prime_mover_type** | **String** |  | [optional] [default to "OT"]
 **fuel** | **Vector{String}** |  | [optional] [default to nothing]
 **co2** | **Dict{String, Float64}** |  | [optional] [default to nothing]
