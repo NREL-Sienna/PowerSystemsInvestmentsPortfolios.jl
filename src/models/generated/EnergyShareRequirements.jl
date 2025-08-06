@@ -12,9 +12,9 @@ This file is auto-generated. Do not edit.
         id::Int64
         generation_fraction_requirement::Float64
         ext::Dict
-        eligible_resources::Vector{ResourceTechnology}
+        eligible_resources::Vector{Technology}
         available::Bool
-        eligible_regions::Vector{RegionTopology}
+        eligible_regions::Vector{Region}
     end
 
 Policy requirement that the total generation of `eligible_technologies` must be greater than or equal to a pre-determined fraction of the total demand in eligible zones, such that `sum(P)_eligible_technologies >= total_fraction * sum(D)_eligible_regions`
@@ -26,9 +26,9 @@ Policy requirement that the total generation of `eligible_technologies` must be 
 - `id::Int64`: ID for individual policy
 - `generation_fraction_requirement::Float64`: (default: `0.0`) Fraction of total demand across all eligible zones that needs to be met by qualifying resources.
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `eligible_resources::Vector{ResourceTechnology}`: (default: `Vector{ResourceTechnology}()`) List of SupplyTechnologies that will meet the energy share requirement.
-- `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
-- `eligible_regions::Vector{RegionTopology}`: (default: `Vector{RegionTopology}()`) List of regions where the EnergyShareRequirement will be applied.
+- `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of SupplyTechnologies that will meet the energy share requirement.
+- `available::Bool`: Availability
+- `eligible_regions::Vector{Region}`: (default: `Vector{Region}()`) List of regions where the EnergyShareRequirement will be applied.
 """
 mutable struct EnergyShareRequirements <: Requirement
     "The policy name"
@@ -44,15 +44,15 @@ mutable struct EnergyShareRequirements <: Requirement
     "Option for providing additional data"
     ext::Dict
     "List of SupplyTechnologies that will meet the energy share requirement."
-    eligible_resources::Vector{ResourceTechnology}
-    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+    eligible_resources::Vector{Technology}
+    "Availability"
     available::Bool
     "List of regions where the EnergyShareRequirement will be applied."
-    eligible_regions::Vector{RegionTopology}
+    eligible_regions::Vector{Region}
 end
 
 
-function EnergyShareRequirements(; name, target_year=2050, internal=InfrastructureSystemsInternal(), id, generation_fraction_requirement=0.0, ext=Dict(), eligible_resources=Vector{ResourceTechnology}(), available, eligible_regions=Vector{RegionTopology}(), )
+function EnergyShareRequirements(; name, target_year=2050, internal=InfrastructureSystemsInternal(), id, generation_fraction_requirement=0.0, ext=Dict(), eligible_resources=Vector{Technology}(), available, eligible_regions=Vector{Region}(), )
     EnergyShareRequirements(name, target_year, internal, id, generation_fraction_requirement, ext, eligible_resources, available, eligible_regions, )
 end
 

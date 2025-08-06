@@ -13,7 +13,7 @@ This file is auto-generated. Do not edit.
         id::Int64
         ext::Dict
         available::Bool
-        eligible_regions::Vector{RegionTopology}
+        eligible_regions::Vector{Region}
     end
 
 Policy requirement that defines an additional cost penalty per ton of CO2 produced in the target in the eligible regions
@@ -25,8 +25,8 @@ Policy requirement that defines an additional cost penalty per ton of CO2 produc
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
 - `id::Int64`: ID for individual policy
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
-- `eligible_regions::Vector{RegionTopology}`: (default: `Vector{RegionTopology}()`) List of regions that contribute to the carbon cap constraint.
+- `available::Bool`: Availability
+- `eligible_regions::Vector{Region}`: (default: `Vector{Region}()`) List of regions that contribute to the carbon cap constraint.
 """
 mutable struct CarbonTax <: Requirement
     "The requirement name"
@@ -41,14 +41,14 @@ mutable struct CarbonTax <: Requirement
     id::Int64
     "Option for providing additional data"
     ext::Dict
-    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+    "Availability"
     available::Bool
     "List of regions that contribute to the carbon cap constraint."
-    eligible_regions::Vector{RegionTopology}
+    eligible_regions::Vector{Region}
 end
 
 
-function CarbonTax(; name, target_year=2050, tax_dollars_per_ton=1.0, internal=InfrastructureSystemsInternal(), id, ext=Dict(), available, eligible_regions=Vector{RegionTopology}(), )
+function CarbonTax(; name, target_year=2050, tax_dollars_per_ton=1.0, internal=InfrastructureSystemsInternal(), id, ext=Dict(), available, eligible_regions=Vector{Region}(), )
     CarbonTax(name, target_year, tax_dollars_per_ton, internal, id, ext, available, eligible_regions, )
 end
 

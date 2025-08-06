@@ -1,7 +1,7 @@
 """
-abstract type to represent spatial aggregations for the CEM.
+abstract type to represent regions for the CEM.
 
-Required fields for a RegionTopology Type
+Required fields for a Region Type
 
   - name
   - id
@@ -9,13 +9,12 @@ Required fields for a RegionTopology Type
   - supplemental_attributes_container
   - internal
 """
-abstract type RegionTopology <: IS.InfrastructureSystemsComponent end
+abstract type Region <: IS.InfrastructureSystemsComponent end
 
-get_name(val::RegionTopology) = val.name
-get_id(val::RegionTopology) = val.id
-get_internal(val::RegionTopology) = val.internal
-get_ext(val::RegionTopology) = get_ext(get_internal(val))
-get_time_series_container(val::RegionTopology) = val.time_series_container
-get_supplemental_attributes_container(val::RegionTopology) =
-    val.supplemental_attributes_container
-supports_time_series(::RegionTopology) = true
+get_name(val::Region) = val.name
+get_id(val::Region) = val.id
+get_internal(val::Region) = val.internal
+get_ext(val::Region) = get_ext(get_internal(val))
+get_time_series_container(val::Region) = val.time_series_container
+get_supplemental_attributes_container(val::Region) = val.supplemental_attributes_container
+supports_time_series(::Region) = true

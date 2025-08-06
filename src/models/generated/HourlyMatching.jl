@@ -8,10 +8,10 @@ This file is auto-generated. Do not edit.
     mutable struct HourlyMatching <: Requirement
         name::String
         internal::InfrastructureSystemsInternal
-        eligible_demand::Vector{DemandTechnology}
+        eligible_demand::Vector{Technology}
         id::Int64
         ext::Dict
-        eligible_resources::Vector{ResourceTechnology}
+        eligible_resources::Vector{Technology}
         available::Bool
     end
 
@@ -20,11 +20,11 @@ Policy requirement that all DemandSideTechnologies in `qualified_demand` must ha
 # Arguments
 - `name::String`: The policy name
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `eligible_demand::Vector{DemandTechnology}`: (default: `Vector{DemandTechnology}()`) List of demand side technologies that need to be met with hourly matching.
+- `eligible_demand::Vector{Technology}`: (default: `Vector{Technology}()`) List of demand side technologies that need to be met with hourly matching.
 - `id::Int64`: ID for individual policy
 - `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `eligible_resources::Vector{ResourceTechnology}`: (default: `Vector{ResourceTechnology}()`) List of technologies eligible to provide hourly matching for demand side technologies.
-- `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
+- `eligible_resources::Vector{Technology}`: (default: `Vector{Technology}()`) List of technologies eligible to provide hourly matching for demand side technologies.
+- `available::Bool`: Availability
 """
 mutable struct HourlyMatching <: Requirement
     "The policy name"
@@ -32,19 +32,19 @@ mutable struct HourlyMatching <: Requirement
     "Internal field"
     internal::InfrastructureSystemsInternal
     "List of demand side technologies that need to be met with hourly matching."
-    eligible_demand::Vector{DemandTechnology}
+    eligible_demand::Vector{Technology}
     "ID for individual policy"
     id::Int64
     "Option for providing additional data"
     ext::Dict
     "List of technologies eligible to provide hourly matching for demand side technologies."
-    eligible_resources::Vector{ResourceTechnology}
-    "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+    eligible_resources::Vector{Technology}
+    "Availability"
     available::Bool
 end
 
 
-function HourlyMatching(; name, internal=InfrastructureSystemsInternal(), eligible_demand=Vector{DemandTechnology}(), id, ext=Dict(), eligible_resources=Vector{ResourceTechnology}(), available, )
+function HourlyMatching(; name, internal=InfrastructureSystemsInternal(), eligible_demand=Vector{Technology}(), id, ext=Dict(), eligible_resources=Vector{Technology}(), available, )
     HourlyMatching(name, internal, eligible_demand, id, ext, eligible_resources, available, )
 end
 

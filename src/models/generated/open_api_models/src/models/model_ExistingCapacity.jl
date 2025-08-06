@@ -4,32 +4,26 @@
 @doc raw"""ExistingCapacity
 
     ExistingCapacity(;
-        existing_technologies=nothing,
-        uuid=nothing,
+        eligible_generators=nothing,
     )
 
-    - existing_technologies::Vector{String}
-    - uuid::String
+    - eligible_generators::Vector{String}
 """
 Base.@kwdef mutable struct ExistingCapacity <: OpenAPI.APIModel
-    existing_technologies::Union{Nothing, Vector{String}} = nothing
-    uuid::Union{Nothing, String} = nothing
+    eligible_generators::Union{Nothing, Vector{String}} = nothing
 
-    function ExistingCapacity(existing_technologies, uuid)
+    function ExistingCapacity(eligible_generators)
         OpenAPI.validate_property(
             ExistingCapacity,
-            Symbol("existing_technologies"),
-            existing_technologies,
+            Symbol("eligible_generators"),
+            eligible_generators,
         )
-        OpenAPI.validate_property(ExistingCapacity, Symbol("uuid"), uuid)
-        return new(existing_technologies, uuid)
+        return new(eligible_generators)
     end
 end # type ExistingCapacity
 
-const _property_types_ExistingCapacity = Dict{Symbol, String}(
-    Symbol("existing_technologies") => "Vector{String}",
-    Symbol("uuid") => "String",
-)
+const _property_types_ExistingCapacity =
+    Dict{Symbol, String}(Symbol("eligible_generators") => "Vector{String}")
 OpenAPI.property_type(::Type{ExistingCapacity}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_ExistingCapacity[name]))}
 

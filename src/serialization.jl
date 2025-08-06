@@ -5,14 +5,7 @@ const MODULE_KEY = "module"
 const PARAMETERS_KEY = "parameters"
 const CONSTRUCT_WITH_PARAMETERS_KEY = "construct_with_parameters"
 const FUNCTION_KEY = "function"
-const _CONTAINS_SHOULD_ENCODE = Union{
-    ResourceTechnology,
-    DemandTechnology,
-    TransmissionTechnology,
-    Requirement,
-    IS.SupplementalAttribute,
-    RegionTopology,
-}
+const _CONTAINS_SHOULD_ENCODE = Union{Technology, Requirement, SupplementalAttribute}
 const SYSTEM_KWARGS = Set((
     :internal,
     :runchecks,
@@ -26,10 +19,8 @@ const SYSTEM_KWARGS = Set((
 const ENCODED_FIELDS = Set((
     :duration_limits,
     :capacity_limits,
-    :capacity_limits_energy,
-    :capacity_limits_discharge,
-    :capacity_limits_charge,
-    :angle_limits,
+    :capacity_energy_limits,
+    :capacity_power_limits,
     :co2,
     :fuel,
     :prime_mover_type,
@@ -37,21 +28,13 @@ const ENCODED_FIELDS = Set((
     :storage_tech,
     :cofire_level_limits,
     :cofire_start_limits,
-    :bus_type,
-    :node,
     :region,
     :start_region,
     :end_region,
-    :start_node,
-    :end_node,
     :efficiency,
-    :ramp_limits,
-    :time_limits,
     :eligible_regions,
     :eligible_resources,
     :eligible_demand,
-    :eligible_technologies,
-    :uuid,
 ))
 
 """
@@ -62,7 +45,6 @@ and all components.
 """
 function Portfolio(
     file_path::AbstractString;
-    from_python=false,
     assign_new_uuids=false,
     try_reimport=true,
     kwargs...,
@@ -77,7 +59,6 @@ function Portfolio(
         portfolio = deserialize(
             Portfolio,
             file_path;
-            from_python=from_python,
             time_series_read_only=time_series_read_only,
             # runchecks = runchecks,
             time_series_directory=time_series_directory,
@@ -107,12 +88,7 @@ function IS.serialize(portfolio::T) where {T <: Portfolio}
     return data
 end
 
-function deserialize(
-    ::Type{Portfolio},
-    filename::AbstractString;
-    from_python=false,
-    kwargs...,
-)
+function deserialize(::Type{Portfolio}, filename::AbstractString; kwargs...)
     raw = open(filename) do io
         JSON3.read(io, Dict)
     end
@@ -129,7 +105,7 @@ function deserialize(
         end
     end
 
-    return from_dict(Portfolio, raw; from_python, kwargs...)
+    return from_dict(Portfolio, raw; kwargs...)
 end
 
 function serialize(technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
@@ -185,7 +161,6 @@ clear_ext!(port::Portfolio) = IS.clear_ext!(port.internal)
 function from_dict(
     ::Type{Portfolio},
     raw::Dict{String, Any};
-    from_python=false,
     time_series_read_only=false,
     time_series_directory=nothing,
     kwargs...,
@@ -231,7 +206,7 @@ function from_dict(
     if !isnothing(sys)
         base_system = PSY.from_dict(PSY.System, sys)
     else
-        base_system = PSY.System(100.0)
+        base_system = nothing
     end
 
     internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
@@ -240,14 +215,12 @@ function from_dict(
     data = deserialize(
         IS.SystemData,
         raw["data"];
-        from_python=from_python,
         time_series_read_only=time_series_read_only,
         time_series_directory=time_series_directory,
     )
     portfolio = Portfolio(
         aggregation,
         data,
-        base_system,
         investment_schedule,
         internal;
         financial_data=PortfolioFinancialData(
@@ -258,18 +231,10 @@ function from_dict(
         ),
         name=name,
         description=description,
+        base_system=base_system,
         parsed_kwargs...,
     )
-    portfolio.data.supplemental_attribute_manager = deserialize_attributes(
-        portfolio,
-        IS.SupplementalAttributeManager,
-        get(
-            raw["data"],
-            "supplemental_attribute_manager",
-            Dict("attributes" => [], "associations" => []),
-        ),
-        portfolio.data.time_series_manager,
-    )
+
     if raw["data_format_version"] != DATA_FORMAT_VERSION
         pre_deserialize_conversion!(raw, portfolio)
     end
@@ -295,7 +260,6 @@ end
 function deserialize(
     ::Type{IS.SystemData},
     raw::Dict;
-    from_python=false,
     time_series_read_only=false,
     time_series_directory=nothing,
     validation_descriptor_file=nothing,
@@ -305,32 +269,6 @@ function deserialize(
         if !isfile(raw["time_series_storage_file"])
             error("time series file $(raw["time_series_storage_file"]) does not exist")
         end
-
-        # Additional functionality to read tiemseries metadata from a portfolio written and serialized in pyPSIP, 
-        # Long-term, we should probably either make it so infrasys supports deserializing without a DB
-        # Or add an option to write this DB file in the serialization functions in IS
-        if from_python
-            if !isnothing(time_series_directory)
-                metadata_path = joinpath(time_series_directory, IS.DB_FILENAME)
-                ts_path = joinpath(time_series_directory, "time_series_storage.h5")
-            else
-                metadata_path = joinpath(raw["time_series"]["directory"], IS.DB_FILENAME)
-                ts_path =
-                    joinpath(raw["time_series"]["directory"], "time_series_storage.h5")
-            end
-
-            # Update h5 file to store this updated DB
-            metadata = open(metadata_path, "r") do io
-                read(io)
-            end
-            HDF5.h5open(ts_path, "r+") do file
-                if IS.METADATA_TABLE_NAME in keys(file)
-                    HDF5.delete_object(file, IS.HDF5_TS_METADATA_ROOT_PATH)
-                end
-                file[IS.HDF5_TS_METADATA_ROOT_PATH] = metadata
-            end
-        end
-
         # TODO: need to address this limitation
         if IS.strip_module_name(raw["time_series_storage_type"]) ==
            "InMemoryTimeSeriesStorage"
@@ -365,12 +303,14 @@ function deserialize(
         metadata_store=time_series_metadata_store,
     )
     subsystems = Dict(k => Set(Base.UUID.(v)) for (k, v) in raw["subsystems"])
-
-    # Deserialize with empty supplemental_attribute_manager to start, will be
-    # deserialized later after Portfolio is initialized
-    supplemental_attribute_manager = IS.SupplementalAttributeManager(
-        IS.SupplementalAttributesByType(IS.SupplementalAttributesByType()),
-        IS.from_records(IS.SupplementalAttributeAssociations, []),
+    supplemental_attribute_manager = IS.deserialize(
+        IS.SupplementalAttributeManager,
+        get(
+            raw,
+            "supplemental_attribute_manager",
+            Dict("attributes" => [], "associations" => []),
+        ),
+        time_series_manager,
     )
     internal = IS.deserialize(IS.InfrastructureSystemsInternal, raw["internal"])
     validation_descriptors = if isnothing(validation_descriptor_file)
@@ -386,7 +326,7 @@ function deserialize(
         supplemental_attribute_manager,
         internal,
     )
-    attributes_by_uuid = Dict{Base.UUID, IS.SupplementalAttribute}()
+    attributes_by_uuid = Dict{Base.UUID, SupplementalAttribute}()
     for attr_dict in values(supplemental_attribute_manager.data)
         for attr in values(attr_dict)
             uuid = IS.get_uuid(attr)
@@ -402,46 +342,6 @@ function deserialize(
     return sys
 end
 
-# Function copied over from IS. This version of the function is modified to deserialize using openAPI structs for PSIP supplemental attributes
-# This is necessary since the openAPI structs do not have an internal field by default, so new UUIDs are given to supplemental attributes
-# when deserialized with the IS version and the associations with PSIP components are broken
-function deserialize_attributes(
-    portfolio::Portfolio,
-    ::Type{IS.SupplementalAttributeManager},
-    data::Dict,
-    time_series_manager::IS.TimeSeriesManager,
-)
-    mgr = IS.SupplementalAttributeManager(
-        IS.SupplementalAttributesByType(IS.SupplementalAttributesByType()),
-        IS.from_records(IS.SupplementalAttributeAssociations, data["associations"]),
-    )
-    refs = IS.SharedSystemReferences(;
-        supplemental_attribute_manager=mgr,
-        time_series_manager=time_series_manager,
-    )
-    for attr_dict in data["attributes"]
-        type = IS.get_type_from_serialization_metadata(
-            IS.get_serialization_metadata(attr_dict),
-        )
-        if !haskey(mgr.data, type)
-            mgr.data[type] = Dict{Base.UUID, SupplementalAttribute}()
-        end
-        #attr = deserialize(type, attr_dict)
-
-        api_attr = deserialize_openapi_struct(type, attr_dict)
-        attr = build_model_struct(api_attr, portfolio, attr_dict["__metadata__"])
-
-        uuid = IS.get_uuid(attr)
-        if haskey(mgr.data[type], uuid)
-            error("Bug: duplicate UUID in attributes container: type=$type uuid=$uuid")
-        end
-        mgr.data[type][uuid] = attr
-        IS.set_shared_system_references!(attr, refs)
-    end
-
-    return mgr
-end
-
 function deserialize_components!(portfolio::Portfolio, raw)
     # Convert the array of components into type-specific arrays to allow addition by type.
     # Need to maintain an order here and deserialize regions first so they can
@@ -450,7 +350,7 @@ function deserialize_components!(portfolio::Portfolio, raw)
     regions = OrderedDict{Any, Vector{Dict}}()
     for component in raw["components"]
         type = IS.get_type_from_serialization_data(component)
-        if type <: RegionTopology
+        if type <: Region
             components = get(regions, type, nothing)
             if components === nothing
                 components = Vector{Dict}()
@@ -520,11 +420,6 @@ function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{St
             vals[name] = getfield(base_struct, name)
         end
     end
-
-    #Build internal from uuid and remove uuid entry
-    vals[:internal] = IS.InfrastructureSystemsInternal(; uuid=vals[:uuid])
-    delete!(vals, :uuid)
-
     struct_type_string = metadata["type"]
     struct_type = getproperty(PowerSystemsInvestmentsPortfolios, Symbol(struct_type_string))
     if haskey(metadata, "parameters")
@@ -575,18 +470,12 @@ function serialize_custom_types(field, technology::T) where {T <: _CONTAINS_SHOU
 
     #For fields with references to other structs, serialize with
     #the id of that struct and convert enums to strings
-    if field in [
-        :region,
-        :eligible_regions,
-        :eligible_resources,
-        :eligible_technologies,
-        :eligible_demand,
-    ]
+    if field in [:region, :eligible_regions, :eligible_resources, :eligible_demand]
         comps = getfield(technology, field)
         val = [get_id(c) for c in comps]
-    elseif field in [:start_region, :end_region, :start_node, :end_node]
+    elseif field in [:start_region, :end_region]
         val = get_id(getfield(technology, field))
-    elseif field in [:prime_mover_type, :storage_tech, :bus_type]
+    elseif field in [:prime_mover_type, :storage_tech]
         val = string(getfield(technology, field))
     elseif field == :fuel
         val = [string(f) for f in getfield(technology, field)]
@@ -602,8 +491,6 @@ function serialize_custom_types(field, technology::T) where {T <: _CONTAINS_SHOU
         for (k, v) in fuel_params
             val[string(k)] = v
         end
-    elseif field == :uuid
-        val = string(IS.get_uuid(technology))
     else
         val = getfield(technology, field)
     end
@@ -615,7 +502,7 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         val = collect(
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
-                RegionTopology,
+                Region,
                 portfolio.data,
             ),
         )
@@ -624,14 +511,6 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
                 SupplyTechnology,
-                portfolio.data,
-            ),
-        )
-    elseif name == :eligible_technologies
-        val = collect(
-            IS.get_components(
-                x -> get_id(x) in getfield(base_struct, name),
-                Technology,
                 portfolio.data,
             ),
         )
@@ -645,37 +524,20 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         )
     elseif name in [
         :capacity_limits,
-        :capacity_limits_discharge,
-        :capacity_limits_charge,
-        :capacity_limits_energy,
+        :capacity_power_limits,
+        :capacity_energy_limits,
         :duration_limits,
-        :angle_limits,
     ]
         data = getfield(base_struct, name)
-        if isnothing(data)
-            val = nothing
-        else
-            val = (min=data["min"], max=data["max"])
-        end
+        val = (min=data["min"], max=data["max"])
     elseif name == :efficiency
         data = getfield(base_struct, name)
         val = (in=data["in"], out=data["out"])
-    elseif name in [:ramp_limits, :time_limits]
-        data = getfield(base_struct, name)
-        val = (up=data["up"], down=data["down"])
     elseif name in [:start_region, :end_region]
         val = first(
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
-                Zone,
-                portfolio.data,
-            ),
-        )
-    elseif name in [:start_node, :end_node]
-        val = first(
-            IS.get_components(
-                x -> get_id(x) in getfield(base_struct, name),
-                Node,
+                Region,
                 portfolio.data,
             ),
         )
@@ -683,8 +545,6 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         val = PrimeMovers(getfield(base_struct, name))
     elseif name == :fuel
         val = [ThermalFuels(f) for f in getfield(base_struct, name)]
-    elseif name == :bus_type
-        val = ACBusTypes(getfield(base_struct, name))
     elseif name == :co2
         data = getfield(base_struct, name)
         val = Dict{ThermalFuels, Float64}()
@@ -705,8 +565,6 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         end
     elseif name == :storage_tech
         val = StorageTech(getfield(base_struct, name))
-    elseif name == :uuid
-        val = Base.UUID(getfield(base_struct, name))
     end
 
     return val
@@ -751,80 +609,12 @@ function to_json(
     portfolio::Portfolio,
     filename::AbstractString;
     user_data=nothing,
-    to_python=false,
     pretty=false,
     force=false,
     runchecks=false,
 )
     IS.prepare_for_serialization_to_file!(portfolio.data, filename; force=force)
     data = to_json(portfolio; pretty=pretty)
-
-    # Additional functionality to write the timeseries metadata, supplemental attributes, etc.
-    # to a DB file so that they can be read into a Portfolio in pyPSIP, since that is what is supported by 
-    # infrasys. Long-term, we should probably either make it so infrasys supports deserializing without a DB
-    # Or add an option to write this DB file in the serialization functions in IS
-    if to_python
-        directory = dirname(filename)
-        metadata_path = joinpath(directory, IS.DB_FILENAME)
-        ts_store = portfolio.data.time_series_manager.metadata_store #Is there a getter for this?
-        attr_store = portfolio.data.supplemental_attribute_manager.associations #getter?
-        dst = SQLite.DB(metadata_path)
-        IS.backup(dst, ts_store.db)
-
-        # Add supplemental attribute association to the same DB
-        schema = [
-            "id INTEGER PRIMARY KEY",
-            "attribute_uuid TEXT NOT NULL",
-            "attribute_type TEXT NOT NULL",
-            "component_uuid TEXT NOT NULL",
-            "component_type TEXT NOT NULL",
-        ]
-        schema_text = join(schema, ",")
-        DBInterface.execute(
-            dst,
-            "CREATE TABLE supplemental_attribute_associations ($(schema_text))",
-        )
-
-        # Would probably be better to directly copy the table from one DB to another
-        df = DataFrames.DataFrame(
-            DBInterface.execute(attr_store.db, "SELECT * FROM supplemental_attributes"),
-        )
-        df[!, "id"] = 1:DataFrames.nrow(df)
-
-        SQLite.load!(df, dst, "supplemental_attribute_associations")
-
-        cols = DataFrames.DataFrame(
-            DBInterface.execute(dst, "PRAGMA table_info(time_series_associations)"),
-        )
-
-        #Check if timeseries metadata columns need to be renamed to be consistent with infrasys 
-        if in("resolution_ms", cols[!, "name"])
-            DBInterface.execute(
-                dst,
-                "ALTER TABLE time_series_associations RENAME COLUMN resolution_ms TO resolution",
-            )
-        end
-        if in("horizon_ms", cols[!, "name"])
-            DBInterface.execute(
-                dst,
-                "ALTER TABLE time_series_associations RENAME COLUMN horizon_ms TO horizon",
-            )
-        end
-
-        # Update h5 file to store this updated DB
-        metadata = open(metadata_path, "r") do io
-            read(io)
-        end
-        ts_filename = splitext(basename(filename))[1] * "_time_series_storage.h5"
-        ts_path = joinpath(directory, ts_filename)
-        HDF5.h5open(ts_path, "r+") do file
-            if IS.METADATA_TABLE_NAME in keys(file)
-                HDF5.delete_object(file, IS.HDF5_TS_METADATA_ROOT_PATH)
-            end
-            file[IS.HDF5_TS_METADATA_ROOT_PATH] = metadata
-        end
-    end
-
     open(filename, "w") do io
         write(io, data)
     end

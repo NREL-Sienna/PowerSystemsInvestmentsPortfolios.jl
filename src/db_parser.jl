@@ -4,12 +4,20 @@ The following function imports from the database and generates the structs for a
 @input database_filepath::AbstractString: The path to the database file
 @input schema_JSON_filepath::AbstractString: The path to the schema JSON file
 """
-function db_to_portfolio_parser(database_filepath::AbstractString)
+function db_to_portfolio_parser(
+    database_filepath::AbstractString;
+    dr=0.07,
+    infr=0.05,
+    intr=0.02,
+    base_year=2025,
+)
 
     #Goal will be be able to read in database and populate structs simultaneously
 
     dfs = db_to_dataframes(database_filepath)
-    portfolio = dataframe_to_structs(dfs)
+    system = dataframe_to_system(dfs)
+    p = initialize_portfolio(dr, infr, intr, base_year, system)
+    portfolio = dataframe_to_structs(dfs, p)
 
     return portfolio
 end
@@ -35,14 +43,14 @@ function db_to_dataframes(db_path::String)
     tables = SQLite.tables(db)
 
     # Create a dictionary to store DataFrames for each table
-    dfs = Dict{String, DataFrames.DataFrame}()
+    dfs = Dict{String, DataFrame}()
 
     #Will adjust queries to only pull a subset of data
     for table in tables
         table_name = table.name
         # Read each table into a DataFrame
         query = "SELECT * FROM $table_name"
-        df = DataFrames.DataFrame(DBInterface.execute(db, query))
+        df = DataFrame(DBInterface.execute(db, query))
         dfs[table_name] = df
     end
 
@@ -108,6 +116,7 @@ function map_prime_mover_to_parametric(prime_mover::String)
         "WIND" => PSY.RenewableDispatch,
         "Wind" => PSY.RenewableDispatch,
     )
+
     return mapping_dict[prime_mover]
 end
 
@@ -131,7 +140,7 @@ function parse_timestamps_and_values(json_str::String)
     return timestamps, values
 end
 
-function parse_timestamps_and_values(df::DataFrames.DataFrame)
+function parse_timestamps_and_values(df::DataFrame)
     # Initialize arrays to store timestamps and values
     timestamps = String[]
     values = Float64[]
@@ -410,21 +419,58 @@ function dataframe_to_system(df_dict::Dict)
     return system
 end
 
-function dataframe_to_structs(df_dict::Dict)
-
+function initialize_portfolio(
+    discount_rate::Float64,
+    inflation_rate::Float64,
+    interest_rate::Float64,
+    base_year::Int64,
+    system::PSY.System
+)
     #Initialize Portfolio
-    system = dataframe_to_system(df_dict)
-
     p = Portfolio(
-        discount_rate=0.07,
-        inflation_rate=0.05,
-        interest_rate=0.02,
-        base_year=2025;
-        base_system=system,
+        discount_rate=discount_rate,
+        inflation_rate=inflation_rate,
+        interest_rate=interest_rate,
+        base_year=base_year;
+        base_system = system
     )
 
-    tech_financials =
-        TechnologyFinancialData(; capital_recovery_period=30, technology_base_year=2025)
+    return p
+end
+
+function get_query(struct_name::String, field_name::String)
+    query_dict = Dict(
+        "supply_technologies",
+        "name" => "SELECT * FROM supply_technologies",
+        "demand_requirements" => "SELECT * FROM demand_requirements",
+        "transmission_lines" => "SELECT * FROM transmission_lines",
+        "balancing_topologies" => "SELECT * FROM balancing_topologies",
+        "planning_regions" => "SELECT * FROM planning_regions",
+        "attributes" => "SELECT * FROM attributes",
+        "time_series" => "SELECT * FROM time_series",
+        "operational_data" => "SELECT * FROM operational_data",
+        "generation_units" => "SELECT * FROM generation_units",
+    )
+    return query_dict[struct_name][field_name]
+end
+
+function dataframe_to_structs(df_dict::Dict, p::Portfolio)
+    tech_financials = TechnologyFinancialData(;
+        capital_recovery_period=30,
+        technology_base_year=2025,
+    )
+
+    """
+    Steps for the parser
+    """
+    # insert_zones
+    # insert_balancing_topologies
+    # insert_transmission_lines
+    # insert_transmission_interchanges
+    # insert_load
+    # insert_generation
+    # insert_storage
+    # insert_supply_technologies
 
     #initialize Zone structs
     zones = []
@@ -475,7 +521,7 @@ function dataframe_to_structs(df_dict::Dict)
         #Now just need to parse the blob
 
         parametric = map_prime_mover_to_parametric(row[!, "prime_mover"][1])
-        f = row[!, "fuel_type"][1]
+        f = map_fuel(row[!, "fuel_type"][1])
         t = SupplyTechnology{parametric}(;
             #Data pulled from DB
             name=string(row[!, "technology_id"][1]),
@@ -483,8 +529,8 @@ function dataframe_to_structs(df_dict::Dict)
             capital_costs=InputOutputCurve(PiecewiseLinearData(supply_curve_parsed)),
             balancing_topology=string(row[!, "balancing_topology"][1]),
             prime_mover_type=map_prime_mover(row[!, "prime_mover"][1]),
-            fuel=[map_fuel(f)],
-            region=[zones[area_int]],
+            fuel=[f],
+            region=[zones[area_int]], #note that technologies can be defined for multiple regions, which is why this is a list
             financial_data=tech_financials,
 
             #Problem ones, need to write functions to extract
@@ -502,8 +548,8 @@ function dataframe_to_structs(df_dict::Dict)
             start_cost_per_mw=91.0,
             up_time=6.0,
             dn_time=6.0,
-            heat_rate_mmbtu_per_mwh=Dict(map_fuel(f) => LinearCurve(7.43)),
-            co2=Dict(map_fuel(f) => 0.05306),
+            heat_rate_mmbtu_per_mwh=Dict(f => LinearCurve(7.43)), 
+            co2=Dict(f => 0.05306),
             ramp_dn_percentage=0.64,
             ramp_up_percentage=0.64,
 
@@ -547,14 +593,14 @@ function dataframe_to_structs(df_dict::Dict)
 
         d = DemandRequirement{ElectricLoad}(
             #Data pulled from DB
-            id=row["entity_attribute_id"],
+            id = row["entity_attribute_id"],
             name=string(row["entity_attribute_id"]),
             region=[zones[area_int]],#parse(Int64, row["area"]),
 
             #Placeholder/default values
             available=true,
             power_systems_type="ElectricLoad",
-            value_of_lost_load=1.0,
+            value_of_lost_load = 1.0
         )
         add_technology!(p, d)
         IS.add_time_series!(p.data, d, ts)
@@ -591,7 +637,7 @@ function dataframe_to_structs(df_dict::Dict)
             available=true,
             start_region=zones[parse(Int64, row["area_from"])],
             end_region=zones[parse(Int64, row["area_to"])],
-            capacity_limits=(min=0.0, max=row["max_flow_from"]),
+            max_new_capacity=row["max_flow_from"],
             existing_line_capacity=existing_capacity,
 
             #stuff we don't have, but probably should

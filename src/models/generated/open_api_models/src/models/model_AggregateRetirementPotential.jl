@@ -5,31 +5,25 @@
 
     AggregateRetirementPotential(;
         retirement_potential=0.0,
-        uuid=nothing,
     )
 
     - retirement_potential::Float64
-    - uuid::String
 """
 Base.@kwdef mutable struct AggregateRetirementPotential <: OpenAPI.APIModel
     retirement_potential::Union{Nothing, Float64} = 0.0
-    uuid::Union{Nothing, String} = nothing
 
-    function AggregateRetirementPotential(retirement_potential, uuid)
+    function AggregateRetirementPotential(retirement_potential)
         OpenAPI.validate_property(
             AggregateRetirementPotential,
             Symbol("retirement_potential"),
             retirement_potential,
         )
-        OpenAPI.validate_property(AggregateRetirementPotential, Symbol("uuid"), uuid)
-        return new(retirement_potential, uuid)
+        return new(retirement_potential)
     end
 end # type AggregateRetirementPotential
 
-const _property_types_AggregateRetirementPotential = Dict{Symbol, String}(
-    Symbol("retirement_potential") => "Float64",
-    Symbol("uuid") => "String",
-)
+const _property_types_AggregateRetirementPotential =
+    Dict{Symbol, String}(Symbol("retirement_potential") => "Float64")
 OpenAPI.property_type(::Type{AggregateRetirementPotential}, name::Symbol) = Union{
     Nothing,
     eval(Base.Meta.parse(_property_types_AggregateRetirementPotential[name])),

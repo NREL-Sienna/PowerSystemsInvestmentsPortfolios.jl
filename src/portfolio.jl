@@ -5,8 +5,6 @@ const DATA_FORMAT_VERSION = "0.1.0"
 
 const DEFAULT_AGGREGATION = PSY.ACBus
 
-const DEFAULT_SYSTEM() = PSY.System(100.0)
-
 mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
     description::Union{Nothing, String}
@@ -27,21 +25,21 @@ end
 struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     data::IS.SystemData # Inputs to the model
-    base_system::PSY.System #Base system storing existing data
     investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
     time_series_directory::Union{Nothing, String}
     financial_data::Union{Nothing, PortfolioFinancialData}
+    base_system::Union{Nothing, System}
     metadata::PortfolioMetadata
     internal::IS.InfrastructureSystemsInternal
 
     function Portfolio(
         aggregation,
         data,
-        base_system::PSY.System,
         investment_schedule::Dict,
         internal::IS.InfrastructureSystemsInternal;
         time_series_directory=nothing,
         financial_data=nothing,
+        base_system=nothing,
         name=nothing,
         description=nothing,
         data_source=nothing,
@@ -60,10 +58,10 @@ struct Portfolio <: IS.InfrastructureSystemsType
         return new(
             aggregation,
             data,
-            base_system,
             investment_schedule,
             time_series_directory,
             financial_data,
+            base_system,
             PortfolioMetadata(name, description, data_source),
             internal,
         )
@@ -78,7 +76,6 @@ function Portfolio(; kwargs...)
     return Portfolio(
         DEFAULT_AGGREGATION,
         data,
-        DEFAULT_SYSTEM(),
         Dict(),
         IS.InfrastructureSystemsInternal();
         kwargs...,
@@ -93,22 +90,6 @@ function Portfolio(aggregation; kwargs...)
     return Portfolio(
         aggregation,
         data,
-        DEFAULT_SYSTEM(),
-        Dict(),
-        IS.InfrastructureSystemsInternal();
-        kwargs...,
-    )
-end
-
-"""
-Construct an empty `Portfolio` specifying base_system. Useful for building a Portfolio from scratch.
-"""
-function Portfolio(base_system::PSY.System; kwargs...)
-    data = PSY._create_system_data_from_kwargs(; kwargs...)
-    return Portfolio(
-        DEFAULT_AGGREGATION,
-        data,
-        base_system,
         Dict(),
         IS.InfrastructureSystemsInternal();
         kwargs...,
@@ -123,7 +104,6 @@ function Portfolio(base_year, discount_rate, inflation_rate, interest_rate; kwar
     return Portfolio(
         DEFAULT_AGGREGATION,
         data,
-        DEFAULT_SYSTEM(),
         Dict(),
         InfrastructureSystemsInternal();
         financial_data=PortfolioFinancialData(
@@ -145,11 +125,6 @@ IS.get_internal(val::Portfolio) = val.internal
 Return a user-modifiable dictionary to store extra information.
 """
 get_ext(val::Portfolio) = IS.get_ext(val.internal)
-
-"""
-Get the base system of the portfolio.
-"""
-get_base_system(val::Portfolio) = val.base_system
 
 """
 Set the name of the portfolio.
@@ -424,18 +399,6 @@ function get_available_technologies(::Type{T}, portfolio::Portfolio) where {T <:
 end
 
 """
-Like [`get_technology`](@ref) but also returns `nothing` if the component is not [`get_available`](@ref).
-"""
-function get_available_technology(
-    ::Type{T},
-    port::Portfolio,
-    args...;
-    kwargs...,
-) where {T <: Technology}
-    return IS.get_available_component(T, port.data, args...; kwargs...)
-end
-
-"""
 Return true if the component is attached to the system.
 """
 function is_attached(technology::T, portfolio::Portfolio) where {T <: Technology}
@@ -573,46 +536,6 @@ function clear_time_series!(portfolio::Portfolio)
 end
 
 """
-Return an iterator of time series in order of initial time.
-
-Note that passing a filter function can be much slower than the other filtering parameters
-because it reads time series data from media.
-
-Call `collect` on the result to get an array.
-
-# Arguments
-
-  - `data::SystemData`: system
-  - `filter_func = nothing`: Only return time series for which this returns true.
-  - `type = nothing`: Only return time series with this type.
-  - `name = nothing`: Only return time series matching this value.
-
-# Examples
-
-```julia
-for time_series in get_time_series_multiple(sys)
-    @show time_series
-end
-
-ts = collect(get_time_series_multiple(sys; type=SingleTimeSeries))
-```
-"""
-function IS.get_time_series_multiple(
-    port::Portfolio,
-    filter_func=nothing;
-    type=nothing,
-    name=nothing,
-)
-    return get_time_series_multiple(port.data, filter_func; type=type, name=name)
-end
-
-"""
-Returns counts of time series including attachments to components and supplemental
-attributes.
-"""
-get_time_series_counts(port::Portfolio) = IS.get_time_series_counts(port.data)
-
-"""
 Remove the time series data for a component and time series type.
 """
 function remove_time_series!(
@@ -742,7 +665,7 @@ end
 ################################
 
 """
-Add a RegionTopology to the portfolio.
+Add a region to the portfolio.
 
 Throws ArgumentError if the region's name is already stored for its concrete type.
 Throws ArgumentError if any region-specific rule is violated.
@@ -767,7 +690,7 @@ function add_region!(
     zone::T;
     skip_validation=false,
     kwargs...,
-) where {T <: RegionTopology}
+) where {T <: Region}
     deserialization_in_progress = _is_deserialization_in_progress(portfolio)
     IS.add_component!(
         portfolio.data,
@@ -787,13 +710,14 @@ Call collect on the result if an array is desired.
 # Examples
 
 ```julia
-iter = Portfolio.get_regions(RegionTopology, portfolio)
-regions = collect(Portfolio.get_regions(RegionTopology, portfolio))
+iter = Portfolio.get_regions(Zone, portfolio)
+iter = Portfolio.get_regions(Region, portfolio)
+regions = collect(Portfolio.get_regions(Region, portfolio))
 ```
 
 """
 
-function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: RegionTopology}
+function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: Region}
     return IS.get_components(T, portfolio.data)
 end
 
@@ -801,7 +725,7 @@ function get_region(
     ::Type{T},
     portfolio::Portfolio,
     name::AbstractString,
-) where {T <: RegionTopology}
+) where {T <: Region}
     return IS.get_component(T, portfolio.data, name)
 end
 
@@ -875,36 +799,6 @@ Throws ArgumentError if the attribute is not stored.
 """
 function get_supplemental_attribute(p::Portfolio, uuid::Base.UUID)
     return IS.get_supplemental_attribute(p.data, uuid)
-end
-
-"""
-Return a vector of supplemental attributes of the given type
-
-Throws ArgumentError if the attribute is not stored.
-"""
-function get_supplemental_attributes(
-    ::Type{T},
-    p::Portfolio,
-) where {T <: IS.SupplementalAttribute}
-    return IS.get_supplemental_attributes(T, p.data)
-end
-
-"""
-Return a Vector of supplemental_attributes. T can be concrete or abstract.
-
-# Arguments
-
-  - `T`: supplemental_attribute type
-  - `supplemental_attributes::SupplementalAttributes`: SupplementalAttributes in the system
-  - `filter_func::Union{Nothing, Function} = nothing`: Optional function that accepts a component
-    of type T and returns a Bool. Apply this function to each component and only return components
-    where the result is true.
-"""
-function get_supplemental_attributes(
-    ::Type{T},
-    component::IS.InfrastructureSystemsComponent,
-) where {T <: IS.SupplementalAttribute}
-    return IS.get_supplemental_attributes(T, component)
 end
 
 """

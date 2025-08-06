@@ -5,7 +5,6 @@
 
     CarbonCaps(;
         name=nothing,
-        uuid=nothing,
         id=nothing,
         available=nothing,
         eligible_regions=nothing,
@@ -15,7 +14,6 @@
     )
 
     - name::String
-    - uuid::String
     - id::Int64
     - available::Bool
     - eligible_regions::Vector{Int64}
@@ -25,7 +23,6 @@
 """
 Base.@kwdef mutable struct CarbonCaps <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
-    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     eligible_regions::Union{Nothing, Vector{Int64}} = nothing
@@ -35,7 +32,6 @@ Base.@kwdef mutable struct CarbonCaps <: OpenAPI.APIModel
 
     function CarbonCaps(
         name,
-        uuid,
         id,
         available,
         eligible_regions,
@@ -44,7 +40,6 @@ Base.@kwdef mutable struct CarbonCaps <: OpenAPI.APIModel
         max_mtons,
     )
         OpenAPI.validate_property(CarbonCaps, Symbol("name"), name)
-        OpenAPI.validate_property(CarbonCaps, Symbol("uuid"), uuid)
         OpenAPI.validate_property(CarbonCaps, Symbol("id"), id)
         OpenAPI.validate_property(CarbonCaps, Symbol("available"), available)
         OpenAPI.validate_property(CarbonCaps, Symbol("eligible_regions"), eligible_regions)
@@ -53,7 +48,6 @@ Base.@kwdef mutable struct CarbonCaps <: OpenAPI.APIModel
         OpenAPI.validate_property(CarbonCaps, Symbol("max_mtons"), max_mtons)
         return new(
             name,
-            uuid,
             id,
             available,
             eligible_regions,
@@ -66,7 +60,6 @@ end # type CarbonCaps
 
 const _property_types_CarbonCaps = Dict{Symbol, String}(
     Symbol("name") => "String",
-    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("eligible_regions") => "Vector{Int64}",

@@ -5,7 +5,6 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | **String** |  | [default to nothing]
-**uuid** | **String** |  | [optional] [default to nothing]
 **id** | **Int64** |  | [optional] [default to nothing]
 **available** | **Bool** |  | [default to nothing]
 **region** | **Vector{Int64}** |  | [optional] [default to nothing]
@@ -13,11 +12,10 @@ Name | Type | Description | Notes
 **technology_efficiency** | **Float64** |  | [optional] [default to 0.0]
 **price_per_unit** | [***ValueCurve**](ValueCurve.md) |  | [optional] [default to nothing]
 **min_power** | **Float64** |  | [optional] [default to 0.0]
-**peak_demand_mw** | **Float64** |  | [optional] [default to 0.0]
 **max_demand_delay** | **Float64** |  | [optional] [default to nothing]
 **max_demand_advance** | **Float64** |  | [optional] [default to nothing]
 **demand_energy_efficiency** | **Float64** |  | [optional] [default to nothing]
-**shift_variable_cost** | [***ValueCurve**](ValueCurve.md) |  | [optional] [default to nothing]
+**variable_cost_per_mwh** | [***ValueCurve**](ValueCurve.md) |  | [optional] [default to nothing]
 **curtailment_cost** | [***ValueCurve**](ValueCurve.md) |  | [optional] [default to nothing]
 **max_demand_curtailment** | **Float64** |  | [optional] [default to nothing]
 

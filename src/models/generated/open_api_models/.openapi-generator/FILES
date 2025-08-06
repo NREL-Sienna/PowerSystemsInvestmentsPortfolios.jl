@@ -1,7 +1,7 @@
 README.md
+docs/ACTransportTechnology.md
 docs/AggregateRetirementPotential.md
 docs/AggregateRetrofitPotential.md
-docs/AggregateTransportTechnology.md
 docs/AverageRateCurve.md
 docs/AverageRateCurveFunctionData.md
 docs/CapacityReserveMargin.md
@@ -15,6 +15,7 @@ docs/EnergyShareRequirements.md
 docs/ExistingCapacity.md
 docs/FuelCurve.md
 docs/FuelCurveFuelCost.md
+docs/HVDCTransportTechnology.md
 docs/HourlyMatching.md
 docs/InOut.md
 docs/IncrementalCurve.md
@@ -25,9 +26,6 @@ docs/LinearFunctionData.md
 docs/MaximumCapacityRequirements.md
 docs/MinMax.md
 docs/MinimumCapacityRequirements.md
-docs/NodalACTransportTechnology.md
-docs/NodalHVDCTransportTechnology.md
-docs/Node.md
 docs/PiecewiseLinearData.md
 docs/PiecewiseStepData.md
 docs/ProductionVariableCostCurve.md
@@ -44,16 +42,14 @@ docs/SupplyTechnology.md
 docs/SupplyTechnologyOperationCosts.md
 docs/ThermalGenerationCost.md
 docs/ThermalGenerationCostStartUp.md
-docs/TopologyMapping.md
-docs/UpDown.md
 docs/ValueCurve.md
 docs/XYCoords.md
 docs/Zone.md
 src/APIServer.jl
 src/modelincludes.jl
+src/models/model_ACTransportTechnology.jl
 src/models/model_AggregateRetirementPotential.jl
 src/models/model_AggregateRetrofitPotential.jl
-src/models/model_AggregateTransportTechnology.jl
 src/models/model_AverageRateCurve.jl
 src/models/model_AverageRateCurveFunctionData.jl
 src/models/model_CapacityReserveMargin.jl
@@ -67,6 +63,7 @@ src/models/model_EnergyShareRequirements.jl
 src/models/model_ExistingCapacity.jl
 src/models/model_FuelCurve.jl
 src/models/model_FuelCurveFuelCost.jl
+src/models/model_HVDCTransportTechnology.jl
 src/models/model_HourlyMatching.jl
 src/models/model_InOut.jl
 src/models/model_IncrementalCurve.jl
@@ -77,9 +74,6 @@ src/models/model_LinearFunctionData.jl
 src/models/model_MaximumCapacityRequirements.jl
 src/models/model_MinMax.jl
 src/models/model_MinimumCapacityRequirements.jl
-src/models/model_NodalACTransportTechnology.jl
-src/models/model_NodalHVDCTransportTechnology.jl
-src/models/model_Node.jl
 src/models/model_PiecewiseLinearData.jl
 src/models/model_PiecewiseStepData.jl
 src/models/model_ProductionVariableCostCurve.jl
@@ -96,8 +90,6 @@ src/models/model_SupplyTechnology.jl
 src/models/model_SupplyTechnologyOperationCosts.jl
 src/models/model_ThermalGenerationCost.jl
 src/models/model_ThermalGenerationCostStartUp.jl
-src/models/model_TopologyMapping.jl
-src/models/model_UpDown.jl
 src/models/model_ValueCurve.jl
 src/models/model_XYCoords.jl
 src/models/model_Zone.jl
