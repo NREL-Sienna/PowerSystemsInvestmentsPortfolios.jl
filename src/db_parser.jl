@@ -95,10 +95,10 @@ The following function imports from the database and generates the structs for a
 """
 function database_to_portfolio(
     database_filepath::AbstractString,
-    discount_rate,
-    inflation_rate,
-    interest_rate,
-    base_year;
+    discount_rate::Float64,
+    inflation_rate::Float64,
+    interest_rate:Float64,
+    base_year::Int64;
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}=DEFAULT_AGGREGATION,
     system::PSY.System=PSY.System(100.0),
 )
