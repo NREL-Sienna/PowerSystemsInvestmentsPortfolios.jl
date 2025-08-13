@@ -431,10 +431,10 @@ function add_buses!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db
     for rec in DBInterface.execute(db, QUERIES[:zones])
         component_attr = get(attributes, rec.id, Dict{String, Any}())
         a = Area(;
-            name = rec.name,
+            name=rec.name,
             load_response=component_attr["load_response"],
             peak_active_power=component_attr["peak_active_power"],
-            peak_reactive_power=component_attr["peak_reactive_power"]
+            peak_reactive_power=component_attr["peak_reactive_power"],
         )
         if haskey(component_attr, "uuid")
             IS.set_uuid!(IS.get_internal(a), Base.UUID(component_attr["uuid"]))
@@ -450,11 +450,7 @@ function add_buses!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db
             bustype=PSY.get_enum_value(PSY.ACBusTypes, component_attr["bustype"]),
             angle=component_attr["angle"],
             magnitude=component_attr["magnitude"],
-            area=get_component(
-                Area,
-                p.base_system,
-                area_name
-            ),
+            area=get_component(Area, p.base_system, area_name),
             voltage_limits=nothing,
             base_voltage=nothing,
             load_zone=nothing,
@@ -505,8 +501,7 @@ function add_nodal_lines!(
     p::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     db::SQLite.DB,
-)
-end
+) end
 
 function add_technologies!(
     p::Portfolio,
@@ -747,11 +742,7 @@ function add_generation_units!(
                         ),
                     ).area
                 regions = collect(
-                    IS.get_components(
-                        x -> get_id(x) == area_id,
-                        RegionTopology,
-                        p.data,
-                    ),
+                    IS.get_components(x -> get_id(x) == area_id, RegionTopology, p.data),
                 )
             end
             s = SupplyTechnology{component_type}(;
@@ -847,19 +838,15 @@ function add_storage_units!(
             regions = [get_region(Node, p, bus_name)]
         else
             area_id =
-                    first(
-                        DBInterface.execute(
-                            db,
-                            QUERIES[:topology_to_area],
-                            [rec.balancing_topology],
-                        ),
-                    ).area
+                first(
+                    DBInterface.execute(
+                        db,
+                        QUERIES[:topology_to_area],
+                        [rec.balancing_topology],
+                    ),
+                ).area
             regions = collect(
-                IS.get_components(
-                    x -> get_id(x) == area_id,
-                    RegionTopology,
-                    p.data,
-                ),
+                IS.get_components(x -> get_id(x) == area_id, RegionTopology, p.data),
             )
         end
         s = StorageTechnology{component_type}(;
@@ -1042,9 +1029,13 @@ function add_system_lines!(
             component_attr = get(attributes, rec.id, Dict{String, Any}())
             arc = first(DBInterface.execute(db, QUERIES[:arc], [rec.arc_id]))
             balancing_topology_from =
-                first(DBInterface.execute(db, QUERIES[:topology_from_arc], [arc.from_id])).name
+                first(
+                    DBInterface.execute(db, QUERIES[:topology_from_arc], [arc.from_id]),
+                ).name
             balancing_topology_to =
-                first(DBInterface.execute(db, QUERIES[:topology_from_arc], [arc.to_id])).name
+                first(
+                    DBInterface.execute(db, QUERIES[:topology_from_arc], [arc.to_id]),
+                ).name
             t = NodalACTransportTechnology{ACBranch}(;
                 name=rec.name,
                 id=rec.id,
@@ -1061,24 +1052,23 @@ function add_system_lines!(
             existing = ExistingCapacity(; existing_technologies=[rec.name])
             add_supplemental_attribute!(p, t, existing)
         else
-            
         end
     end
 
     if get_aggregation(p) != PSY.ACBus
-        i=1
+        i = 1
         for (areas, lines) in tx_dict
             a = collect(areas)
             t = AggregateTransportTechnology{ACBranch}(;
-                name=string(a[1])*"_"*string(a[2]),
+                name=string(a[1]) * "_" * string(a[2]),
                 id=i,
                 available=true,
                 power_systems_type=string(ACBranch),
                 financial_data=DEFAULT_FINANCIAL_DATA,
-                start_region=get_region(Zone,p,a[1]),
-                end_region=get_region(Zone,p,a[2]),
+                start_region=get_region(Zone, p, a[1]),
+                end_region=get_region(Zone, p, a[2]),
             )
-            i+=1
+            i += 1
             add_technology!(p, t)
             existing = ExistingCapacity(; existing_technologies=lines)
             add_supplemental_attribute!(p, t, existing)
