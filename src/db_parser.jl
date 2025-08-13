@@ -59,9 +59,6 @@ QUERIES = Dict(
     :entity_type => """
           SELECT entity_type FROM entities WHERE id = ?
         """,
-    :attributes => """
-          SELECT * FROM attributes WHERE entity_id = ? AND name = ?
-        """,
     :investment_timeseries => """
           SELECT * FROM time_series_associations WHERE owner_type = ?
         """,
@@ -503,32 +500,12 @@ function add_aggregate_lines!(
     end
 end
 
+# Will be used for new candidate transmission options in the future if in database
 function add_nodal_lines!(
     p::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     db::SQLite.DB,
 )
-    for rec in DBInterface.execute(db, QUERIES[:transmission_lines])
-        component_attr = get(attributes, rec.id, Dict{String, Any}())
-        arc = first(DBInterface.execute(db, QUERIES[:arc], [rec.arc_id]))
-        balancing_topology_from =
-            first(DBInterface.execute(db, QUERIES[:topology_from_arc], [arc.from_id])).name
-        balancing_topology_to =
-            first(DBInterface.execute(db, QUERIES[:topology_from_arc], [arc.to_id])).name
-        t = NodalACTransportTechnology{ACBranch}(;
-            name=rec.name,
-            id=rec.id,
-            available=true,
-            power_systems_type=string(ACBranch),
-            financial_data=DEFAULT_FINANCIAL_DATA,
-            start_node=get_region(Node, p, balancing_topology_from),
-            end_node=get_region(Node, p, balancing_topology_to),
-            reactance=component_attr["x"],
-            resistance=component_attr["r"],
-            capital_costs=LinearCurve(1000.0),
-        )
-        add_technology!(p, t)
-    end
 end
 
 function add_technologies!(
@@ -933,14 +910,14 @@ function add_demand_requirements!(
         end
 
         # build and immediately insert
-        d = DemandRequirement{StaticLoad}(;
+        d = DemandRequirement{component_type}(;
             name=rec.name,
             id=rec.id,
             region=collect(
                 IS.get_components(x -> get_id(x) == area, RegionTopology, p.data),
             ),
             value_of_lost_load=1e8, #TODO: Assign a default value to this field
-            power_systems_type="StaticLoad",
+            power_systems_type=string(component_type),
         )
         add_technology!(p, d)
     end
@@ -1000,6 +977,7 @@ function add_system_lines!(
         arc_dict[rec.id] = arc
     end
 
+    tx_dict = Dict()
     for rec in DBInterface.execute(db, QUERIES[:transmission_lines])
         component_type = eval(
             Meta.parse(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]),
@@ -1046,6 +1024,65 @@ function add_system_lines!(
             IS.set_uuid!(IS.get_internal(l), Base.UUID(component_attr["uuid"]))
         end
         add_component!(p.base_system, l)
+
+        #If Line is between areas, add to dictionary
+        from_area = PSY.get_name(get_area(get_from(get_arc(l))))
+        to_area = PSY.get_name(get_area(get_to(get_arc(l))))
+        if from_area != to_area
+            areas = Set([from_area, to_area])
+            if haskey(tx_dict, areas)
+                push!(tx_dict[areas], PSY.get_name(l))
+            else
+                tx_dict[areas] = [PSY.get_name(l)]
+            end
+        end
+
+        #Build Portfolio transmission based on existing transmission
+        if get_aggregation(p) == PSY.ACBus
+            component_attr = get(attributes, rec.id, Dict{String, Any}())
+            arc = first(DBInterface.execute(db, QUERIES[:arc], [rec.arc_id]))
+            balancing_topology_from =
+                first(DBInterface.execute(db, QUERIES[:topology_from_arc], [arc.from_id])).name
+            balancing_topology_to =
+                first(DBInterface.execute(db, QUERIES[:topology_from_arc], [arc.to_id])).name
+            t = NodalACTransportTechnology{ACBranch}(;
+                name=rec.name,
+                id=rec.id,
+                available=true,
+                power_systems_type=string(ACBranch),
+                financial_data=DEFAULT_FINANCIAL_DATA,
+                start_node=get_region(Node, p, balancing_topology_from),
+                end_node=get_region(Node, p, balancing_topology_to),
+                reactance=component_attr["x"],
+                resistance=component_attr["r"],
+                capital_costs=LinearCurve(1000.0),
+            )
+            add_technology!(p, t)
+            existing = ExistingCapacity(; existing_technologies=[rec.name])
+            add_supplemental_attribute!(p, t, existing)
+        else
+            
+        end
+    end
+
+    if get_aggregation(p) != PSY.ACBus
+        i=1
+        for (areas, lines) in tx_dict
+            a = collect(areas)
+            t = AggregateTransportTechnology{ACBranch}(;
+                name=string(a[1])*"_"*string(a[2]),
+                id=i,
+                available=true,
+                power_systems_type=string(ACBranch),
+                financial_data=DEFAULT_FINANCIAL_DATA,
+                start_region=get_region(Zone,p,a[1]),
+                end_region=get_region(Zone,p,a[2]),
+            )
+            i+=1
+            add_technology!(p, t)
+            existing = ExistingCapacity(; existing_technologies=lines)
+            add_supplemental_attribute!(p, t, existing)
+        end
     end
 end
 
