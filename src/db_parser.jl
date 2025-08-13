@@ -11,6 +11,9 @@ QUERIES = Dict(
     :zones => """
          SELECT * FROM planning_regions
        """,
+    :zone => """
+          SELECT name FROM planning_regions WHERE id = ?
+        """,
     :zone_for_technology => """
           SELECT id FROM planning_regions WHERE name = ?
         """,
@@ -428,17 +431,35 @@ function add_nodes!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db
 end
 
 function add_buses!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
+    for rec in DBInterface.execute(db, QUERIES[:zones])
+        component_attr = get(attributes, rec.id, Dict{String, Any}())
+        a = Area(;
+            name = rec.name,
+            load_response=component_attr["load_response"],
+            peak_active_power=component_attr["peak_active_power"],
+            peak_reactive_power=component_attr["peak_reactive_power"]
+        )
+        if haskey(component_attr, "uuid")
+            IS.set_uuid!(IS.get_internal(a), Base.UUID(component_attr["uuid"]))
+        end
+        PSY.add_component!(p.base_system, a)
+    end
     for rec in DBInterface.execute(db, QUERIES[:balancing_topologies])
         component_attr = get(attributes, rec.id, Dict{String, Any}())
+        area_name = first(DBInterface.execute(db, QUERIES[:zone], [rec.area])).name
         b = PSY.ACBus(;
             name=rec.name,
             number=rec.id,
             bustype=PSY.get_enum_value(PSY.ACBusTypes, component_attr["bustype"]),
             angle=component_attr["angle"],
             magnitude=component_attr["magnitude"],
+            area=get_component(
+                Area,
+                p.base_system,
+                area_name
+            ),
             voltage_limits=nothing,
             base_voltage=nothing,
-            area=nothing,
             load_zone=nothing,
         )
         if haskey(component_attr, "uuid")
