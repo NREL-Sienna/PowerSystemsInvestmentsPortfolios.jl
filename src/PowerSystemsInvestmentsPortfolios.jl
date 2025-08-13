@@ -22,9 +22,6 @@ import InfrastructureSystems:
     InfrastructureSystemsComponent,
     InfrastructureSystemsType
 
-#import PowerSystems
-#import PowerSystems: StorageCost, ThermalGenerationCost
-
 # Using PowerSystems in order to support deserializing with PSY parametric typing
 using PowerSystems
 
@@ -40,6 +37,7 @@ import DataStructures: OrderedDict, SortedDict
 import OpenAPI
 import StringEncodings
 import HDF5
+import Tables
 
 export Portfolio
 export Technology
@@ -111,7 +109,7 @@ export generate_structs
 export db_to_dataframes
 export map_prime_mover
 export dataframe_to_structs
-export db_to_portfolio_parser
+export database_to_portfolio
 export add_supplemental_attribute!
 export remove_supplemental_attribute!
 export get_supplemental_attribute
