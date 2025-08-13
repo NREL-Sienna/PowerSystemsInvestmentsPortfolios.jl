@@ -747,10 +747,10 @@ function add_generation_units!(
                             QUERIES[:topology_to_area],
                             [rec.balancing_topology],
                         ),
-                    ).id
+                    ).area
                 regions = collect(
                     IS.get_components(
-                        x -> get_id(x) == parse(Int64, area_id),
+                        x -> get_id(x) == area_id,
                         RegionTopology,
                         p.data,
                     ),
@@ -849,16 +849,16 @@ function add_storage_units!(
             regions = [get_region(Node, p, bus_name)]
         else
             area_id =
-                first(
-                    DBInterface.execute(
-                        db,
-                        QUERIES[:topology_to_area],
-                        [rec.balancing_topology],
-                    ),
-                ).id
+                    first(
+                        DBInterface.execute(
+                            db,
+                            QUERIES[:topology_to_area],
+                            [rec.balancing_topology],
+                        ),
+                    ).area
             regions = collect(
                 IS.get_components(
-                    x -> get_id(x) == parse(Int64, area_id),
+                    x -> get_id(x) == area_id,
                     RegionTopology,
                     p.data,
                 ),
