@@ -1251,19 +1251,10 @@ function deserialize_time_series_row!(sys, db, row)
 end
 
 # TODO: STOLEN FROM InfrastructureSystems. This should be made an IS functions.
-const TIME_SERIES_STRING_TO_TYPE = Dict(
-    "Deterministic" => Deterministic,
-    "DeterministicSingleTimeSeries" => DeterministicSingleTimeSeries,
-    "Probabilistic" => Probabilistic,
-    "Scenarios" => Scenarios,
-    "SingleTimeSeries" => SingleTimeSeries,
-)
-
 function deserialize_metadata(row)
     exclude_keys = Set((:metadata_uuid, :owner_uuid, :time_series_type))
     time_series_type =
-    #    IS.TIME_SERIES_STRING_TO_TYPE[row.time_series_type]
-        TIME_SERIES_STRING_TO_TYPE[row.time_series_type]
+       IS.TIME_SERIES_STRING_TO_TYPE[row.time_series_type]
     metadata_type = IS.time_series_data_to_metadata(time_series_type)
     fields = Set(fieldnames(metadata_type))
     data = Dict{Symbol, Any}(
