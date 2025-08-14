@@ -617,6 +617,5 @@ function build_portfolio()
     PSIP.add_time_series!(p_5bus, t_demand_c, ts_demand_c_2028; year="2028", rep_day=4)
     PSIP.add_time_series!(p_5bus, t_demand_d, ts_demand_d_2024; year="2024", rep_day=3)
     PSIP.add_time_series!(p_5bus, t_demand_d, ts_demand_d_2028; year="2028", rep_day=4)
-
     return p_5bus
 end

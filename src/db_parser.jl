@@ -1,79 +1,329 @@
+"""
+This PoC is if a dictionary of queries is maintained, then the database can be read in and the structs can be generated.
+"""
+
+"""
+Set of queries to extract relevant data from the database. Need to be maintained to be consistent with the most recent version of the database
+"""
+
+#TODO: Support scenario handling
+QUERIES = Dict(
+    :zones => """
+         SELECT * FROM planning_regions
+       """,
+    :zone => """
+          SELECT name FROM planning_regions WHERE id = ?
+        """,
+    :zone_for_technology => """
+          SELECT id FROM planning_regions WHERE name = ?
+        """,
+    :balancing_topologies => """
+          SELECT * FROM balancing_topologies WHERE area >= 1
+        """,
+    :area_to_topology => """
+          SELECT name FROM balancing_topologies WHERE area = ?
+        """,
+    :topology_to_area => """
+          SELECT area FROM balancing_topologies WHERE id = ?
+        """,
+    :topology_for_unit => """
+          SELECT name FROM balancing_topologies WHERE id = ?
+        """,
+    :arcs => """
+          SELECT * FROM arcs
+        """,
+    :arc => """
+          SELECT * FROM arcs WHERE id = ?
+        """,
+    :topology_from_arc => """
+          SELECT * FROM balancing_topologies WHERE id = ?
+        """,
+    :aggregate_lines => """
+          SELECT * FROM transmission_interchanges
+        """,
+    :transmission_lines => """
+          SELECT * FROM transmission_lines
+        """,
+    :technologies => """
+          SELECT * FROM supply_technologies
+        """,
+    :generation_units => """
+        SELECT * FROM generation_units
+      """,
+    :storage_units => """
+          SELECT * FROM storage_units
+        """,
+    :demand_requirements => """
+          SELECT * FROM loads
+        """,
+    :entity_type => """
+          SELECT entity_type FROM entities WHERE id = ?
+        """,
+    :investment_timeseries => """
+          SELECT * FROM time_series_associations WHERE owner_type = ?
+        """,
+    :ts_data => """
+          SELECT * FROM static_time_series WHERE uuid = ?
+        """,
+    # add additional queries here as needed
+)
+
+# Ported from SiennaGridDB
+const DB_TO_OPENAPI_FIELDS = Dict(
+    ("transmission_lines", "arc_id") => "arc_",
+    ("generation_units", "balancing_topology") => "bus",
+    ("storage_units", "balancing_topology") => "bus",
+    ("supply_technologies", "balancing_topology") => "bus",
+    ("loads", "balancing_topology") => "bus",
+    ("generation_units", "prime_mover") => "prime_mover_type",
+    ("storage_units", "prime_mover") => "prime_mover_type",
+    ("arcs", "from_id") => "from",
+    ("arcs", "to_id") => "to",
+    ("transmission_lines", "continuous_rating") => "rating",
+)
+
+# Remove later, or make this optional later depending on what is in the dataset
+const DEFAULT_FINANCIAL_DATA = TechnologyFinancialData(;
+    capital_recovery_period=30,
+    interest_rate=0.06,
+    technology_base_year=2025,
+)
 
 """
 The following function imports from the database and generates the structs for a portfolio
 @input database_filepath::AbstractString: The path to the database file
-@input schema_JSON_filepath::AbstractString: The path to the schema JSON file
 """
-function db_to_portfolio_parser(database_filepath::AbstractString)
-
-    #Goal will be be able to read in database and populate structs simultaneously
-
-    dfs = db_to_dataframes(database_filepath)
-    portfolio = dataframe_to_structs(dfs)
+function database_to_portfolio(
+    database_filepath::AbstractString,
+    discount_rate::Float64,
+    inflation_rate::Float64,
+    interest_rate::Float64,
+    base_year::Int64;
+    aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}=DEFAULT_AGGREGATION,
+    system::PSY.System=PSY.System(100.0),
+)
+    p = Portfolio(
+        aggregation,
+        base_year,
+        discount_rate,
+        inflation_rate,
+        interest_rate;
+        base_system=system,
+    )
+    portfolio = database_to_structs(database_filepath, p)
 
     return portfolio
 end
 
-"""
-The following function imports from the database and creates a dictionary
-of DataFrames for each table in the database
-
-# Example usage:
-
-db_path = "/Users/prao/GitHub_Repos/SiennaInvest/PowerSystemsInvestmentsPortfoliosTestData/RTS_GMLC.db"
-dataframes_all = db_to_dataframes(db_path)
-
-# Access a specific DataFrame
-
-supply_technologies_df = dataframes_all["supply_technologies"]
-"""
-function db_to_dataframes(db_path::String)
+function database_to_structs(db_path::AbstractString, p::Portfolio)
     # Connect to the SQLite database
     db = SQLite.DB(db_path)
+    attributes = get_entity_attributes(db)
 
-    # Get a list of tables in the database
-    tables = SQLite.tables(db)
+    # Add zones and lines, shouldn't add both aggregate lines and nodal lines to the same DB
+    # User can provide a desired aggregation level and then we can select based on that
 
-    # Create a dictionary to store DataFrames for each table
-    dfs = Dict{String, DataFrames.DataFrame}()
-
-    #Will adjust queries to only pull a subset of data
-    for table in tables
-        table_name = table.name
-        # Read each table into a DataFrame
-        query = "SELECT * FROM $table_name"
-        df = DataFrames.DataFrame(DBInterface.execute(db, query))
-        dfs[table_name] = df
+    # Add zones to the portfolio
+    if get_aggregation(p) == PSY.ACBus #Nodal aggregation
+        add_nodes!(p, attributes, db)
+        add_nodal_lines!(p, attributes, db)
+    else #Zonal aggregation
+        add_zones!(p, attributes, db)
+        add_aggregate_lines!(p, attributes, db)
     end
 
-    # Close the database connection
-    SQLite.close(db)
+    # Add technologies to Portfolio
+    add_technologies!(p, attributes, db)
 
-    return dfs
+    # Add demands
+    add_demand_requirements!(p, attributes, db)
+    add_demand_technologies!(p, attributes, db)
+
+    # Add data to base_systems
+    add_buses!(p, attributes, db)
+    add_system_lines!(p, attributes, db)
+    add_generation_units!(p, attributes, db)
+    add_storage_units!(p, attributes, db)
+    add_loads!(p, attributes, db)
+
+    # Deserialize timeseries
+    deserialize_timeseries!(p.base_system, db)
+    deserialize_portfolio_timeseries!(p, db)
+
+    return p
 end
 
-# TODO: Figure out more permanent solution for mapping prime movers
-"""
-Function to map prime mover types to PrimeMovers
-"""
-function map_prime_mover(prime_mover::String)
-    mapping_dict = Dict(
-        "CT" => PrimeMovers.CT,
-        "STEAM" => PrimeMovers.ST,
-        "CC" => PrimeMovers.CC,
-        "SYNC_COND" => PrimeMovers.OT,
-        "NUCLEAR" => PrimeMovers.ST,
-        "HYDRO" => PrimeMovers.HA,
-        "ROR" => PrimeMovers.IC,
-        "PV" => PrimeMovers.PVe,
-        "CSP" => PrimeMovers.CP,
-        "RTPV" => PrimeMovers.PVe,
-        "WIND" => PrimeMovers.WT,
-        "Wind" => PrimeMovers.WT,
-        "STORAGE" => PrimeMovers.BA,
-    )
+# Ported from SiennaGridDB
+function get_entity_attributes(db)
+    # First, get all attributes for this entity type and group them by entity_id
+    attributes_query = """
+    SELECT entity_id,
+           json_group_object(name, json(value)) AS attribute_json
+    FROM attributes
+    GROUP BY entity_id
+    """
 
-    return mapping_dict[prime_mover]
+    attributes_result = DBInterface.execute(db, attributes_query, strict=true)
+
+    # Create a dictionary of entity_id => attributes
+    attributes_dict = Dict{Int64, Dict{String, Any}}()
+    for row in attributes_result
+        attributes_dict[row.entity_id] = JSON3.read(row.attribute_json, Dict{String, Any})
+    end
+
+    return attributes_dict
+end
+
+# Ported from SiennaGridDB
+function make_dict(
+    ::Type{T},
+    table_name::AbstractString,
+    row,
+    extra_attributes::Dict{String, Any},
+) where {T}
+    return merge(
+        Dict(
+            get(DB_TO_OPENAPI_FIELDS, (table_name, string(k)), string(k)) =>
+                coalesce(v, nothing) for (k, v) in zip(propertynames(row), row)
+        ),
+        extra_attributes,
+    )
+end
+
+function parse_operational_cost(ops_cost::Dict{String, Any})
+
+    # Build correct cost struct
+    if ops_cost["cost_type"] == "THERMAL"
+        start_up_dict = ops_cost["start_up"]
+        variable_dict = ops_cost["variable"]
+        operational_cost = ThermalGenerationCost(;
+            start_up=(
+                hot=Float64(start_up_dict["hot"]),
+                warm=Float64(start_up_dict["warm"]),
+                cold=Float64(start_up_dict["cold"]),
+            ),
+            shut_down=ops_cost["shut_down"],
+            fixed=ops_cost["fixed"],
+            variable=FuelCurve(;
+                fuel_cost=variable_dict["fuel_cost"],
+                value_curve=IncrementalCurve(
+                    PiecewiseStepData(
+                        variable_dict["value_curve"]["function_data"]["x_coords"],
+                        variable_dict["value_curve"]["function_data"]["y_coords"],
+                    ),
+                    variable_dict["value_curve"]["initial_input"],
+                ),
+                vom_cost=InputOutputCurve(
+                    LinearFunctionData(
+                        constant_term=variable_dict["vom_cost"]["function_data"]["constant_term"],
+                        proportional_term=variable_dict["vom_cost"]["function_data"]["proportional_term"],
+                    ),
+                ),
+            ),
+        )
+    elseif ops_cost["cost_type"] == "RENEWABLE"
+        curtailment_dict = ops_cost["curtailment_cost"]
+        variable_dict = ops_cost["variable"]
+        operational_cost = RenewableGenerationCost(;
+            curtailment_cost=CostCurve(;
+                value_curve=InputOutputCurve(
+                    LinearFunctionData(
+                        constant_term=curtailment_dict["value_curve"]["function_data"]["constant_term"],
+                        proportional_term=curtailment_dict["value_curve"]["function_data"]["proportional_term"],
+                    ),
+                ),
+                vom_cost=InputOutputCurve(
+                    LinearFunctionData(
+                        constant_term=curtailment_dict["vom_cost"]["function_data"]["constant_term"],
+                        proportional_term=curtailment_dict["vom_cost"]["function_data"]["proportional_term"],
+                    ),
+                ),
+            ),
+            variable=CostCurve(;
+                value_curve=InputOutputCurve(
+                    LinearFunctionData(
+                        constant_term=variable_dict["value_curve"]["function_data"]["constant_term"],
+                        proportional_term=variable_dict["value_curve"]["function_data"]["proportional_term"],
+                    ),
+                ),
+                vom_cost=InputOutputCurve(
+                    LinearFunctionData(
+                        constant_term=variable_dict["vom_cost"]["function_data"]["constant_term"],
+                        proportional_term=variable_dict["vom_cost"]["function_data"]["proportional_term"],
+                    ),
+                ),
+            ),
+        )
+    elseif ops_cost["cost_type"] == "STORAGE"
+        charge_variable_dict = ops_cost["charge_variable_cost"]
+        discharge_variable_dict = ops_cost["discharge_variable_cost"]
+        operational_cost = StorageCost(;
+            charge_variable_cost=CostCurve(;
+                value_curve=InputOutputCurve(
+                    LinearFunctionData(
+                        constant_term=charge_variable_dict["value_curve"]["function_data"]["constant_term"],
+                        proportional_term=charge_variable_dict["value_curve"]["function_data"]["proportional_term"],
+                    ),
+                ),
+                vom_cost=InputOutputCurve(
+                    LinearFunctionData(
+                        constant_term=charge_variable_dict["vom_cost"]["function_data"]["constant_term"],
+                        proportional_term=charge_variable_dict["vom_cost"]["function_data"]["proportional_term"],
+                    ),
+                ),
+            ),
+            discharge_variable_cost=CostCurve(;
+                value_curve=InputOutputCurve(
+                    LinearFunctionData(
+                        constant_term=discharge_variable_dict["value_curve"]["function_data"]["constant_term"],
+                        proportional_term=discharge_variable_dict["value_curve"]["function_data"]["proportional_term"],
+                    ),
+                ),
+                vom_cost=InputOutputCurve(
+                    LinearFunctionData(
+                        constant_term=discharge_variable_dict["vom_cost"]["function_data"]["constant_term"],
+                        proportional_term=discharge_variable_dict["vom_cost"]["function_data"]["proportional_term"],
+                    ),
+                ),
+            ),
+            start_up=Float64(ops_cost["start_up"]),
+            shut_down=ops_cost["shut_down"],
+            energy_shortage_cost=ops_cost["energy_shortage_cost"],
+            energy_surplus_cost=ops_cost["energy_surplus_cost"],
+            fixed=ops_cost["fixed"],
+        )
+    elseif ops_cost["cost_type"] == "HYDRO_GEN"
+        variable_dict = ops_cost["variable"]
+        operational_cost = HydroGenerationCost(;
+            variable=CostCurve(;
+                value_curve=InputOutputCurve(
+                    LinearFunctionData(
+                        constant_term=variable_dict["value_curve"]["function_data"]["constant_term"],
+                        proportional_term=variable_dict["value_curve"]["function_data"]["proportional_term"],
+                    ),
+                ),
+                vom_cost=InputOutputCurve(
+                    LinearFunctionData(
+                        constant_term=variable_dict["vom_cost"]["function_data"]["constant_term"],
+                        proportional_term=variable_dict["vom_cost"]["function_data"]["proportional_term"],
+                    ),
+                ),
+            ),
+            fixed=ops_cost["fixed"],
+        )
+    end
+    return operational_cost
+end
+
+"""
+Function to map storage technology string to StorageTech
+"""
+function map_storage_tech(fuel::String)
+    mapping_dict = Dict("Hydro" => StorageTech.PTES, "Solar" => StorageTech.OTHER_THERM)
+
+    fuel_enum = haskey(mapping_dict, fuel) ? mapping_dict[fuel] : StorageTech.LIB
+
+    return fuel_enum
 end
 
 """
@@ -86,11 +336,34 @@ function map_fuel(fuel::String)
         "Coal" => ThermalFuels.COAL,
         "Oil" => ThermalFuels.DISTILLATE_FUEL_OIL,
     )
-    if haskey(mapping_dict, fuel)
-        return mapping_dict[fuel]
-    else
-        return ThermalFuels.OTHER
-    end
+
+    fuel_enum = haskey(mapping_dict, fuel) ? mapping_dict[fuel] : ThermalFuels.OTHER
+
+    return fuel_enum
+end
+
+"""
+Function to map prime mover types to PrimeMovers
+"""
+function map_prime_mover(prime_mover::String)
+    mapping_dict = Dict(
+        "CT" => PrimeMovers.CT,
+        "STEAM" => PrimeMovers.ST,
+        "CC" => PrimeMovers.CC,
+        "SYNC_COND" => PrimeMovers.OT,
+        "NUCLEAR" => PrimeMovers.ST,
+        "HYDRO" => PrimeMovers.PS,
+        "ROR" => PrimeMovers.IC,
+        "PV" => PrimeMovers.PVe,
+        "CSP" => PrimeMovers.CP,
+        "RTPV" => PrimeMovers.PVe,
+        "WIND" => PrimeMovers.WT,
+        "Wind" => PrimeMovers.WT,
+        "STORAGE" => PrimeMovers.BA,
+        "CSP" => PrimeMovers.CP,
+    )
+
+    return mapping_dict[prime_mover]
 end
 
 function map_prime_mover_to_parametric(prime_mover::String)
@@ -98,510 +371,972 @@ function map_prime_mover_to_parametric(prime_mover::String)
         "CT" => PSY.ThermalStandard,
         "STEAM" => PSY.ThermalStandard,
         "CC" => PSY.ThermalStandard,
+        "ST" => PSY.ThermalStandard,
         "SYNC_COND" => PSY.ThermalStandard,
         "NUCLEAR" => PSY.ThermalStandard,
         "HYDRO" => PSY.ThermalStandard,
         "ROR" => PSY.RenewableDispatch,
         "PV" => PSY.RenewableDispatch,
+        "PVe" => PSY.RenewableDispatch,
         "CSP" => PSY.RenewableDispatch,
         "RTPV" => PSY.RenewableDispatch,
         "WIND" => PSY.RenewableDispatch,
         "Wind" => PSY.RenewableDispatch,
+        "WT" => PSY.RenewableDispatch,
+        "BA" => PSY.EnergyReservoirStorage,
+        "PS" => PSY.EnergyReservoirStorage,
+        "STORAGE" => PSY.EnergyReservoirStorage,
+        "CP" => PSY.RenewableDispatch,
     )
+
     return mapping_dict[prime_mover]
 end
 
-function parse_timestamps_and_values(json_str::String)
-    # Parse the JSON string into a Julia object
-    data = JSON3.read(json_str)
-
-    # Initialize arrays to store timestamps and values
-    timestamps = String[]
-    values = Float64[]
-
-    # Iterate over each dictionary in the parsed JSON data
-    for item in data
-        # Append the timestamp to the timestamps array
-        push!(timestamps, item["timestamp"])
-
-        # Append the value to the values array
-        push!(values, item["value"])
-    end
-
-    return timestamps, values
-end
-
-function parse_timestamps_and_values(df::DataFrames.DataFrame)
-    # Initialize arrays to store timestamps and values
-    timestamps = String[]
-    values = Float64[]
-    type = ""
-
-    # Check if the timestamps are within the hours of the day
-    is_within_hours =
-        all(row -> parse(Int, split(row["timestamp"], "-")[end]) in 1:24, eachrow(df))
-
-    if is_within_hours
-        type = "Real Time"
-        # Iterate over each row in the DataFrame
-        for row in eachrow(df)
-            # Append the timestamp to the timestamps array
-            push!(timestamps, row["timestamp"])
-
-            # Append the value to the values array
-            push!(values, row["value"])
-        end
-    else
-        type = "Forecast"
-        # Create a dictionary to store daily values
-        daily_values = Dict{String, Vector{Float64}}()
-
-        # Iterate over each row in the DataFrame
-        for row in eachrow(df)
-            # Extract the date part of the timestamp
-            date_part = join(split(row["timestamp"], "-")[1:3], "-")
-
-            # Initialize the daily values array if not already present
-            if !haskey(daily_values, date_part)
-                daily_values[date_part] = Float64[]
-            end
-
-            # Append the value to the daily values array
-            push!(daily_values[date_part], row["value"])
-        end
-
-        # Calculate the average values for each day and create 24-hour profiles
-        for (date, vals) in daily_values
-            avg_value = sum(vals) / length(vals)
-            for hour in 1:24
-                push!(timestamps, "$date-$hour")
-                push!(values, avg_value)
-            end
-        end
-    end
-
-    # Parse timestamps into DateTime objects
-    parsed_timestamps = DateTime.(timestamps, "yyyy-m-d-H")
-
-    # Sort the parsed timestamps and values
-    sorted_indices = sortperm(parsed_timestamps)
-    sorted_timestamps = parsed_timestamps[sorted_indices]
-    sorted_values = values[sorted_indices]
-
-    return sorted_timestamps, sorted_values, type
-end
-
-function parse_json_to_arrays(json_str::String)
-    # Replace invalid JSON values
-    cleaned_str = replace(json_str, "NaN" => "null")
-
-    # Parse the cleaned JSON string into a Julia object
-    data = JSON3.read(cleaned_str)
-
-    # Initialize array to store x and y values
-    xy_values = []
-
-    # Initialize previous values
-    prev_to_x = 0.0
-    prev_to_y = 0.0
-
-    # Iterate over each dictionary in the parsed JSON data
-    for item in data
-        # Handle from_x and from_y replacements
-        from_x = isnothing(item["from_x"]) ? prev_to_x : Float64(item["from_x"])
-        from_y = isnothing(item["from_y"]) ? prev_to_y : Float64(item["from_y"])
-
-        # Handle to_x and to_y replacements
-        to_x = isnothing(item["to_x"]) ? prev_to_x : Float64(item["to_x"])
-        to_y = isnothing(item["to_y"]) ? prev_to_y : Float64(item["to_y"])
-
-        # Append corrected values to the array
-        push!(xy_values, IS.XY_COORDS((from_x, from_y)))
-        push!(xy_values, IS.XY_COORDS((to_x, to_y)))
-
-        # Update previous values
-        prev_to_x = to_x
-        prev_to_y = to_y
-    end
-
-    return unique(xy_values)
-end
-
-function parse_heatrate_to_array(json_str::String)
-    xy_vector = parse_json_to_arrays(json_str)
-
-    # Validation: Check if there are at least two distinct x-coordinates
-    if length(unique(getfield.(xy_vector, :x))) < 2
-        return 0.0
-    end
-
-    # If valid, return the InputOutputCurve
-    return InputOutputCurve(function_data=PiecewiseLinearData(points=xy_vector))
-end
-
-function dataframe_to_system(df_dict::Dict)
-    system = PSY.System(100.0)
-
-    buses = []
-    # TODO: Add angle, bustype, etc. to database
-    for row_bus in eachrow(df_dict["balancing_topologies"])
-        b = PSY.ACBus(;
-            name=string("bus_", row_bus["name"]),
-            number=parse(Int64, row_bus["name"]),
-            angle=0.1,
-            bustype=ACBusTypes.PQ,
-            magnitude=1.0,
-            voltage_limits=(0.0, 2.0),
-            base_voltage=100.0,
-        )
-        add_component!(system, b)
-        push!(buses, b)
-    end
-
-    #Transmission Lines
-    lines = df_dict["transmission_lines"]
-    for row in eachrow(lines)
-        arc = PSY.Arc(;
-            from=filter(b -> contains(b.name, row["balancing_topology_from"]), buses)[1],
-            to=filter(b -> contains(b.name, row["balancing_topology_to"]), buses)[1],
-        )
-
-        tx = Line(;
-            name=string("line_", rownumber(row)),
-            available=true,
-            active_power_flow=0.0,
-            reactive_power_flow=0.0,
-            arc=arc,
-            r=1.0,
-            x=1.0,
-            b=(from=1.0, to=1.0),
-            rating=row["continuous_rating"],
-            angle_limits=(-1.5, 1.5),
-        )
-        add_component!(system, tx)
-    end
-
-    # Get existing generation units
-    for row in eachrow(df_dict["generation_units"])
-
-        #extract area
-        #area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
-        #area_int = parse(Int64, area)
-
-        # This will return all rows where entity_id matches any value in the tech_id vector
-        tech_id = row["unit_id"]
-
-        op_data = filter(row -> row[:unit_id] == tech_id, df_dict["operational_data"])
-        variable_om = op_data[!, "vom_cost"][1]
-
-        parametric = map_prime_mover_to_parametric(row["prime_mover"])
-
-        if row["fuel_type"] == "Solar" || row["fuel_type"] == "Wind"
-            t = RenewableDispatch(;
-                name=row["name"],
-                available=true,
-                bus=filter(b -> contains(b.name, row["balancing_topology"]), buses)[1],
-                active_power=row["rating"],
-                reactive_power=0.0,
-                rating=row["rating"],
-                reactive_power_limits=nothing,
-                power_factor=0.5,
-                operation_cost=RenewableGenerationCost(
-                    variable=CostCurve(LinearCurve(variable_om)),
-                ),
-                base_power=row["base_power"],
-                prime_mover_type=map_prime_mover(row["prime_mover"]),
-            )
-            add_component!(system, t)
-            # Put in time series for the solar and Wind
-            eaid = row["unit_id"]
-            ts_index =
-                filter("entity_id" => isequal(eaid), df_dict["entities"])[!, "entity_id"]
-            if length(ts_index) == 0
-                continue
-            else
-                # TODO: All real-time timeseries
-                for time_series in ts_index
-                    ts = filter("entity_id" => isequal(time_series), df_dict["time_series"])
-                    # TODO: Remove this hacky fix once database has been corrected to have unique timestamps
-                    # ts = unique(ts,:timestamp)
-                    timestamps, values, type = parse_timestamps_and_values(ts)
-                    # dates = DateTime.(timestamps, "yyyy-m-d-H")
-                    time_series_array = TimeArray(timestamps, values)
-                    if type == "Forecast"
-                        ts = SingleTimeSeries(string(eaid), time_series_array)
-                        PSY.add_time_series!(system, t, ts)
-                        # TODO: Remove once we have decided real time data handling
-                        break
-                    elseif type == "Real Time"
-                        # TODO: For now, skipping this. But need to add later for real-time data
-                        # ts = SingleTimeSeries(string(time_series), time_series_array)
-                        # IS.add_time_series!(p.data, t, ts)
-                    end
-                    # ts = SingleTimeSeries(string(time_series), time_series_array)
-                    # IS.add_time_series!(p.data, t, ts)
-
-                end
-                @warn "Only day ahead added for unit_id: $eaid"
-            end
-        elseif row["fuel_type"] == "Hydro"
-            continue
-        else
-            t = ThermalStandard(;
-                name=row["name"],
-                available=true,
-                status=true,
-                bus=filter(b -> contains(b.name, row["balancing_topology"]), buses)[1],
-                active_power=row["rating"],
-                reactive_power=0.0,
-                rating=row["rating"],
-                active_power_limits=(0.0, row["rating"]),
-                reactive_power_limits=nothing,
-                ramp_limits=nothing,
-                operation_cost=ThermalGenerationCost(
-                    variable=CostCurve(LinearCurve(variable_om)),
-                    fixed=op_data[!, "fom_cost"][1],
-                    start_up=0.0,
-                    shut_down=0.0,
-                ),
-                base_power=row["base_power"],
-                prime_mover_type=map_prime_mover(row["prime_mover"]),
-                fuel=map_fuel(row["fuel_type"]),
-            )
-            add_component!(system, t)
-        end
-    end
-
-    # Get storage units
-    for row in eachrow(df_dict["storage_units"])
-
-        #extract area
-        #area = topologies[topologies.name .== row["balancing_topology"], "area"][1]
-        #area_int = parse(Int64, area)
-
-        s = EnergyReservoirStorage(;
-            name=row["name"],
-            available=true,
-            bus=filter(b -> contains(b.name, row["balancing_topology"]), buses)[1],
-            prime_mover_type=map_prime_mover(row["prime_mover"]),
-            storage_technology_type=StorageTech.LIB,
-            storage_capacity=row["max_capacity"],
-            storage_level_limits=(0.0, 1.0),
-            initial_storage_capacity_level=0.0,
-            rating=row["rating"],
-            active_power=row["rating"],
-            input_active_power_limits=(0.0, row["rating"]),
-            output_active_power_limits=(0.0, row["rating"]),
-            efficiency=(in=row["charging_efficiency"], out=row["discharge_efficiency"]),
-            reactive_power=0.0,
-            reactive_power_limits=nothing,
-            base_power=row["base_power"],
-            operation_cost=StorageCost(
-                charge_variable_cost=CostCurve(LinearCurve(0.0)),
-                discharge_variable_cost=CostCurve(LinearCurve(0.0)),
-                fixed=0.0,
-                start_up=0.0,
-                shut_down=0.0,
-            ),
-        )
-        PSY.add_component!(system, s)
-    end
-
-    return system
-end
-
-function dataframe_to_structs(df_dict::Dict)
-
-    #Initialize Portfolio
-    system = dataframe_to_system(df_dict)
-
-    p = Portfolio(
-        discount_rate=0.07,
-        inflation_rate=0.05,
-        interest_rate=0.02,
-        base_year=2025;
-        base_system=system,
+function map_prime_mover_to_timeseries(prime_mover::PSY.PrimeMovers, fuel::PSY.ThermalFuels)
+    mapping_dict = Dict(
+        [PrimeMovers.BA, ThermalFuels.OTHER] => "battery_li_cost_R1",
+        [PrimeMovers.PVe, ThermalFuels.OTHER] => "csp1_cost_R1", #FIX THIS ONE
+        [PrimeMovers.CP, ThermalFuels.OTHER] => "csp1_cost_R1",
+        [PrimeMovers.WT, ThermalFuels.OTHER] => "115hh_170rd_cost_R1",
+        [PrimeMovers.CT, ThermalFuels.NATURAL_GAS] => "Gas-CC_cost_R1",
+        [PrimeMovers.CT, ThermalFuels.DISTILLATE_FUEL_OIL] => "o-g-s_cost_R1",
+        [PrimeMovers.ST, ThermalFuels.COAL] => "Coal-new_cost_R1",
+        [PrimeMovers.ST, ThermalFuels.DISTILLATE_FUEL_OIL] => "o-g-s_cost_R1",
+        [PrimeMovers.ST, ThermalFuels.NUCLEAR] => "Nuclear_cost_R1",
+        [PrimeMovers.CC, ThermalFuels.NATURAL_GAS] => "Gas-CC_cost_R1",
     )
 
-    tech_financials =
-        TechnologyFinancialData(; capital_recovery_period=30, technology_base_year=2025)
+    ts_name =
+        haskey(mapping_dict, [prime_mover, fuel]) ? mapping_dict[[prime_mover, fuel]] :
+        "None"
 
-    #initialize Zone structs
-    zones = []
-    for row_zone in eachrow(df_dict["areas"])
-        z = Zone(name=string("zone_", row_zone["name"]), id=parse(Int64, row_zone["name"]))
-        push!(zones, z)
+    return ts_name
+end
+
+function add_zones!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
+    for rec in DBInterface.execute(db, QUERIES[:zones])
+        z = Zone(; name=rec.name, id=rec.id)
+        add_region!(p, z)
     end
-    #Populate SupplyTechnology structs from database (new builds)
-    topologies = df_dict["balancing_topologies"]
-    supply_curves_full =
-        filter("entity_type" => contains("supply_technologies"), df_dict["attributes"])
-    supply_curves = filter("name" => contains("supply"), supply_curves_full)
+end
 
-    # TODO: Add fields for reinforcement distances
-    reinforcement_distances =
-        filter("name" => contains("reinforcement"), supply_curves_full)
-    for row_pw in eachrow(supply_curves)
+function add_nodes!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
+    for rec in DBInterface.execute(db, QUERIES[:balancing_topologies])
+        z = Node(; name=rec.name, id=rec.id)
+        add_region!(p, z)
+    end
+end
 
-        # Extract supply curves and IDs
-        eaid = row_pw["entity_attribute_id"]
-        supply_curve = row_pw["value"]
-        supply_curve = decode(supply_curve, "UTF-8")
-
-        id = eaid
-
-        # Find corresponding supply technology for that supply curve
-        # TODO: Add check to only do the rest of this is this returns a real (and not an empty dataframe)
-        row = df_dict["supply_technologies"][
-            df_dict["supply_technologies"][!, "technology_id"] .== id,
-            :,
-        ]
-
-        # @show eaid, row_pw, supply_curve, topologies[topologies.name .== row[!, "balancing_topology"][1], "area"][1]
-        supply_curve_parsed = parse_json_to_arrays(supply_curve)
-        #extract area
-        if !isempty(row)
-            area =
-                topologies[topologies.name .== row[!, "balancing_topology"][1], "area"][1]
-            area_int = parse(Int64, area)
-
-        else
-            continue
+function add_buses!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
+    for rec in DBInterface.execute(db, QUERIES[:zones])
+        component_attr = get(attributes, rec.id, Dict{String, Any}())
+        a = Area(;
+            name=rec.name,
+            load_response=component_attr["load_response"],
+            peak_active_power=component_attr["peak_active_power"],
+            peak_reactive_power=component_attr["peak_reactive_power"],
+        )
+        if haskey(component_attr, "uuid")
+            IS.set_uuid!(IS.get_internal(a), Base.UUID(component_attr["uuid"]))
         end
-        #extract supply curve, does every supply_technology have a supply curve?
-        #id = row["technology_id"]
-        #eaid = df_dict["attributes"][df_dict["attributes"] .== id, "entity_attribute_id"][1]
-        #supply_curve = df_dict["time_series"][df_dict["entity_attribute_id"] .== eaid, "piecewise_linear_blob"][1]
-        #Now just need to parse the blob
+        PSY.add_component!(p.base_system, a)
+    end
+    for rec in DBInterface.execute(db, QUERIES[:balancing_topologies])
+        component_attr = get(attributes, rec.id, Dict{String, Any}())
+        area_name = first(DBInterface.execute(db, QUERIES[:zone], [rec.area])).name
+        b = PSY.ACBus(;
+            name=rec.name,
+            number=rec.id,
+            bustype=PSY.get_enum_value(PSY.ACBusTypes, component_attr["bustype"]),
+            angle=component_attr["angle"],
+            magnitude=component_attr["magnitude"],
+            area=get_component(Area, p.base_system, area_name),
+            voltage_limits=nothing,
+            base_voltage=nothing,
+            load_zone=nothing,
+        )
+        if haskey(component_attr, "uuid")
+            IS.set_uuid!(IS.get_internal(b), Base.UUID(component_attr["uuid"]))
+        end
+        PSY.add_component!(p.base_system, b)
+    end
+end
 
-        parametric = map_prime_mover_to_parametric(row[!, "prime_mover"][1])
-        f = row[!, "fuel_type"][1]
-        t = SupplyTechnology{parametric}(;
-            #Data pulled from DB
-            name=string(row[!, "technology_id"][1]),
-            id=row[!, "technology_id"][1],
-            capital_costs=InputOutputCurve(PiecewiseLinearData(supply_curve_parsed)),
-            balancing_topology=string(row[!, "balancing_topology"][1]),
-            prime_mover_type=map_prime_mover(row[!, "prime_mover"][1]),
-            fuel=[map_fuel(f)],
-            region=[zones[area_int]],
-            financial_data=tech_financials,
-
-            #Problem ones, need to write functions to extract
-            base_power=100.0,
-            initial_capacity=0.0,
-
-            # Data we should have but dont currently
-            operation_costs=ThermalGenerationCost(
-                variable=CostCurve(LinearCurve(0.0)),
-                fixed=0.0,
-                start_up=0.0,
-                shut_down=0.0,
-            ),
-            start_fuel_mmbtu_per_mw=2.0,
-            start_cost_per_mw=91.0,
-            up_time=6.0,
-            dn_time=6.0,
-            heat_rate_mmbtu_per_mwh=Dict(map_fuel(f) => LinearCurve(7.43)),
-            co2=Dict(map_fuel(f) => 0.05306),
-            ramp_dn_percentage=0.64,
-            ramp_up_percentage=0.64,
-
-            #Placeholder or default values (modeling assumptions)
+function add_aggregate_lines!(
+    p::Portfolio,
+    attributes::Dict{Int64, Dict{String, Any}},
+    db::SQLite.DB,
+)
+    for rec in DBInterface.execute(db, QUERIES[:aggregate_lines])
+        component_attr = get(attributes, rec.id, Dict{String, Any}())
+        t = AggregateTransportTechnology{ACBranch}(;
+            name=string(rec.rowid),
+            id=rec.rowid,
             available=true,
-            min_generation_percentage=0.0,
-            power_systems_type=string(parametric),
+            base_power=100.0,
+            power_systems_type=string(ACBranch),
+            financial_data=DEFAULT_FINANCIAL_DATA,
+            start_region=collect(
+                IS.get_components(
+                    x -> get_id(x) == parse(Int64, rec.area_from),
+                    RegionTopology,
+                    p.data,
+                ),
+            )[1],
+            end_region=collect(
+                IS.get_components(
+                    x -> get_id(x) == parse(Int64, rec.area_to),
+                    RegionTopology,
+                    p.data,
+                ),
+            )[1],
+            capacity_limits=(min=0.0, max=max(rec.max_flow_from, rec.max_flow_to)),
         )
         add_technology!(p, t)
     end
+end
 
-    #Populate DemandRequirement structs from database
-    for row in eachrow(df_dict["demand_requirements"])
-        #start in time_series
-        eaid = row["entity_attribute_id"]
-        # ts_index = filter("entity_id" => isequal(eaid), df_dict["entities"])[!, "entity_id"]
-        ts_index = filter(
-            row ->
-                row["entity_id"] == eaid && row["entity_type"] == "demand_requirements",
-            df_dict["entities"],
-        )[
-            !,
-            "entity_id",
-        ]
+# Will be used for new candidate transmission options in the future if in database
+function add_nodal_lines!(
+    p::Portfolio,
+    attributes::Dict{Int64, Dict{String, Any}},
+    db::SQLite.DB,
+) end
 
-        # Collect all rows in the time_series table that match the entity_id
-        ts = filter("entity_id" => isequal(ts_index[1]), df_dict["time_series"])
-        ts_parsed = collect(ts[:, :value])
+function add_technologies!(
+    p::Portfolio,
+    attributes::Dict{Int64, Dict{String, Any}},
+    db::SQLite.DB,
+)
+    for rec in DBInterface.execute(db, QUERIES[:technologies])
 
-        # Parsing the timestamps into Dates
-        timestamps = DateTime.(ts[!, :timestamp], "yyyy-m-d-H")
+        # Select appropriate parametric type
+        parametric = map_prime_mover_to_parametric(rec.prime_mover)
 
-        dates = timestamps[1]:Hour(1):timestamps[end]
-        demand = ts_parsed
-        demand_array = TimeArray(dates, demand)
-        ts = SingleTimeSeries(string(row["entity_attribute_id"]), demand_array)
+        if get_aggregation(p) == PSY.ACBus
+            area_id =
+                first(DBInterface.execute(db, QUERIES[:zone_for_technology], [rec.area])).id
+            regions = [
+                get_region(Node, p, row.name) for
+                row in DBInterface.execute(db, QUERIES[:area_to_topology], [area_id])
+            ]
+        else
+            regions = [get_region(Zone, p, rec.area)]
+        end
 
-        area_int = parse(Int64, row["area"])
+        if rec.prime_mover == "STORAGE"
+            t = StorageTechnology{parametric}(;
+                name=rec.prime_mover * string(rec.id),
+                id=rec.id,
+                capital_costs_discharge=LinearCurve(0.0),
+                prime_mover_type=map_prime_mover(rec.prime_mover),
+                storage_tech=map_storage_tech(rec.fuel),
+                region=regions,
+                financial_data=DEFAULT_FINANCIAL_DATA,
+                available=true,
+                power_systems_type=string(parametric),
+                operation_costs=StorageCost(),
+            )
+        elseif rec.prime_mover in ["HYDRO", "ROR", "SYND_COND"]
+            @warn "Technologies of type $(rec.prime_mover) are not currently supported in portfolios. Skipping serialization."
+            continue
+        else
+            t = SupplyTechnology{parametric}(;
+                name=rec.prime_mover * string(rec.id),
+                id=rec.id,
+                capital_costs=LinearCurve(0.0),
+                prime_mover_type=map_prime_mover(rec.prime_mover),
+                fuel=[map_fuel(rec.fuel)],
+                co2=Dict(map_fuel(rec.fuel) => 0.0),
+                region=regions,
+                financial_data=DEFAULT_FINANCIAL_DATA,
+                available=true,
+                power_systems_type=string(parametric),
+                operation_costs=ThermalGenerationCost(
+                    variable=CostCurve(LinearCurve(0.0)),
+                    fixed=0.0,
+                    start_up=0.0,
+                    shut_down=0.0,
+                ),
+            )
+        end
+        add_technology!(p, t)
+    end
+end
 
-        #How to parse this timestamp stuff??
+function add_generation_units!(
+    p::Portfolio,
+    attributes::Dict{Int64, Dict{String, Any}},
+    db::SQLite.DB,
+)
+    for rec in DBInterface.execute(db, QUERIES[:generation_units])
+        component_type = eval(
+            Meta.parse(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]),
+        )
+        component_attr = get(attributes, rec.id, Dict{String, Any}())
 
-        d = DemandRequirement{ElectricLoad}(
+        bus_name = first(
+            DBInterface.execute(db, QUERIES[:topology_for_unit], [rec.balancing_topology]),
+        )[1]
+
+        if component_type == PSY.ThermalStandard
+            time_limits = (
+                up=component_attr["time_limits"]["up"],
+                down=component_attr["time_limits"]["down"],
+            )
+            ramp_limits = (
+                up=component_attr["ramp_limits"]["up"],
+                down=component_attr["ramp_limits"]["down"],
+            )
+            active_limits = (
+                min=component_attr["active_power_limits"]["min"],
+                max=component_attr["active_power_limits"]["max"],
+            )
+            reactive_limits = (
+                min=component_attr["reactive_power_limits"]["min"],
+                max=component_attr["reactive_power_limits"]["max"],
+            )
+
+            ops_cost = parse_operational_cost(component_attr["operation_cost"])
+            g = component_type(;
+                name=rec.name,
+                rating=rec.rating,
+                base_power=rec.base_power,
+                available=true,
+                status=true,
+                bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
+                prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
+                active_power_limits=active_limits,
+                active_power=get(component_attr, "active_power", 0.0),
+                reactive_power=get(component_attr, "reactive_power", 0.0),
+                reactive_power_limits=reactive_limits,
+                ramp_limits=ramp_limits,
+                time_limits=time_limits,
+                operation_cost=ops_cost,
+            )
+
+        elseif component_type == PSY.RenewableDispatch
+            reactive_limits = (
+                min=component_attr["reactive_power_limits"]["min"],
+                max=component_attr["reactive_power_limits"]["max"],
+            )
+            ops_cost = parse_operational_cost(component_attr["operation_cost"])
+            g = component_type(;
+                name=rec.name,
+                rating=rec.rating,
+                base_power=rec.base_power,
+                available=true,
+                bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
+                prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
+                active_power=get(component_attr, "active_power", 0.0),
+                reactive_power=get(component_attr, "reactive_power", 0.0),
+                reactive_power_limits=reactive_limits,
+                power_factor=get(component_attr, "power factor", 0.0),
+                operation_cost=ops_cost,
+            )
+
+        elseif component_type == PSY.RenewableNonDispatch
+            ops_cost = RenewableGenerationCost(nothing)
+            g = component_type(;
+                name=rec.name,
+                rating=rec.rating,
+                base_power=rec.base_power,
+                available=true,
+                bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
+                prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
+                active_power=get(component_attr, "active_power", 0.0),
+                reactive_power=get(component_attr, "reactive_power", 0.0),
+                power_factor=get(component_attr, "power factor", 0.0),
+            )
+        elseif component_type == PSY.HydroDispatch
+            time_limits = (
+                up=component_attr["time_limits"]["up"],
+                down=component_attr["time_limits"]["down"],
+            )
+            ramp_limits = (
+                up=component_attr["ramp_limits"]["up"],
+                down=component_attr["ramp_limits"]["down"],
+            )
+            active_limits = (
+                min=component_attr["active_power_limits"]["min"],
+                max=component_attr["active_power_limits"]["max"],
+            )
+            reactive_limits = (
+                min=component_attr["reactive_power_limits"]["min"],
+                max=component_attr["reactive_power_limits"]["max"],
+            )
+            g = component_type(;
+                name=rec.name,
+                rating=rec.rating,
+                base_power=rec.base_power,
+                available=true,
+                bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
+                prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
+                active_power=get(component_attr, "active_power", 0.0),
+                reactive_power=get(component_attr, "reactive_power", 0.0),
+                active_power_limits=active_limits,
+                reactive_power_limits=reactive_limits,
+                ramp_limits=ramp_limits,
+                time_limits=time_limits,
+            )
+
+        elseif component_type == PSY.HydroEnergyReservoir
+            active_limits = (
+                min=component_attr["active_power_limits"]["min"],
+                max=component_attr["active_power_limits"]["max"],
+            )
+            reactive_limits = (
+                min=component_attr["reactive_power_limits"]["min"],
+                max=component_attr["reactive_power_limits"]["max"],
+            )
+            time_limits = (
+                up=component_attr["time_limits"]["up"],
+                down=component_attr["time_limits"]["down"],
+            )
+            ramp_limits = (
+                up=component_attr["ramp_limits"]["up"],
+                down=component_attr["ramp_limits"]["down"],
+            )
+            ops_cost = parse_operational_cost(component_attr["operation_cost"])
+
+            g = component_type(;
+                name=rec.name,
+                rating=rec.rating,
+                base_power=rec.base_power,
+                available=component_attr["available"],
+                status=component_attr["status"],
+                inflow=component_attr["inflow"],
+                bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
+                time_at_status=component_attr["time_at_status"],
+                storage_target=component_attr["storage_target"],
+                prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
+                conversion_factor=component_attr["conversion_factor"],
+                storage_capacity=component_attr["storage_capacity"],
+                active_power_limits=active_limits,
+                active_power=component_attr["active_power"],
+                reactive_power=component_attr["reactive_power"],
+                reactive_power_limits=reactive_limits,
+                ramp_limits=ramp_limits,
+                time_limits=time_limits,
+                initial_storage=component_attr["initial_storage"],
+                operation_cost=ops_cost, #Add later when data is in DB
+            )
+        end
+        if haskey(component_attr, "uuid")
+            IS.set_uuid!(IS.get_internal(g), Base.UUID(component_attr["uuid"]))
+        end
+        add_component!(p.base_system, g)
+
+        if component_type in
+           [PSY.ThermalStandard, PSY.RenewableDispatch, PSY.RenewableNonDispatch]
+            # Add corresponding technology to portfolio-level data
+            if get_aggregation(p) == PSY.ACBus
+                regions = [get_region(Node, p, bus_name)]
+            else
+                area_id =
+                    first(
+                        DBInterface.execute(
+                            db,
+                            QUERIES[:topology_to_area],
+                            [rec.balancing_topology],
+                        ),
+                    ).area
+                regions = collect(
+                    IS.get_components(x -> get_id(x) == area_id, RegionTopology, p.data),
+                )
+            end
+            s = SupplyTechnology{component_type}(;
+                name=rec.name,
+                id=rec.id,
+                capital_costs=LinearCurve(0.0),
+                prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
+                fuel=[map_fuel(rec.prime_mover)],
+                region=regions,
+                financial_data=DEFAULT_FINANCIAL_DATA,
+                available=true,
+                power_systems_type=string(component_type),
+                operation_costs=ops_cost,
+                ramp_limits=(@isdefined ramp_limits) ? ramp_limits : (up=1.0, down=1.0),
+                time_limits=(@isdefined time_limits) ? time_limits : (up=1.0, down=1.0),
+                capacity_limits=(min=0, max=rec.rating),
+                co2=Dict(map_fuel(rec.prime_mover) => 0.0),
+            )
+            add_technology!(p, s)
+            existing = ExistingCapacity(; existing_technologies=[rec.name])
+            add_supplemental_attribute!(p, s, existing)
+        end
+    end
+end
+
+function add_storage_units!(
+    p::Portfolio,
+    attributes::Dict{Int64, Dict{String, Any}},
+    db::SQLite.DB,
+)
+    for rec in DBInterface.execute(db, QUERIES[:storage_units])
+        component_type = eval(
+            Meta.parse(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]),
+        )
+        component_attr = get(attributes, rec.id, Dict{String, Any}())
+
+        level_limits = (
+            min=component_attr["storage_level_limits"]["min"],
+            max=component_attr["storage_level_limits"]["max"],
+        )
+        input_active_limits = (
+            min=component_attr["input_active_power_limits"]["min"],
+            max=component_attr["input_active_power_limits"]["max"],
+        )
+        output_active_limits = (
+            min=component_attr["output_active_power_limits"]["min"],
+            max=component_attr["output_active_power_limits"]["max"],
+        )
+        reactive_limits = (
+            min=component_attr["reactive_power_limits"]["min"],
+            max=component_attr["reactive_power_limits"]["max"],
+        )
+
+        # Get name of bus
+        bus_name = first(
+            DBInterface.execute(db, QUERIES[:topology_for_unit], [rec.balancing_topology]),
+        )[1]
+
+        ops_cost = parse_operational_cost(component_attr["operation_cost"])
+
+        t = component_type(;
             #Data pulled from DB
-            id=row["entity_attribute_id"],
-            name=string(row["entity_attribute_id"]),
-            region=[zones[area_int]],#parse(Int64, row["area"]),
+            name=rec.name,
+            rating=rec.rating,
+            base_power=rec.base_power,
+            available=component_attr["available"],
+            bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
+            prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
+            storage_technology_type=PSY.StorageTech(
+                component_attr["storage_technology_type"],
+            ),
+            conversion_factor=component_attr["conversion_factor"],
+            cycle_limits=component_attr["cycle_limits"],
+            storage_capacity=component_attr["storage_capacity"],
+            storage_level_limits=level_limits,
+            storage_target=component_attr["storage_target"],
+            initial_storage_capacity_level=component_attr["initial_storage_capacity_level"],
+            input_active_power_limits=input_active_limits,
+            output_active_power_limits=output_active_limits,
+            active_power=component_attr["active_power"],
+            reactive_power=component_attr["reactive_power"],
+            reactive_power_limits=reactive_limits,
+            efficiency=(in=rec.efficiency_up, out=rec.efficiency_down),
+            operation_cost=ops_cost,
+        )
+        if haskey(component_attr, "uuid")
+            IS.set_uuid!(IS.get_internal(t), Base.UUID(component_attr["uuid"]))
+        end
+        add_component!(p.base_system, t)
 
-            #Placeholder/default values
+        # Add corresponding technology to portfolio-level data
+        if get_aggregation(p) == PSY.ACBus
+            regions = [get_region(Node, p, bus_name)]
+        else
+            area_id =
+                first(
+                    DBInterface.execute(
+                        db,
+                        QUERIES[:topology_to_area],
+                        [rec.balancing_topology],
+                    ),
+                ).area
+            regions = collect(
+                IS.get_components(x -> get_id(x) == area_id, RegionTopology, p.data),
+            )
+        end
+        s = StorageTechnology{component_type}(;
+            name=rec.name,
+            id=rec.id,
+            capital_costs_discharge=LinearCurve(0.0),
+            capital_costs_energy=LinearCurve(0.0),
+            prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
+            storage_tech=PSY.StorageTech(component_attr["storage_technology_type"]),
+            region=regions,
+            financial_data=DEFAULT_FINANCIAL_DATA,
             available=true,
-            power_systems_type="ElectricLoad",
-            value_of_lost_load=1.0,
+            power_systems_type=string(component_type),
+            operation_costs=ops_cost,
+            capacity_limits_discharge=(min=0, max=rec.rating),
+            capacity_limits_energy=(min=0, max=component_attr["storage_capacity"]),
+        )
+        add_technology!(p, s)
+        existing = ExistingCapacity(; existing_technologies=[rec.name])
+        add_supplemental_attribute!(p, s, existing)
+    end
+end
+
+function add_demand_requirements!(
+    p::Portfolio,
+    attributes::Dict{Int64, Dict{String, Any}},
+    db::SQLite.DB,
+)
+    # stream straight through the table
+    for rec in DBInterface.execute(db, QUERIES[:demand_requirements])
+        component_type = eval(
+            Meta.parse(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]),
+        )
+        component_attr = get(attributes, rec.id, Dict{String, Any}())
+
+        # Determine area based on balancing topology if zonal
+        if get_aggregation(p) == PSY.ACBus
+            area = rec.balancing_topology
+        else
+            area =
+                first(
+                    DBInterface.execute(
+                        db,
+                        QUERIES[:topology_to_area],
+                        [rec.balancing_topology],
+                    ),
+                ).area
+        end
+
+        # build and immediately insert
+        d = DemandRequirement{component_type}(;
+            name=rec.name,
+            id=rec.id,
+            region=collect(
+                IS.get_components(x -> get_id(x) == area, RegionTopology, p.data),
+            ),
+            value_of_lost_load=1e8, #TODO: Assign a default value to this field
+            power_systems_type=string(component_type),
         )
         add_technology!(p, d)
-        IS.add_time_series!(p.data, d, ts)
+    end
+end
+
+function add_loads!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
+    # stream straight through the table
+    for rec in DBInterface.execute(db, QUERIES[:demand_requirements])
+        component_type = eval(
+            Meta.parse(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]),
+        )
+        component_attr = get(attributes, rec.id, Dict{String, Any}())
+
+        # Determine area based on balancing topology if zonal
+        bus_name = first(
+            DBInterface.execute(db, QUERIES[:topology_for_unit], [rec.balancing_topology]),
+        )[1]
+
+        # build and immediately insert
+        d = component_type(;
+            name=rec.name,
+            base_power=rec.base_power,
+            bus=PSY.get_component(ACBus, p.base_system, bus_name),
+            max_active_power=component_attr["max_active_power"],
+            max_reactive_power=component_attr["max_reactive_power"],
+            reactive_power=component_attr["reactive_power"],
+            active_power=component_attr["active_power"],
+            available=component_attr["available"],
+        )
+        if haskey(component_attr, "uuid")
+            IS.set_uuid!(IS.get_internal(d), Base.UUID(component_attr["uuid"]))
+        end
+        add_component!(p.base_system, d)
+    end
+end
+
+function add_system_lines!(
+    p::Portfolio,
+    attributes::Dict{Int64, Dict{String, Any}},
+    db::SQLite.DB,
+)
+    arc_dict = Dict()
+    for rec in DBInterface.execute(db, QUERIES[:arcs])
+        component_attr = get(attributes, rec.id, Dict{String, Any}())
+        from_bus =
+            first(DBInterface.execute(db, QUERIES[:topology_from_arc], [rec.from_id])).name
+        to_bus =
+            first(DBInterface.execute(db, QUERIES[:topology_from_arc], [rec.to_id])).name
+        arc = Arc(;
+            from=PSY.get_component(ACBus, p.base_system, from_bus),
+            to=PSY.get_component(ACBus, p.base_system, to_bus),
+        )
+        if haskey(component_attr, "uuid")
+            IS.set_uuid!(IS.get_internal(arc), Base.UUID(component_attr["uuid"]))
+        end
+        add_component!(p.base_system, arc)
+        arc_dict[rec.id] = arc
     end
 
-    #Transmission Lines
-    lines = df_dict["transmission_lines"]
-    for row in eachrow(df_dict["transmission_interchange"])
+    tx_dict = Dict()
+    for rec in DBInterface.execute(db, QUERIES[:transmission_lines])
+        component_type = eval(
+            Meta.parse(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]),
+        )
+        component_attr = get(attributes, rec.id, Dict{String, Any}())
 
-        # get list of balancing topologies that correspond to the areas for line tx
-        topologies_from = filter("area" => isequal(row["area_from"]), topologies)[!, "name"]
-        topologies_to = filter("area" => isequal(row["area_to"]), topologies)[!, "name"]
+        # Determine area based on balancing topology if zonal
+        arc = first(DBInterface.execute(db, QUERIES[:arc], [rec.arc_id])).id
 
-        existing_capacity = 0.0
-        for from in topologies_from
-            for to in topologies_to
-                line_cap = lines[
-                    (lines[
-                        !,
-                        "balancing_topology_from",
-                    ] .== from) .& (lines[!, "balancing_topology_to"] .== to),
-                    "continuous_rating",
-                ]
-                if length(line_cap) == 1
-                    existing_capacity += line_cap[1]
-                end
+        if component_type == PSY.Line
+            b = (from=component_attr["b"]["from"], to=component_attr["b"]["to"])
+            g = (from=component_attr["g"]["from"], to=component_attr["g"]["to"])
+            angle_limits = (
+                min=component_attr["angle_limits"]["min"],
+                max=component_attr["angle_limits"]["max"],
+            )
+            l = component_type(;
+                name=rec.name,
+                rating=rec.continuous_rating,
+                arc=arc_dict[arc],
+                reactive_power_flow=component_attr["reactive_power_flow"],
+                active_power_flow=component_attr["active_power_flow"],
+                available=component_attr["available"],
+                angle_limits=angle_limits,
+                x=component_attr["x"] / get_base_power(p.base_system),
+                r=component_attr["r"] / get_base_power(p.base_system),
+                b=b,
+                g=g,
+            )
+        elseif component_type == PSY.Transformer2W
+            l = component_type(;
+                name=rec.name,
+                rating=rec.continuous_rating,
+                arc=arc_dict[arc],
+                primary_shunt=component_attr["primary_shunt"]["real"],
+                reactive_power_flow=component_attr["reactive_power_flow"],
+                active_power_flow=component_attr["active_power_flow"],
+                available=component_attr["available"],
+                x=component_attr["x"] / get_base_power(p.base_system),
+                r=component_attr["r"],
+            )
+        end
+        if haskey(component_attr, "uuid")
+            IS.set_uuid!(IS.get_internal(l), Base.UUID(component_attr["uuid"]))
+        end
+        add_component!(p.base_system, l)
+
+        #If Line is between areas, add to dictionary
+        from_area = PSY.get_name(get_area(get_from(get_arc(l))))
+        to_area = PSY.get_name(get_area(get_to(get_arc(l))))
+        if from_area != to_area
+            areas = Set([from_area, to_area])
+            if haskey(tx_dict, areas)
+                push!(tx_dict[areas], PSY.get_name(l))
+            else
+                tx_dict[areas] = [PSY.get_name(l)]
             end
         end
 
-        tx = ACTransportTechnology{Branch}(;
-            name=string(rownumber(row)),
-            id=rownumber(row),
-            base_power=100.0,
-            available=true,
-            start_region=zones[parse(Int64, row["area_from"])],
-            end_region=zones[parse(Int64, row["area_to"])],
-            capacity_limits=(min=0.0, max=row["max_flow_from"]),
-            existing_line_capacity=existing_capacity,
-
-            #stuff we don't have, but probably should
-            capital_cost=LinearCurve(19261),
-            line_loss=0.019653847,
-            power_systems_type="Branch",
-            financial_data=tech_financials,
-        )
-        add_technology!(p, tx)
+        #Build Portfolio transmission based on existing transmission
+        if get_aggregation(p) == PSY.ACBus
+            component_attr = get(attributes, rec.id, Dict{String, Any}())
+            arc = first(DBInterface.execute(db, QUERIES[:arc], [rec.arc_id]))
+            balancing_topology_from =
+                first(
+                    DBInterface.execute(db, QUERIES[:topology_from_arc], [arc.from_id]),
+                ).name
+            balancing_topology_to =
+                first(
+                    DBInterface.execute(db, QUERIES[:topology_from_arc], [arc.to_id]),
+                ).name
+            t = NodalACTransportTechnology{ACBranch}(;
+                name=rec.name,
+                id=rec.id,
+                available=true,
+                power_systems_type=string(ACBranch),
+                financial_data=DEFAULT_FINANCIAL_DATA,
+                start_node=get_region(Node, p, balancing_topology_from),
+                end_node=get_region(Node, p, balancing_topology_to),
+                reactance=component_attr["x"],
+                resistance=component_attr["r"],
+                capital_costs=LinearCurve(1000.0),
+            )
+            add_technology!(p, t)
+            existing = ExistingCapacity(; existing_technologies=[rec.name])
+            add_supplemental_attribute!(p, t, existing)
+        else
+        end
     end
 
-    return p
+    if get_aggregation(p) != PSY.ACBus
+        i = 1
+        for (areas, lines) in tx_dict
+            a = collect(areas)
+            t = AggregateTransportTechnology{ACBranch}(;
+                name=string(a[1]) * "_" * string(a[2]),
+                id=i,
+                available=true,
+                power_systems_type=string(ACBranch),
+                financial_data=DEFAULT_FINANCIAL_DATA,
+                start_region=get_region(Zone, p, a[1]),
+                end_region=get_region(Zone, p, a[2]),
+            )
+            i += 1
+            add_technology!(p, t)
+            existing = ExistingCapacity(; existing_technologies=lines)
+            add_supplemental_attribute!(p, t, existing)
+        end
+    end
+end
+
+#TODO: Implement DemandSideTechnologies if/when they are in the database
+function add_demand_technologies!(
+    p::Portfolio,
+    attributes::Dict{Int64, Dict{String, Any}},
+    db::SQLite.DB,
+) end
+
+function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
+    supply_technologies = get_technologies(SupplyTechnology, p)
+    for t in supply_technologies
+
+        #Add cost projections to timeseries
+        fuel = first(get_fuel(t))
+        prime_mover = get_prime_mover_type(t)
+        ts_type = map_prime_mover_to_timeseries(prime_mover, fuel)
+        if ts_type != "None" && !has_supplemental_attributes(t)
+            cost_data = Dict()
+            for ts_association in
+                DBInterface.execute(db, QUERIES[:investment_timeseries], [ts_type])
+                timestamps = [
+                    Dates.DateTime(row.idx, 1, 1) for row in DBInterface.execute(
+                        db,
+                        QUERIES[:ts_data],
+                        [ts_association.time_series_uuid],
+                    )
+                ]
+                if occursin("Overnight", ts_association.name) ||
+                   occursin("Fixed", ts_association.name)
+                    values = [
+                        row.value / 1000 for row in DBInterface.execute(
+                            db,
+                            QUERIES[:ts_data],
+                            [ts_association.time_series_uuid],
+                        )
+                    ]
+                else
+                    values = [
+                        row.value for row in DBInterface.execute(
+                            db,
+                            QUERIES[:ts_data],
+                            [ts_association.time_series_uuid],
+                        )
+                    ]
+                end
+                ts_data = TimeSeries.TimeArray(timestamps, values)
+
+                ts =
+                    SingleTimeSeries(ts_association.name, ts_data; resolution=Dates.Year(1))
+                cost_data[ts_association.name] =
+                    first(TimeSeries.values(ts_data[Dates.DateTime(2025, 1, 1)]))
+                add_time_series!(p, t, ts)
+            end
+
+            #Setting cost data using data from timeseries
+            if haskey(cost_data, "heatrate_R1")
+                capex = LinearCurve(cost_data["capcost_R1"])
+                opex = ThermalGenerationCost(
+                    variable=FuelCurve(
+                        LinearCurve(cost_data["heatrate_R1"]),
+                        cost_data["vom_R1"],
+                    ), #Using vom cost as fuel cost for now
+                    fixed=cost_data["fom_R1"],
+                    start_up=0.0,
+                    shut_down=0.0,
+                )
+                set_operation_costs!(t, opex)
+                set_capital_costs!(t, capex)
+            elseif haskey(cost_data, "Var O&M \$/MWh_R1")
+                capex = LinearCurve(cost_data["Overnight Cap Cost \$/kW_R1"])
+                opex = RenewableGenerationCost(
+                    variable=CostCurve(
+                        LinearCurve(0.0),
+                        LinearCurve(cost_data["Var O&M \$/MWh_R1"]),
+                    ), #Using vom cost as fuel cost for now
+                ) #Fixed cost should be added to this at some point
+                set_operation_costs!(t, opex)
+                set_capital_costs!(t, capex)
+            else
+                capex = LinearCurve(cost_data["capcost_R1"])
+                opex = RenewableGenerationCost(
+                    variable=CostCurve(LinearCurve(0.0), LinearCurve(cost_data["vom_R1"])), #Using vom cost as fuel cost for now
+                )
+                set_operation_costs!(t, opex)
+                set_capital_costs!(t, capex)
+            end
+        end
+
+        #Using capacity factor data from base system for capacity factors
+        if typeof(t) in
+           [SupplyTechnology{RenewableDispatch}, SupplyTechnology{RenewableNonDispatch}]
+            prime_mover = get_prime_mover_type(t)
+            unit = first(
+                IS.get_components(
+                    x -> PSY.get_prime_mover_type(x) == prime_mover,
+                    typeof(t).parameters[1],
+                    p.base_system,
+                ),
+            )
+            ts_array = get_time_series_array(SingleTimeSeries, unit, "max_active_power")
+            ts = SingleTimeSeries("capacity_factor", ts_array)
+            add_time_series!(p, t, ts)
+        end
+    end
+
+    #Duplicate hourly demand profile on the portfolio level
+    demands = get_technologies(DemandRequirement, p)
+    for d in demands
+        unit = first(
+            IS.get_components(
+                x -> PSY.get_name(x) == get_name(d),
+                typeof(d).parameters[1],
+                p.base_system,
+            ),
+        )
+        ts_array = get_time_series_array(SingleTimeSeries, unit, "max_active_power")
+        ts = SingleTimeSeries("demand", ts_array)
+        add_time_series!(p, d, ts)
+    end
+end
+
+#############################################################################
+# Code below is ported from SiennaGridDB. Can remove this and call these
+# functions directly once there is an official release of SiennaGridDB
+#############################################################################
+
+function deserialize_timedata(db, sts_meta::IS.SingleTimeSeriesMetadata, time_series_uuid)
+    stmt = DBInterface.prepare(
+        db,
+        """
+        SELECT idx, value
+        FROM static_time_series
+        WHERE uuid = ?
+        ORDER BY idx
+        """,
+    )
+    rows = DBInterface.execute(stmt, (string(time_series_uuid),))
+    column_table = Tables.columntable(rows)
+    timestamps =
+        range(sts_meta.initial_timestamp; length=sts_meta.length, step=sts_meta.resolution)
+    return PowerSystems.TimeSeries.TimeArray(timestamps, column_table.value)
+end
+
+function deserialize_timedata(_, ts::IS.DeterministicMetadata, _)
+    error("Cannot deserialize deterministic timeseries $ts")
+end
+
+function deserialize_time_series_row!(sys, db, row)
+    metadata = deserialize_metadata(row)
+    if isa(metadata, IS.DeterministicMetadata) &&
+       metadata.time_series_type <: IS.DeterministicSingleTimeSeries
+        component = PowerSystems.get_component(sys, row.owner_uuid)
+        IS.add_metadata!(sys.data.time_series_manager.metadata_store, component, metadata)
+    else
+        time_array = deserialize_timedata(db, metadata, row.time_series_uuid)
+        ts = IS.time_series_metadata_to_data(metadata)(metadata, time_array)
+        PowerSystems.add_time_series!(
+            sys,
+            PowerSystems.get_component(sys, row.owner_uuid),
+            ts,
+        )
+    end
+end
+
+# TODO: STOLEN FROM InfrastructureSystems. This should be made an IS functions.
+function deserialize_metadata(row)
+    exclude_keys = Set((:metadata_uuid, :owner_uuid, :time_series_type))
+    time_series_type = IS.TIME_SERIES_STRING_TO_TYPE[row.time_series_type]
+    metadata_type = IS.time_series_data_to_metadata(time_series_type)
+    fields = Set(fieldnames(metadata_type))
+    data = Dict{Symbol, Any}(
+        :internal =>
+            IS.InfrastructureSystemsInternal(; uuid=Base.UUID(row.metadata_uuid)),
+    )
+    if time_series_type <: IS.Forecast
+        # Special case because the table column does not match the field name.
+        data[:count] = row.window_count
+    end
+    if time_series_type <: IS.AbstractDeterministic
+        data[:time_series_type] = time_series_type
+    end
+    for field in keys(row)
+        if !in(field, fields) || field in exclude_keys
+            continue
+        end
+        val = getproperty(row, field)
+        if field == :initial_timestamp
+            data[field] = Dates.DateTime(val)
+        elseif field == :resolution
+            data[field] = IS.from_iso_8601(val)
+        elseif field == :horizon || field == :interval
+            if !ismissing(val)
+                data[field] = IS.from_iso_8601(val)
+            end
+        elseif field == :time_series_uuid
+            data[field] = Base.UUID(val)
+        elseif field == :features
+            features_array = IS.JSON3.read(val, Array)
+            features_dict = Dict{String, Union{Bool, Int, String}}()
+            for obj in features_array
+                length(obj) != 1 && error("Invalid features: $obj")
+                key = first(keys(obj))
+                key in keys(features_dict) && error("Duplicate features: $key")
+                features_dict[key] = obj[key]
+            end
+            data[field] = features_dict
+        elseif field == :scaling_factor_multiplier
+            if !ismissing(val)
+                val2 = IS.JSON3.read(val, Dict{String, Any})
+                data[field] = IS.deserialize(Function, val2)
+            end
+        else
+            data[field] = val
+        end
+    end
+    metadata = metadata_type(; data...)
+    return metadata
+end
+
+function get_example_metadata(db)
+    time_series_uuid_rows = DBInterface.execute(
+        db,
+        "SELECT * FROM time_series_associations WHERE time_series_type != 'DeterministicSingleTimeSeries' GROUP BY time_series_uuid",
+    )
+    return time_series_uuid_rows
+end
+
+function deserialize_time_series_from_metadata!(sys::PowerSystems.System, db, metadata, row)
+    time_array = deserialize_timedata(db, metadata, row.time_series_uuid)
+    ts = IS.time_series_metadata_to_data(metadata)(metadata, time_array)
+    PowerSystems.add_time_series!(sys, PowerSystems.get_component(sys, row.owner_uuid), ts)
+end
+
+function deserialize_timeseries!(sys::PowerSystems.System, db)
+    DBInterface.transaction(db) do
+        # For each time_series_uuid, we'll pick a "real" metadata_uuid (so no DeterministicSingleTimeSeries),
+        # then we will deserialize and add them to the system. Finally, we'll go through and add_metadata!
+        # for all others.
+        serialized_metadata = Set{String}()
+        for row in get_example_metadata(db)
+            if row.metadata_uuid != "0" #Including this to skip over the temporary investment timeseries
+                metadata = deserialize_metadata(row)
+                deserialize_time_series_from_metadata!(sys, db, metadata, row)
+                push!(serialized_metadata, row.metadata_uuid)
+            end
+        end
+
+        associations = DBInterface.execute(db, "SELECT * FROM time_series_associations")
+
+        for row in associations
+            if row.metadata_uuid != "0"
+                metadata = deserialize_metadata(row)
+                if in(row.metadata_uuid, serialized_metadata)
+                    continue
+                end
+                component = PowerSystems.get_component(sys, row.owner_uuid)
+                IS.add_metadata!(
+                    sys.data.time_series_manager.metadata_store,
+                    component,
+                    metadata,
+                )
+            end
+        end
+    end
 end
