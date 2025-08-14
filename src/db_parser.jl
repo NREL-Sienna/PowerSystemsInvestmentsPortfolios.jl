@@ -1203,7 +1203,7 @@ end
 
 function deserialize_timedata(
     db,
-    sts_meta::InfrastructureSystems.SingleTimeSeriesMetadata,
+    sts_meta::IS.SingleTimeSeriesMetadata,
     time_series_uuid,
 )
     stmt = DBInterface.prepare(
@@ -1222,23 +1222,23 @@ function deserialize_timedata(
     return PowerSystems.TimeSeries.TimeArray(timestamps, column_table.value)
 end
 
-function deserialize_timedata(_, ts::InfrastructureSystems.DeterministicMetadata, _)
+function deserialize_timedata(_, ts::IS.DeterministicMetadata, _)
     error("Cannot deserialize deterministic timeseries $ts")
 end
 
 function deserialize_time_series_row!(sys, db, row)
     metadata = deserialize_metadata(row)
-    if isa(metadata, InfrastructureSystems.DeterministicMetadata) &&
-       metadata.time_series_type <: InfrastructureSystems.DeterministicSingleTimeSeries
+    if isa(metadata, IS.DeterministicMetadata) &&
+       metadata.time_series_type <: IS.DeterministicSingleTimeSeries
         component = PowerSystems.get_component(sys, row.owner_uuid)
-        InfrastructureSystems.add_metadata!(
+        IS.add_metadata!(
             sys.data.time_series_manager.metadata_store,
             component,
             metadata,
         )
     else
         time_array = deserialize_timedata(db, metadata, row.time_series_uuid)
-        ts = InfrastructureSystems.time_series_metadata_to_data(metadata)(
+        ts = IS.time_series_metadata_to_data(metadata)(
             metadata,
             time_array,
         )
@@ -1251,22 +1251,31 @@ function deserialize_time_series_row!(sys, db, row)
 end
 
 # TODO: STOLEN FROM InfrastructureSystems. This should be made an IS functions.
+const TIME_SERIES_STRING_TO_TYPE = Dict(
+    "Deterministic" => Deterministic,
+    "DeterministicSingleTimeSeries" => DeterministicSingleTimeSeries,
+    "Probabilistic" => Probabilistic,
+    "Scenarios" => Scenarios,
+    "SingleTimeSeries" => SingleTimeSeries,
+)
+
 function deserialize_metadata(row)
     exclude_keys = Set((:metadata_uuid, :owner_uuid, :time_series_type))
     time_series_type =
-        InfrastructureSystems.TIME_SERIES_STRING_TO_TYPE[row.time_series_type]
-    metadata_type = InfrastructureSystems.time_series_data_to_metadata(time_series_type)
+    #    IS.TIME_SERIES_STRING_TO_TYPE[row.time_series_type]
+        TIME_SERIES_STRING_TO_TYPE[row.time_series_type]
+    metadata_type = IS.time_series_data_to_metadata(time_series_type)
     fields = Set(fieldnames(metadata_type))
     data = Dict{Symbol, Any}(
-        :internal => InfrastructureSystems.InfrastructureSystemsInternal(;
+        :internal => IS.InfrastructureSystemsInternal(;
             uuid=Base.UUID(row.metadata_uuid),
         ),
     )
-    if time_series_type <: InfrastructureSystems.Forecast
+    if time_series_type <: IS.Forecast
         # Special case because the table column does not match the field name.
         data[:count] = row.window_count
     end
-    if time_series_type <: InfrastructureSystems.AbstractDeterministic
+    if time_series_type <: IS.AbstractDeterministic
         data[:time_series_type] = time_series_type
     end
     for field in keys(row)
@@ -1277,15 +1286,15 @@ function deserialize_metadata(row)
         if field == :initial_timestamp
             data[field] = Dates.DateTime(val)
         elseif field == :resolution
-            data[field] = InfrastructureSystems.from_iso_8601(val)
+            data[field] = IS.from_iso_8601(val)
         elseif field == :horizon || field == :interval
             if !ismissing(val)
-                data[field] = InfrastructureSystems.from_iso_8601(val)
+                data[field] = IS.from_iso_8601(val)
             end
         elseif field == :time_series_uuid
             data[field] = Base.UUID(val)
         elseif field == :features
-            features_array = InfrastructureSystems.JSON3.read(val, Array)
+            features_array = IS.JSON3.read(val, Array)
             features_dict = Dict{String, Union{Bool, Int, String}}()
             for obj in features_array
                 length(obj) != 1 && error("Invalid features: $obj")
@@ -1296,8 +1305,8 @@ function deserialize_metadata(row)
             data[field] = features_dict
         elseif field == :scaling_factor_multiplier
             if !ismissing(val)
-                val2 = InfrastructureSystems.JSON3.read(val, Dict{String, Any})
-                data[field] = InfrastructureSystems.deserialize(Function, val2)
+                val2 = IS.JSON3.read(val, Dict{String, Any})
+                data[field] = IS.deserialize(Function, val2)
             end
         else
             data[field] = val
@@ -1317,7 +1326,7 @@ end
 
 function deserialize_time_series_from_metadata!(sys::PowerSystems.System, db, metadata, row)
     time_array = deserialize_timedata(db, metadata, row.time_series_uuid)
-    ts = InfrastructureSystems.time_series_metadata_to_data(metadata)(metadata, time_array)
+    ts = IS.time_series_metadata_to_data(metadata)(metadata, time_array)
     PowerSystems.add_time_series!(sys, PowerSystems.get_component(sys, row.owner_uuid), ts)
 end
 
@@ -1344,7 +1353,7 @@ function deserialize_timeseries!(sys::PowerSystems.System, db)
                     continue
                 end
                 component = PowerSystems.get_component(sys, row.owner_uuid)
-                InfrastructureSystems.add_metadata!(
+                IS.add_metadata!(
                     sys.data.time_series_manager.metadata_store,
                     component,
                     metadata,
