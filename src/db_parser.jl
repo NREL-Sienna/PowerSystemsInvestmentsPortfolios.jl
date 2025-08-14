@@ -104,10 +104,10 @@ function database_to_portfolio(
 )
     p = Portfolio(
         aggregation,
-        discount_rate=discount_rate,
-        inflation_rate=inflation_rate,
-        interest_rate=interest_rate,
-        base_year=base_year;
+        base_year,
+        discount_rate,
+        inflation_rate,
+        interest_rate;
         base_system=system,
     )
     portfolio = database_to_structs(database_filepath, p)
@@ -1201,11 +1201,7 @@ end
 # functions directly once there is an official release of SiennaGridDB
 #############################################################################
 
-function deserialize_timedata(
-    db,
-    sts_meta::IS.SingleTimeSeriesMetadata,
-    time_series_uuid,
-)
+function deserialize_timedata(db, sts_meta::IS.SingleTimeSeriesMetadata, time_series_uuid)
     stmt = DBInterface.prepare(
         db,
         """
@@ -1231,17 +1227,10 @@ function deserialize_time_series_row!(sys, db, row)
     if isa(metadata, IS.DeterministicMetadata) &&
        metadata.time_series_type <: IS.DeterministicSingleTimeSeries
         component = PowerSystems.get_component(sys, row.owner_uuid)
-        IS.add_metadata!(
-            sys.data.time_series_manager.metadata_store,
-            component,
-            metadata,
-        )
+        IS.add_metadata!(sys.data.time_series_manager.metadata_store, component, metadata)
     else
         time_array = deserialize_timedata(db, metadata, row.time_series_uuid)
-        ts = IS.time_series_metadata_to_data(metadata)(
-            metadata,
-            time_array,
-        )
+        ts = IS.time_series_metadata_to_data(metadata)(metadata, time_array)
         PowerSystems.add_time_series!(
             sys,
             PowerSystems.get_component(sys, row.owner_uuid),
@@ -1253,14 +1242,12 @@ end
 # TODO: STOLEN FROM InfrastructureSystems. This should be made an IS functions.
 function deserialize_metadata(row)
     exclude_keys = Set((:metadata_uuid, :owner_uuid, :time_series_type))
-    time_series_type =
-       IS.TIME_SERIES_STRING_TO_TYPE[row.time_series_type]
+    time_series_type = IS.TIME_SERIES_STRING_TO_TYPE[row.time_series_type]
     metadata_type = IS.time_series_data_to_metadata(time_series_type)
     fields = Set(fieldnames(metadata_type))
     data = Dict{Symbol, Any}(
-        :internal => IS.InfrastructureSystemsInternal(;
-            uuid=Base.UUID(row.metadata_uuid),
-        ),
+        :internal =>
+            IS.InfrastructureSystemsInternal(; uuid=Base.UUID(row.metadata_uuid)),
     )
     if time_series_type <: IS.Forecast
         # Special case because the table column does not match the field name.
