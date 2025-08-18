@@ -117,7 +117,6 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
             Symbol("power_systems_type"),
             power_systems_type,
         )
-        OpenAPI.validate_property(StorageTechnology, Symbol("base_power"), base_power)
         OpenAPI.validate_property(
             StorageTechnology,
             Symbol("min_discharge_fraction"),
