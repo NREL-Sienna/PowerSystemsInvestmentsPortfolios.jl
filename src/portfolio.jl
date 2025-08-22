@@ -3,7 +3,7 @@ const PORTFOLIO_KWARGS =
 
 const DATA_FORMAT_VERSION = "0.1.0"
 
-const DEFAULT_AGGREGATION = PSY.ACBus
+const DEFAULT_AGGREGATION = PSY.Area
 
 const DEFAULT_SYSTEM() = PSY.System(100.0)
 
@@ -137,6 +137,34 @@ function Portfolio(base_year, discount_rate, inflation_rate, interest_rate; kwar
 end
 
 """
+Construct an empty `Portfolio` specifying financial data. Useful for building a Portfolio from scratch and used in the database parser.
+"""
+function Portfolio(
+    aggregation,
+    base_year,
+    discount_rate,
+    inflation_rate,
+    interest_rate;
+    kwargs...,
+)
+    data = PSY._create_system_data_from_kwargs(; kwargs...)
+    return Portfolio(
+        aggregation,
+        data,
+        DEFAULT_SYSTEM(),
+        Dict(),
+        InfrastructureSystemsInternal();
+        financial_data=PortfolioFinancialData(
+            base_year,
+            discount_rate,
+            inflation_rate,
+            interest_rate,
+        ),
+        kwargs...,
+    )
+end
+
+"""
 Return the internal of the portfolio
 """
 IS.get_internal(val::Portfolio) = val.internal
@@ -150,6 +178,11 @@ get_ext(val::Portfolio) = IS.get_ext(val.internal)
 Get the base system of the portfolio.
 """
 get_base_system(val::Portfolio) = val.base_system
+
+"""
+Get the aggregation level of the portfolio.
+"""
+get_aggregation(val::Portfolio) = val.aggregation
 
 """
 Set the name of the portfolio.
