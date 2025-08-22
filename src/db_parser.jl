@@ -537,7 +537,7 @@ function add_technologies!(
                 power_systems_type=string(parametric),
                 operation_costs=StorageCost(),
             )
-        elseif rec.prime_mover in ["HYDRO", "ROR", "SYND_COND"]
+        elseif rec.prime_mover in ["HYDRO", "ROR", "SYNC_COND"]
             @warn "Technologies of type $(rec.prime_mover) are not currently supported in portfolios. Skipping serialization."
             continue
         else
