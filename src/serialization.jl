@@ -82,7 +82,6 @@ function Portfolio(
             # runchecks = runchecks,
             time_series_directory=time_series_directory,
         )
-        return portfolio
         _post_deserialize_handling(
             portfolio;
             runchecks=runchecks,
@@ -129,7 +128,7 @@ function deserialize(
         end
     end
 
-    return from_dict(Portfolio, raw; from_python, kwargs...)
+    return from_dict(Portfolio, raw, filename; from_python, kwargs...)
 end
 
 function serialize(technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
@@ -184,7 +183,8 @@ clear_ext!(port::Portfolio) = IS.clear_ext!(port.internal)
 
 function from_dict(
     ::Type{Portfolio},
-    raw::Dict{String, Any};
+    raw::Dict{String, Any},
+    filename::AbstractString;
     from_python=false,
     time_series_read_only=false,
     time_series_directory=nothing,
@@ -227,12 +227,8 @@ function from_dict(
     interest_rate = get(financial_data, "interest_rate", nothing)
 
     #Base system
-    sys = get(raw, "base_system", nothing)
-    if !isnothing(sys)
-        base_system = PSY.from_dict(PSY.System, sys)
-    else
-        base_system = PSY.System(100.0)
-    end
+    base_system_file = joinpath(dirname(filename), splitext(basename(filename))[1] * "_base_system.json")
+    base_system = PSY.System(base_system_file)
 
     internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
     aggregation = PSY.ACBus
@@ -832,6 +828,10 @@ function to_json(
     mfile = joinpath(dirname(filename), splitext(basename(filename))[1] * "_metadata.json")
     _serialize_portfolio_metadata_to_file(portfolio, mfile, user_data)
     @info "Serialized Portfolio to $filename"
+
+    # Serialize base system to a separate file
+    base_system_file = joinpath(dirname(filename), splitext(basename(filename))[1] * "_base_system.json")
+    PSY.to_json(portfolio.base_system, base_system_file)
 
     return
 end
