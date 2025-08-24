@@ -156,6 +156,7 @@ include("models/financial_data/financial_data.jl")
 include("models/financial_data/TechnologyFinancialData.jl")
 include("models/requirements.jl")
 include("models/generated/includes.jl")
+include("investment_schedule.jl")
 
 include("portfolio.jl")
 include("time_mapping.jl")
