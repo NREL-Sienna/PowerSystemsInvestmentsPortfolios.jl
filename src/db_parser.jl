@@ -764,6 +764,8 @@ function add_generation_units!(
             add_technology!(p, s)
             existing = ExistingCapacity(; existing_technologies=[rec.name])
             add_supplemental_attribute!(p, s, existing)
+
+            set_capacity_limits!(s, (min=0, max=get_existing_capacity_mw(p, s)))
         end
     end
 end
