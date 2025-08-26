@@ -48,7 +48,7 @@ function get_existing_capacity_mw(
             @error "Not all names in ExistingCapacity matched generators in the base system"
         end
 
-        return sum(PSY.get_rating(t) for t in comp)
+        return sum(PSY.get_rating(t) * PSY.get_base_power(t) for t in comp)
     else
         return 0.0
     end

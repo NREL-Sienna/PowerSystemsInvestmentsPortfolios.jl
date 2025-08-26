@@ -585,30 +585,32 @@ function add_generation_units!(
                 down=component_attr["time_limits"]["down"],
             )
             ramp_limits = (
-                up=component_attr["ramp_limits"]["up"],
-                down=component_attr["ramp_limits"]["down"],
+                up=component_attr["ramp_limits"]["up"] / rec.base_power,
+                down=component_attr["ramp_limits"]["down"] / rec.base_power,
             )
             active_limits = (
-                min=component_attr["active_power_limits"]["min"],
-                max=component_attr["active_power_limits"]["max"],
+                min=component_attr["active_power_limits"]["min"] / rec.base_power,
+                max=component_attr["active_power_limits"]["max"] / rec.base_power,
             )
             reactive_limits = (
-                min=component_attr["reactive_power_limits"]["min"],
-                max=component_attr["reactive_power_limits"]["max"],
+                min=component_attr["reactive_power_limits"]["min"] / rec.base_power,
+                max=component_attr["reactive_power_limits"]["max"] / rec.base_power,
             )
 
             ops_cost = parse_operational_cost(component_attr["operation_cost"])
             g = component_type(;
                 name=rec.name,
-                rating=rec.rating,
+                rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
                 available=true,
                 status=true,
                 bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
                 active_power_limits=active_limits,
-                active_power=get(component_attr, "active_power", 0.0),
-                reactive_power=get(component_attr, "reactive_power", 0.0),
+                active_power=get(component_attr, "active_power", rec.rating) /
+                             rec.base_power,
+                reactive_power=get(component_attr, "reactive_power", rec.rating) /
+                               rec.base_power,
                 reactive_power_limits=reactive_limits,
                 ramp_limits=ramp_limits,
                 time_limits=time_limits,
@@ -617,21 +619,23 @@ function add_generation_units!(
 
         elseif component_type == PSY.RenewableDispatch
             reactive_limits = (
-                min=component_attr["reactive_power_limits"]["min"],
-                max=component_attr["reactive_power_limits"]["max"],
+                min=component_attr["reactive_power_limits"]["min"] / rec.base_power,
+                max=component_attr["reactive_power_limits"]["max"] / rec.base_power,
             )
             ops_cost = parse_operational_cost(component_attr["operation_cost"])
             g = component_type(;
                 name=rec.name,
-                rating=rec.rating,
+                rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
                 available=true,
                 bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
-                active_power=get(component_attr, "active_power", 0.0),
-                reactive_power=get(component_attr, "reactive_power", 0.0),
+                active_power=get(component_attr, "active_power", rec.rating) /
+                             rec.base_power,
+                reactive_power=get(component_attr, "reactive_power", rec.rating) /
+                               rec.base_power,
                 reactive_power_limits=reactive_limits,
-                power_factor=get(component_attr, "power factor", 0.0),
+                power_factor=get(component_attr, "power_factor", 1.0),
                 operation_cost=ops_cost,
             )
 
@@ -639,14 +643,16 @@ function add_generation_units!(
             ops_cost = RenewableGenerationCost(nothing)
             g = component_type(;
                 name=rec.name,
-                rating=rec.rating,
+                rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
                 available=true,
                 bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
-                active_power=get(component_attr, "active_power", 0.0),
-                reactive_power=get(component_attr, "reactive_power", 0.0),
-                power_factor=get(component_attr, "power factor", 0.0),
+                active_power=get(component_attr, "active_power", rec.rating) /
+                             rec.base_power,
+                reactive_power=get(component_attr, "reactive_power", rec.rating) /
+                               rec.base_power,
+                power_factor=get(component_attr, "power_factor", 1.0),
             )
         elseif component_type == PSY.HydroDispatch
             time_limits = (
@@ -654,26 +660,28 @@ function add_generation_units!(
                 down=component_attr["time_limits"]["down"],
             )
             ramp_limits = (
-                up=component_attr["ramp_limits"]["up"],
-                down=component_attr["ramp_limits"]["down"],
+                up=component_attr["ramp_limits"]["up"] / rec.base_power,
+                down=component_attr["ramp_limits"]["down"] / rec.base_power,
             )
             active_limits = (
-                min=component_attr["active_power_limits"]["min"],
-                max=component_attr["active_power_limits"]["max"],
+                min=component_attr["active_power_limits"]["min"] / rec.base_power,
+                max=component_attr["active_power_limits"]["max"] / rec.base_power,
             )
             reactive_limits = (
-                min=component_attr["reactive_power_limits"]["min"],
-                max=component_attr["reactive_power_limits"]["max"],
+                min=component_attr["reactive_power_limits"]["min"] / rec.base_power,
+                max=component_attr["reactive_power_limits"]["max"] / rec.base_power,
             )
             g = component_type(;
                 name=rec.name,
-                rating=rec.rating,
+                rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
                 available=true,
                 bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
-                active_power=get(component_attr, "active_power", 0.0),
-                reactive_power=get(component_attr, "reactive_power", 0.0),
+                active_power=get(component_attr, "active_power", rec.rating) /
+                             rec.base_power,
+                reactive_power=get(component_attr, "reactive_power", rec.rating) /
+                               rec.base_power,
                 active_power_limits=active_limits,
                 reactive_power_limits=reactive_limits,
                 ramp_limits=ramp_limits,
@@ -682,43 +690,43 @@ function add_generation_units!(
 
         elseif component_type == PSY.HydroEnergyReservoir
             active_limits = (
-                min=component_attr["active_power_limits"]["min"],
-                max=component_attr["active_power_limits"]["max"],
+                min=component_attr["active_power_limits"]["min"] / rec.base_power,
+                max=component_attr["active_power_limits"]["max"] / rec.base_power,
             )
             reactive_limits = (
-                min=component_attr["reactive_power_limits"]["min"],
-                max=component_attr["reactive_power_limits"]["max"],
+                min=component_attr["reactive_power_limits"]["min"] / rec.base_power,
+                max=component_attr["reactive_power_limits"]["max"] / rec.base_power,
             )
             time_limits = (
                 up=component_attr["time_limits"]["up"],
                 down=component_attr["time_limits"]["down"],
             )
             ramp_limits = (
-                up=component_attr["ramp_limits"]["up"],
-                down=component_attr["ramp_limits"]["down"],
+                up=component_attr["ramp_limits"]["up"] / rec.base_power,
+                down=component_attr["ramp_limits"]["down"] / rec.base_power,
             )
             ops_cost = parse_operational_cost(component_attr["operation_cost"])
 
             g = component_type(;
                 name=rec.name,
-                rating=rec.rating,
+                rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
                 available=component_attr["available"],
                 status=component_attr["status"],
-                inflow=component_attr["inflow"],
+                inflow=component_attr["inflow"] / rec.base_power,
                 bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
                 time_at_status=component_attr["time_at_status"],
                 storage_target=component_attr["storage_target"],
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
                 conversion_factor=component_attr["conversion_factor"],
-                storage_capacity=component_attr["storage_capacity"],
+                storage_capacity=component_attr["storage_capacity"] / rec.base_power,
                 active_power_limits=active_limits,
-                active_power=component_attr["active_power"],
-                reactive_power=component_attr["reactive_power"],
+                active_power=component_attr["active_power"] / rec.base_power,
+                reactive_power=component_attr["reactive_power"] / rec.base_power,
                 reactive_power_limits=reactive_limits,
                 ramp_limits=ramp_limits,
                 time_limits=time_limits,
-                initial_storage=component_attr["initial_storage"],
+                initial_storage=component_attr["initial_storage"] / rec.base_power,
                 operation_cost=ops_cost, #Add later when data is in DB
             )
         end
@@ -786,16 +794,16 @@ function add_storage_units!(
             max=component_attr["storage_level_limits"]["max"],
         )
         input_active_limits = (
-            min=component_attr["input_active_power_limits"]["min"],
-            max=component_attr["input_active_power_limits"]["max"],
+            min=component_attr["input_active_power_limits"]["min"] / rec.base_power,
+            max=component_attr["input_active_power_limits"]["max"] / rec.base_power,
         )
         output_active_limits = (
-            min=component_attr["output_active_power_limits"]["min"],
-            max=component_attr["output_active_power_limits"]["max"],
+            min=component_attr["output_active_power_limits"]["min"] / rec.base_power,
+            max=component_attr["output_active_power_limits"]["max"] / rec.base_power,
         )
         reactive_limits = (
-            min=component_attr["reactive_power_limits"]["min"],
-            max=component_attr["reactive_power_limits"]["max"],
+            min=component_attr["reactive_power_limits"]["min"] / rec.base_power,
+            max=component_attr["reactive_power_limits"]["max"] / rec.base_power,
         )
 
         # Get name of bus
@@ -808,7 +816,7 @@ function add_storage_units!(
         t = component_type(;
             #Data pulled from DB
             name=rec.name,
-            rating=rec.rating,
+            rating=rec.rating / rec.base_power,
             base_power=rec.base_power,
             available=component_attr["available"],
             bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
@@ -818,14 +826,14 @@ function add_storage_units!(
             ),
             conversion_factor=component_attr["conversion_factor"],
             cycle_limits=component_attr["cycle_limits"],
-            storage_capacity=component_attr["storage_capacity"],
+            storage_capacity=component_attr["storage_capacity"] / rec.base_power,
             storage_level_limits=level_limits,
             storage_target=component_attr["storage_target"],
             initial_storage_capacity_level=component_attr["initial_storage_capacity_level"],
             input_active_power_limits=input_active_limits,
             output_active_power_limits=output_active_limits,
-            active_power=component_attr["active_power"],
-            reactive_power=component_attr["reactive_power"],
+            active_power=component_attr["active_power"] / rec.base_power,
+            reactive_power=component_attr["reactive_power"] / rec.base_power,
             reactive_power_limits=reactive_limits,
             efficiency=(in=rec.efficiency_up, out=rec.efficiency_down),
             operation_cost=ops_cost,
@@ -1053,7 +1061,6 @@ function add_system_lines!(
             add_technology!(p, t)
             existing = ExistingCapacity(; existing_technologies=[rec.name])
             add_supplemental_attribute!(p, t, existing)
-        else
         end
     end
 
@@ -1176,7 +1183,9 @@ function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
                     p.base_system,
                 ),
             )
-            ts_array = get_time_series_array(SingleTimeSeries, unit, "max_active_power")
+            ts_array =
+                get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
+                get_rating(unit)
             ts = SingleTimeSeries("capacity_factor", ts_array)
             add_time_series!(p, t, ts)
         end
@@ -1307,9 +1316,16 @@ end
 function deserialize_time_series_from_metadata!(sys::PowerSystems.System, db, metadata, row)
     time_array = deserialize_timedata(db, metadata, row.time_series_uuid)
     ts = IS.time_series_metadata_to_data(metadata)(metadata, time_array)
+    component = PowerSystems.get_component(sys, row.owner_uuid)
     PowerSystems.add_time_series!(sys, PowerSystems.get_component(sys, row.owner_uuid), ts)
+    if PSY.get_name(component) == "122_HYDRO_4"
+        @show ts.name, PSY.get_name(component), maximum(values(ts.data))
+        @show ts.name,
+        PSY.get_name(component),
+        maximum(get_time_series_values(SingleTimeSeries, component, ts.name))
+        @show get_rating(component), get_base_power(component)
+    end
 end
-
 function deserialize_timeseries!(sys::PowerSystems.System, db)
     DBInterface.transaction(db) do
         # For each time_series_uuid, we'll pick a "real" metadata_uuid (so no DeterministicSingleTimeSeries),
@@ -1317,17 +1333,15 @@ function deserialize_timeseries!(sys::PowerSystems.System, db)
         # for all others.
         serialized_metadata = Set{String}()
         for row in get_example_metadata(db)
-            if row.metadata_uuid != "0" #Including this to skip over the temporary investment timeseries
+            if row.owner_category == "Component" #Including this to skip over the temporary investment timeseries
                 metadata = deserialize_metadata(row)
                 deserialize_time_series_from_metadata!(sys, db, metadata, row)
                 push!(serialized_metadata, row.metadata_uuid)
             end
         end
-
         associations = DBInterface.execute(db, "SELECT * FROM time_series_associations")
-
         for row in associations
-            if row.metadata_uuid != "0"
+            if row.owner_category == "Component"
                 metadata = deserialize_metadata(row)
                 if in(row.metadata_uuid, serialized_metadata)
                     continue
