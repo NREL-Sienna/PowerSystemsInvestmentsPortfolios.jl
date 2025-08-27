@@ -955,7 +955,7 @@ end
 function transform_natural_impedance_to_device_base(natural_units_impedance, arc, sys)
     base_voltage = arc.from.base_voltage
     if isnothing(base_voltage)
-       error("Base voltage is not defined")
+        error("Base voltage is not defined")
     end
     base_power = get_base_power(sys)
     Z_base = base_voltage^2 / base_power
@@ -966,7 +966,7 @@ end
 function transform_natural_admittance_to_device_base(natural_units_admittance, arc, sys)
     base_voltage = arc.from.base_voltage
     if isnothing(base_voltage)
-       error("Base voltage is not defined")
+        error("Base voltage is not defined")
     end
     base_power = get_base_power(sys)
     Z_base = base_voltage^2 / base_power
@@ -1008,7 +1008,18 @@ function add_system_lines!(
         arc = first(DBInterface.execute(db, QUERIES[:arc], [rec.arc_id])).id
 
         if component_type == PSY.Line
-            b = (from=transform_natural_admittance_to_device_base(component_attr["b"]["from"], arc_dict[arc], p.base_system), to=transform_natural_admittance_to_device_base(component_attr["b"]["to"], arc_dict[arc], p.base_system))
+            b = (
+                from=transform_natural_admittance_to_device_base(
+                    component_attr["b"]["from"],
+                    arc_dict[arc],
+                    p.base_system,
+                ),
+                to=transform_natural_admittance_to_device_base(
+                    component_attr["b"]["to"],
+                    arc_dict[arc],
+                    p.base_system,
+                ),
+            )
             g = (from=component_attr["g"]["from"], to=component_attr["g"]["to"])
             angle_limits = (
                 min=component_attr["angle_limits"]["min"],
@@ -1024,26 +1035,45 @@ function add_system_lines!(
                                   get_base_power(p.base_system),
                 available=component_attr["available"],
                 angle_limits=angle_limits,
-                x=transform_natural_impedance_to_device_base(component_attr["x"], arc_dict[arc], p.base_system),
-                r=transform_natural_impedance_to_device_base(component_attr["r"], arc_dict[arc], p.base_system),
+                x=transform_natural_impedance_to_device_base(
+                    component_attr["x"],
+                    arc_dict[arc],
+                    p.base_system,
+                ),
+                r=transform_natural_impedance_to_device_base(
+                    component_attr["r"],
+                    arc_dict[arc],
+                    p.base_system,
+                ),
                 b=b,
                 g=g,
             )
-            
-            
+
         elseif component_type == PSY.Transformer2W
             l = component_type(;
                 name=rec.name,
                 rating=rec.continuous_rating / get_base_power(p.base_system),
                 arc=arc_dict[arc],
-                primary_shunt=transform_natural_impedance_to_device_base(component_attr["primary_shunt"]["real"], arc_dict[arc], p.base_system),
+                primary_shunt=transform_natural_impedance_to_device_base(
+                    component_attr["primary_shunt"]["real"],
+                    arc_dict[arc],
+                    p.base_system,
+                ),
                 reactive_power_flow=component_attr["reactive_power_flow"] /
                                     get_base_power(p.base_system),
                 active_power_flow=component_attr["active_power_flow"] /
                                   get_base_power(p.base_system),
                 available=component_attr["available"],
-                x=transform_natural_impedance_to_device_base(component_attr["x"], arc_dict[arc], p.base_system),
-                r=transform_natural_impedance_to_device_base(component_attr["r"], arc_dict[arc], p.base_system),
+                x=transform_natural_impedance_to_device_base(
+                    component_attr["x"],
+                    arc_dict[arc],
+                    p.base_system,
+                ),
+                r=transform_natural_impedance_to_device_base(
+                    component_attr["r"],
+                    arc_dict[arc],
+                    p.base_system,
+                ),
             )
         end
         if haskey(component_attr, "uuid")
