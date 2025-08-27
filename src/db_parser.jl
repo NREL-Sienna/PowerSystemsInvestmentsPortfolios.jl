@@ -1199,7 +1199,7 @@ function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
 
             #Setting cost data using data from timeseries
             if haskey(cost_data, "heatrate_R1")
-                capex = LinearCurve(cost_data["capcost_R1"])
+                capex = LinearCurve(cost_data["capcost_R1"]*1000.0)
                 opex = ThermalGenerationCost(
                     variable=FuelCurve(
                         LinearCurve(cost_data["heatrate_R1"]),
@@ -1212,7 +1212,7 @@ function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
                 set_operation_costs!(t, opex)
                 set_capital_costs!(t, capex)
             elseif haskey(cost_data, "Var O&M \$/MWh_R1")
-                capex = LinearCurve(cost_data["Overnight Cap Cost \$/kW_R1"])
+                capex = LinearCurve(cost_data["Overnight Cap Cost \$/kW_R1"]*1000.0)
                 opex = RenewableGenerationCost(
                     variable=CostCurve(
                         LinearCurve(0.0),
@@ -1222,7 +1222,7 @@ function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
                 set_operation_costs!(t, opex)
                 set_capital_costs!(t, capex)
             else
-                capex = LinearCurve(cost_data["capcost_R1"])
+                capex = LinearCurve(cost_data["capcost_R1"]*1000.0)
                 opex = RenewableGenerationCost(
                     variable=CostCurve(LinearCurve(0.0), LinearCurve(cost_data["vom_R1"])), #Using vom cost as fuel cost for now
                 )
