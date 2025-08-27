@@ -1234,17 +1234,33 @@ function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
         #Using capacity factor data from base system for capacity factors
         if typeof(t) in
            [SupplyTechnology{RenewableDispatch}, SupplyTechnology{RenewableNonDispatch}]
-            prime_mover = get_prime_mover_type(t)
-            unit = first(
-                IS.get_components(
-                    x -> PSY.get_prime_mover_type(x) == prime_mover,
-                    typeof(t).parameters[1],
-                    p.base_system,
-                ),
-            )
-            ts_array =
-                get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
-                get_rating(unit)
+            if has_supplemental_attributes(t)
+                existing_names = get_existing_technologies(
+                    only(get_supplemental_attributes(ExistingCapacity, t)),
+                )
+                unit = first(
+                    IS.get_components(
+                        x -> PSY.get_name(x) == first(existing_names),
+                        typeof(t).parameters[1],
+                        p.base_system,
+                    ),
+                )
+                ts_array =
+                    get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
+                    get_rating(unit)
+            else
+                prime_mover = get_prime_mover_type(t)
+                unit = first(
+                    IS.get_components(
+                        x -> PSY.get_prime_mover_type(x) == prime_mover,
+                        typeof(t).parameters[1],
+                        p.base_system,
+                    ),
+                )
+                ts_array =
+                    get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
+                    get_rating(unit)
+            end
             ts = SingleTimeSeries("capacity_factor", ts_array)
             add_time_series!(p, t, ts)
         end
