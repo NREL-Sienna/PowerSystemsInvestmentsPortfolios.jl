@@ -110,6 +110,7 @@ function database_to_portfolio(
         interest_rate;
         base_system=system,
     )
+    set_units_base_system!(p.base_system, "DEVICE_BASE")
     portfolio = database_to_structs(database_filepath, p)
 
     return portfolio
@@ -906,10 +907,10 @@ function add_demand_requirements!(
                 ).area
         end
 
-        # build and immediately insert
         d = DemandRequirement{component_type}(;
             name=rec.name,
             id=rec.id,
+            peak_demand_mw=component_attr["active_power"], #TODO: Change to "max_active_power" later when DB is fixed
             region=collect(
                 IS.get_components(x -> get_id(x) == area, RegionTopology, p.data),
             ),
@@ -938,10 +939,10 @@ function add_loads!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db
             name=rec.name,
             base_power=rec.base_power,
             bus=PSY.get_component(ACBus, p.base_system, bus_name),
-            max_active_power=component_attr["max_active_power"],
-            max_reactive_power=component_attr["max_reactive_power"],
-            reactive_power=component_attr["reactive_power"],
-            active_power=component_attr["active_power"],
+            max_active_power=component_attr["active_power"] / rec.base_power, #TODO: Change to "max_active_power" later when DB is fixed
+            max_reactive_power=component_attr["max_reactive_power"] / rec.base_power,
+            reactive_power=component_attr["reactive_power"] / rec.base_power,
+            active_power=component_attr["active_power"] / rec.base_power,
             available=component_attr["available"],
         )
         if haskey(component_attr, "uuid")
@@ -993,27 +994,31 @@ function add_system_lines!(
             )
             l = component_type(;
                 name=rec.name,
-                rating=rec.continuous_rating,
+                rating=rec.continuous_rating / get_base_power(p.base_system),
                 arc=arc_dict[arc],
-                reactive_power_flow=component_attr["reactive_power_flow"],
-                active_power_flow=component_attr["active_power_flow"],
+                reactive_power_flow=component_attr["reactive_power_flow"] /
+                                    get_base_power(p.base_system),
+                active_power_flow=component_attr["active_power_flow"] /
+                                  get_base_power(p.base_system),
                 available=component_attr["available"],
                 angle_limits=angle_limits,
-                x=component_attr["x"] / get_base_power(p.base_system),
-                r=component_attr["r"] / get_base_power(p.base_system),
+                x=component_attr["x"],
+                r=component_attr["r"],
                 b=b,
                 g=g,
             )
         elseif component_type == PSY.Transformer2W
             l = component_type(;
                 name=rec.name,
-                rating=rec.continuous_rating,
+                rating=rec.continuous_rating / get_base_power(p.base_system),
                 arc=arc_dict[arc],
                 primary_shunt=component_attr["primary_shunt"]["real"],
-                reactive_power_flow=component_attr["reactive_power_flow"],
-                active_power_flow=component_attr["active_power_flow"],
+                reactive_power_flow=component_attr["reactive_power_flow"] /
+                                    get_base_power(p.base_system),
+                active_power_flow=component_attr["active_power_flow"] /
+                                  get_base_power(p.base_system),
                 available=component_attr["available"],
-                x=component_attr["x"] / get_base_power(p.base_system),
+                x=component_attr["x"],
                 r=component_attr["r"],
             )
         end
@@ -1201,7 +1206,13 @@ function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
                 p.base_system,
             ),
         )
-        ts_array = get_time_series_array(SingleTimeSeries, unit, "max_active_power")
+        if get_max_active_power(unit) != 0
+            ts_array =
+                get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
+                get_max_active_power(unit)
+        else
+            ts_array = get_time_series_array(SingleTimeSeries, unit, "max_active_power")
+        end
         ts = SingleTimeSeries("demand", ts_array)
         add_time_series!(p, d, ts)
     end
@@ -1319,11 +1330,8 @@ function deserialize_time_series_from_metadata!(sys::PowerSystems.System, db, me
     component = PowerSystems.get_component(sys, row.owner_uuid)
     PowerSystems.add_time_series!(sys, PowerSystems.get_component(sys, row.owner_uuid), ts)
     if PSY.get_name(component) == "122_HYDRO_4"
-        @show ts.name, PSY.get_name(component), maximum(values(ts.data))
-        @show ts.name,
         PSY.get_name(component),
         maximum(get_time_series_values(SingleTimeSeries, component, ts.name))
-        @show get_rating(component), get_base_power(component)
     end
 end
 function deserialize_timeseries!(sys::PowerSystems.System, db)
