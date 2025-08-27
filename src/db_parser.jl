@@ -492,6 +492,7 @@ function add_aggregate_lines!(
                 ),
             )[1],
             capacity_limits=(min=0.0, max=max(rec.max_flow_from, rec.max_flow_to)),
+            capital_costs= LinearCurve(1e5)
         )
         add_technology!(p, t)
     end
@@ -1115,7 +1116,7 @@ function add_system_lines!(
                 end_node=get_region(Node, p, balancing_topology_to),
                 reactance=component_attr["x"],
                 resistance=component_attr["r"],
-                capital_costs=LinearCurve(1000.0),
+                capital_costs=LinearCurve(1e5),
             )
             add_technology!(p, t)
             existing = ExistingCapacity(; existing_technologies=[rec.name])
@@ -1135,6 +1136,7 @@ function add_system_lines!(
                 financial_data=DEFAULT_FINANCIAL_DATA,
                 start_region=get_region(Zone, p, a[1]),
                 end_region=get_region(Zone, p, a[2]),
+                capital_costs=LinearCurve(1e5)
             )
             i += 1
             add_technology!(p, t)
@@ -1170,24 +1172,13 @@ function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
                         [ts_association.time_series_uuid],
                     )
                 ]
-                if occursin("Overnight", ts_association.name) ||
-                   occursin("Fixed", ts_association.name)
-                    values = [
-                        row.value / 1000 for row in DBInterface.execute(
-                            db,
-                            QUERIES[:ts_data],
-                            [ts_association.time_series_uuid],
-                        )
-                    ]
-                else
-                    values = [
-                        row.value for row in DBInterface.execute(
-                            db,
-                            QUERIES[:ts_data],
-                            [ts_association.time_series_uuid],
-                        )
-                    ]
-                end
+                values = [
+                    row.value for row in DBInterface.execute(
+                        db,
+                        QUERIES[:ts_data],
+                        [ts_association.time_series_uuid],
+                    )
+                ]
                 ts_data = TimeSeries.TimeArray(timestamps, values)
 
                 ts =
