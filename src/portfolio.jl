@@ -24,11 +24,11 @@ mutable struct PortfolioFinancialData <: IS.InfrastructureSystemsType
     interest_rate::Float64
 end
 
-struct Portfolio <: IS.InfrastructureSystemsType
+mutable struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     data::IS.SystemData # Inputs to the model
     base_system::PSY.System #Base system storing existing data
-    investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
+    investment_schedule::Union{Nothing, InvestmentScheduleResults} # Investment decisions container i.e., model outputs. Container TBD
     time_series_directory::Union{Nothing, String}
     financial_data::Union{Nothing, PortfolioFinancialData}
     metadata::PortfolioMetadata
@@ -38,7 +38,7 @@ struct Portfolio <: IS.InfrastructureSystemsType
         aggregation,
         data,
         base_system::PSY.System,
-        investment_schedule::Dict,
+        investment_schedule::Union{Nothing, InvestmentScheduleResults},
         internal::IS.InfrastructureSystemsInternal;
         time_series_directory=nothing,
         financial_data=nothing,
@@ -79,7 +79,7 @@ function Portfolio(; kwargs...)
         DEFAULT_AGGREGATION,
         data,
         DEFAULT_SYSTEM(),
-        Dict(),
+        nothing,
         IS.InfrastructureSystemsInternal();
         kwargs...,
     )
@@ -94,7 +94,7 @@ function Portfolio(aggregation; kwargs...)
         aggregation,
         data,
         DEFAULT_SYSTEM(),
-        Dict(),
+        nothing,
         IS.InfrastructureSystemsInternal();
         kwargs...,
     )
@@ -109,7 +109,7 @@ function Portfolio(base_system::PSY.System; kwargs...)
         DEFAULT_AGGREGATION,
         data,
         base_system,
-        Dict(),
+        nothing,
         IS.InfrastructureSystemsInternal();
         kwargs...,
     )
@@ -124,7 +124,7 @@ function Portfolio(base_year, discount_rate, inflation_rate, interest_rate; kwar
         DEFAULT_AGGREGATION,
         data,
         DEFAULT_SYSTEM(),
-        Dict(),
+        nothing,
         InfrastructureSystemsInternal();
         financial_data=PortfolioFinancialData(
             base_year,
@@ -152,7 +152,7 @@ function Portfolio(
         aggregation,
         data,
         DEFAULT_SYSTEM(),
-        Dict(),
+        nothing,
         InfrastructureSystemsInternal();
         financial_data=PortfolioFinancialData(
             base_year,
@@ -225,6 +225,11 @@ Get the description of the portfolio.
 get_description(val::Portfolio) = val.metadata.description
 
 """
+Get the investment schedule of the portfolio.
+"""
+get_investment_schedule(val::Portfolio) = val.investment_schedule
+
+"""
 Return true if checks are enabled on the system.
 """
 get_runchecks(val::Portfolio) = val.runchecks[]
@@ -257,6 +262,12 @@ Set the interest rate of the portfolio.
 """
 set_interest_rate!(val::Portfolio, interest_rate::Float64) =
     val.financial_data.interest_rate = interest_rate
+
+"""
+Set the investment schedule of the portfolio.
+"""
+set_investment_schedule!(val::Portfolio, investment_schedule::InvestmentScheduleResults) =
+    val.investment_schedule = investment_schedule
 
 function _validate_or_skip!(sys, component, skip_validation)
     if skip_validation && get_runchecks(sys)

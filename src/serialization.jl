@@ -131,6 +131,26 @@ function deserialize(
     return from_dict(Portfolio, raw, filename; from_python, kwargs...)
 end
 
+function serialize(schedule::InvestmentScheduleResults)
+    data = Dict{String, Dict{String, Any}}()
+    for (period, investments) in schedule.results
+        date_strings = [string(date) for date in period]
+        tuple_str = "(" * join(date_strings, ",") * ")"
+
+        serialize_investments = Dict{String, Any}()
+        for (technology, capacity) in investments
+            key_strings = [string(k) for k in technology]
+            inner_tuple_str = "(" * join(key_strings, ",") * ")"
+            serialize_investments[inner_tuple_str] = capacity
+        end
+        data[tuple_str] = serialize_investments
+    end
+    schedule_dict = Dict{String, Any}("results" => data)
+    add_serialization_metadata!(schedule_dict, InvestmentScheduleResults)
+
+    return schedule_dict
+end
+
 function serialize(technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
     api_struct = serialize_openapi_struct(technology)
 
@@ -227,12 +247,16 @@ function from_dict(
     interest_rate = get(financial_data, "interest_rate", nothing)
 
     #Base system
-    base_system_file = joinpath(dirname(filename), splitext(basename(filename))[1] * "_base_system.json")
+    base_system_file =
+        joinpath(dirname(filename), splitext(basename(filename))[1] * "_base_system.json")
     base_system = PSY.System(base_system_file)
 
     internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
     aggregation = PSY.ACBus
-    investment_schedule = raw["investment_schedule"]
+    investment_schedule = get(raw, "investment_schedule", nothing)
+    if !isnothing(investment_schedule)
+        investment_schedule = deserialize(InvestmentScheduleResults, investment_schedule)
+    end
     data = deserialize(
         IS.SystemData,
         raw["data"];
@@ -396,6 +420,34 @@ function deserialize(
     # Note: components need to be deserialized by the parent so that they can go through
     # the proper checks.
     return sys
+end
+
+function deserialize(::Type{InvestmentScheduleResults}, raw::Dict)
+    schedule = Dict()
+    for (period_str, investment_dict) in raw["results"]
+        inner = period_str[2:(end - 1)]
+        date_strings = split(inner, ",")
+        dates = [Dates.Date(strip(date_str)) for date_str in date_strings]
+        period_tuple = Tuple(dates)
+
+        schedule[period_tuple] = Dict()
+        for (tech_key, capacities) in investment_dict
+            inner2 = tech_key[2:(end - 1)]
+            key_strings = s = split(inner2, ",")
+
+            technology_tuple = (eval(Meta.parse(key_strings[1])), key_strings[2])
+
+            if capacities isa Dict
+                capacity_tuple =
+                    NamedTuple((Symbol(key), value) for (key, value) in capacities)
+                schedule[period_tuple][technology_tuple] = capacity_tuple
+            else
+                schedule[period_tuple][technology_tuple] = capacities
+            end
+        end
+    end
+
+    return InvestmentScheduleResults(schedule)
 end
 
 # Function copied over from IS. This version of the function is modified to deserialize using openAPI structs for PSIP supplemental attributes
@@ -830,8 +882,9 @@ function to_json(
     @info "Serialized Portfolio to $filename"
 
     # Serialize base system to a separate file
-    base_system_file = joinpath(dirname(filename), splitext(basename(filename))[1] * "_base_system.json")
-    PSY.to_json(portfolio.base_system, base_system_file)
+    base_system_file =
+        joinpath(dirname(filename), splitext(basename(filename))[1] * "_base_system.json")
+    PSY.to_json(portfolio.base_system, base_system_file; pretty=pretty, force=force)
 
     return
 end

@@ -72,6 +72,7 @@ export RegionTopology
 export Zone
 export Node
 export PortfolioFinancialData
+export InvestmentScheduleResults
 export TechnologyFinancialData
 export TimeMapping
 
@@ -91,12 +92,14 @@ export get_base_year
 export get_inflation_rate
 export get_interest_rate
 export get_discount_rate
+export get_investment_schedule
 export set_description!
 export set_name!
 export set_base_year!
 export set_inflation_rate!
 export set_interest_rate!
 export set_discount_rate!
+export set_investment_schedule!
 export add_technology!
 export add_technologies!
 export add_region!
