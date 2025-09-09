@@ -102,7 +102,7 @@ function database_to_portfolio(
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}=DEFAULT_AGGREGATION,
     system::PSY.System=PSY.System(100.0),
 )
-    p = Portfolio(
+    portfolio = Portfolio(
         aggregation,
         base_year,
         discount_rate,
@@ -110,13 +110,13 @@ function database_to_portfolio(
         interest_rate;
         base_system=system,
     )
-    #set_units_base_system!(p.base_system, "DEVICE_BASE")
-    portfolio = database_to_structs(database_filepath, p)
+    #set_units_base_system!(portfolio.base_system, "DEVICE_BASE")
+    portfolio = database_to_structs(database_filepath, portfolio)
 
     return portfolio
 end
 
-function database_to_structs(db_path::AbstractString, p::Portfolio)
+function database_to_structs(db_path::AbstractString, portfolio::Portfolio)
     # Connect to the SQLite database
     db = SQLite.DB(db_path)
     attributes = get_entity_attributes(db)
@@ -124,34 +124,33 @@ function database_to_structs(db_path::AbstractString, p::Portfolio)
     # Add zones and lines, shouldn't add both aggregate lines and nodal lines to the same DB
     # User can provide a desired aggregation level and then we can select based on that
 
-    # Add zones to the portfolio
-    if get_aggregation(p) == PSY.ACBus #Nodal aggregation
-        add_nodes!(p, attributes, db)
-        add_nodal_lines!(p, attributes, db)
-    else #Zonal aggregation
-        add_zones!(p, attributes, db)
-        add_aggregate_lines!(p, attributes, db)
+    if get_aggregation(portfolio) === PSY.ACBus
+        add_nodes!(portfolio, attributes, db)
+        add_nodal_lines!(portfolio, attributes, db)
+    else
+        add_zones!(portfolio, attributes, db)
+        add_aggregate_lines!(portfolio, attributes, db)
     end
 
     # Add technologies to Portfolio
-    add_technologies!(p, attributes, db)
+    add_technologies!(portfolio, attributes, db)
 
     # Add demands
-    add_demand_requirements!(p, attributes, db)
-    add_demand_technologies!(p, attributes, db)
+    add_demand_requirements!(portfolio, attributes, db)
+    add_demand_technologies!(portfolio, attributes, db)
 
     # Add data to base_systems
-    add_buses!(p, attributes, db)
-    add_system_lines!(p, attributes, db)
-    add_generation_units!(p, attributes, db)
-    add_storage_units!(p, attributes, db)
-    add_loads!(p, attributes, db)
+    add_buses!(portfolio, attributes, db)
+    add_system_lines!(portfolio, attributes, db)
+    add_generation_units!(portfolio, attributes, db)
+    add_storage_units!(portfolio, attributes, db)
+    add_loads!(portfolio, attributes, db)
 
     # Deserialize timeseries
-    deserialize_timeseries!(p.base_system, db)
-    deserialize_portfolio_timeseries!(p, db)
+    deserialize_timeseries!(portfolio.base_system, db)
+    deserialize_portfolio_timeseries!(portfolio, db)
 
-    return p
+    return portfolio
 end
 
 # Ported from SiennaGridDB
@@ -193,7 +192,6 @@ end
 
 function parse_operational_cost(ops_cost::Dict{String, Any})
 
-    # Build correct cost struct
     if ops_cost["cost_type"] == "THERMAL"
         start_up_dict = ops_cost["start_up"]
         variable_dict = ops_cost["variable"]
@@ -421,50 +419,50 @@ function add_zones!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db
     end
 end
 
-function add_nodes!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
+function add_nodes!(portfolio::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
     for rec in DBInterface.execute(db, QUERIES[:balancing_topologies])
         z = Node(; name=rec.name, id=rec.id)
-        add_region!(p, z)
+        add_region!(portfolio, z)
     end
 end
 
-function add_buses!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
+function add_buses!(portfolio::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
     for rec in DBInterface.execute(db, QUERIES[:zones])
         component_attr = get(attributes, rec.id, Dict{String, Any}())
-        a = Area(;
+        area = Area(;
             name=rec.name,
             load_response=component_attr["load_response"],
             peak_active_power=component_attr["peak_active_power"],
             peak_reactive_power=component_attr["peak_reactive_power"],
         )
         if haskey(component_attr, "uuid")
-            IS.set_uuid!(IS.get_internal(a), Base.UUID(component_attr["uuid"]))
+            IS.set_uuid!(IS.get_internal(area), Base.UUID(component_attr["uuid"]))
         end
-        PSY.add_component!(p.base_system, a)
+        PSY.add_component!(portfolio.base_system, area)
     end
     for rec in DBInterface.execute(db, QUERIES[:balancing_topologies])
         component_attr = get(attributes, rec.id, Dict{String, Any}())
         area_name = first(DBInterface.execute(db, QUERIES[:zone], [rec.area])).name
-        b = PSY.ACBus(;
+        bus = PSY.ACBus(;
             name=rec.name,
             number=rec.id,
             bustype=PSY.get_enum_value(PSY.ACBusTypes, component_attr["bustype"]),
             angle=component_attr["angle"],
             magnitude=component_attr["magnitude"],
-            area=get_component(Area, p.base_system, area_name),
+            area=get_component(Area, portfolio.base_system, area_name),
             voltage_limits=nothing,
             base_voltage=component_attr["base_voltage"],
             load_zone=nothing,
         )
         if haskey(component_attr, "uuid")
-            IS.set_uuid!(IS.get_internal(b), Base.UUID(component_attr["uuid"]))
+            IS.set_uuid!(IS.get_internal(bus), Base.UUID(component_attr["uuid"]))
         end
-        PSY.add_component!(p.base_system, b)
+        PSY.add_component!(portfolio.base_system, bus)
     end
 end
 
 function add_aggregate_lines!(
-    p::Portfolio,
+    portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     db::SQLite.DB,
 )
@@ -481,53 +479,52 @@ function add_aggregate_lines!(
                 IS.get_components(
                     x -> get_id(x) == parse(Int64, rec.area_from),
                     RegionTopology,
-                    p.data,
+                    portfolio.data,
                 ),
             )[1],
             end_region=collect(
                 IS.get_components(
                     x -> get_id(x) == parse(Int64, rec.area_to),
                     RegionTopology,
-                    p.data,
+                    portfolio.data,
                 ),
             )[1],
             capacity_limits=(min=0.0, max=max(rec.max_flow_from, rec.max_flow_to)),
             capital_costs=LinearCurve(1e5),
         )
-        add_technology!(p, t)
+        add_technology!(portfolio, t)
     end
 end
 
 # Will be used for new candidate transmission options in the future if in database
 function add_nodal_lines!(
-    p::Portfolio,
+    portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     db::SQLite.DB,
 ) end
 
 function add_technologies!(
-    p::Portfolio,
+    portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     db::SQLite.DB,
 )
     for rec in DBInterface.execute(db, QUERIES[:technologies])
 
-        # Select appropriate parametric type
         parametric = map_prime_mover_to_parametric(rec.prime_mover)
 
-        if get_aggregation(p) == PSY.ACBus
+        if get_aggregation(portfolio) == PSY.ACBus
             area_id =
                 first(DBInterface.execute(db, QUERIES[:zone_for_technology], [rec.area])).id
             regions = [
-                get_region(Node, p, row.name) for
+                get_region(Node, portfolio, row.name) for
                 row in DBInterface.execute(db, QUERIES[:area_to_topology], [area_id])
             ]
         else
-            regions = [get_region(Zone, p, rec.area)]
+            regions = [get_region(Zone, portfolio, rec.area)]
         end
 
         if rec.prime_mover == "STORAGE"
-            t = StorageTechnology{parametric}(;
+            technology = StorageTechnology{parametric}(;
                 name=rec.prime_mover * string(rec.id),
                 id=rec.id,
                 capital_costs_discharge=LinearCurve(0.0),
@@ -540,10 +537,10 @@ function add_technologies!(
                 operation_costs=StorageCost(),
             )
         elseif rec.prime_mover in ["HYDRO", "ROR", "SYNC_COND"]
-            @warn "Technologies of type $(rec.prime_mover) are not currently supported in portfolios. Skipping serialization."
+            @warn "Technologies of type $(rec.prime_mover) are not currently supported in portfolios. Skipping de-serialization."
             continue
         else
-            t = SupplyTechnology{parametric}(;
+            technology = SupplyTechnology{parametric}(;
                 name=rec.prime_mover * string(rec.id),
                 id=rec.id,
                 capital_costs=LinearCurve(0.0),
@@ -562,12 +559,12 @@ function add_technologies!(
                 ),
             )
         end
-        add_technology!(p, t)
+        add_technology!(portfolio, technology)
     end
 end
 
 function add_generation_units!(
-    p::Portfolio,
+    portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     db::SQLite.DB,
 )
@@ -600,13 +597,13 @@ function add_generation_units!(
             )
 
             ops_cost = parse_operational_cost(component_attr["operation_cost"])
-            g = component_type(;
+            generator = component_type(;
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
                 available=true,
                 status=true,
-                bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
+                bus=PSY.get_component(PSY.ACBus, portfolio.base_system, bus_name),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
                 active_power_limits=active_limits,
                 active_power=get(component_attr, "active_power", rec.rating) /
@@ -625,12 +622,12 @@ function add_generation_units!(
                 max=component_attr["reactive_power_limits"]["max"] / rec.base_power,
             )
             ops_cost = parse_operational_cost(component_attr["operation_cost"])
-            g = component_type(;
+            generator = component_type(;
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
                 available=true,
-                bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
+                bus=PSY.get_component(PSY.ACBus, portfolio.base_system, bus_name),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
                 active_power=get(component_attr, "active_power", rec.rating) /
                              rec.base_power,
@@ -643,12 +640,12 @@ function add_generation_units!(
 
         elseif component_type == PSY.RenewableNonDispatch
             ops_cost = RenewableGenerationCost(nothing)
-            g = component_type(;
+            generator = component_type(;
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
                 available=true,
-                bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
+                bus=PSY.get_component(PSY.ACBus, portfolio.base_system, bus_name),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
                 active_power=get(component_attr, "active_power", rec.rating) /
                              rec.base_power,
@@ -673,12 +670,12 @@ function add_generation_units!(
                 min=component_attr["reactive_power_limits"]["min"] / rec.base_power,
                 max=component_attr["reactive_power_limits"]["max"] / rec.base_power,
             )
-            g = component_type(;
+            generator = component_type(;
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
                 available=true,
-                bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
+                bus=PSY.get_component(PSY.ACBus, portfolio.base_system, bus_name),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
                 active_power=get(component_attr, "active_power", rec.rating) /
                              rec.base_power,
@@ -709,14 +706,14 @@ function add_generation_units!(
             )
             ops_cost = parse_operational_cost(component_attr["operation_cost"])
 
-            g = component_type(;
+            generator = component_type(;
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
                 available=component_attr["available"],
                 status=component_attr["status"],
                 inflow=component_attr["inflow"] / rec.base_power,
-                bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
+                bus=PSY.get_component(PSY.ACBus, portfolio.base_system, bus_name),
                 time_at_status=component_attr["time_at_status"],
                 storage_target=component_attr["storage_target"],
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
@@ -733,15 +730,14 @@ function add_generation_units!(
             )
         end
         if haskey(component_attr, "uuid")
-            IS.set_uuid!(IS.get_internal(g), Base.UUID(component_attr["uuid"]))
+            IS.set_uuid!(IS.get_internal(generator), Base.UUID(component_attr["uuid"]))
         end
-        add_component!(p.base_system, g)
+        add_component!(portfolio.base_system, generator)
 
         if component_type in
            [PSY.ThermalStandard, PSY.RenewableDispatch, PSY.RenewableNonDispatch]
-            # Add corresponding technology to portfolio-level data
-            if get_aggregation(p) == PSY.ACBus
-                regions = [get_region(Node, p, bus_name)]
+            if get_aggregation(portfolio) == PSY.ACBus
+                regions = [get_region(Node, portfolio, bus_name)]
             else
                 area_id =
                     first(
@@ -752,10 +748,10 @@ function add_generation_units!(
                         ),
                     ).area
                 regions = collect(
-                    IS.get_components(x -> get_id(x) == area_id, RegionTopology, p.data),
+                    IS.get_components(x -> get_id(x) == area_id, RegionTopology, portfolio.data),
                 )
             end
-            s = SupplyTechnology{component_type}(;
+            technology = SupplyTechnology{component_type}(;
                 name=rec.name,
                 id=rec.id,
                 capital_costs=LinearCurve(0.0),
@@ -771,17 +767,17 @@ function add_generation_units!(
                 capacity_limits=(min=0, max=rec.rating),
                 co2=Dict(map_fuel(rec.prime_mover) => 0.0),
             )
-            add_technology!(p, s)
+            add_technology!(portfolio, technology)
             existing = ExistingCapacity(; existing_technologies=[rec.name])
-            add_supplemental_attribute!(p, s, existing)
+            add_supplemental_attribute!(portfolio, technology, existing)
 
-            set_capacity_limits!(s, (min=0, max=get_existing_capacity_mw(p, s)))
+            set_capacity_limits!(technology, (min=0, max=get_existing_capacity_mw(portfolio, technology)))
         end
     end
 end
 
 function add_storage_units!(
-    p::Portfolio,
+    portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     db::SQLite.DB,
 )
@@ -815,13 +811,13 @@ function add_storage_units!(
 
         ops_cost = parse_operational_cost(component_attr["operation_cost"])
 
-        t = component_type(;
+        storage_unit = component_type(;
             #Data pulled from DB
             name=rec.name,
             rating=rec.rating / rec.base_power,
             base_power=rec.base_power,
             available=component_attr["available"],
-            bus=PSY.get_component(PSY.ACBus, p.base_system, bus_name),
+            bus=PSY.get_component(PSY.ACBus, portfolio.base_system, bus_name),
             prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
             storage_technology_type=PSY.StorageTech(
                 component_attr["storage_technology_type"],
@@ -841,13 +837,12 @@ function add_storage_units!(
             operation_cost=ops_cost,
         )
         if haskey(component_attr, "uuid")
-            IS.set_uuid!(IS.get_internal(t), Base.UUID(component_attr["uuid"]))
+            IS.set_uuid!(IS.get_internal(storage_unit), Base.UUID(component_attr["uuid"]))
         end
-        add_component!(p.base_system, t)
+        add_component!(portfolio.base_system, storage_unit)
 
-        # Add corresponding technology to portfolio-level data
-        if get_aggregation(p) == PSY.ACBus
-            regions = [get_region(Node, p, bus_name)]
+        if get_aggregation(portfolio) == PSY.ACBus
+            regions = [get_region(Node, portfolio, bus_name)]
         else
             area_id =
                 first(
@@ -858,10 +853,10 @@ function add_storage_units!(
                     ),
                 ).area
             regions = collect(
-                IS.get_components(x -> get_id(x) == area_id, RegionTopology, p.data),
+                IS.get_components(x -> get_id(x) == area_id, RegionTopology, portfolio.data),
             )
         end
-        s = StorageTechnology{component_type}(;
+        storage = StorageTechnology{component_type}(;
             name=rec.name,
             id=rec.id,
             capital_costs_discharge=LinearCurve(0.0),
@@ -876,14 +871,14 @@ function add_storage_units!(
             capacity_limits_discharge=(min=0, max=rec.rating),
             capacity_limits_energy=(min=0, max=component_attr["storage_capacity"]),
         )
-        add_technology!(p, s)
+        add_technology!(portfolio, storage)
         existing = ExistingCapacity(; existing_technologies=[rec.name])
-        add_supplemental_attribute!(p, s, existing)
+        add_supplemental_attribute!(portfolio, storage, existing)
     end
 end
 
 function add_demand_requirements!(
-    p::Portfolio,
+    portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     db::SQLite.DB,
 )
@@ -894,8 +889,7 @@ function add_demand_requirements!(
         )
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
-        # Determine area based on balancing topology if zonal
-        if get_aggregation(p) == PSY.ACBus
+        if get_aggregation(portfolio) == PSY.ACBus
             area = rec.balancing_topology
         else
             area =
@@ -908,21 +902,21 @@ function add_demand_requirements!(
                 ).area
         end
 
-        d = DemandRequirement{component_type}(;
+        demand = DemandRequirement{component_type}(;
             name=rec.name,
             id=rec.id,
             peak_demand_mw=component_attr["active_power"], #TODO: Change to "max_active_power" later when DB is fixed
             region=collect(
-                IS.get_components(x -> get_id(x) == area, RegionTopology, p.data),
+                IS.get_components(x -> get_id(x) == area, RegionTopology, portfolio.data),
             ),
             value_of_lost_load=1e8, #TODO: Assign a default value to this field
             power_systems_type=string(component_type),
         )
-        add_technology!(p, d)
+        add_technology!(portfolio, demand)
     end
 end
 
-function add_loads!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
+function add_loads!(portfolio::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
     # stream straight through the table
     for rec in DBInterface.execute(db, QUERIES[:demand_requirements])
         component_type = eval(
@@ -936,10 +930,10 @@ function add_loads!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db
         )[1]
 
         # build and immediately insert
-        d = component_type(;
+        load = component_type(;
             name=rec.name,
             base_power=rec.base_power,
-            bus=PSY.get_component(ACBus, p.base_system, bus_name),
+            bus=PSY.get_component(ACBus, portfolio.base_system, bus_name),
             max_active_power=component_attr["active_power"] / rec.base_power, #TODO: Change to "max_active_power" later when DB is fixed
             max_reactive_power=component_attr["max_reactive_power"] / rec.base_power,
             reactive_power=component_attr["reactive_power"] / rec.base_power,
@@ -947,9 +941,9 @@ function add_loads!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db
             available=component_attr["available"],
         )
         if haskey(component_attr, "uuid")
-            IS.set_uuid!(IS.get_internal(d), Base.UUID(component_attr["uuid"]))
+            IS.set_uuid!(IS.get_internal(load), Base.UUID(component_attr["uuid"]))
         end
-        add_component!(p.base_system, d)
+        add_component!(portfolio.base_system, load)
     end
 end
 
@@ -976,7 +970,7 @@ function transform_natural_admittance_to_device_base(natural_units_admittance, a
 end
 
 function add_system_lines!(
-    p::Portfolio,
+    portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     db::SQLite.DB,
 )
@@ -988,13 +982,13 @@ function add_system_lines!(
         to_bus =
             first(DBInterface.execute(db, QUERIES[:topology_from_arc], [rec.to_id])).name
         arc = Arc(;
-            from=PSY.get_component(ACBus, p.base_system, from_bus),
-            to=PSY.get_component(ACBus, p.base_system, to_bus),
+            from=PSY.get_component(ACBus, portfolio.base_system, from_bus),
+            to=PSY.get_component(ACBus, portfolio.base_system, to_bus),
         )
         if haskey(component_attr, "uuid")
             IS.set_uuid!(IS.get_internal(arc), Base.UUID(component_attr["uuid"]))
         end
-        add_component!(p.base_system, arc)
+        add_component!(portfolio.base_system, arc)
         arc_dict[rec.id] = arc
     end
 
@@ -1013,12 +1007,12 @@ function add_system_lines!(
                 from=transform_natural_admittance_to_device_base(
                     component_attr["b"]["from"],
                     arc_dict[arc],
-                    p.base_system,
+                    portfolio.base_system,
                 ),
                 to=transform_natural_admittance_to_device_base(
                     component_attr["b"]["to"],
                     arc_dict[arc],
-                    p.base_system,
+                    portfolio.base_system,
                 ),
             )
             g = (from=component_attr["g"]["from"], to=component_attr["g"]["to"])
@@ -1026,76 +1020,76 @@ function add_system_lines!(
                 min=component_attr["angle_limits"]["min"],
                 max=component_attr["angle_limits"]["max"],
             )
-            l = component_type(;
+            line = component_type(;
                 name=rec.name,
-                rating=rec.continuous_rating / get_base_power(p.base_system),
+                rating=rec.continuous_rating / get_base_power(portfolio.base_system),
                 arc=arc_dict[arc],
                 reactive_power_flow=component_attr["reactive_power_flow"] /
-                                    get_base_power(p.base_system),
+                                    get_base_power(portfolio.base_system),
                 active_power_flow=component_attr["active_power_flow"] /
-                                  get_base_power(p.base_system),
+                                  get_base_power(portfolio.base_system),
                 available=component_attr["available"],
                 angle_limits=angle_limits,
                 x=transform_natural_impedance_to_device_base(
                     component_attr["x"],
                     arc_dict[arc],
-                    p.base_system,
+                    portfolio.base_system,
                 ),
                 r=transform_natural_impedance_to_device_base(
                     component_attr["r"],
                     arc_dict[arc],
-                    p.base_system,
+                    portfolio.base_system,
                 ),
                 b=b,
                 g=g,
             )
 
         elseif component_type == PSY.Transformer2W
-            l = component_type(;
+            line = component_type(;
                 name=rec.name,
-                rating=rec.continuous_rating / get_base_power(p.base_system),
+                rating=rec.continuous_rating / get_base_power(portfolio.base_system),
                 arc=arc_dict[arc],
                 primary_shunt=transform_natural_impedance_to_device_base(
                     component_attr["primary_shunt"]["real"],
                     arc_dict[arc],
-                    p.base_system,
+                    portfolio.base_system,
                 ),
                 reactive_power_flow=component_attr["reactive_power_flow"] /
-                                    get_base_power(p.base_system),
+                                    get_base_power(portfolio.base_system),
                 active_power_flow=component_attr["active_power_flow"] /
-                                  get_base_power(p.base_system),
+                                  get_base_power(portfolio.base_system),
                 available=component_attr["available"],
                 x=transform_natural_impedance_to_device_base(
                     component_attr["x"],
                     arc_dict[arc],
-                    p.base_system,
+                    portfolio.base_system,
                 ),
                 r=transform_natural_impedance_to_device_base(
                     component_attr["r"],
                     arc_dict[arc],
-                    p.base_system,
+                    portfolio.base_system,
                 ),
             )
         end
         if haskey(component_attr, "uuid")
-            IS.set_uuid!(IS.get_internal(l), Base.UUID(component_attr["uuid"]))
+            IS.set_uuid!(IS.get_internal(line), Base.UUID(component_attr["uuid"]))
         end
-        add_component!(p.base_system, l)
+        add_component!(portfolio.base_system, line)
 
         #If Line is between areas, add to dictionary
-        from_area = PSY.get_name(get_area(get_from(get_arc(l))))
-        to_area = PSY.get_name(get_area(get_to(get_arc(l))))
+        from_area = PSY.get_name(get_area(get_from(get_arc(line))))
+        to_area = PSY.get_name(get_area(get_to(get_arc(line))))
         if from_area != to_area
             areas = Set([from_area, to_area])
             if haskey(tx_dict, areas)
-                push!(tx_dict[areas], PSY.get_name(l))
+                push!(tx_dict[areas], PSY.get_name(line))
             else
-                tx_dict[areas] = [PSY.get_name(l)]
+                tx_dict[areas] = [PSY.get_name(line)]
             end
         end
 
         #Build Portfolio transmission based on existing transmission
-        if get_aggregation(p) == PSY.ACBus
+        if get_aggregation(portfolio) == PSY.ACBus
             component_attr = get(attributes, rec.id, Dict{String, Any}())
             arc = first(DBInterface.execute(db, QUERIES[:arc], [rec.arc_id]))
             balancing_topology_from =
@@ -1106,7 +1100,7 @@ function add_system_lines!(
                 first(
                     DBInterface.execute(db, QUERIES[:topology_from_arc], [arc.to_id]),
                 ).name
-            t = NodalACTransportTechnology{ACBranch}(;
+            transport = NodalACTransportTechnology{ACBranch}(;
                 name=rec.name,
                 id=rec.id,
                 available=true,
@@ -1118,50 +1112,49 @@ function add_system_lines!(
                 resistance=component_attr["r"],
                 capital_costs=LinearCurve(1e5),
             )
-            add_technology!(p, t)
+            add_technology!(portfolio, transport)
             existing = ExistingCapacity(; existing_technologies=[rec.name])
-            add_supplemental_attribute!(p, t, existing)
+            add_supplemental_attribute!(portfolio, transport, existing)
         end
     end
 
-    if get_aggregation(p) != PSY.ACBus
-        i = 1
+    if get_aggregation(portfolio) != PSY.ACBus
+        id = 1
         for (areas, lines) in tx_dict
-            a = collect(areas)
-            t = AggregateTransportTechnology{ACBranch}(;
-                name=string(a[1]) * "_" * string(a[2]),
-                id=i,
+            area_list = collect(areas)
+            transport = AggregateTransportTechnology{ACBranch}(;
+                name=string(area_list[1]) * "_" * string(area_list[2]),
+                id=id,
                 available=true,
                 power_systems_type=string(ACBranch),
                 financial_data=DEFAULT_FINANCIAL_DATA,
-                start_region=get_region(Zone, p, a[1]),
-                end_region=get_region(Zone, p, a[2]),
+                start_region=get_region(Zone, portfolio, area_list[1]),
+                end_region=get_region(Zone, portfolio, area_list[2]),
                 capital_costs=LinearCurve(1e5),
             )
-            i += 1
-            add_technology!(p, t)
+            id += 1
+            add_technology!(portfolio, transport)
             existing = ExistingCapacity(; existing_technologies=lines)
-            add_supplemental_attribute!(p, t, existing)
+            add_supplemental_attribute!(portfolio, transport, existing)
         end
     end
 end
 
 #TODO: Implement DemandSideTechnologies if/when they are in the database
 function add_demand_technologies!(
-    p::Portfolio,
+    portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     db::SQLite.DB,
 ) end
 
-function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
-    supply_technologies = get_technologies(SupplyTechnology, p)
-    for t in supply_technologies
+function deserialize_portfolio_timeseries!(portfolio::Portfolio, db::SQLite.DB)
+    supply_technologies = get_technologies(SupplyTechnology, portfolio)
+    for tech in supply_technologies
 
-        #Add cost projections to timeseries
-        fuel = first(get_fuel(t))
-        prime_mover = get_prime_mover_type(t)
+        fuel = first(get_fuel(tech))
+        prime_mover = get_prime_mover_type(tech)
         ts_type = map_prime_mover_to_timeseries(prime_mover, fuel)
-        if ts_type != "None" && !has_supplemental_attributes(t)
+        if ts_type != "None" && !has_supplemental_attributes(tech)
             cost_data = Dict()
             for ts_association in
                 DBInterface.execute(db, QUERIES[:investment_timeseries], [ts_type])
@@ -1185,10 +1178,9 @@ function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
                     SingleTimeSeries(ts_association.name, ts_data; resolution=Dates.Year(1))
                 cost_data[ts_association.name] =
                     first(TimeSeries.values(ts_data[Dates.DateTime(2025, 1, 1)]))
-                add_time_series!(p, t, ts)
+                add_time_series!(portfolio, tech, ts)
             end
 
-            #Setting cost data using data from timeseries
             if haskey(cost_data, "heatrate_R1")
                 capex = LinearCurve(cost_data["capcost_R1"] * 1000.0)
                 opex = ThermalGenerationCost(
@@ -1200,8 +1192,8 @@ function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
                     start_up=0.0,
                     shut_down=0.0,
                 )
-                set_operation_costs!(t, opex)
-                set_capital_costs!(t, capex)
+                set_operation_costs!(tech, opex)
+                set_capital_costs!(tech, capex)
             elseif haskey(cost_data, "Var O&M \$/MWh_R1")
                 capex = LinearCurve(cost_data["Overnight Cap Cost \$/kW_R1"] * 1000.0)
                 opex = RenewableGenerationCost(
@@ -1210,42 +1202,41 @@ function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
                         LinearCurve(cost_data["Var O&M \$/MWh_R1"]),
                     ), #Using vom cost as fuel cost for now
                 ) #Fixed cost should be added to this at some point
-                set_operation_costs!(t, opex)
-                set_capital_costs!(t, capex)
+                set_operation_costs!(tech, opex)
+                set_capital_costs!(tech, capex)
             else
                 capex = LinearCurve(cost_data["capcost_R1"] * 1000.0)
                 opex = RenewableGenerationCost(
                     variable=CostCurve(LinearCurve(0.0), LinearCurve(cost_data["vom_R1"])), #Using vom cost as fuel cost for now
                 )
-                set_operation_costs!(t, opex)
-                set_capital_costs!(t, capex)
+                set_operation_costs!(tech, opex)
+                set_capital_costs!(tech, capex)
             end
         end
 
-        #Using capacity factor data from base system for capacity factors
-        if typeof(t) in
+        if typeof(tech) in
            [SupplyTechnology{RenewableDispatch}, SupplyTechnology{RenewableNonDispatch}]
-            if has_supplemental_attributes(t)
+            if has_supplemental_attributes(tech)
                 existing_names = get_existing_technologies(
-                    only(get_supplemental_attributes(ExistingCapacity, t)),
+                    only(get_supplemental_attributes(ExistingCapacity, tech)),
                 )
                 unit = first(
                     IS.get_components(
                         x -> PSY.get_name(x) == first(existing_names),
-                        typeof(t).parameters[1],
-                        p.base_system,
+                        typeof(tech).parameters[1],
+                        portfolio.base_system,
                     ),
                 )
                 ts_array =
                     get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
                     get_rating(unit)
             else
-                prime_mover = get_prime_mover_type(t)
+                prime_mover = get_prime_mover_type(tech)
                 unit = first(
                     IS.get_components(
                         x -> PSY.get_prime_mover_type(x) == prime_mover,
-                        typeof(t).parameters[1],
-                        p.base_system,
+                        typeof(tech).parameters[1],
+                        portfolio.base_system,
                     ),
                 )
                 ts_array =
@@ -1253,18 +1244,18 @@ function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
                     get_rating(unit)
             end
             ts = SingleTimeSeries("capacity_factor", ts_array)
-            add_time_series!(p, t, ts)
+            add_time_series!(portfolio, tech, ts)
         end
     end
 
     #Duplicate hourly demand profile on the portfolio level
-    demands = get_technologies(DemandRequirement, p)
-    for d in demands
+    demands = get_technologies(DemandRequirement, portfolio)
+    for demand in demands
         unit = first(
             IS.get_components(
-                x -> PSY.get_name(x) == get_name(d),
-                typeof(d).parameters[1],
-                p.base_system,
+                x -> PSY.get_name(x) == get_name(demand),
+                typeof(demand).parameters[1],
+                portfolio.base_system,
             ),
         )
         if get_max_active_power(unit) != 0
@@ -1275,7 +1266,7 @@ function deserialize_portfolio_timeseries!(p::Portfolio, db::SQLite.DB)
             ts_array = get_time_series_array(SingleTimeSeries, unit, "max_active_power")
         end
         ts = SingleTimeSeries("demand", ts_array)
-        add_time_series!(p, d, ts)
+        add_time_series!(portfolio, demand, ts)
     end
 end
 
