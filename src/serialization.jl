@@ -132,18 +132,24 @@ function deserialize(
 end
 
 function serialize(schedule::InvestmentScheduleResults)
-    data = Dict{String, Dict{String, Any}}()
+    data = Vector{Dict{String, Any}}()
     for (period, investments) in schedule.results
-        date_strings = [string(date) for date in period]
-        tuple_str = "(" * join(date_strings, ",") * ")"
-
-        serialize_investments = Dict{String, Any}()
+        installation_list = Vector{Dict{String, Any}}()
         for (technology, capacity) in investments
-            key_strings = [string(k) for k in technology]
-            inner_tuple_str = "(" * join(key_strings, ",") * ")"
-            serialize_investments[inner_tuple_str] = capacity
+            installation = Dict{String, Any}(
+                "technology" => IS.serialize(technology[1]),
+                "name" => technology[2],
+                "capacity" => capacity,
+            )
+            push!(installation_list, installation)
         end
-        data[tuple_str] = serialize_investments
+
+        serialized_data = Dict{String, Any}(
+            "start_date" => string(period[1]),
+            "end_date" => string(period[2]),
+            "installations" => installation_list,
+        )
+        push!(data, serialized_data)
     end
     schedule_dict = Dict{String, Any}("results" => data)
     add_serialization_metadata!(schedule_dict, InvestmentScheduleResults)
@@ -423,31 +429,29 @@ function deserialize(
 end
 
 function deserialize(::Type{InvestmentScheduleResults}, raw::Dict)
-    schedule = Dict()
-    for (period_str, investment_dict) in raw["results"]
-        inner = period_str[2:(end - 1)]
-        date_strings = split(inner, ",")
-        dates = [Dates.Date(strip(date_str)) for date_str in date_strings]
-        period_tuple = Tuple(dates)
+    deserialized_schedule = Dict()
+    for schedule in raw["results"]
+        period_tuple =
+            (Dates.Date(schedule["start_date"]), Dates.Date(schedule["end_date"]))
 
-        schedule[period_tuple] = Dict()
-        for (tech_key, capacities) in investment_dict
-            inner2 = tech_key[2:(end - 1)]
-            key_strings = s = split(inner2, ",")
+        deserialized_schedule[period_tuple] = Dict()
+        for installation in schedule["installations"]
+            technology_tuple =
+                (eval(Meta.parse(installation["technology"])), installation["name"])
 
-            technology_tuple = (eval(Meta.parse(key_strings[1])), key_strings[2])
-
-            if capacities isa Dict
-                capacity_tuple =
-                    NamedTuple((Symbol(key), value) for (key, value) in capacities)
-                schedule[period_tuple][technology_tuple] = capacity_tuple
+            if installation["capacity"] isa Dict
+                capacity_tuple = NamedTuple(
+                    (Symbol(key), value) for (key, value) in installation["capacity"]
+                )
+                deserialized_schedule[period_tuple][technology_tuple] = capacity_tuple
             else
-                schedule[period_tuple][technology_tuple] = capacities
+                deserialized_schedule[period_tuple][technology_tuple] =
+                    installation["capacity"]
             end
         end
     end
 
-    return InvestmentScheduleResults(schedule)
+    return InvestmentScheduleResults(deserialized_schedule)
 end
 
 # Function copied over from IS. This version of the function is modified to deserialize using openAPI structs for PSIP supplemental attributes
