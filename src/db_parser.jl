@@ -82,6 +82,67 @@ const DB_TO_OPENAPI_FIELDS = Dict(
     ("transmission_lines", "continuous_rating") => "rating",
 )
 
+const STORAGE_MAPPING = Dict("Hydro" => StorageTech.PTES, "Solar" => StorageTech.OTHER_THERM)
+
+const FUEL_MAPPING = Dict(
+    "NG" => ThermalFuels.NATURAL_GAS,
+    "Nuclear" => ThermalFuels.NUCLEAR,
+    "Coal" => ThermalFuels.COAL,
+    "Oil" => ThermalFuels.DISTILLATE_FUEL_OIL,
+)
+
+const PRIME_MOVER_MAPPING = Dict(
+    "CT" => PrimeMovers.CT,
+    "STEAM" => PrimeMovers.ST,
+    "CC" => PrimeMovers.CC,
+    "SYNC_COND" => PrimeMovers.OT,
+    "NUCLEAR" => PrimeMovers.ST,
+    "HYDRO" => PrimeMovers.PS,
+    "ROR" => PrimeMovers.IC,
+    "PV" => PrimeMovers.PVe,
+    "CSP" => PrimeMovers.CP,
+    "RTPV" => PrimeMovers.PVe,
+    "WIND" => PrimeMovers.WT,
+    "Wind" => PrimeMovers.WT,
+    "STORAGE" => PrimeMovers.BA,
+    "CSP" => PrimeMovers.CP,
+)
+
+const PRIME_MOVER_TO_PARAMETRIC = Dict(
+    "CT" => PSY.ThermalStandard,
+    "STEAM" => PSY.ThermalStandard,
+    "CC" => PSY.ThermalStandard,
+    "ST" => PSY.ThermalStandard,
+    "SYNC_COND" => PSY.ThermalStandard,
+    "NUCLEAR" => PSY.ThermalStandard,
+    "HYDRO" => PSY.ThermalStandard,
+    "ROR" => PSY.RenewableDispatch,
+    "PV" => PSY.RenewableDispatch,
+    "PVe" => PSY.RenewableDispatch,
+    "CSP" => PSY.RenewableDispatch,
+    "RTPV" => PSY.RenewableDispatch,
+    "WIND" => PSY.RenewableDispatch,
+    "Wind" => PSY.RenewableDispatch,
+    "WT" => PSY.RenewableDispatch,
+    "BA" => PSY.EnergyReservoirStorage,
+    "PS" => PSY.EnergyReservoirStorage,
+    "STORAGE" => PSY.EnergyReservoirStorage,
+    "CP" => PSY.RenewableDispatch,
+)
+
+const PRIME_MOVER_TO_TIMESERIES = Dict(
+    [PrimeMovers.BA, ThermalFuels.OTHER] => "battery_li_cost_R1",
+    [PrimeMovers.PVe, ThermalFuels.OTHER] => "csp1_cost_R1", #FIX THIS ONE
+    [PrimeMovers.CP, ThermalFuels.OTHER] => "csp1_cost_R1",
+    [PrimeMovers.WT, ThermalFuels.OTHER] => "115hh_170rd_cost_R1",
+    [PrimeMovers.CT, ThermalFuels.NATURAL_GAS] => "Gas-CC_cost_R1",
+    [PrimeMovers.CT, ThermalFuels.DISTILLATE_FUEL_OIL] => "o-g-s_cost_R1",
+    [PrimeMovers.ST, ThermalFuels.COAL] => "Coal-new_cost_R1",
+    [PrimeMovers.ST, ThermalFuels.DISTILLATE_FUEL_OIL] => "o-g-s_cost_R1",
+    [PrimeMovers.ST, ThermalFuels.NUCLEAR] => "Nuclear_cost_R1",
+    [PrimeMovers.CC, ThermalFuels.NATURAL_GAS] => "Gas-CC_cost_R1",
+)
+
 # Remove later, or make this optional later depending on what is in the dataset
 const DEFAULT_FINANCIAL_DATA = TechnologyFinancialData(;
     capital_recovery_period=30,
@@ -310,102 +371,6 @@ function parse_operational_cost(ops_cost::Dict{String, Any})
     return operational_cost
 end
 
-"""
-Function to map storage technology string to StorageTech
-"""
-function map_storage_tech(fuel::String)
-    mapping_dict = Dict("Hydro" => StorageTech.PTES, "Solar" => StorageTech.OTHER_THERM)
-
-    fuel_enum = get(mapping_dict, fuel, StorageTech.LIB)
-
-    return fuel_enum
-end
-
-"""
-Function to map fuel string to ThermalFuels
-"""
-function map_fuel(fuel::String)
-    mapping_dict = Dict(
-        "NG" => ThermalFuels.NATURAL_GAS,
-        "Nuclear" => ThermalFuels.NUCLEAR,
-        "Coal" => ThermalFuels.COAL,
-        "Oil" => ThermalFuels.DISTILLATE_FUEL_OIL,
-    )
-
-    fuel_enum = get(mapping_dict, fuel, ThermalFuels.OTHER)
-
-    return fuel_enum
-end
-
-"""
-Function to map prime mover types to PrimeMovers
-"""
-function map_prime_mover(prime_mover::String)
-    mapping_dict = Dict(
-        "CT" => PrimeMovers.CT,
-        "STEAM" => PrimeMovers.ST,
-        "CC" => PrimeMovers.CC,
-        "SYNC_COND" => PrimeMovers.OT,
-        "NUCLEAR" => PrimeMovers.ST,
-        "HYDRO" => PrimeMovers.PS,
-        "ROR" => PrimeMovers.IC,
-        "PV" => PrimeMovers.PVe,
-        "CSP" => PrimeMovers.CP,
-        "RTPV" => PrimeMovers.PVe,
-        "WIND" => PrimeMovers.WT,
-        "Wind" => PrimeMovers.WT,
-        "STORAGE" => PrimeMovers.BA,
-        "CSP" => PrimeMovers.CP,
-    )
-
-    return mapping_dict[prime_mover]
-end
-
-function map_prime_mover_to_parametric(prime_mover::String)
-    mapping_dict = Dict(
-        "CT" => PSY.ThermalStandard,
-        "STEAM" => PSY.ThermalStandard,
-        "CC" => PSY.ThermalStandard,
-        "ST" => PSY.ThermalStandard,
-        "SYNC_COND" => PSY.ThermalStandard,
-        "NUCLEAR" => PSY.ThermalStandard,
-        "HYDRO" => PSY.ThermalStandard,
-        "ROR" => PSY.RenewableDispatch,
-        "PV" => PSY.RenewableDispatch,
-        "PVe" => PSY.RenewableDispatch,
-        "CSP" => PSY.RenewableDispatch,
-        "RTPV" => PSY.RenewableDispatch,
-        "WIND" => PSY.RenewableDispatch,
-        "Wind" => PSY.RenewableDispatch,
-        "WT" => PSY.RenewableDispatch,
-        "BA" => PSY.EnergyReservoirStorage,
-        "PS" => PSY.EnergyReservoirStorage,
-        "STORAGE" => PSY.EnergyReservoirStorage,
-        "CP" => PSY.RenewableDispatch,
-    )
-
-    return mapping_dict[prime_mover]
-end
-
-function map_prime_mover_to_timeseries(prime_mover::PSY.PrimeMovers, fuel::PSY.ThermalFuels)
-    mapping_dict = Dict(
-        [PrimeMovers.BA, ThermalFuels.OTHER] => "battery_li_cost_R1",
-        [PrimeMovers.PVe, ThermalFuels.OTHER] => "csp1_cost_R1", #FIX THIS ONE
-        [PrimeMovers.CP, ThermalFuels.OTHER] => "csp1_cost_R1",
-        [PrimeMovers.WT, ThermalFuels.OTHER] => "115hh_170rd_cost_R1",
-        [PrimeMovers.CT, ThermalFuels.NATURAL_GAS] => "Gas-CC_cost_R1",
-        [PrimeMovers.CT, ThermalFuels.DISTILLATE_FUEL_OIL] => "o-g-s_cost_R1",
-        [PrimeMovers.ST, ThermalFuels.COAL] => "Coal-new_cost_R1",
-        [PrimeMovers.ST, ThermalFuels.DISTILLATE_FUEL_OIL] => "o-g-s_cost_R1",
-        [PrimeMovers.ST, ThermalFuels.NUCLEAR] => "Nuclear_cost_R1",
-        [PrimeMovers.CC, ThermalFuels.NATURAL_GAS] => "Gas-CC_cost_R1",
-    )
-
-    ts_name = get(mapping_dict, [prime_mover, fuel], "None")
-
-    return ts_name
-end
-
 function add_zones!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
     for rec in DBInterface.execute(db, QUERIES[:zones])
         z = Zone(; name=rec.name, id=rec.id)
@@ -479,7 +444,7 @@ function add_aggregate_lines!(
             id=rec.rowid,
             available=component_attr["available"],
             base_power=100.0,
-            power_systems_type=string(ACBranch),
+            power_systems_type=string(nameof(ACBranch)),
             financial_data=DEFAULT_FINANCIAL_DATA,
             start_region=collect(
                 IS.get_components(
@@ -515,7 +480,7 @@ function add_technologies!(
     db::SQLite.DB,
 )
     for rec in DBInterface.execute(db, QUERIES[:technologies])
-        parametric = map_prime_mover_to_parametric(rec.prime_mover)
+        parametric = get(PRIME_MOVER_TO_PARAMETRIC, rec.prime_mover, PSY.ThermalStandard)
 
         if get_aggregation(portfolio) == PSY.ACBus
             area_id =
@@ -533,12 +498,12 @@ function add_technologies!(
                 name=rec.prime_mover * string(rec.id),
                 id=rec.id,
                 capital_costs_discharge=LinearCurve(0.0),
-                prime_mover_type=map_prime_mover(rec.prime_mover),
-                storage_tech=map_storage_tech(rec.fuel),
+                prime_mover_type=get(PRIME_MOVER_MAPPING, rec.prime_mover, PrimeMovers.OT),
+                storage_tech=get(STORAGE_MAPPING, rec.fuel, StorageTech.OTHER_THERM),
                 region=regions,
                 financial_data=DEFAULT_FINANCIAL_DATA,
                 available=true,
-                power_systems_type=string(parametric),
+                power_systems_type=string(nameof(parametric)),
                 operation_costs=StorageCost(),
             )
         elseif rec.prime_mover in ["HYDRO", "ROR", "SYNC_COND"]
@@ -549,13 +514,13 @@ function add_technologies!(
                 name=rec.prime_mover * string(rec.id),
                 id=rec.id,
                 capital_costs=LinearCurve(0.0),
-                prime_mover_type=map_prime_mover(rec.prime_mover),
-                fuel=[map_fuel(rec.fuel)],
-                co2=Dict(map_fuel(rec.fuel) => 0.0),
+                prime_mover_type=get(PRIME_MOVER_MAPPING, rec.prime_mover, PrimeMovers.OT),
+                fuel=[get(FUEL_MAPPING, rec.fuel, ThermalFuels.OTHER)],
+                co2=Dict(get(FUEL_MAPPING, rec.fuel, ThermalFuels.OTHER) => 0.0),
                 region=regions,
                 financial_data=DEFAULT_FINANCIAL_DATA,
                 available=true,
-                power_systems_type=string(parametric),
+                power_systems_type=string(nameof(parametric)),
                 operation_costs=ThermalGenerationCost(
                     variable=CostCurve(LinearCurve(0.0)),
                     fixed=0.0,
@@ -765,16 +730,16 @@ function add_generation_units!(
                 id=rec.id,
                 capital_costs=LinearCurve(0.0),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
-                fuel=[map_fuel(rec.prime_mover)],
+                fuel=[get(FUEL_MAPPING, rec.prime_mover, ThermalFuels.OTHER)],
                 region=regions,
                 financial_data=DEFAULT_FINANCIAL_DATA,
                 available=true,
-                power_systems_type=string(component_type),
+                power_systems_type=string(nameof(component_type)),
                 operation_costs=ops_cost,
                 ramp_limits=(@isdefined ramp_limits) ? ramp_limits : (up=1.0, down=1.0),
                 time_limits=(@isdefined time_limits) ? time_limits : (up=1.0, down=1.0),
                 capacity_limits=(min=0, max=rec.rating),
-                co2=Dict(map_fuel(rec.prime_mover) => 0.0),
+                co2=Dict(get(FUEL_MAPPING, rec.prime_mover, ThermalFuels.OTHER) => 0.0),
             )
             add_technology!(portfolio, technology)
             existing = ExistingCapacity(; existing_technologies=[rec.name])
@@ -882,7 +847,7 @@ function add_storage_units!(
             region=regions,
             financial_data=DEFAULT_FINANCIAL_DATA,
             available=true,
-            power_systems_type=string(component_type),
+            power_systems_type=string(nameof(component_type)),
             operation_costs=ops_cost,
             capacity_limits_discharge=(min=0, max=rec.rating),
             capacity_limits_energy=(min=0, max=component_attr["storage_capacity"]),
@@ -924,7 +889,7 @@ function add_demand_requirements!(
                 IS.get_components(x -> get_id(x) == area, RegionTopology, portfolio.data),
             ),
             value_of_lost_load=1e8, #TODO: Assign a default value to this field
-            power_systems_type=string(component_type),
+            power_systems_type=string(nameof(component_type)),
         )
         add_technology!(portfolio, demand)
     end
@@ -1124,7 +1089,7 @@ function add_system_lines!(
                 name=rec.name * "_new",
                 id=rec.id,
                 available=true,
-                power_systems_type=string(ACBranch),
+                power_systems_type=string(nameof(component_type)),
                 financial_data=DEFAULT_FINANCIAL_DATA,
                 start_node=get_region(Node, p, balancing_topology_from),
                 end_node=get_region(Node, p, balancing_topology_to),
@@ -1146,7 +1111,7 @@ function add_system_lines!(
                 name=string(area_list[1]) * "_" * string(area_list[2]),
                 id=id,
                 available=true,
-                power_systems_type=string(ACBranch),
+                power_systems_type=string(nameof(ACBranch)),
                 financial_data=DEFAULT_FINANCIAL_DATA,
                 start_region=get_region(Zone, portfolio, area_list[1]),
                 end_region=get_region(Zone, portfolio, area_list[2]),
@@ -1172,8 +1137,8 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, db::SQLite.DB)
     for tech in supply_technologies
         fuel = first(get_fuel(tech))
         prime_mover = get_prime_mover_type(tech)
-        ts_type = map_prime_mover_to_timeseries(prime_mover, fuel)
-        if ts_type != "None" && !has_supplemental_attributes(tech)
+        ts_type = get(PRIME_MOVER_TO_TIMESERIES, [prime_mover, fuel], nothing)
+        if !isnothing(ts_type) && !has_supplemental_attributes(tech)
             cost_data = Dict()
             for ts_association in
                 DBInterface.execute(db, QUERIES[:investment_timeseries], [ts_type])
@@ -1406,6 +1371,7 @@ function deserialize_time_series_from_metadata!(sys::PowerSystems.System, db, me
         maximum(get_time_series_values(SingleTimeSeries, component, ts.name))
     end
 end
+
 function deserialize_timeseries!(sys::PowerSystems.System, db)
     DBInterface.transaction(db) do
         # For each time_series_uuid, we'll pick a "real" metadata_uuid (so no DeterministicSingleTimeSeries),
