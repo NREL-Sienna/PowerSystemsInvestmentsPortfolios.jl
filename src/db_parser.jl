@@ -110,7 +110,6 @@ function database_to_portfolio(
         interest_rate;
         base_system=system,
     )
-    #set_units_base_system!(portfolio.base_system, "DEVICE_BASE")
     portfolio = database_to_structs(database_filepath, portfolio)
 
     return portfolio
@@ -132,21 +131,17 @@ function database_to_structs(db_path::AbstractString, portfolio::Portfolio)
         add_aggregate_lines!(portfolio, attributes, db)
     end
 
-    # Add technologies to Portfolio
     add_technologies!(portfolio, attributes, db)
 
-    # Add demands
     add_demand_requirements!(portfolio, attributes, db)
     add_demand_technologies!(portfolio, attributes, db)
 
-    # Add data to base_systems
     add_buses!(portfolio, attributes, db)
     add_system_lines!(portfolio, attributes, db)
     add_generation_units!(portfolio, attributes, db)
     add_storage_units!(portfolio, attributes, db)
     add_loads!(portfolio, attributes, db)
 
-    # Deserialize timeseries
     deserialize_timeseries!(portfolio.base_system, db)
     deserialize_portfolio_timeseries!(portfolio, db)
 
@@ -191,7 +186,6 @@ function make_dict(
 end
 
 function parse_operational_cost(ops_cost::Dict{String, Any})
-
     if ops_cost["cost_type"] == "THERMAL"
         start_up_dict = ops_cost["start_up"]
         variable_dict = ops_cost["variable"]
@@ -310,6 +304,8 @@ function parse_operational_cost(ops_cost::Dict{String, Any})
             ),
             fixed=ops_cost["fixed"],
         )
+    else
+        error("Unsupported operational cost of type $(ops_cost["cost_type"])")
     end
     return operational_cost
 end
@@ -320,7 +316,7 @@ Function to map storage technology string to StorageTech
 function map_storage_tech(fuel::String)
     mapping_dict = Dict("Hydro" => StorageTech.PTES, "Solar" => StorageTech.OTHER_THERM)
 
-    fuel_enum = haskey(mapping_dict, fuel) ? mapping_dict[fuel] : StorageTech.LIB
+    fuel_enum = get(mapping_dict, fuel, StorageTech.LIB)
 
     return fuel_enum
 end
@@ -336,7 +332,7 @@ function map_fuel(fuel::String)
         "Oil" => ThermalFuels.DISTILLATE_FUEL_OIL,
     )
 
-    fuel_enum = haskey(mapping_dict, fuel) ? mapping_dict[fuel] : ThermalFuels.OTHER
+    fuel_enum = get(mapping_dict, fuel, ThermalFuels.OTHER)
 
     return fuel_enum
 end
@@ -405,9 +401,7 @@ function map_prime_mover_to_timeseries(prime_mover::PSY.PrimeMovers, fuel::PSY.T
         [PrimeMovers.CC, ThermalFuels.NATURAL_GAS] => "Gas-CC_cost_R1",
     )
 
-    ts_name =
-        haskey(mapping_dict, [prime_mover, fuel]) ? mapping_dict[[prime_mover, fuel]] :
-        "None"
+    ts_name = get(mapping_dict, [prime_mover, fuel], "None")
 
     return ts_name
 end
@@ -419,14 +413,22 @@ function add_zones!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db
     end
 end
 
-function add_nodes!(portfolio::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
+function add_nodes!(
+    portfolio::Portfolio,
+    attributes::Dict{Int64, Dict{String, Any}},
+    db::SQLite.DB,
+)
     for rec in DBInterface.execute(db, QUERIES[:balancing_topologies])
         z = Node(; name=rec.name, id=rec.id)
         add_region!(portfolio, z)
     end
 end
 
-function add_buses!(portfolio::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
+function add_buses!(
+    portfolio::Portfolio,
+    attributes::Dict{Int64, Dict{String, Any}},
+    db::SQLite.DB,
+)
     for rec in DBInterface.execute(db, QUERIES[:zones])
         component_attr = get(attributes, rec.id, Dict{String, Any}())
         area = Area(;
@@ -437,6 +439,8 @@ function add_buses!(portfolio::Portfolio, attributes::Dict{Int64, Dict{String, A
         )
         if haskey(component_attr, "uuid")
             IS.set_uuid!(IS.get_internal(area), Base.UUID(component_attr["uuid"]))
+        else
+            warn("UUID for component named $(rec.name) not found in database")
         end
         PSY.add_component!(portfolio.base_system, area)
     end
@@ -456,6 +460,8 @@ function add_buses!(portfolio::Portfolio, attributes::Dict{Int64, Dict{String, A
         )
         if haskey(component_attr, "uuid")
             IS.set_uuid!(IS.get_internal(bus), Base.UUID(component_attr["uuid"]))
+        else
+            warn("UUID for component named $(rec.name) not found in database")
         end
         PSY.add_component!(portfolio.base_system, bus)
     end
@@ -471,7 +477,7 @@ function add_aggregate_lines!(
         t = AggregateTransportTechnology{ACBranch}(;
             name=string(rec.rowid),
             id=rec.rowid,
-            available=true,
+            available=component_attr["available"],
             base_power=100.0,
             power_systems_type=string(ACBranch),
             financial_data=DEFAULT_FINANCIAL_DATA,
@@ -509,7 +515,6 @@ function add_technologies!(
     db::SQLite.DB,
 )
     for rec in DBInterface.execute(db, QUERIES[:technologies])
-
         parametric = map_prime_mover_to_parametric(rec.prime_mover)
 
         if get_aggregation(portfolio) == PSY.ACBus
@@ -569,9 +574,7 @@ function add_generation_units!(
     db::SQLite.DB,
 )
     for rec in DBInterface.execute(db, QUERIES[:generation_units])
-        component_type = eval(
-            Meta.parse(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]),
-        )
+        component_type = getproperty(PowerSystems, Symbol(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]))
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         bus_name = first(
@@ -601,8 +604,8 @@ function add_generation_units!(
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
-                available=true,
-                status=true,
+                available=component_attr["available"],
+                status=component_attr["status"],
                 bus=PSY.get_component(PSY.ACBus, portfolio.base_system, bus_name),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
                 active_power_limits=active_limits,
@@ -626,7 +629,7 @@ function add_generation_units!(
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
-                available=true,
+                available=component_attr["available"],
                 bus=PSY.get_component(PSY.ACBus, portfolio.base_system, bus_name),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
                 active_power=get(component_attr, "active_power", rec.rating) /
@@ -644,7 +647,7 @@ function add_generation_units!(
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
-                available=true,
+                available=component_attr["available"],
                 bus=PSY.get_component(PSY.ACBus, portfolio.base_system, bus_name),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
                 active_power=get(component_attr, "active_power", rec.rating) /
@@ -674,7 +677,7 @@ function add_generation_units!(
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
-                available=true,
+                available=component_attr["available"],
                 bus=PSY.get_component(PSY.ACBus, portfolio.base_system, bus_name),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
                 active_power=get(component_attr, "active_power", rec.rating) /
@@ -731,6 +734,8 @@ function add_generation_units!(
         end
         if haskey(component_attr, "uuid")
             IS.set_uuid!(IS.get_internal(generator), Base.UUID(component_attr["uuid"]))
+        else
+            warn("UUID for component named $(rec.name) not found in database")
         end
         add_component!(portfolio.base_system, generator)
 
@@ -748,7 +753,11 @@ function add_generation_units!(
                         ),
                     ).area
                 regions = collect(
-                    IS.get_components(x -> get_id(x) == area_id, RegionTopology, portfolio.data),
+                    IS.get_components(
+                        x -> get_id(x) == area_id,
+                        RegionTopology,
+                        portfolio.data,
+                    ),
                 )
             end
             technology = SupplyTechnology{component_type}(;
@@ -771,7 +780,10 @@ function add_generation_units!(
             existing = ExistingCapacity(; existing_technologies=[rec.name])
             add_supplemental_attribute!(portfolio, technology, existing)
 
-            set_capacity_limits!(technology, (min=0, max=get_existing_capacity_mw(portfolio, technology)))
+            set_capacity_limits!(
+                technology,
+                (min=0, max=get_existing_capacity_mw(portfolio, technology)),
+            )
         end
     end
 end
@@ -782,9 +794,7 @@ function add_storage_units!(
     db::SQLite.DB,
 )
     for rec in DBInterface.execute(db, QUERIES[:storage_units])
-        component_type = eval(
-            Meta.parse(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]),
-        )
+        component_type = getproperty(PowerSystems, Symbol(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]))
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         level_limits = (
@@ -838,6 +848,8 @@ function add_storage_units!(
         )
         if haskey(component_attr, "uuid")
             IS.set_uuid!(IS.get_internal(storage_unit), Base.UUID(component_attr["uuid"]))
+        else
+            warn("UUID for component named $(rec.name) not found in database")
         end
         add_component!(portfolio.base_system, storage_unit)
 
@@ -853,7 +865,11 @@ function add_storage_units!(
                     ),
                 ).area
             regions = collect(
-                IS.get_components(x -> get_id(x) == area_id, RegionTopology, portfolio.data),
+                IS.get_components(
+                    x -> get_id(x) == area_id,
+                    RegionTopology,
+                    portfolio.data,
+                ),
             )
         end
         storage = StorageTechnology{component_type}(;
@@ -884,9 +900,7 @@ function add_demand_requirements!(
 )
     # stream straight through the table
     for rec in DBInterface.execute(db, QUERIES[:demand_requirements])
-        component_type = eval(
-            Meta.parse(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]),
-        )
+        component_type = getproperty(PowerSystems, Symbol(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]))
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         if get_aggregation(portfolio) == PSY.ACBus
@@ -916,12 +930,14 @@ function add_demand_requirements!(
     end
 end
 
-function add_loads!(portfolio::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
+function add_loads!(
+    portfolio::Portfolio,
+    attributes::Dict{Int64, Dict{String, Any}},
+    db::SQLite.DB,
+)
     # stream straight through the table
     for rec in DBInterface.execute(db, QUERIES[:demand_requirements])
-        component_type = eval(
-            Meta.parse(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]),
-        )
+        component_type = getproperty(PowerSystems, Symbol(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]))
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         # Determine area based on balancing topology if zonal
@@ -942,6 +958,8 @@ function add_loads!(portfolio::Portfolio, attributes::Dict{Int64, Dict{String, A
         )
         if haskey(component_attr, "uuid")
             IS.set_uuid!(IS.get_internal(load), Base.UUID(component_attr["uuid"]))
+        else
+            warn("UUID for component named $(rec.name) not found in database")
         end
         add_component!(portfolio.base_system, load)
     end
@@ -953,8 +971,8 @@ function transform_natural_impedance_to_device_base(natural_units_impedance, arc
         error("Base voltage is not defined")
     end
     base_power = get_base_power(sys)
-    Z_base = base_voltage^2 / base_power
-    device_base_impedance = natural_units_impedance / Z_base
+    z_base = base_voltage^2 / base_power
+    device_base_impedance = natural_units_impedance / z_base
     return device_base_impedance
 end
 
@@ -964,8 +982,8 @@ function transform_natural_admittance_to_device_base(natural_units_admittance, a
         error("Base voltage is not defined")
     end
     base_power = get_base_power(sys)
-    Z_base = base_voltage^2 / base_power
-    device_base_impedance = natural_units_admittance * Z_base
+    z_base = base_voltage^2 / base_power
+    device_base_impedance = natural_units_admittance * z_base
     return device_base_impedance
 end
 
@@ -987,6 +1005,8 @@ function add_system_lines!(
         )
         if haskey(component_attr, "uuid")
             IS.set_uuid!(IS.get_internal(arc), Base.UUID(component_attr["uuid"]))
+        else
+            warn("UUID for component named $(rec.name) not found in database")
         end
         add_component!(portfolio.base_system, arc)
         arc_dict[rec.id] = arc
@@ -994,9 +1014,7 @@ function add_system_lines!(
 
     tx_dict = Dict()
     for rec in DBInterface.execute(db, QUERIES[:transmission_lines])
-        component_type = eval(
-            Meta.parse(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]),
-        )
+        component_type = getproperty(PowerSystems, Symbol(first(DBInterface.execute(db, QUERIES[:entity_type], [rec.id]))[1]))
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         # Determine area based on balancing topology if zonal
@@ -1073,6 +1091,8 @@ function add_system_lines!(
         end
         if haskey(component_attr, "uuid")
             IS.set_uuid!(IS.get_internal(line), Base.UUID(component_attr["uuid"]))
+        else
+            warn("UUID for component named $(rec.name) not found in database")
         end
         add_component!(portfolio.base_system, line)
 
@@ -1100,8 +1120,8 @@ function add_system_lines!(
                 first(
                     DBInterface.execute(db, QUERIES[:topology_from_arc], [arc.to_id]),
                 ).name
-            transport = NodalACTransportTechnology{ACBranch}(;
-                name=rec.name,
+            transport = NodalACTransportTechnology{component_type}(;
+                name=rec.name * "_new",
                 id=rec.id,
                 available=true,
                 power_systems_type=string(ACBranch),
@@ -1150,7 +1170,6 @@ function add_demand_technologies!(
 function deserialize_portfolio_timeseries!(portfolio::Portfolio, db::SQLite.DB)
     supply_technologies = get_technologies(SupplyTechnology, portfolio)
     for tech in supply_technologies
-
         fuel = first(get_fuel(tech))
         prime_mover = get_prime_mover_type(tech)
         ts_type = map_prime_mover_to_timeseries(prime_mover, fuel)
@@ -1176,8 +1195,9 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, db::SQLite.DB)
 
                 ts =
                     SingleTimeSeries(ts_association.name, ts_data; resolution=Dates.Year(1))
+                cost_year = get_base_year(portfolio)
                 cost_data[ts_association.name] =
-                    first(TimeSeries.values(ts_data[Dates.DateTime(2025, 1, 1)]))
+                    first(TimeSeries.values(ts_data[Dates.DateTime(cost_year, 1, 1)]))
                 add_time_series!(portfolio, tech, ts)
             end
 
