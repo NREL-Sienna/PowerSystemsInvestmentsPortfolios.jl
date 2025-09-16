@@ -41,6 +41,9 @@ QUERIES = Dict(
     :aggregate_lines => """
           SELECT * FROM transmission_interchanges
         """,
+    :new_lines => """
+          SELECT * from transport_technologies
+        """,
     :transmission_lines => """
           SELECT * FROM transmission_lines
         """,
@@ -194,7 +197,6 @@ function database_to_structs(db_path::AbstractString, portfolio::Portfolio)
     end
 
     add_technologies!(portfolio, attributes, db)
-
     add_demand_requirements!(portfolio, attributes, db)
     add_demand_technologies!(portfolio, attributes, db)
 
@@ -481,7 +483,44 @@ function add_nodal_lines!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     db::SQLite.DB,
-) end
+)
+    for rec in IS.execute(db, QUERIES[:new_lines], nothing, IS.LOG_GROUP_SERIALIZATION)
+        component_attr = get(attributes, rec.id, Dict{String, Any}())
+        arc = first(IS.execute(db, QUERIES[:arc], [rec.arc_id], IS.LOG_GROUP_SERIALIZATION))
+        balancing_topology_from =
+            first(
+                IS.execute(
+                    db,
+                    QUERIES[:topology_from_arc],
+                    [arc.from_id],
+                    IS.LOG_GROUP_SERIALIZATION,
+                ),
+            ).name
+        balancing_topology_to =
+            first(
+                IS.execute(
+                    db,
+                    QUERIES[:topology_from_arc],
+                    [arc.to_id],
+                    IS.LOG_GROUP_SERIALIZATION,
+                ),
+            ).name
+        transport = NodalACTransportTechnology{ACBranch}(;
+            name=string(rec.arc_id) * "_newline",
+            id=rec.id,
+            available=true,
+            power_systems_type=string(nameof(ACBranch)),
+            financial_data=DEFAULT_FINANCIAL_DATA,
+            start_node=get_region(Node, portfolio, balancing_topology_from),
+            end_node=get_region(Node, portfolio, balancing_topology_to),
+            reactance=component_attr["reactance"],
+            resistance=component_attr["resistance"],
+            capital_costs=LinearCurve(1e5),
+            unit_size=component_attr["unit_size"],
+        )
+        add_technology!(portfolio, transport)
+    end
+end
 
 function add_technologies!(
     portfolio::Portfolio,
@@ -1222,8 +1261,8 @@ function add_system_lines!(
                 available=true,
                 power_systems_type=string(nameof(component_type)),
                 financial_data=DEFAULT_FINANCIAL_DATA,
-                start_node=get_region(Node, p, balancing_topology_from),
-                end_node=get_region(Node, p, balancing_topology_to),
+                start_node=get_region(Node, portfolio, balancing_topology_from),
+                end_node=get_region(Node, portfolio, balancing_topology_to),
                 reactance=component_attr["x"],
                 resistance=component_attr["r"],
                 capital_costs=LinearCurve(1e5),
