@@ -220,126 +220,145 @@ function make_dict(
         extra_attributes,
     )
 end
+function parse_thermal_cost(ops_cost::Dict{String, Any})
+    start_up_dict = ops_cost["start_up"]
+    variable_dict = ops_cost["variable"]
+    operational_cost = ThermalGenerationCost(;
+        start_up=(
+            hot=Float64(start_up_dict["hot"]),
+            warm=Float64(start_up_dict["warm"]),
+            cold=Float64(start_up_dict["cold"]),
+        ),
+        shut_down=ops_cost["shut_down"],
+        fixed=ops_cost["fixed"],
+        variable=FuelCurve(;
+            fuel_cost=variable_dict["fuel_cost"],
+            value_curve=IncrementalCurve(
+                PiecewiseStepData(
+                    variable_dict["value_curve"]["function_data"]["x_coords"],
+                    variable_dict["value_curve"]["function_data"]["y_coords"],
+                ),
+                variable_dict["value_curve"]["initial_input"],
+            ),
+            vom_cost=InputOutputCurve(
+                LinearFunctionData(
+                    constant_term=variable_dict["vom_cost"]["function_data"]["constant_term"],
+                    proportional_term=variable_dict["vom_cost"]["function_data"]["proportional_term"],
+                ),
+            ),
+        ),
+    )
+    return operational_cost
+end
+
+function parse_renewable_cost(ops_cost::Dict{String, Any})
+    curtailment_dict = ops_cost["curtailment_cost"]
+    variable_dict = ops_cost["variable"]
+    operational_cost = RenewableGenerationCost(;
+        curtailment_cost=CostCurve(;
+            value_curve=InputOutputCurve(
+                LinearFunctionData(
+                    constant_term=curtailment_dict["value_curve"]["function_data"]["constant_term"],
+                    proportional_term=curtailment_dict["value_curve"]["function_data"]["proportional_term"],
+                ),
+            ),
+            vom_cost=InputOutputCurve(
+                LinearFunctionData(
+                    constant_term=curtailment_dict["vom_cost"]["function_data"]["constant_term"],
+                    proportional_term=curtailment_dict["vom_cost"]["function_data"]["proportional_term"],
+                ),
+            ),
+        ),
+        variable=CostCurve(;
+            value_curve=InputOutputCurve(
+                LinearFunctionData(
+                    constant_term=variable_dict["value_curve"]["function_data"]["constant_term"],
+                    proportional_term=variable_dict["value_curve"]["function_data"]["proportional_term"],
+                ),
+            ),
+            vom_cost=InputOutputCurve(
+                LinearFunctionData(
+                    constant_term=variable_dict["vom_cost"]["function_data"]["constant_term"],
+                    proportional_term=variable_dict["vom_cost"]["function_data"]["proportional_term"],
+                ),
+            ),
+        ),
+    )
+    return operational_cost
+end
+
+function parse_storage_cost(ops_cost::Dict{String, Any})
+    charge_variable_dict = ops_cost["charge_variable_cost"]
+    discharge_variable_dict = ops_cost["discharge_variable_cost"]
+    operational_cost = StorageCost(;
+        charge_variable_cost=CostCurve(;
+            value_curve=InputOutputCurve(
+                LinearFunctionData(
+                    constant_term=charge_variable_dict["value_curve"]["function_data"]["constant_term"],
+                    proportional_term=charge_variable_dict["value_curve"]["function_data"]["proportional_term"],
+                ),
+            ),
+            vom_cost=InputOutputCurve(
+                LinearFunctionData(
+                    constant_term=charge_variable_dict["vom_cost"]["function_data"]["constant_term"],
+                    proportional_term=charge_variable_dict["vom_cost"]["function_data"]["proportional_term"],
+                ),
+            ),
+        ),
+        discharge_variable_cost=CostCurve(;
+            value_curve=InputOutputCurve(
+                LinearFunctionData(
+                    constant_term=discharge_variable_dict["value_curve"]["function_data"]["constant_term"],
+                    proportional_term=discharge_variable_dict["value_curve"]["function_data"]["proportional_term"],
+                ),
+            ),
+            vom_cost=InputOutputCurve(
+                LinearFunctionData(
+                    constant_term=discharge_variable_dict["vom_cost"]["function_data"]["constant_term"],
+                    proportional_term=discharge_variable_dict["vom_cost"]["function_data"]["proportional_term"],
+                ),
+            ),
+        ),
+        start_up=Float64(ops_cost["start_up"]),
+        shut_down=ops_cost["shut_down"],
+        energy_shortage_cost=ops_cost["energy_shortage_cost"],
+        energy_surplus_cost=ops_cost["energy_surplus_cost"],
+        fixed=ops_cost["fixed"],
+    )
+    return operational_cost
+end
+
+function parse_hydro_cost(ops_cost::Dict{String, Any})
+    variable_dict = ops_cost["variable"]
+    operational_cost = HydroGenerationCost(;
+        variable=CostCurve(;
+            value_curve=InputOutputCurve(
+                LinearFunctionData(
+                    constant_term=variable_dict["value_curve"]["function_data"]["constant_term"],
+                    proportional_term=variable_dict["value_curve"]["function_data"]["proportional_term"],
+                ),
+            ),
+            vom_cost=InputOutputCurve(
+                LinearFunctionData(
+                    constant_term=variable_dict["vom_cost"]["function_data"]["constant_term"],
+                    proportional_term=variable_dict["vom_cost"]["function_data"]["proportional_term"],
+                ),
+            ),
+        ),
+        fixed=ops_cost["fixed"],
+    )
+    return operational_cost
+end
 
 function parse_operational_cost(ops_cost::Dict{String, Any})
     if ops_cost["cost_type"] == "THERMAL"
-        start_up_dict = ops_cost["start_up"]
-        variable_dict = ops_cost["variable"]
-        operational_cost = ThermalGenerationCost(;
-            start_up=(
-                hot=Float64(start_up_dict["hot"]),
-                warm=Float64(start_up_dict["warm"]),
-                cold=Float64(start_up_dict["cold"]),
-            ),
-            shut_down=ops_cost["shut_down"],
-            fixed=ops_cost["fixed"],
-            variable=FuelCurve(;
-                fuel_cost=variable_dict["fuel_cost"],
-                value_curve=IncrementalCurve(
-                    PiecewiseStepData(
-                        variable_dict["value_curve"]["function_data"]["x_coords"],
-                        variable_dict["value_curve"]["function_data"]["y_coords"],
-                    ),
-                    variable_dict["value_curve"]["initial_input"],
-                ),
-                vom_cost=InputOutputCurve(
-                    LinearFunctionData(
-                        constant_term=variable_dict["vom_cost"]["function_data"]["constant_term"],
-                        proportional_term=variable_dict["vom_cost"]["function_data"]["proportional_term"],
-                    ),
-                ),
-            ),
-        )
+        operational_cost = parse_thermal_cost(ops_cost)
     elseif ops_cost["cost_type"] == "RENEWABLE"
-        curtailment_dict = ops_cost["curtailment_cost"]
-        variable_dict = ops_cost["variable"]
-        operational_cost = RenewableGenerationCost(;
-            curtailment_cost=CostCurve(;
-                value_curve=InputOutputCurve(
-                    LinearFunctionData(
-                        constant_term=curtailment_dict["value_curve"]["function_data"]["constant_term"],
-                        proportional_term=curtailment_dict["value_curve"]["function_data"]["proportional_term"],
-                    ),
-                ),
-                vom_cost=InputOutputCurve(
-                    LinearFunctionData(
-                        constant_term=curtailment_dict["vom_cost"]["function_data"]["constant_term"],
-                        proportional_term=curtailment_dict["vom_cost"]["function_data"]["proportional_term"],
-                    ),
-                ),
-            ),
-            variable=CostCurve(;
-                value_curve=InputOutputCurve(
-                    LinearFunctionData(
-                        constant_term=variable_dict["value_curve"]["function_data"]["constant_term"],
-                        proportional_term=variable_dict["value_curve"]["function_data"]["proportional_term"],
-                    ),
-                ),
-                vom_cost=InputOutputCurve(
-                    LinearFunctionData(
-                        constant_term=variable_dict["vom_cost"]["function_data"]["constant_term"],
-                        proportional_term=variable_dict["vom_cost"]["function_data"]["proportional_term"],
-                    ),
-                ),
-            ),
-        )
+        operational_cost = parse_renewable_cost(ops_cost)
     elseif ops_cost["cost_type"] == "STORAGE"
-        charge_variable_dict = ops_cost["charge_variable_cost"]
-        discharge_variable_dict = ops_cost["discharge_variable_cost"]
-        operational_cost = StorageCost(;
-            charge_variable_cost=CostCurve(;
-                value_curve=InputOutputCurve(
-                    LinearFunctionData(
-                        constant_term=charge_variable_dict["value_curve"]["function_data"]["constant_term"],
-                        proportional_term=charge_variable_dict["value_curve"]["function_data"]["proportional_term"],
-                    ),
-                ),
-                vom_cost=InputOutputCurve(
-                    LinearFunctionData(
-                        constant_term=charge_variable_dict["vom_cost"]["function_data"]["constant_term"],
-                        proportional_term=charge_variable_dict["vom_cost"]["function_data"]["proportional_term"],
-                    ),
-                ),
-            ),
-            discharge_variable_cost=CostCurve(;
-                value_curve=InputOutputCurve(
-                    LinearFunctionData(
-                        constant_term=discharge_variable_dict["value_curve"]["function_data"]["constant_term"],
-                        proportional_term=discharge_variable_dict["value_curve"]["function_data"]["proportional_term"],
-                    ),
-                ),
-                vom_cost=InputOutputCurve(
-                    LinearFunctionData(
-                        constant_term=discharge_variable_dict["vom_cost"]["function_data"]["constant_term"],
-                        proportional_term=discharge_variable_dict["vom_cost"]["function_data"]["proportional_term"],
-                    ),
-                ),
-            ),
-            start_up=Float64(ops_cost["start_up"]),
-            shut_down=ops_cost["shut_down"],
-            energy_shortage_cost=ops_cost["energy_shortage_cost"],
-            energy_surplus_cost=ops_cost["energy_surplus_cost"],
-            fixed=ops_cost["fixed"],
-        )
+        operational_cost = parse_storage_cost(ops_cost)
     elseif ops_cost["cost_type"] == "HYDRO_GEN"
-        variable_dict = ops_cost["variable"]
-        operational_cost = HydroGenerationCost(;
-            variable=CostCurve(;
-                value_curve=InputOutputCurve(
-                    LinearFunctionData(
-                        constant_term=variable_dict["value_curve"]["function_data"]["constant_term"],
-                        proportional_term=variable_dict["value_curve"]["function_data"]["proportional_term"],
-                    ),
-                ),
-                vom_cost=InputOutputCurve(
-                    LinearFunctionData(
-                        constant_term=variable_dict["vom_cost"]["function_data"]["constant_term"],
-                        proportional_term=variable_dict["vom_cost"]["function_data"]["proportional_term"],
-                    ),
-                ),
-            ),
-            fixed=ops_cost["fixed"],
-        )
+        operational_cost = parse_hydro_cost(ops_cost)
     else
         error("Unsupported operational cost of type $(ops_cost["cost_type"])")
     end
