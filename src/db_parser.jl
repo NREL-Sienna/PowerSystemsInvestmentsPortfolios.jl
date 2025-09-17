@@ -8,66 +8,26 @@ Set of queries to extract relevant data from the database. Need to be maintained
 
 #TODO: Support scenario handling
 QUERIES = Dict(
-    :zones => """
-         SELECT * FROM planning_regions
-       """,
-    :zone => """
-          SELECT name FROM planning_regions WHERE id = ?
-        """,
-    :zone_for_technology => """
-          SELECT id FROM planning_regions WHERE name = ?
-        """,
-    :balancing_topologies => """
-          SELECT * FROM balancing_topologies WHERE area >= 1
-        """,
-    :area_to_topology => """
-          SELECT name FROM balancing_topologies WHERE area = ?
-        """,
-    :topology_to_area => """
-          SELECT area FROM balancing_topologies WHERE id = ?
-        """,
-    :topology_for_unit => """
-          SELECT name FROM balancing_topologies WHERE id = ?
-        """,
-    :arcs => """
-          SELECT * FROM arcs
-        """,
-    :arc => """
-          SELECT * FROM arcs WHERE id = ?
-        """,
-    :topology_from_arc => """
-          SELECT * FROM balancing_topologies WHERE id = ?
-        """,
-    :aggregate_lines => """
-          SELECT * FROM transmission_interchanges
-        """,
-    :new_lines => """
-          SELECT * from transport_technologies
-        """,
-    :transmission_lines => """
-          SELECT * FROM transmission_lines
-        """,
-    :technologies => """
-          SELECT * FROM supply_technologies
-        """,
-    :generation_units => """
-        SELECT * FROM generation_units
-      """,
-    :storage_units => """
-          SELECT * FROM storage_units
-        """,
-    :demand_requirements => """
-          SELECT * FROM loads
-        """,
-    :entity_type => """
-          SELECT entity_type FROM entities WHERE id = ?
-        """,
-    :investment_timeseries => """
-          SELECT * FROM time_series_associations WHERE owner_type = ?
-        """,
-    :ts_data => """
-          SELECT * FROM static_time_series WHERE uuid = ?
-        """,
+    :zones => "SELECT * FROM planning_regions",
+    :zone => "SELECT name FROM planning_regions WHERE id = ?",
+    :zone_for_technology => "SELECT id FROM planning_regions WHERE name = ?",
+    :balancing_topologies => "SELECT * FROM balancing_topologies WHERE area >= 1",
+    :area_to_topology => "SELECT name FROM balancing_topologies WHERE area = ?",
+    :topology_to_area => "SELECT area FROM balancing_topologies WHERE id = ?",
+    :topology_for_unit => "SELECT name FROM balancing_topologies WHERE id = ?",
+    :arcs => "SELECT * FROM arcs",
+    :arc => "SELECT * FROM arcs WHERE id = ?",
+    :topology_from_arc => "SELECT * FROM balancing_topologies WHERE id = ?",
+    :aggregate_lines => "SELECT * FROM transmission_interchanges",
+    :new_lines => "SELECT * from transport_technologies",
+    :transmission_lines => "SELECT * FROM transmission_lines",
+    :technologies => "SELECT * FROM supply_technologies",
+    :generation_units => "SELECT * FROM generation_units",
+    :storage_units => "SELECT * FROM storage_units",
+    :demand_requirements => "SELECT * FROM loads",
+    :entity_type => "SELECT entity_type FROM entities WHERE id = ?",
+    :investment_timeseries => "SELECT * FROM time_series_associations WHERE owner_type = ?",
+    :ts_data => "SELECT * FROM static_time_series WHERE uuid = ?",
     # add additional queries here as needed
 )
 
@@ -183,33 +143,45 @@ end
 function database_to_structs(db_path::AbstractString, portfolio::Portfolio)
     # Connect to the SQLite database
     db = SQLite.DB(db_path)
+
+    #Prepare SQL statements
+    stmts = prepare_statements(db)
+
     attributes = get_entity_attributes(db)
 
     # Add zones and lines, shouldn't add both aggregate lines and nodal lines to the same DB
     # User can provide a desired aggregation level and then we can select based on that
 
     if get_aggregation(portfolio) === PSY.ACBus
-        add_nodes!(portfolio, attributes, db)
-        add_nodal_lines!(portfolio, attributes, db)
+        add_nodes!(portfolio, attributes, stmts)
+        add_nodal_lines!(portfolio, attributes, stmts)
     else
-        add_zones!(portfolio, attributes, db)
-        add_aggregate_lines!(portfolio, attributes, db)
+        add_zones!(portfolio, attributes, stmts)
+        add_aggregate_lines!(portfolio, attributes, stmts)
     end
 
-    add_technologies!(portfolio, attributes, db)
-    add_demand_requirements!(portfolio, attributes, db)
-    add_demand_technologies!(portfolio, attributes, db)
+    add_technologies!(portfolio, attributes, stmts)
+    add_demand_requirements!(portfolio, attributes, stmts)
+    add_demand_technologies!(portfolio, attributes, stmts)
 
-    add_buses!(portfolio, attributes, db)
-    add_system_lines!(portfolio, attributes, db)
-    add_generation_units!(portfolio, attributes, db)
-    add_storage_units!(portfolio, attributes, db)
-    add_loads!(portfolio, attributes, db)
+    add_buses!(portfolio, attributes, stmts)
+    add_system_lines!(portfolio, attributes, stmts)
+    add_generation_units!(portfolio, attributes, stmts)
+    add_storage_units!(portfolio, attributes, stmts)
+    add_loads!(portfolio, attributes, stmts)
 
     deserialize_timeseries!(portfolio.base_system, db)
-    deserialize_portfolio_timeseries!(portfolio, db)
+    deserialize_portfolio_timeseries!(portfolio, stmts)
 
     return portfolio
+end
+
+function prepare_statements(db::SQLite.DB)
+    stmts = Dict()
+    for (k, v) in QUERIES
+        stmts[k] = DBInterface.prepare(db, v)
+    end
+    return stmts
 end
 
 # Ported from SiennaGridDB
@@ -374,8 +346,8 @@ function parse_operational_cost(ops_cost::Dict{String, Any})
     return operational_cost
 end
 
-function add_zones!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, db::SQLite.DB)
-    for rec in IS.execute(db, QUERIES[:zones], nothing, IS.LOG_GROUP_SERIALIZATION)
+function add_zones!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, stmts::Dict)
+    for rec in IS.execute(stmts[:zones], nothing, IS.LOG_GROUP_SERIALIZATION)
         z = Zone(; name=rec.name, id=rec.id)
         add_region!(p, z)
     end
@@ -384,10 +356,9 @@ end
 function add_nodes!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
-    db::SQLite.DB,
+    stmts::Dict,
 )
-    for rec in
-        IS.execute(db, QUERIES[:balancing_topologies], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in IS.execute(stmts[:balancing_topologies], nothing, IS.LOG_GROUP_SERIALIZATION)
         z = Node(; name=rec.name, id=rec.id)
         add_region!(portfolio, z)
     end
@@ -396,9 +367,9 @@ end
 function add_buses!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
-    db::SQLite.DB,
+    stmts::Dict,
 )
-    for rec in IS.execute(db, QUERIES[:zones], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in IS.execute(stmts[:zones], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_attr = get(attributes, rec.id, Dict{String, Any}())
         area = Area(;
             name=rec.name,
@@ -413,13 +384,10 @@ function add_buses!(
         end
         PSY.add_component!(portfolio.base_system, area)
     end
-    for rec in
-        IS.execute(db, QUERIES[:balancing_topologies], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in IS.execute(stmts[:balancing_topologies], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_attr = get(attributes, rec.id, Dict{String, Any}())
         area_name =
-            first(
-                IS.execute(db, QUERIES[:zone], [rec.area], IS.LOG_GROUP_SERIALIZATION),
-            ).name
+            first(IS.execute(stmts[:zone], [rec.area], IS.LOG_GROUP_SERIALIZATION)).name
         bus = PSY.ACBus(;
             name=rec.name,
             number=rec.id,
@@ -443,10 +411,9 @@ end
 function add_aggregate_lines!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
-    db::SQLite.DB,
+    stmts::Dict,
 )
-    for rec in
-        IS.execute(db, QUERIES[:aggregate_lines], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in IS.execute(stmts[:aggregate_lines], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_attr = get(attributes, rec.id, Dict{String, Any}())
         area_to_id = parse(Int64, rec.area_to)
         area_from_id = parse(Int64, rec.area_from)
@@ -482,16 +449,15 @@ end
 function add_nodal_lines!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
-    db::SQLite.DB,
+    stmts::Dict,
 )
-    for rec in IS.execute(db, QUERIES[:new_lines], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in IS.execute(stmts[:new_lines], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_attr = get(attributes, rec.id, Dict{String, Any}())
-        arc = first(IS.execute(db, QUERIES[:arc], [rec.arc_id], IS.LOG_GROUP_SERIALIZATION))
+        arc = first(IS.execute(stmts[:arc], [rec.arc_id], IS.LOG_GROUP_SERIALIZATION))
         balancing_topology_from =
             first(
                 IS.execute(
-                    db,
-                    QUERIES[:topology_from_arc],
+                    stmts[:topology_from_arc],
                     [arc.from_id],
                     IS.LOG_GROUP_SERIALIZATION,
                 ),
@@ -499,8 +465,7 @@ function add_nodal_lines!(
         balancing_topology_to =
             first(
                 IS.execute(
-                    db,
-                    QUERIES[:topology_from_arc],
+                    stmts[:topology_from_arc],
                     [arc.to_id],
                     IS.LOG_GROUP_SERIALIZATION,
                 ),
@@ -525,25 +490,23 @@ end
 function add_technologies!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
-    db::SQLite.DB,
+    stmts::Dict,
 )
-    for rec in IS.execute(db, QUERIES[:technologies], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in IS.execute(stmts[:technologies], nothing, IS.LOG_GROUP_SERIALIZATION)
         parametric = get(PRIME_MOVER_TO_PARAMETRIC, rec.prime_mover, PSY.ThermalStandard)
 
         if get_aggregation(portfolio) == PSY.ACBus
             area_id =
                 first(
                     IS.execute(
-                        db,
-                        QUERIES[:zone_for_technology],
+                        stmts[:zone_for_technology],
                         [rec.area],
                         IS.LOG_GROUP_SERIALIZATION,
                     ),
                 ).id
             regions = [
                 get_region(Node, portfolio, row.name) for row in IS.execute(
-                    db,
-                    QUERIES[:area_to_topology],
+                    stmts[:area_to_topology],
                     [area_id],
                     IS.LOG_GROUP_SERIALIZATION,
                 )
@@ -595,33 +558,27 @@ end
 function add_generation_units!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
-    db::SQLite.DB,
+    stmts::Dict,
 )
-    for rec in
-        IS.execute(db, QUERIES[:generation_units], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in IS.execute(stmts[:generation_units], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_type = getproperty(
             PowerSystems,
             Symbol(
                 first(
-                    IS.execute(
-                        db,
-                        QUERIES[:entity_type],
-                        [rec.id],
-                        IS.LOG_GROUP_SERIALIZATION,
-                    ),
-                )[1],
+                    IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
+                ).entity_type,
             ),
         )
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
-        bus_name = first(
-            IS.execute(
-                db,
-                QUERIES[:topology_for_unit],
-                [rec.balancing_topology],
-                IS.LOG_GROUP_SERIALIZATION,
-            ),
-        )[1]
+        bus_name =
+            first(
+                IS.execute(
+                    stmts[:topology_for_unit],
+                    [rec.balancing_topology],
+                    IS.LOG_GROUP_SERIALIZATION,
+                ),
+            ).name
 
         if component_type == PSY.ThermalStandard
             time_limits = (
@@ -789,8 +746,7 @@ function add_generation_units!(
                 area_id =
                     first(
                         IS.execute(
-                            db,
-                            QUERIES[:topology_to_area],
+                            stmts[:topology_to_area],
                             [rec.balancing_topology],
                             IS.LOG_GROUP_SERIALIZATION,
                         ),
@@ -834,20 +790,15 @@ end
 function add_storage_units!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
-    db::SQLite.DB,
+    stmts::Dict,
 )
-    for rec in IS.execute(db, QUERIES[:storage_units], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in IS.execute(stmts[:storage_units], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_type = getproperty(
             PowerSystems,
             Symbol(
                 first(
-                    IS.execute(
-                        db,
-                        QUERIES[:entity_type],
-                        [rec.id],
-                        IS.LOG_GROUP_SERIALIZATION,
-                    ),
-                )[1],
+                    IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
+                ).entity_type,
             ),
         )
         component_attr = get(attributes, rec.id, Dict{String, Any}())
@@ -870,14 +821,14 @@ function add_storage_units!(
         )
 
         # Get name of bus
-        bus_name = first(
-            IS.execute(
-                db,
-                QUERIES[:topology_for_unit],
-                [rec.balancing_topology],
-                IS.LOG_GROUP_SERIALIZATION,
-            ),
-        )[1]
+        bus_name =
+            first(
+                IS.execute(
+                    stmts[:topology_for_unit],
+                    [rec.balancing_topology],
+                    IS.LOG_GROUP_SERIALIZATION,
+                ),
+            ).name
 
         ops_cost = parse_operational_cost(component_attr["operation_cost"])
 
@@ -919,8 +870,7 @@ function add_storage_units!(
             area_id =
                 first(
                     IS.execute(
-                        db,
-                        QUERIES[:topology_to_area],
+                        stmts[:topology_to_area],
                         [rec.balancing_topology],
                         IS.LOG_GROUP_SERIALIZATION,
                     ),
@@ -957,22 +907,16 @@ end
 function add_demand_requirements!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
-    db::SQLite.DB,
+    stmts::Dict,
 )
     # stream straight through the table
-    for rec in
-        IS.execute(db, QUERIES[:demand_requirements], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in IS.execute(stmts[:demand_requirements], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_type = getproperty(
             PowerSystems,
             Symbol(
                 first(
-                    IS.execute(
-                        db,
-                        QUERIES[:entity_type],
-                        [rec.id],
-                        IS.LOG_GROUP_SERIALIZATION,
-                    ),
-                )[1],
+                    IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
+                ).entity_type,
             ),
         )
         component_attr = get(attributes, rec.id, Dict{String, Any}())
@@ -983,8 +927,7 @@ function add_demand_requirements!(
             area =
                 first(
                     IS.execute(
-                        db,
-                        QUERIES[:topology_to_area],
+                        stmts[:topology_to_area],
                         [rec.balancing_topology],
                         IS.LOG_GROUP_SERIALIZATION,
                     ),
@@ -1008,35 +951,29 @@ end
 function add_loads!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
-    db::SQLite.DB,
+    stmts::Dict,
 )
     # stream straight through the table
-    for rec in
-        IS.execute(db, QUERIES[:demand_requirements], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in IS.execute(stmts[:demand_requirements], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_type = getproperty(
             PowerSystems,
             Symbol(
                 first(
-                    IS.execute(
-                        db,
-                        QUERIES[:entity_type],
-                        [rec.id],
-                        IS.LOG_GROUP_SERIALIZATION,
-                    ),
-                )[1],
+                    IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
+                ).entity_type,
             ),
         )
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         # Determine area based on balancing topology if zonal
-        bus_name = first(
-            IS.execute(
-                db,
-                QUERIES[:topology_for_unit],
-                [rec.balancing_topology],
-                IS.LOG_GROUP_SERIALIZATION,
-            ),
-        )[1]
+        bus_name =
+            first(
+                IS.execute(
+                    stmts[:topology_for_unit],
+                    [rec.balancing_topology],
+                    IS.LOG_GROUP_SERIALIZATION,
+                ),
+            ).name
 
         # build and immediately insert
         load = component_type(;
@@ -1083,16 +1020,15 @@ end
 function add_system_lines!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
-    db::SQLite.DB,
+    stmts::Dict,
 )
     arc_dict = Dict()
-    for rec in IS.execute(db, QUERIES[:arcs], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in IS.execute(stmts[:arcs], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_attr = get(attributes, rec.id, Dict{String, Any}())
         from_bus =
             first(
                 IS.execute(
-                    db,
-                    QUERIES[:topology_from_arc],
+                    stmts[:topology_from_arc],
                     [rec.from_id],
                     IS.LOG_GROUP_SERIALIZATION,
                 ),
@@ -1100,8 +1036,7 @@ function add_system_lines!(
         to_bus =
             first(
                 IS.execute(
-                    db,
-                    QUERIES[:topology_from_arc],
+                    stmts[:topology_from_arc],
                     [rec.to_id],
                     IS.LOG_GROUP_SERIALIZATION,
                 ),
@@ -1120,28 +1055,19 @@ function add_system_lines!(
     end
 
     tx_dict = Dict()
-    for rec in
-        IS.execute(db, QUERIES[:transmission_lines], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in IS.execute(stmts[:transmission_lines], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_type = getproperty(
             PowerSystems,
             Symbol(
                 first(
-                    IS.execute(
-                        db,
-                        QUERIES[:entity_type],
-                        [rec.id],
-                        IS.LOG_GROUP_SERIALIZATION,
-                    ),
-                )[1],
+                    IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
+                ).entity_type,
             ),
         )
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         # Determine area based on balancing topology if zonal
-        arc =
-            first(
-                IS.execute(db, QUERIES[:arc], [rec.arc_id], IS.LOG_GROUP_SERIALIZATION),
-            ).id
+        arc = first(IS.execute(stmts[:arc], [rec.arc_id], IS.LOG_GROUP_SERIALIZATION)).id
 
         if component_type == PSY.Line
             b = (
@@ -1234,14 +1160,11 @@ function add_system_lines!(
         #Build Portfolio transmission based on existing transmission
         if get_aggregation(portfolio) == PSY.ACBus
             component_attr = get(attributes, rec.id, Dict{String, Any}())
-            arc = first(
-                IS.execute(db, QUERIES[:arc], [rec.arc_id], IS.LOG_GROUP_SERIALIZATION),
-            )
+            arc = first(IS.execute(stmts[:arc], [rec.arc_id], IS.LOG_GROUP_SERIALIZATION))
             balancing_topology_from =
                 first(
                     IS.execute(
-                        db,
-                        QUERIES[:topology_from_arc],
+                        stmts[:topology_from_arc],
                         [arc.from_id],
                         IS.LOG_GROUP_SERIALIZATION,
                     ),
@@ -1249,8 +1172,7 @@ function add_system_lines!(
             balancing_topology_to =
                 first(
                     IS.execute(
-                        db,
-                        QUERIES[:topology_from_arc],
+                        stmts[:topology_from_arc],
                         [arc.to_id],
                         IS.LOG_GROUP_SERIALIZATION,
                     ),
@@ -1299,10 +1221,10 @@ end
 function add_demand_technologies!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
-    db::SQLite.DB,
+    stmts::Dict,
 ) end
 
-function deserialize_portfolio_timeseries!(portfolio::Portfolio, db::SQLite.DB)
+function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
     supply_technologies = get_technologies(SupplyTechnology, portfolio)
     for tech in supply_technologies
         fuel = first(get_fuel(tech))
@@ -1311,23 +1233,20 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, db::SQLite.DB)
         if !isnothing(ts_type) && !has_supplemental_attributes(tech)
             cost_data = Dict()
             for ts_association in IS.execute(
-                db,
-                QUERIES[:investment_timeseries],
+                stmts[:investment_timeseries],
                 [ts_type],
                 IS.LOG_GROUP_SERIALIZATION,
             )
                 timestamps = [
                     Dates.DateTime(row.idx, 1, 1) for row in IS.execute(
-                        db,
-                        QUERIES[:ts_data],
+                        stmts[:ts_data],
                         [ts_association.time_series_uuid],
                         IS.LOG_GROUP_SERIALIZATION,
                     )
                 ]
                 values = [
                     row.value for row in IS.execute(
-                        db,
-                        QUERIES[:ts_data],
+                        stmts[:ts_data],
                         [ts_association.time_series_uuid],
                         IS.LOG_GROUP_SERIALIZATION,
                     )
@@ -1378,6 +1297,8 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, db::SQLite.DB)
         if typeof(tech) in
            [SupplyTechnology{RenewableDispatch}, SupplyTechnology{RenewableNonDispatch}]
             if has_supplemental_attributes(tech)
+                #If there are existing capacity associated with a technology
+                #Use an existing unit to extract timeseries
                 existing_names = get_existing_technologies(
                     only(get_supplemental_attributes(ExistingCapacity, tech)),
                 )
@@ -1392,6 +1313,9 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, db::SQLite.DB)
                     get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
                     get_rating(unit)
             else
+                #If technology does not have existing capacity associated with it,
+                #select a similar technology from the base system to get required timeseries
+                #based on prime mover
                 prime_mover = get_prime_mover_type(tech)
                 unit = first(
                     IS.get_components(
