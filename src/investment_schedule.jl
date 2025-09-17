@@ -17,6 +17,6 @@ A mutable struct that stores the results of investment decisions over multiple i
       + "name": String identifier for the specific technology instance
       + BuildCapacity: The capacity to be built for that technology in that period
 """
-mutable struct InvestmentScheduleResults
-    results::Dict  # InvestmentPeriod => (TypeTechnology, "name") => BuildCapacity
+mutable struct InvestmentScheduleResults <: IS.InfrastructureSystemsType
+    results::Dict # InvestmentPeriod => (TypeTechnology, "name") => BuildCapacity
 end

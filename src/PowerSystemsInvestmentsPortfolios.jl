@@ -109,7 +109,6 @@ export clear_time_series!
 export read_json_data
 export generate_invest_structs
 export generate_structs
-export map_prime_mover
 export database_to_portfolio
 export add_supplemental_attribute!
 export remove_supplemental_attribute!

@@ -132,29 +132,36 @@ function deserialize(
 end
 
 function serialize(schedule::InvestmentScheduleResults)
-    data = Vector{Dict{String, Any}}()
+    start_dates = Vector{String}()
+    end_dates = Vector{String}()
+    capacity_data = Vector{Vector{Dict{String, Any}}}()
     for (period, investments) in schedule.results
+        push!(start_dates, string(period[1]))
+        push!(end_dates, string(period[2]))
+
         installation_list = Vector{Dict{String, Any}}()
         for (technology, capacity) in investments
             installation = Dict{String, Any}(
-                "technology" => IS.serialize(technology[1]),
+                "technology" => string(nameof(technology[1])),
+                "parameter" => string(nameof((only(technology[1].parameters)))),
                 "name" => technology[2],
-                "capacity" => capacity,
+                "installations" => capacity,
             )
             push!(installation_list, installation)
         end
-
-        serialized_data = Dict{String, Any}(
-            "start_date" => string(period[1]),
-            "end_date" => string(period[2]),
-            "installations" => installation_list,
-        )
-        push!(data, serialized_data)
+        push!(capacity_data, installation_list)
     end
-    schedule_dict = Dict{String, Any}("results" => data)
-    add_serialization_metadata!(schedule_dict, InvestmentScheduleResults)
+    openapi_schedule = APIServer.InvestmentScheduleResults(
+        start_dates=start_dates,
+        end_dates=end_dates,
+        results=capacity_data,
+    )
+    data = Dict{String, Any}(
+        string(name) => serialize(getproperty(openapi_schedule, name)) for
+        name in fieldnames(typeof(openapi_schedule))
+    )
 
-    return schedule_dict
+    return data
 end
 
 function serialize(technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
@@ -429,29 +436,34 @@ function deserialize(
 end
 
 function deserialize(::Type{InvestmentScheduleResults}, raw::Dict)
-    deserialized_schedule = Dict()
-    for schedule in raw["results"]
-        period_tuple =
-            (Dates.Date(schedule["start_date"]), Dates.Date(schedule["end_date"]))
+    openapi_schedule = IS.deserialize_struct(APIServer.InvestmentScheduleResults, raw)
 
-        deserialized_schedule[period_tuple] = Dict()
-        for installation in schedule["installations"]
-            technology_tuple =
-                (eval(Meta.parse(installation["technology"])), installation["name"])
+    schedule = Dict()
+    for (i, start_date) in enumerate(openapi_schedule.start_dates)
+        end_date = openapi_schedule.end_dates[i]
+        period_tuple = (Dates.Date(start_date), Dates.Date(end_date))
 
-            if installation["capacity"] isa Dict
+        schedule[period_tuple] = Dict()
+        for capacity in openapi_schedule.results[i]
+            technology_type = getproperty(
+                PowerSystemsInvestmentsPortfolios,
+                Symbol(capacity["technology"]),
+            )
+            parameter = getproperty(PowerSystems, Symbol(capacity["parameter"]))
+            technology_tuple = (technology_type{parameter}, capacity["name"])
+
+            if capacity["installations"] isa Dict
                 capacity_tuple = NamedTuple(
-                    (Symbol(key), value) for (key, value) in installation["capacity"]
+                    (Symbol(key), value) for (key, value) in capacity["installations"]
                 )
-                deserialized_schedule[period_tuple][technology_tuple] = capacity_tuple
+                schedule[period_tuple][technology_tuple] = capacity_tuple
             else
-                deserialized_schedule[period_tuple][technology_tuple] =
-                    installation["capacity"]
+                schedule[period_tuple][technology_tuple] = capacity["installations"]
             end
         end
     end
 
-    return InvestmentScheduleResults(deserialized_schedule)
+    return InvestmentScheduleResults(schedule)
 end
 
 # Function copied over from IS. This version of the function is modified to deserialize using openAPI structs for PSIP supplemental attributes
