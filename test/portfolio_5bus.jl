@@ -41,8 +41,14 @@ function build_portfolio()
     ##### Thermals #####
     ####################
 
-    tech_financials =
-        TechnologyFinancialData(; capital_recovery_period=30, technology_base_year=2025)
+    tech_financials = TechnologyFinancialData(;
+        capital_recovery_period=30,
+        technology_base_year=2025,
+        debt_fraction=0.5,
+        debt_rate=0.07,
+        return_on_equity=0.1,
+        tax_rate=0.257,
+    )
 
     thermals = collect(get_components(ThermalStandard, sys))
     var_cost = PSY.get_variable.((get_operation_cost.((thermals))))

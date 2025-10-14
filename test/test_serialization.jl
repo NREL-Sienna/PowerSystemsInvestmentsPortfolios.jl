@@ -23,9 +23,12 @@ end
         id=1,
         available=true,
         financial_data=TechnologyFinancialData(;
-            interest_rate=30,
             capital_recovery_period=30,
-            technology_base_year=2020,
+            technology_base_year=2025,
+            debt_fraction=0.5,
+            debt_rate=0.07,
+            return_on_equity=0.1,
+            tax_rate=0.257,
         ),
         power_systems_type="test",
         operation_costs=ThermalGenerationCost(;

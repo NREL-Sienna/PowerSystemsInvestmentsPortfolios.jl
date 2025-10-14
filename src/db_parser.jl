@@ -110,8 +110,11 @@ const PRIME_MOVER_TO_TIMESERIES = Dict(
 # Remove later, or make this optional later depending on what is in the dataset
 const DEFAULT_FINANCIAL_DATA = TechnologyFinancialData(;
     capital_recovery_period=30,
-    interest_rate=0.06,
     technology_base_year=2025,
+    debt_fraction=0.5,
+    debt_rate=0.07,
+    return_on_equity=0.1,
+    tax_rate=0.257,
 )
 
 """
