@@ -413,6 +413,7 @@ function add_buses!(
         bus = PSY.ACBus(;
             name=rec.name,
             number=rec.id,
+            available=component_attr["available"],
             bustype=PSY.get_enum_value(PSY.ACBusTypes, component_attr["bustype"]),
             angle=component_attr["angle"],
             magnitude=component_attr["magnitude"],
@@ -583,14 +584,20 @@ function add_generation_units!(
     stmts::Dict,
 )
     for rec in IS.execute(stmts[:generation_units], nothing, IS.LOG_GROUP_SERIALIZATION)
-        component_type = getproperty(
-            PowerSystems,
-            Symbol(
-                first(
-                    IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
-                ).entity_type,
-            ),
-        )
+        #TODO: Temporary workaround since HydroEnergyReservoir no longer exists in the RTS 
+        #Can revert this back once RTS database is updated
+        # component_type = getproperty(
+        #     PowerSystems,
+        #     Symbol(
+        #         first(
+        #             IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
+        #         ).entity_type,
+        #     ),
+        # )
+        component_type =
+            first(
+                IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
+            ).entity_type
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         bus_name =
@@ -602,7 +609,8 @@ function add_generation_units!(
                 ),
             ).name
 
-        if component_type == PSY.ThermalStandard
+        #if component_type == PSY.ThermalStandard
+        if component_type == "ThermalStandard"
             time_limits = (
                 up=component_attr["time_limits"]["up"],
                 down=component_attr["time_limits"]["down"],
@@ -621,7 +629,8 @@ function add_generation_units!(
             )
 
             ops_cost = parse_operational_cost(component_attr["operation_cost"])
-            generator = component_type(;
+            #generator = component_type(;
+            generator = PSY.ThermalStandard(;
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
@@ -640,13 +649,15 @@ function add_generation_units!(
                 operation_cost=ops_cost,
             )
 
-        elseif component_type == PSY.RenewableDispatch
+            #elseif component_type == PSY.RenewableDispatch
+        elseif component_type == "RenewableDispatch"
             reactive_limits = (
                 min=component_attr["reactive_power_limits"]["min"] / rec.base_power,
                 max=component_attr["reactive_power_limits"]["max"] / rec.base_power,
             )
             ops_cost = parse_operational_cost(component_attr["operation_cost"])
-            generator = component_type(;
+            #generator = component_type(;
+            generator = PSY.RenewableDispatch(;
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
@@ -662,9 +673,11 @@ function add_generation_units!(
                 operation_cost=ops_cost,
             )
 
-        elseif component_type == PSY.RenewableNonDispatch
+            #elseif component_type == PSY.RenewableNonDispatch
+        elseif component_type == "RenewableNonDispatch"
             ops_cost = RenewableGenerationCost(nothing)
-            generator = component_type(;
+            #generator = component_type(;
+            generator = PSY.RenewableNonDispatch(;
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
@@ -677,7 +690,8 @@ function add_generation_units!(
                                rec.base_power,
                 power_factor=get(component_attr, "power_factor", 1.0),
             )
-        elseif component_type == PSY.HydroDispatch
+            #elseif component_type == PSY.HydroDispatch
+        elseif component_type == "HydroDispatch"
             time_limits = (
                 up=component_attr["time_limits"]["up"],
                 down=component_attr["time_limits"]["down"],
@@ -694,7 +708,8 @@ function add_generation_units!(
                 min=component_attr["reactive_power_limits"]["min"] / rec.base_power,
                 max=component_attr["reactive_power_limits"]["max"] / rec.base_power,
             )
-            generator = component_type(;
+            #generator = component_type(;
+            generator = PSY.HydroDispatch(;
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
@@ -711,7 +726,8 @@ function add_generation_units!(
                 time_limits=time_limits,
             )
 
-        elseif component_type == PSY.HydroEnergyReservoir
+            #elseif component_type == PSY.HydroEnergyReservoir
+        elseif component_type == "HydroEnergyReservoir"
             active_limits = (
                 min=component_attr["active_power_limits"]["min"] / rec.base_power,
                 max=component_attr["active_power_limits"]["max"] / rec.base_power,
@@ -730,38 +746,78 @@ function add_generation_units!(
             )
             ops_cost = parse_operational_cost(component_attr["operation_cost"])
 
-            generator = component_type(;
+            # generator = component_type(;
+            #     name=rec.name,
+            #     rating=rec.rating / rec.base_power,
+            #     base_power=rec.base_power,
+            #     available=component_attr["available"],
+            #     status=component_attr["status"],
+            #     inflow=component_attr["inflow"] / rec.base_power,
+            #     bus=PSY.get_component(PSY.ACBus, portfolio.base_system, bus_name),
+            #     time_at_status=component_attr["time_at_status"],
+            #     storage_target=component_attr["storage_target"],
+            #     prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
+            #     conversion_factor=component_attr["conversion_factor"],
+            #     storage_capacity=component_attr["storage_capacity"] / rec.base_power,
+            #     active_power_limits=active_limits,
+            #     active_power=component_attr["active_power"] / rec.base_power,
+            #     reactive_power=component_attr["reactive_power"] / rec.base_power,
+            #     reactive_power_limits=reactive_limits,
+            #     ramp_limits=ramp_limits,
+            #     time_limits=time_limits,
+            #     initial_storage=component_attr["initial_storage"] / rec.base_power,
+            #     operation_cost=ops_cost, #Add later when data is in DB
+            # )
+            turbine = HydroTurbine(;
                 name=rec.name,
-                rating=rec.rating / rec.base_power,
-                base_power=rec.base_power,
                 available=component_attr["available"],
-                status=component_attr["status"],
-                inflow=component_attr["inflow"] / rec.base_power,
                 bus=PSY.get_component(PSY.ACBus, portfolio.base_system, bus_name),
-                time_at_status=component_attr["time_at_status"],
-                storage_target=component_attr["storage_target"],
-                prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
-                conversion_factor=component_attr["conversion_factor"],
-                storage_capacity=component_attr["storage_capacity"] / rec.base_power,
-                active_power_limits=active_limits,
                 active_power=component_attr["active_power"] / rec.base_power,
                 reactive_power=component_attr["reactive_power"] / rec.base_power,
+                rating=rec.rating / rec.base_power,
+                active_power_limits=active_limits,
                 reactive_power_limits=reactive_limits,
+                base_power=rec.base_power,
+                operation_cost=ops_cost,
                 ramp_limits=ramp_limits,
                 time_limits=time_limits,
-                initial_storage=component_attr["initial_storage"] / rec.base_power,
-                operation_cost=ops_cost, #Add later when data is in DB
+                outflow_limits=nothing,
+            )
+            reservoir = HydroReservoir(;
+                name=string(rec.name, "_reservoir"),
+                available=component_attr["available"],
+                storage_level_limits=(min=0, max=1.0),
+                initial_level=component_attr["initial_storage"],
+                spillage_limits=nothing,
+                inflow=component_attr["inflow"] / rec.base_power,
+                outflow=1.0,
+                level_targets=component_attr["storage_target"],
+                intake_elevation=0.0,
+                head_to_volume_factor=LinearCurve(1.0),
+                operation_cost=PSY.HydroReservoirCost(),
+                level_data_type=PSY.ReservoirDataType.ENERGY,
             )
         end
-        if haskey(component_attr, "uuid")
-            IS.set_uuid!(IS.get_internal(generator), Base.UUID(component_attr["uuid"]))
+        if component_type == "HydroEnergyReservoir"
+            if haskey(component_attr, "uuid")
+                IS.set_uuid!(IS.get_internal(turbine), Base.UUID(component_attr["uuid"]))
+            else
+                warn("UUID for component named $(rec.name) not found in database")
+            end
+            add_component!(portfolio.base_system, reservoir)
+            add_component!(portfolio.base_system, turbine)
+            PSY.set_downstream_turbines!(reservoir, [turbine])
         else
-            warn("UUID for component named $(rec.name) not found in database")
+            if haskey(component_attr, "uuid")
+                IS.set_uuid!(IS.get_internal(generator), Base.UUID(component_attr["uuid"]))
+            else
+                warn("UUID for component named $(rec.name) not found in database")
+            end
+            add_component!(portfolio.base_system, generator)
         end
-        add_component!(portfolio.base_system, generator)
-
         if component_type in
-           [PSY.ThermalStandard, PSY.RenewableDispatch, PSY.RenewableNonDispatch]
+           #[PSY.ThermalStandard, PSY.RenewableDispatch, PSY.RenewableNonDispatch]
+           ["ThermalStandard", "RenewableDispatch", "RenewableNonDispatch"]
             if get_aggregation(portfolio) == PSY.ACBus
                 regions = [get_region(Node, portfolio, bus_name)]
             else
@@ -781,7 +837,8 @@ function add_generation_units!(
                     ),
                 )
             end
-            technology = SupplyTechnology{component_type}(;
+            psy_type = getproperty(PowerSystems, Symbol(component_type))
+            technology = SupplyTechnology{psy_type}(;
                 name=rec.name,
                 id=rec.id,
                 capital_costs=LinearCurve(0.0),
@@ -790,7 +847,8 @@ function add_generation_units!(
                 region=regions,
                 financial_data=DEFAULT_FINANCIAL_DATA,
                 available=true,
-                power_systems_type=string(nameof(component_type)),
+                #power_systems_type=string(nameof(component_type)),
+                power_systems_type=component_type,
                 operation_costs=ops_cost,
                 ramp_limits=(@isdefined ramp_limits) ? ramp_limits : (up=1.0, down=1.0),
                 time_limits=(@isdefined time_limits) ? time_limits : (up=1.0, down=1.0),
@@ -1137,6 +1195,7 @@ function add_system_lines!(
             line = component_type(;
                 name=rec.name,
                 rating=rec.continuous_rating / get_base_power(portfolio.base_system),
+                base_power=component_attr["base_power"],
                 arc=arc_dict[arc],
                 primary_shunt=transform_natural_impedance_to_device_base(
                     component_attr["primary_shunt"]["real"],
