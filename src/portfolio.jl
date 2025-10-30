@@ -137,6 +137,35 @@ function Portfolio(base_year, discount_rate, inflation_rate, interest_rate; kwar
 end
 
 """
+Construct an empty `Portfolio` specifying financial data and a base system. Useful for building a Portfolio from scratch.
+"""
+function Portfolio(
+    aggregation,
+    base_system,
+    base_year,
+    discount_rate,
+    inflation_rate,
+    interest_rate;
+    kwargs...,
+)
+    data = PSY._create_system_data_from_kwargs(; kwargs...)
+    return Portfolio(
+        aggregation,
+        data,
+        base_system,
+        nothing,
+        InfrastructureSystemsInternal();
+        financial_data=PortfolioFinancialData(
+            base_year,
+            discount_rate,
+            inflation_rate,
+            interest_rate,
+        ),
+        kwargs...,
+    )
+end
+
+"""
 Construct an empty `Portfolio` specifying financial data. Useful for building a Portfolio from scratch and used in the database parser.
 """
 function Portfolio(
