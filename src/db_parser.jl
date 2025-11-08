@@ -997,7 +997,6 @@ function add_loads!(
                 ),
             ).name
 
-        # build and immediately insert
         load = component_type(;
             name=rec.name,
             base_power=rec.base_power,
@@ -1199,6 +1198,7 @@ function add_system_lines!(
                         IS.LOG_GROUP_SERIALIZATION,
                     ),
                 ).name
+
             transport = NodalACTransportTechnology{component_type}(;
                 name=rec.name * "_new",
                 id=rec.id,
@@ -1209,6 +1209,13 @@ function add_system_lines!(
                 end_node=get_region(Node, portfolio, balancing_topology_to),
                 reactance=component_attr["x"],
                 resistance=component_attr["r"],
+                voltage=get_base_voltage(
+                    PSY.get_component(
+                        PSY.ACBus,
+                        portfolio.base_system,
+                        balancing_topology_from,
+                    ),
+                ),
                 capital_costs=LinearCurve(1e5),
             )
             add_technology!(portfolio, transport)
