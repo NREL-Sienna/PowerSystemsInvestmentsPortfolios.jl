@@ -298,6 +298,11 @@ Set the investment schedule of the portfolio.
 set_investment_schedule!(val::Portfolio, investment_schedule::InvestmentScheduleResults) =
     val.investment_schedule = investment_schedule
 
+"""
+Set the base system of the portfolio.
+"""
+set_base_system!(val::Portfolio, system::PSY.System) = val.base_system = system
+
 function _validate_or_skip!(sys, component, skip_validation)
     if skip_validation && get_runchecks(sys)
         @warn(

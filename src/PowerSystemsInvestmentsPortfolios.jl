@@ -93,6 +93,7 @@ export get_inflation_rate
 export get_interest_rate
 export get_discount_rate
 export get_investment_schedule
+export get_base_system
 export set_description!
 export set_name!
 export set_base_year!
@@ -100,6 +101,7 @@ export set_inflation_rate!
 export set_interest_rate!
 export set_discount_rate!
 export set_investment_schedule!
+export set_base_system!
 export add_technology!
 export add_technologies!
 export add_region!
