@@ -1179,6 +1179,7 @@ function add_system_lines!(
         end
 
         #Build Portfolio transmission based on existing transmission
+        #Also new candidates lines for each connection
         if get_aggregation(portfolio) == PSY.ACBus
             component_attr = get(attributes, rec.id, Dict{String, Any}())
             arc = first(IS.execute(stmts[:arc], [rec.arc_id], IS.LOG_GROUP_SERIALIZATION))
@@ -1200,7 +1201,7 @@ function add_system_lines!(
                 ).name
 
             transport = NodalACTransportTechnology{component_type}(;
-                name=rec.name * "_new",
+                name=rec.name,
                 id=rec.id,
                 available=true,
                 power_systems_type=string(nameof(component_type)),
@@ -1221,6 +1222,32 @@ function add_system_lines!(
             add_technology!(portfolio, transport)
             existing = ExistingCapacity(; existing_technologies=[rec.name])
             add_supplemental_attribute!(portfolio, transport, existing)
+            set_capacity_limits!(
+                transport,
+                (min=0, max=get_existing_capacity_mw(portfolio, transport)),
+            )
+
+            new_transport = NodalACTransportTechnology{component_type}(;
+                name=rec.name * "_new",
+                id=rec.id,
+                available=true,
+                power_systems_type=string(nameof(component_type)),
+                financial_data=DEFAULT_FINANCIAL_DATA,
+                start_node=get_region(Node, portfolio, balancing_topology_from),
+                end_node=get_region(Node, portfolio, balancing_topology_to),
+                reactance=component_attr["x"],
+                resistance=component_attr["r"],
+                voltage=get_base_voltage(
+                    PSY.get_component(
+                        PSY.ACBus,
+                        portfolio.base_system,
+                        balancing_topology_from,
+                    ),
+                ),
+                capital_costs=LinearCurve(1e5),
+            )
+            add_technology!(portfolio, new_transport)
+
         end
     end
 
