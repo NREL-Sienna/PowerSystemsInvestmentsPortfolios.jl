@@ -1247,7 +1247,6 @@ function add_system_lines!(
                 capital_costs=LinearCurve(1e5),
             )
             add_technology!(portfolio, new_transport)
-
         end
     end
 
