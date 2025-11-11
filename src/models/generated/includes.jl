@@ -1,5 +1,5 @@
-include("Node.jl")
 include("Zone.jl")
+include("Node.jl")
 include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
 include("DemandRequirement.jl")

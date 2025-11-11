@@ -34,10 +34,10 @@ This file is auto-generated. Do not edit.
 Candidate generation technology for a region. Can represent either a thermal or renewable generation technology
 
 # Arguments
-- `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology
+- `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology. Fraction of hours in a year where technology is unavailable.
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
-- `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed
+- `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
 - `available::Bool`: (default: `True`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `co2::Dict{ThermalFuels, Float64}`: (default: `Dict()`) Carbon Intensity of fuel
 - `name::String`: The technology name
@@ -47,25 +47,25 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `start_fuel_mmbtu_per_mw::Float64`: (default: `0.0`) Startup fuel use per MW of nameplate capacity of each generator (MMBtu/MW per start)
 - `operation_costs::PSY.OperationalCost`: (default: `ThermalGenerationCost()`) Fixed and variable O&M costs for a technology
 - `fuel::Vector{ThermalFuels}`: (default: `[ThermalFuels.OTHER]`) Fuel type according to IEA
-- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
+- `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `cofire_level_limits::Dict{ThermalFuels, MinMax}`: (default: `Dict()`) Minimum and maximum blending level (%) of each fuel during normal generation process for multi-fuel generator
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology operates. Can be a zone or node.
-- `min_generation_fraction::Float64`: (default: `0.0`) Minimum generation as a fraction of total capacity
-- `time_limits::UpDown`: (default: `(up=1.0, down=1.0)`) Minimum amount of time a resource has to stay in the committed or shutdown state.
+- `min_generation_fraction::Float64`: (default: `0.0`) Minimum generation as a fraction of total capacity (MW)
+- `time_limits::UpDown`: (default: `(up=1.0, down=1.0)`) Minimum amount of time a resource has to stay in the committed or shutdown state (hours).
 - `unit_size::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
 - `ramp_limits::UpDown`: (default: `(up=1.0, down=1.0)`) Maximum decrease and increase in output between operation periods. Fraction of nameplate capacity per hour
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Minimum and maximum allowable installed capacity for a technology (MW)
 """
 mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
-    "Derating factor to account for planned or forced outages of a technology"
+    "Derating factor to account for planned or forced outages of a technology. Fraction of hours in a year where technology is unavailable."
     outage_factor::Float64
     "Prime mover for generator"
     prime_mover_type::PrimeMovers
     "Capital costs for investing in a technology. (USD/MW)"
     capital_costs::PSY.ValueCurve
-    "Maximum number of years a technology can be active once installed"
+    "Maximum number of years a technology can be active once installed (years)"
     lifetime::Int
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
@@ -85,19 +85,19 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
     operation_costs::PSY.OperationalCost
     "Fuel type according to IEA"
     fuel::Vector{ThermalFuels}
-    "maps to a valid PowerSystems.jl for PCM modeling"
+    "Corresponding type in PowerSystems.jl to be used in PCM modeling"
     power_systems_type::String
     "Minimum and maximum blending level (%) of each fuel during normal generation process for multi-fuel generator"
     cofire_level_limits::Dict{ThermalFuels, MinMax}
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "Location where technology operates. Can be a zone or node."
     region::Vector{RegionTopology}
-    "Minimum generation as a fraction of total capacity"
+    "Minimum generation as a fraction of total capacity (MW)"
     min_generation_fraction::Float64
-    "Minimum amount of time a resource has to stay in the committed or shutdown state."
+    "Minimum amount of time a resource has to stay in the committed or shutdown state (hours)."
     time_limits::UpDown
     "Used for discrete investment decisions. Size of each unit being built (MW)"
     unit_size::Float64
