@@ -901,6 +901,14 @@ function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirem
     return IS.get_components(T, portfolio.data)
 end
 
+function get_requirement(
+    ::Type{T},
+    portfolio::Portfolio,
+    name::AbstractString,
+) where {T <: Requirement}
+    return IS.get_component(T, portfolio.data, name)
+end
+
 ###########################################
 ######### Supplemental Attributes #########
 ###########################################
