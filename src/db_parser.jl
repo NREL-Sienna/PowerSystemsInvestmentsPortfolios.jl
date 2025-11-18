@@ -1,11 +1,7 @@
-"""
-This PoC is if a dictionary of queries is maintained, then the database can be read in and the structs can be generated.
-"""
 
 """
 Set of queries to extract relevant data from the database. Need to be maintained to be consistent with the most recent version of the database
 """
-
 #TODO: Support scenario handling
 QUERIES = Dict(
     :zones => "SELECT * FROM planning_regions",
@@ -118,8 +114,19 @@ const DEFAULT_FINANCIAL_DATA = TechnologyFinancialData(;
 )
 
 """
-The following function imports from the database and generates the structs for a portfolio
-@input database_filepath::AbstractString: The path to the database file
+The following function imports from the database and generates the structs for a portfolio.
+Portfolio-level financial data is not stored in the database and must be provided separately.
+See `PortfolioFinancialData`(@ref) for more details.
+
+# Arguments
+
+  - `database_filepath::AbstractString`: The path to the SQLite database file
+  - `discount_rate::Float64`: The discount rate for the portfolio
+  - `inflation_rate::Float64`: The inflation rate for the portfolio
+  - `interest_rate::Float64`: The interest rate for the portfolio
+  - `base_year::Int64`: The base year for the portfolio
+  - `aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}`: (default: `PSY.ACBus`) The aggregation level for the portfolio. Defaults to a nodal aggregation level
+  - `system::PSY.System`: (default: `PSY.System(100.0)`) The base power system for the portfolio
 """
 function database_to_portfolio(
     database_filepath::AbstractString,
@@ -931,7 +938,6 @@ function add_demand_requirements!(
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
 )
-    # stream straight through the table
     for rec in IS.execute(stmts[:demand_requirements], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_type = getproperty(
             PowerSystems,
@@ -975,7 +981,6 @@ function add_loads!(
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
 )
-    # stream straight through the table
     for rec in IS.execute(stmts[:demand_requirements], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_type = getproperty(
             PowerSystems,
@@ -1322,6 +1327,8 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                     variable=FuelCurve(
                         LinearCurve(cost_data["heatrate_R1"]),
                         cost_data["vom_R1"],
+                        LinearCurve(0.0),
+                        LinearCurve(cost_data["vom_R1"]),
                     ), #Using vom cost as fuel cost for now
                     fixed=cost_data["fom_R1"],
                     start_up=0.0,

@@ -1,15 +1,14 @@
 """
-Functions to calculate the existing capacity associated with a PSIP Technology.
-
-If a technology has an ExistingCapacity supplemental attribute, it will use the names stored in the attribute
-to retreive relevant components from the base system and calcuate their total rated capacity.
+Utility functions to get individual attributes from custom NamedTuples.
 """
-
 get_max(x::MinMax) = x.max
 get_min(x::MinMax) = x.min
 get_in(x::InOut) = x.in
 get_out(x::InOut) = x.out
 
+"""
+Functions to obtain the parameter type T from various Technology types.
+"""
 get_parameter_type(t::SupplyTechnology{T}) where {T} = T
 get_parameter_type(t::StorageTechnology{T}) where {T} = T
 get_parameter_type(t::AggregateTransportTechnology{T}) where {T} = T
@@ -18,6 +17,18 @@ get_parameter_type(t::NodalHVDCTransportTechnology{T}) where {T} = T
 get_parameter_type(t::DemandRequirement{T}) where {T} = T
 get_parameter_type(t::DemandSideTechnology{T}) where {T} = T
 
+"""
+Calculates the amount of existing capacity (in MW) associated with a given Technology in the Portfolio.
+Technology must have an ExistingCapacity supplemental attribute attached to it to be non-zero.
+This attribute contains a list of names of existing assets in the base system that correspond to this technology.
+For StorageTechnology, this function returns existing charge/discharge capacity in MW. See
+[`get_existing_capacity_mwh`](@ref) for existing energy capacity in MWh.
+
+# Arguments
+
+  - `p::Portfolio`: The portfolio containing the base system and technology
+  - `t::Union{ResourceTechnology, TransmissionTechnology}`: The technology to get existing capacity
+"""
 function get_existing_capacity_mw(
     p::Portfolio,
     t::Union{ResourceTechnology, TransmissionTechnology},
@@ -54,6 +65,17 @@ function get_existing_capacity_mw(
     end
 end
 
+"""
+Calculates the amount of existing energy capacity (in MWh) associated with a given StorageTechnology.
+Technology must have an ExistingCapacity supplemental attribute attached to it to be non-zero.
+This attribute contains a list of names of existing assets in the base system that correspond to this technology.
+To get the charge/discharge capacity in MW, see [`get_existing_capacity_mw`](@ref).
+
+# Arguments
+
+  - `p::Portfolio`: The portfolio containing the base system and technology
+  - `t::StorageTechnology`: The storage technology to get existing energy capacity
+"""
 function get_existing_capacity_mwh(p::Portfolio, t::StorageTechnology)
     if !is_new(t)
         attr = IS.get_supplemental_attributes(ExistingCapacity, t)
