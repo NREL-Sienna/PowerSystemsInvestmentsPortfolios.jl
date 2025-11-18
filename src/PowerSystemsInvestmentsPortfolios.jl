@@ -134,6 +134,7 @@ export get_variable_cost_discharge
 export get_fixed_cost
 export get_fixed_cost_charge
 export get_fixed_cost_discharge
+export get_wacc
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems

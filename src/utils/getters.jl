@@ -155,3 +155,22 @@ Get constant fixed OM costs for storage discharge from OperationalCost in a Stor
 get_fixed_cost_discharge(t::StorageTechnology) = PSY.get_proportional_term(
     PSY.get_value_curve(PSY.get_discharge_variable_cost(get_operation_costs(t))),
 )
+
+"""
+Calculate the weighted average cost of capital (WACC) for a Technology based on its TechnologyFinancialData.
+We defined WACC such that `WACC = D * Rd * (1 - Tc) + E * Re``
+where D is the debt fraction, Rd is the debt rate, Tc is the tax rate, E is the equity fraction, and Re is the return on equity.
+
+Will return an error if the debt fraction is not between 0.0 and 1.0.
+"""
+function get_wacc(tech_financials::TechnologyFinancialData)
+    dr = tech_financials.debt_rate
+    tr = tech_financials.tax_rate
+    re = tech_financials.return_on_equity
+    df = tech_financials.debt_fraction
+    ef = 1.0 - df
+    if df > 1.0 || df < 0.0
+        error("Debt fraction must be between 0.0 and 1.0")
+    end
+    return df * dr * (1.0 - tr) + ef * re
+end
