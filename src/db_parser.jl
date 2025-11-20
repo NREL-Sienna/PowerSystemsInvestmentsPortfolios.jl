@@ -91,16 +91,16 @@ const PRIME_MOVER_TO_PARAMETRIC = Dict(
 )
 
 const PRIME_MOVER_TO_TIMESERIES = Dict(
-    [PrimeMovers.BA, ThermalFuels.OTHER] => "battery_li_cost_R1",
-    [PrimeMovers.PVe, ThermalFuels.OTHER] => "csp1_cost_R1", #FIX THIS ONE
-    [PrimeMovers.CP, ThermalFuels.OTHER] => "csp1_cost_R1",
-    [PrimeMovers.WT, ThermalFuels.OTHER] => "115hh_170rd_cost_R1",
-    [PrimeMovers.CT, ThermalFuels.NATURAL_GAS] => "Gas-CC_cost_R1",
-    [PrimeMovers.CT, ThermalFuels.DISTILLATE_FUEL_OIL] => "o-g-s_cost_R1",
-    [PrimeMovers.ST, ThermalFuels.COAL] => "Coal-new_cost_R1",
-    [PrimeMovers.ST, ThermalFuels.DISTILLATE_FUEL_OIL] => "o-g-s_cost_R1",
-    [PrimeMovers.ST, ThermalFuels.NUCLEAR] => "Nuclear_cost_R1",
-    [PrimeMovers.CC, ThermalFuels.NATURAL_GAS] => "Gas-CC_cost_R1",
+    [PrimeMovers.BA, ThermalFuels.OTHER] => "Battery",
+    [PrimeMovers.PVe, ThermalFuels.OTHER] => "PV",
+    [PrimeMovers.CP, ThermalFuels.OTHER] => "CSP",
+    [PrimeMovers.WT, ThermalFuels.OTHER] => "Wind",
+    [PrimeMovers.CT, ThermalFuels.NATURAL_GAS] => "NGCT",
+    [PrimeMovers.CT, ThermalFuels.DISTILLATE_FUEL_OIL] => "OGS",
+    [PrimeMovers.ST, ThermalFuels.COAL] => "Coal",
+    [PrimeMovers.ST, ThermalFuels.DISTILLATE_FUEL_OIL] => "OGS",
+    [PrimeMovers.ST, ThermalFuels.NUCLEAR] => "Nuclear",
+    [PrimeMovers.CC, ThermalFuels.NATURAL_GAS] => "NGCC",
 )
 
 # Remove later, or make this optional later depending on what is in the dataset
@@ -1320,36 +1320,25 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                     first(TimeSeries.values(ts_data[Dates.DateTime(cost_year, 1, 1)]))
                 add_time_series!(portfolio, tech, ts)
             end
-
-            if haskey(cost_data, "heatrate_R1")
-                capex = LinearCurve(cost_data["capcost_R1"] * 1000.0)
+            if haskey(cost_data, "heatrate")
+                capex = LinearCurve(cost_data["capcost"] * 1000.0)
                 opex = ThermalGenerationCost(
                     variable=FuelCurve(
-                        LinearCurve(cost_data["heatrate_R1"]),
-                        cost_data["vom_R1"],
+                        LinearCurve(cost_data["heatrate"]),
+                        cost_data["fuel_price"],
                         LinearCurve(0.0),
-                        LinearCurve(cost_data["vom_R1"]),
+                        LinearCurve(cost_data["vom"]),
                     ), #Using vom cost as fuel cost for now
-                    fixed=cost_data["fom_R1"],
+                    fixed=cost_data["fom"] * 1000.0,
                     start_up=0.0,
                     shut_down=0.0,
                 )
                 set_operation_costs!(tech, opex)
                 set_capital_costs!(tech, capex)
-            elseif haskey(cost_data, "Var O&M \$/MWh_R1")
-                capex = LinearCurve(cost_data["Overnight Cap Cost \$/kW_R1"] * 1000.0)
-                opex = RenewableGenerationCost(
-                    variable=CostCurve(
-                        LinearCurve(0.0),
-                        LinearCurve(cost_data["Var O&M \$/MWh_R1"]),
-                    ), #Using vom cost as fuel cost for now
-                ) #Fixed cost should be added to this at some point
-                set_operation_costs!(tech, opex)
-                set_capital_costs!(tech, capex)
             else
-                capex = LinearCurve(cost_data["capcost_R1"] * 1000.0)
+                capex = LinearCurve(cost_data["capcost"] * 1000.0)
                 opex = RenewableGenerationCost(
-                    variable=CostCurve(LinearCurve(0.0), LinearCurve(cost_data["vom_R1"])), #Using vom cost as fuel cost for now
+                    variable=CostCurve(LinearCurve(0.0), LinearCurve(cost_data["vom"])), #Using vom cost as fuel cost for now
                 )
                 set_operation_costs!(tech, opex)
                 set_capital_costs!(tech, capex)
