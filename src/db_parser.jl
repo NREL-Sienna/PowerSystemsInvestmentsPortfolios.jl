@@ -46,9 +46,12 @@ const STORAGE_MAPPING =
 
 const FUEL_MAPPING = Dict(
     "NG" => ThermalFuels.NATURAL_GAS,
+    "NATURAL_GAS" => ThermalFuels.NATURAL_GAS,
     "Nuclear" => ThermalFuels.NUCLEAR,
     "Coal" => ThermalFuels.COAL,
+    "COAL" => ThermalFuels.COAL,
     "Oil" => ThermalFuels.DISTILLATE_FUEL_OIL,
+    "DISTILLATE_FUEL_OIL" => ThermalFuels.DISTILLATE_FUEL_OIL,
 )
 
 const PRIME_MOVER_MAPPING = Dict(
@@ -101,6 +104,11 @@ const PRIME_MOVER_TO_TIMESERIES = Dict(
     [PrimeMovers.ST, ThermalFuels.DISTILLATE_FUEL_OIL] => "OGS",
     [PrimeMovers.ST, ThermalFuels.NUCLEAR] => "Nuclear",
     [PrimeMovers.CC, ThermalFuels.NATURAL_GAS] => "NGCC",
+
+    #Defaults for others
+    [PrimeMovers.ST, ThermalFuels.OTHER] => "Coal",
+    [PrimeMovers.CT, ThermalFuels.OTHER] => "NGCT",
+    [PrimeMovers.CC, ThermalFuels.OTHER] => "NGCC",
 )
 
 # Remove later, or make this optional later depending on what is in the dataset
@@ -645,6 +653,7 @@ function add_generation_units!(
                 ramp_limits=ramp_limits,
                 time_limits=time_limits,
                 operation_cost=ops_cost,
+                fuel=get(FUEL_MAPPING, component_attr["fuel_type"], ThermalFuels.OTHER),
             )
 
         elseif component_type == PSY.RenewableDispatch
@@ -788,12 +797,17 @@ function add_generation_units!(
                     ),
                 )
             end
+            if haskey(component_attr, "fuel_type")
+                fuel = get(FUEL_MAPPING, component_attr["fuel_type"], ThermalFuels.OTHER)
+            else
+                fuel = ThermalFuels.OTHER
+            end
             technology = SupplyTechnology{component_type}(;
                 name=rec.name,
                 id=rec.id,
                 capital_costs=LinearCurve(0.0),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
-                fuel=[get(FUEL_MAPPING, rec.prime_mover, ThermalFuels.OTHER)],
+                fuel=[fuel],
                 region=regions,
                 financial_data=DEFAULT_FINANCIAL_DATA,
                 available=true,
@@ -802,7 +816,7 @@ function add_generation_units!(
                 ramp_limits=(@isdefined ramp_limits) ? ramp_limits : (up=1.0, down=1.0),
                 time_limits=(@isdefined time_limits) ? time_limits : (up=1.0, down=1.0),
                 capacity_limits=(min=0, max=rec.rating),
-                co2=Dict(get(FUEL_MAPPING, rec.prime_mover, ThermalFuels.OTHER) => 0.0),
+                co2=Dict(fuel => 0.0),
             )
             add_technology!(portfolio, technology)
             existing = ExistingCapacity(; existing_technologies=[rec.name])
@@ -1290,8 +1304,8 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
         fuel = first(get_fuel(tech))
         prime_mover = get_prime_mover_type(tech)
         ts_type = get(PRIME_MOVER_TO_TIMESERIES, [prime_mover, fuel], nothing)
-        if !isnothing(ts_type) && !has_supplemental_attributes(tech)
-            cost_data = Dict()
+        cost_data = Dict()
+        if !isnothing(ts_type)
             for ts_association in IS.execute(
                 stmts[:investment_timeseries],
                 [ts_type],
@@ -1312,14 +1326,21 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                     )
                 ]
                 ts_data = TimeSeries.TimeArray(timestamps, values)
-
-                ts =
-                    SingleTimeSeries(ts_association.name, ts_data; resolution=Dates.Year(1))
                 cost_year = get_base_year(portfolio)
                 cost_data[ts_association.name] =
                     first(TimeSeries.values(ts_data[Dates.DateTime(cost_year, 1, 1)]))
-                add_time_series!(portfolio, tech, ts)
+
+                if is_new(tech)
+                    ts = SingleTimeSeries(
+                        ts_association.name,
+                        ts_data;
+                        resolution=Dates.Year(1),
+                    )
+                    add_time_series!(portfolio, tech, ts)
+                end
             end
+        end
+        if is_new(tech)
             if haskey(cost_data, "heatrate")
                 capex = LinearCurve(cost_data["capcost"] * 1000.0)
                 opex = ThermalGenerationCost(
@@ -1328,7 +1349,7 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                         cost_data["fuel_price"],
                         LinearCurve(0.0),
                         LinearCurve(cost_data["vom"]),
-                    ), #Using vom cost as fuel cost for now
+                    ),
                     fixed=cost_data["fom"] * 1000.0,
                     start_up=0.0,
                     shut_down=0.0,
@@ -1338,10 +1359,33 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
             else
                 capex = LinearCurve(cost_data["capcost"] * 1000.0)
                 opex = RenewableGenerationCost(
-                    variable=CostCurve(LinearCurve(0.0), LinearCurve(cost_data["vom"])), #Using vom cost as fuel cost for now
+                    variable=CostCurve(LinearCurve(0.0), LinearCurve(cost_data["vom"])),
                 )
                 set_operation_costs!(tech, opex)
                 set_capital_costs!(tech, capex)
+            end
+        elseif !is_new(tech)
+            ops = get_operation_costs(tech)
+            if haskey(cost_data, "fuel_price")
+                fixed = get_fixed_cost(tech)
+                vom = get_variable_cost(tech)
+                if get_variable_cost(tech) == 0.0
+                    vom = LinearCurve(cost_data["vom"])
+                end
+                if get_fixed(ops) == 0.0
+                    fixed = cost_data["fom"] * 1000.0
+                end
+                set_variable!(
+                    ops,
+                    FuelCurve(
+                        get_value_curve(get_variable(ops)),
+                        get_fuel_cost(tech),
+                        IS.get_startup_fuel_offtake(get_variable(ops)),
+                        vom,
+                    ),
+                )
+                set_fixed!(ops, fixed)
+                set_operation_costs!(tech, ops)
             end
         end
 
