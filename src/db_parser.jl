@@ -1341,11 +1341,16 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
             end
         end
         if is_new(tech)
-            if haskey(cost_data, "heatrate")
+            if haskey(cost_data, "fuel_price")
                 capex = LinearCurve(cost_data["capcost"] * 1000.0)
+                if haskey(cost_data, "heatrate")
+                    heat_rate = LinearCurve(cost_data["heatrate"])
+                else
+                    heat_rate = LinearCurve(0.0)
+                end
                 opex = ThermalGenerationCost(
                     variable=FuelCurve(
-                        LinearCurve(cost_data["heatrate"]),
+                        heat_rate,
                         cost_data["fuel_price"],
                         LinearCurve(0.0),
                         LinearCurve(cost_data["vom"]),
