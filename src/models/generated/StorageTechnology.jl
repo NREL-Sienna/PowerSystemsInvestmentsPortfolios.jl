@@ -37,81 +37,81 @@ Candidate storage technology in a region.
 
 # Arguments
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
-- `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed
+- `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `min_discharge_fraction::Float64`: (default: `0.0`) Minimum discharge as a fraction of total discharge capacity
-- `capacity_limits_charge::Union{Nothing, MinMax}`: (default: `nothing`) allowable installed power capacity for a storage technology
+- `capacity_limits_charge::Union{Nothing, MinMax}`: (default: `nothing`) allowable installed power capacity for a storage technology (MW)
 - `name::String`: The technology name
 - `storage_tech::StorageTech`: Storage Technology Type
-- `duration_limits::MinMax`: (default: `(min=0,max=1000.0)`) Minimum and maximum duration limits (energy to discharge capacity ratio) for a storage technology
+- `duration_limits::MinMax`: (default: `(min=0,max=1000.0)`) Minimum and maximum duration limits (energy to discharge capacity ratio) for a storage technology (hours)
 - `id::Int64`: ID for individual storage technology
 - `losses::Float64`: (default: `0.00`) Self-discharge of storage (fraction of energy stored per hour)
-- `capital_costs_energy::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
+- `capital_costs_energy::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MWh)
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `operation_costs::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a technology
-- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology is operated
-- `capacity_limits_energy::MinMax`: (default: `(min=0,max=1e8)`) allowable installed energy capacity for a storage technology
-- `unit_size_energy::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
+- `capacity_limits_energy::MinMax`: (default: `(min=0,max=1e8)`) allowable installed energy capacity for a storage technology (MWh)
+- `unit_size_energy::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MWh)
 - `unit_size_charge::Union{Nothing, Float64}`: (default: `nothing`) Used for discrete investment decisions. Unit size of charging capacity (MW)
-- `efficiency::InOut`: (default: `(in=1, out=1)`) Efficiency of charging storage
+- `efficiency::InOut`: (default: `(in=1, out=1)`) Efficiency of charging storage, fraction of total charge (in) and discharge (out) capacity
 - `unit_size_discharge::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit of discharging capacity being built (MW)
-- `capacity_limits_discharge::MinMax`: (default: `(min=0,max=1e8)`) allowable installed power capacity for a storage technology
-- `capital_costs_charge::Union{Nothing, PSY.ValueCurve}`: (default: `nothing`) Capital costs for investing in a technology.
-- `capital_costs_discharge::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology.
+- `capacity_limits_discharge::MinMax`: (default: `(min=0,max=1e8)`) allowable installed power capacity for a storage technology (MW)
+- `capital_costs_charge::Union{Nothing, PSY.ValueCurve}`: (default: `nothing`) Capital costs for investing in a technology. (USD/MW)
+- `capital_costs_discharge::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
 """
 mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
     "Prime mover for generator"
     prime_mover_type::PrimeMovers
-    "Maximum number of years a technology can be active once installed"
+    "Maximum number of years a technology can be active once installed (years)"
     lifetime::Int
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Minimum discharge as a fraction of total discharge capacity"
     min_discharge_fraction::Float64
-    "allowable installed power capacity for a storage technology"
+    "allowable installed power capacity for a storage technology (MW)"
     capacity_limits_charge::Union{Nothing, MinMax}
     "The technology name"
     name::String
     "Storage Technology Type"
     storage_tech::StorageTech
-    "Minimum and maximum duration limits (energy to discharge capacity ratio) for a storage technology"
+    "Minimum and maximum duration limits (energy to discharge capacity ratio) for a storage technology (hours)"
     duration_limits::MinMax
     "ID for individual storage technology"
     id::Int64
     "Self-discharge of storage (fraction of energy stored per hour)"
     losses::Float64
-    "Capital costs for investing in a technology."
+    "Capital costs for investing in a technology. (USD/MWh)"
     capital_costs_energy::PSY.ValueCurve
     "Struct containing relevant financial information for a technology"
     financial_data::TechnologyFinancialData
     "Fixed and variable O&M costs for a technology"
     operation_costs::PSY.OperationalCost
-    "maps to a valid PowerSystems.jl for PCM modeling"
+    "Corresponding type in PowerSystems.jl to be used in PCM modeling"
     power_systems_type::String
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "Location where technology is operated"
     region::Vector{RegionTopology}
-    "allowable installed energy capacity for a storage technology"
+    "allowable installed energy capacity for a storage technology (MWh)"
     capacity_limits_energy::MinMax
-    "Used for discrete investment decisions. Size of each unit being built (MW)"
+    "Used for discrete investment decisions. Size of each unit being built (MWh)"
     unit_size_energy::Float64
     "Used for discrete investment decisions. Unit size of charging capacity (MW)"
     unit_size_charge::Union{Nothing, Float64}
-    "Efficiency of charging storage"
+    "Efficiency of charging storage, fraction of total charge (in) and discharge (out) capacity"
     efficiency::InOut
     "Used for discrete investment decisions. Size of each unit of discharging capacity being built (MW)"
     unit_size_discharge::Float64
-    "allowable installed power capacity for a storage technology"
+    "allowable installed power capacity for a storage technology (MW)"
     capacity_limits_discharge::MinMax
-    "Capital costs for investing in a technology."
+    "Capital costs for investing in a technology. (USD/MW)"
     capital_costs_charge::Union{Nothing, PSY.ValueCurve}
-    "Capital costs for investing in a technology."
+    "Capital costs for investing in a technology. (USD/MW)"
     capital_costs_discharge::PSY.ValueCurve
 end
 

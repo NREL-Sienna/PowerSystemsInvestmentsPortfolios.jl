@@ -24,22 +24,22 @@ This file is auto-generated. Do not edit.
 A nodal representation of candidate HVDC transmission lines between two regions.
 
 # Arguments
-- `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line.
+- `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line. (USD/MW)
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
 - `end_node::RegionTopology`: End node for transport technology
 - `id::Int64`: Numerical Index for HVDC lines
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `start_node::RegionTopology`: Start node for transport technology
-- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
 - `line_loss::Union{IS.LinearCurve, IS.PiecewiseIncrementalCurve}`: (default: `1.0`) Loss model coefficients. It accepts a linear model with a constant loss and a proportional loss rate. All terms are defined as fraction of installed nameplate capacity It also accepts a Piecewise loss, with N segments to specify different proportional losses for different segments.
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Allowable capacity for a transmission line (MW)
 """
 mutable struct NodalHVDCTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
-    "Cost of adding new capacity to the nodal transmission line."
+    "Cost of adding new capacity to the nodal transmission line. (USD/MW)"
     capital_costs::PSY.ValueCurve
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
@@ -53,11 +53,11 @@ mutable struct NodalHVDCTransportTechnology{T <: PSY.Device} <: TransmissionTech
     financial_data::TechnologyFinancialData
     "Start node for transport technology"
     start_node::RegionTopology
-    "maps to a valid PowerSystems.jl for PCM modeling"
+    "Corresponding type in PowerSystems.jl to be used in PCM modeling"
     power_systems_type::String
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)"
     unit_size::Float64

@@ -21,10 +21,10 @@ Policy requirement that defines an additional cost penalty per ton of CO2 produc
 # Arguments
 - `name::String`: The requirement name
 - `target_year::Int64`: (default: `2050`) Year in which carbon tax will be applied
-- `tax_dollars_per_ton::Float64`: (default: `1.0`) Emission limit in terms of rate (USD/tCO2)
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `tax_dollars_per_ton::Float64`: (default: `0.0`) Cost penalty per ton of CO2 emitted by technologies in the eligible regions during the target year (USD/tCO2)
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `id::Int64`: ID for individual policy
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `eligible_regions::Vector{RegionTopology}`: (default: `Vector{RegionTopology}()`) List of regions that contribute to the carbon cap constraint.
 """
@@ -33,13 +33,13 @@ mutable struct CarbonTax <: Requirement
     name::String
     "Year in which carbon tax will be applied"
     target_year::Int64
-    "Emission limit in terms of rate (USD/tCO2)"
+    "Cost penalty per ton of CO2 emitted by technologies in the eligible regions during the target year (USD/tCO2)"
     tax_dollars_per_ton::Float64
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
     "ID for individual policy"
     id::Int64
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
@@ -48,7 +48,7 @@ mutable struct CarbonTax <: Requirement
 end
 
 
-function CarbonTax(; name, target_year=2050, tax_dollars_per_ton=1.0, internal=InfrastructureSystemsInternal(), id, ext=Dict(), available, eligible_regions=Vector{RegionTopology}(), )
+function CarbonTax(; name, target_year=2050, tax_dollars_per_ton=0.0, internal=InfrastructureSystemsInternal(), id, ext=Dict(), available, eligible_regions=Vector{RegionTopology}(), )
     CarbonTax(name, target_year, tax_dollars_per_ton, internal, id, ext, available, eligible_regions, )
 end
 

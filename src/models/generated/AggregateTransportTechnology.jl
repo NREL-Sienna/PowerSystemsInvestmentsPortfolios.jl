@@ -25,15 +25,15 @@ An aggregated representation of a transmission interchange between two regions.
 
 # Arguments
 - `start_region::RegionTopology`: Start region for transport technology
-- `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line.
+- `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line. (USD/MW)
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
 - `id::Int64`: Numerical Index for AC transport technologies
 - `end_region::RegionTopology`: End region for transport technology
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
-- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
 - `line_loss::Float64`: (default: `1.0`) Transmission loss for each transport technology (%)
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Allowable capacity for a transmission line (MW)
@@ -41,7 +41,7 @@ An aggregated representation of a transmission interchange between two regions.
 mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
     "Start region for transport technology"
     start_region::RegionTopology
-    "Cost of adding new capacity to the nodal transmission line."
+    "Cost of adding new capacity to the nodal transmission line. (USD/MW)"
     capital_costs::PSY.ValueCurve
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
@@ -53,11 +53,11 @@ mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTech
     end_region::RegionTopology
     "Struct containing relevant financial information for a technology"
     financial_data::TechnologyFinancialData
-    "maps to a valid PowerSystems.jl for PCM modeling"
+    "Corresponding type in PowerSystems.jl to be used in PCM modeling"
     power_systems_type::String
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)"
     unit_size::Float64

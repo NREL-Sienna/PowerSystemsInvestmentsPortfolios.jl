@@ -1,11 +1,7 @@
-"""
-This PoC is if a dictionary of queries is maintained, then the database can be read in and the structs can be generated.
-"""
 
 """
 Set of queries to extract relevant data from the database. Need to be maintained to be consistent with the most recent version of the database
 """
-
 #TODO: Support scenario handling
 QUERIES = Dict(
     :zones => "SELECT * FROM planning_regions",
@@ -50,9 +46,12 @@ const STORAGE_MAPPING =
 
 const FUEL_MAPPING = Dict(
     "NG" => ThermalFuels.NATURAL_GAS,
+    "NATURAL_GAS" => ThermalFuels.NATURAL_GAS,
     "Nuclear" => ThermalFuels.NUCLEAR,
     "Coal" => ThermalFuels.COAL,
+    "COAL" => ThermalFuels.COAL,
     "Oil" => ThermalFuels.DISTILLATE_FUEL_OIL,
+    "DISTILLATE_FUEL_OIL" => ThermalFuels.DISTILLATE_FUEL_OIL,
 )
 
 const PRIME_MOVER_MAPPING = Dict(
@@ -95,16 +94,21 @@ const PRIME_MOVER_TO_PARAMETRIC = Dict(
 )
 
 const PRIME_MOVER_TO_TIMESERIES = Dict(
-    [PrimeMovers.BA, ThermalFuels.OTHER] => "battery_li_cost_R1",
-    [PrimeMovers.PVe, ThermalFuels.OTHER] => "csp1_cost_R1", #FIX THIS ONE
-    [PrimeMovers.CP, ThermalFuels.OTHER] => "csp1_cost_R1",
-    [PrimeMovers.WT, ThermalFuels.OTHER] => "115hh_170rd_cost_R1",
-    [PrimeMovers.CT, ThermalFuels.NATURAL_GAS] => "Gas-CC_cost_R1",
-    [PrimeMovers.CT, ThermalFuels.DISTILLATE_FUEL_OIL] => "o-g-s_cost_R1",
-    [PrimeMovers.ST, ThermalFuels.COAL] => "Coal-new_cost_R1",
-    [PrimeMovers.ST, ThermalFuels.DISTILLATE_FUEL_OIL] => "o-g-s_cost_R1",
-    [PrimeMovers.ST, ThermalFuels.NUCLEAR] => "Nuclear_cost_R1",
-    [PrimeMovers.CC, ThermalFuels.NATURAL_GAS] => "Gas-CC_cost_R1",
+    [PrimeMovers.BA, ThermalFuels.OTHER] => "Battery",
+    [PrimeMovers.PVe, ThermalFuels.OTHER] => "PV",
+    [PrimeMovers.CP, ThermalFuels.OTHER] => "CSP",
+    [PrimeMovers.WT, ThermalFuels.OTHER] => "Wind",
+    [PrimeMovers.CT, ThermalFuels.NATURAL_GAS] => "NGCT",
+    [PrimeMovers.CT, ThermalFuels.DISTILLATE_FUEL_OIL] => "OGS",
+    [PrimeMovers.ST, ThermalFuels.COAL] => "Coal",
+    [PrimeMovers.ST, ThermalFuels.DISTILLATE_FUEL_OIL] => "OGS",
+    [PrimeMovers.ST, ThermalFuels.NUCLEAR] => "Nuclear",
+    [PrimeMovers.CC, ThermalFuels.NATURAL_GAS] => "NGCC",
+
+    #Defaults for others
+    [PrimeMovers.ST, ThermalFuels.OTHER] => "Coal",
+    [PrimeMovers.CT, ThermalFuels.OTHER] => "NGCT",
+    [PrimeMovers.CC, ThermalFuels.OTHER] => "NGCC",
 )
 
 # Remove later, or make this optional later depending on what is in the dataset
@@ -118,8 +122,19 @@ const DEFAULT_FINANCIAL_DATA = TechnologyFinancialData(;
 )
 
 """
-The following function imports from the database and generates the structs for a portfolio
-@input database_filepath::AbstractString: The path to the database file
+The following function imports from the database and generates the structs for a portfolio.
+Portfolio-level financial data is not stored in the database and must be provided separately.
+See `PortfolioFinancialData`(@ref) for more details.
+
+# Arguments
+
+  - `database_filepath::AbstractString`: The path to the SQLite database file
+  - `discount_rate::Float64`: The discount rate for the portfolio
+  - `inflation_rate::Float64`: The inflation rate for the portfolio
+  - `interest_rate::Float64`: The interest rate for the portfolio
+  - `base_year::Int64`: The base year for the portfolio
+  - `aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}`: (default: `PSY.ACBus`) The aggregation level for the portfolio. Defaults to a nodal aggregation level
+  - `system::PSY.System`: (default: `PSY.System(100.0)`) The base power system for the portfolio
 """
 function database_to_portfolio(
     database_filepath::AbstractString,
@@ -647,6 +662,7 @@ function add_generation_units!(
                 ramp_limits=ramp_limits,
                 time_limits=time_limits,
                 operation_cost=ops_cost,
+                fuel=get(FUEL_MAPPING, component_attr["fuel_type"], ThermalFuels.OTHER),
             )
 
             #elseif component_type == PSY.RenewableDispatch
@@ -837,13 +853,19 @@ function add_generation_units!(
                     ),
                 )
             end
+
+            if haskey(component_attr, "fuel_type")
+                fuel = get(FUEL_MAPPING, component_attr["fuel_type"], ThermalFuels.OTHER)
+            else
+                fuel = ThermalFuels.OTHER
+            end
             psy_type = getproperty(PowerSystems, Symbol(component_type))
             technology = SupplyTechnology{psy_type}(;
                 name=rec.name,
                 id=rec.id,
                 capital_costs=LinearCurve(0.0),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
-                fuel=[get(FUEL_MAPPING, rec.prime_mover, ThermalFuels.OTHER)],
+                fuel=[fuel],
                 region=regions,
                 financial_data=DEFAULT_FINANCIAL_DATA,
                 available=true,
@@ -853,7 +875,7 @@ function add_generation_units!(
                 ramp_limits=(@isdefined ramp_limits) ? ramp_limits : (up=1.0, down=1.0),
                 time_limits=(@isdefined time_limits) ? time_limits : (up=1.0, down=1.0),
                 capacity_limits=(min=0, max=rec.rating),
-                co2=Dict(get(FUEL_MAPPING, rec.prime_mover, ThermalFuels.OTHER) => 0.0),
+                co2=Dict(fuel => 0.0),
             )
             add_technology!(portfolio, technology)
             existing = ExistingCapacity(; existing_technologies=[rec.name])
@@ -989,7 +1011,6 @@ function add_demand_requirements!(
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
 )
-    # stream straight through the table
     for rec in IS.execute(stmts[:demand_requirements], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_type = getproperty(
             PowerSystems,
@@ -1033,7 +1054,6 @@ function add_loads!(
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
 )
-    # stream straight through the table
     for rec in IS.execute(stmts[:demand_requirements], nothing, IS.LOG_GROUP_SERIALIZATION)
         component_type = getproperty(
             PowerSystems,
@@ -1055,7 +1075,6 @@ function add_loads!(
                 ),
             ).name
 
-        # build and immediately insert
         load = component_type(;
             name=rec.name,
             base_power=rec.base_power,
@@ -1239,6 +1258,7 @@ function add_system_lines!(
         end
 
         #Build Portfolio transmission based on existing transmission
+        #Also new candidates lines for each connection
         if get_aggregation(portfolio) == PSY.ACBus
             component_attr = get(attributes, rec.id, Dict{String, Any}())
             arc = first(IS.execute(stmts[:arc], [rec.arc_id], IS.LOG_GROUP_SERIALIZATION))
@@ -1258,7 +1278,35 @@ function add_system_lines!(
                         IS.LOG_GROUP_SERIALIZATION,
                     ),
                 ).name
+
             transport = NodalACTransportTechnology{component_type}(;
+                name=rec.name,
+                id=rec.id,
+                available=true,
+                power_systems_type=string(nameof(component_type)),
+                financial_data=DEFAULT_FINANCIAL_DATA,
+                start_node=get_region(Node, portfolio, balancing_topology_from),
+                end_node=get_region(Node, portfolio, balancing_topology_to),
+                reactance=component_attr["x"],
+                resistance=component_attr["r"],
+                voltage=get_base_voltage(
+                    PSY.get_component(
+                        PSY.ACBus,
+                        portfolio.base_system,
+                        balancing_topology_from,
+                    ),
+                ),
+                capital_costs=LinearCurve(1e5),
+            )
+            add_technology!(portfolio, transport)
+            existing = ExistingCapacity(; existing_technologies=[rec.name])
+            add_supplemental_attribute!(portfolio, transport, existing)
+            set_capacity_limits!(
+                transport,
+                (min=0, max=get_existing_capacity_mw(portfolio, transport)),
+            )
+
+            new_transport = NodalACTransportTechnology{component_type}(;
                 name=rec.name * "_new",
                 id=rec.id,
                 available=true,
@@ -1268,11 +1316,16 @@ function add_system_lines!(
                 end_node=get_region(Node, portfolio, balancing_topology_to),
                 reactance=component_attr["x"],
                 resistance=component_attr["r"],
+                voltage=get_base_voltage(
+                    PSY.get_component(
+                        PSY.ACBus,
+                        portfolio.base_system,
+                        balancing_topology_from,
+                    ),
+                ),
                 capital_costs=LinearCurve(1e5),
             )
-            add_technology!(portfolio, transport)
-            existing = ExistingCapacity(; existing_technologies=[rec.name])
-            add_supplemental_attribute!(portfolio, transport, existing)
+            add_technology!(portfolio, new_transport)
         end
     end
 
@@ -1311,8 +1364,8 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
         fuel = first(get_fuel(tech))
         prime_mover = get_prime_mover_type(tech)
         ts_type = get(PRIME_MOVER_TO_TIMESERIES, [prime_mover, fuel], nothing)
-        if !isnothing(ts_type) && !has_supplemental_attributes(tech)
-            cost_data = Dict()
+        cost_data = Dict()
+        if !isnothing(ts_type)
             for ts_association in IS.execute(
                 stmts[:investment_timeseries],
                 [ts_type],
@@ -1333,45 +1386,71 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                     )
                 ]
                 ts_data = TimeSeries.TimeArray(timestamps, values)
-
-                ts =
-                    SingleTimeSeries(ts_association.name, ts_data; resolution=Dates.Year(1))
                 cost_year = get_base_year(portfolio)
                 cost_data[ts_association.name] =
                     first(TimeSeries.values(ts_data[Dates.DateTime(cost_year, 1, 1)]))
-                add_time_series!(portfolio, tech, ts)
-            end
 
-            if haskey(cost_data, "heatrate_R1")
-                capex = LinearCurve(cost_data["capcost_R1"] * 1000.0)
+                if is_new(tech)
+                    ts = SingleTimeSeries(
+                        ts_association.name,
+                        ts_data;
+                        resolution=Dates.Year(1),
+                    )
+                    add_time_series!(portfolio, tech, ts)
+                end
+            end
+        end
+        if is_new(tech)
+            if haskey(cost_data, "fuel_price")
+                capex = LinearCurve(cost_data["capcost"] * 1000.0)
+                if haskey(cost_data, "heatrate")
+                    heat_rate = LinearCurve(cost_data["heatrate"])
+                else
+                    heat_rate = LinearCurve(0.0)
+                end
                 opex = ThermalGenerationCost(
                     variable=FuelCurve(
-                        LinearCurve(cost_data["heatrate_R1"]),
-                        cost_data["vom_R1"],
-                    ), #Using vom cost as fuel cost for now
-                    fixed=cost_data["fom_R1"],
+                        heat_rate,
+                        cost_data["fuel_price"],
+                        LinearCurve(0.0),
+                        LinearCurve(cost_data["vom"]),
+                    ),
+                    fixed=cost_data["fom"] * 1000.0,
                     start_up=0.0,
                     shut_down=0.0,
                 )
                 set_operation_costs!(tech, opex)
                 set_capital_costs!(tech, capex)
-            elseif haskey(cost_data, "Var O&M \$/MWh_R1")
-                capex = LinearCurve(cost_data["Overnight Cap Cost \$/kW_R1"] * 1000.0)
-                opex = RenewableGenerationCost(
-                    variable=CostCurve(
-                        LinearCurve(0.0),
-                        LinearCurve(cost_data["Var O&M \$/MWh_R1"]),
-                    ), #Using vom cost as fuel cost for now
-                ) #Fixed cost should be added to this at some point
-                set_operation_costs!(tech, opex)
-                set_capital_costs!(tech, capex)
             else
-                capex = LinearCurve(cost_data["capcost_R1"] * 1000.0)
+                capex = LinearCurve(cost_data["capcost"] * 1000.0)
                 opex = RenewableGenerationCost(
-                    variable=CostCurve(LinearCurve(0.0), LinearCurve(cost_data["vom_R1"])), #Using vom cost as fuel cost for now
+                    variable=CostCurve(LinearCurve(0.0), LinearCurve(cost_data["vom"])),
                 )
                 set_operation_costs!(tech, opex)
                 set_capital_costs!(tech, capex)
+            end
+        elseif !is_new(tech)
+            ops = get_operation_costs(tech)
+            if haskey(cost_data, "fuel_price")
+                fixed = get_fixed_cost(tech)
+                vom = get_variable_cost(tech)
+                if get_variable_cost(tech) == 0.0
+                    vom = LinearCurve(cost_data["vom"])
+                end
+                if get_fixed(ops) == 0.0
+                    fixed = cost_data["fom"] * 1000.0
+                end
+                set_variable!(
+                    ops,
+                    FuelCurve(
+                        get_value_curve(get_variable(ops)),
+                        get_fuel_cost(tech),
+                        IS.get_startup_fuel_offtake(get_variable(ops)),
+                        vom,
+                    ),
+                )
+                set_fixed!(ops, fixed)
+                set_operation_costs!(tech, ops)
             end
         end
 

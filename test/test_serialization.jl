@@ -1,12 +1,29 @@
-@testset "Test JSON serialization" begin
+@testset "Test serialization of technologies" begin
     portfolio = build_portfolio()
+    portfolio2 = validate_serialization(portfolio; time_series_read_only=true)
 
-    #TODO: Build this test, the IS.compare_values function does not appear to be
-    #working correctly with the openAPI serialization method
+    technologies = get_technologies(Technology, portfolio)
 
-    #port2, result = validate_serialization(portfolio; time_series_read_only = true)
-    #@test result
+    for t in technologies
+        t2 = get_technology(typeof(t), portfolio2, PSIP.get_name(t))
+        @test t2 !== nothing
+        result = IS.compare_values(t, t2; compare_uuids=false)
+        @test result
+    end
+end
 
+@testset "Test serialization of regions" begin
+    portfolio = build_portfolio()
+    portfolio2 = validate_serialization(portfolio; time_series_read_only=true)
+
+    regions = get_regions(RegionTopology, portfolio)
+
+    for r in regions
+        r2 = get_region(typeof(r), portfolio2, PSIP.get_name(r))
+        @test r2 !== nothing
+        result = IS.compare_values(r, r2; compare_uuids=false)
+        @test result
+    end
 end
 
 @testset "Test serialization of Portfolio fields" begin
@@ -40,10 +57,7 @@ end
     )
     add_technology!(port, gen)
 
-    #TODO: Fix validate_serialization function and compare_values
-    #port2, result = validate_serialization(port)
     port2 = validate_serialization(port)
-    #@test result
     @test port2.financial_data.discount_rate == financial_data.discount_rate
     @test port2.financial_data.inflation_rate == financial_data.inflation_rate
     @test port2.financial_data.interest_rate == financial_data.interest_rate

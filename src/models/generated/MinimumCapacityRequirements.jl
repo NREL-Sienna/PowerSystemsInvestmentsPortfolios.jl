@@ -20,26 +20,26 @@ Policy requirement that the total capacity of all technologies in `eligible_tech
 
 # Arguments
 - `name::String`: The requirement name
-- `target_year::Int64`: (default: `2050`) Year in which carbon cap will be applied
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `target_year::Int64`: (default: `2050`) Year in which the capacity requirement will be applied
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `id::Int64`: ID for individual policy
-- `min_capacity_mw::Float64`: (default: `0.0`) Minimum total capacity across all eligible resources
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `min_capacity_mw::Float64`: (default: `0.0`) Minimum total capacity across all eligible resources (MW)
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `eligible_resources::Vector{ResourceTechnology}`: (default: `Vector{ResourceTechnology}()`) List of resources that contribute to the capacity requirement.
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 """
 mutable struct MinimumCapacityRequirements <: Requirement
     "The requirement name"
     name::String
-    "Year in which carbon cap will be applied"
+    "Year in which the capacity requirement will be applied"
     target_year::Int64
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
     "ID for individual policy"
     id::Int64
-    "Minimum total capacity across all eligible resources"
+    "Minimum total capacity across all eligible resources (MW)"
     min_capacity_mw::Float64
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "List of resources that contribute to the capacity requirement."
     eligible_resources::Vector{ResourceTechnology}

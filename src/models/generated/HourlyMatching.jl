@@ -19,25 +19,25 @@ Policy requirement that all DemandSideTechnologies in `qualified_demand` must ha
 
 # Arguments
 - `name::String`: The policy name
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `eligible_demand::Vector{DemandTechnology}`: (default: `Vector{DemandTechnology}()`) List of demand side technologies that need to be met with hourly matching.
 - `id::Int64`: ID for individual policy
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `eligible_resources::Vector{ResourceTechnology}`: (default: `Vector{ResourceTechnology}()`) List of technologies eligible to provide hourly matching for demand side technologies.
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
+- `eligible_resources::Vector{ResourceTechnology}`: (default: `Vector{ResourceTechnology}()`) List of technologies eligible to provide hourly generation for demand side technologies.
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 """
 mutable struct HourlyMatching <: Requirement
     "The policy name"
     name::String
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
     "List of demand side technologies that need to be met with hourly matching."
     eligible_demand::Vector{DemandTechnology}
     "ID for individual policy"
     id::Int64
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
-    "List of technologies eligible to provide hourly matching for demand side technologies."
+    "List of technologies eligible to provide hourly generation for demand side technologies."
     eligible_resources::Vector{ResourceTechnology}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool

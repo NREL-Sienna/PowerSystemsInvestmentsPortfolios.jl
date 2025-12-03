@@ -687,7 +687,7 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         val = collect(
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
-                SupplyTechnology,
+                ResourceTechnology,
                 portfolio.data,
             ),
         )
@@ -703,7 +703,7 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         val = collect(
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
-                DemandRequirement,
+                DemandTechnology,
                 portfolio.data,
             ),
         )

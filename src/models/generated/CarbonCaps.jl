@@ -23,10 +23,10 @@ Defines limits to the amount of carbon produced. Can be defined either by the to
 - `name::String`: The requirement name
 - `max_tons_mwh::Float64`: (default: `1.0`) Emission limit in terms of rate (tCO2/MWh)
 - `target_year::Int64`: (default: `2050`) Year in which carbon cap will be applied
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `id::Int64`: ID for individual policy
-- `max_mtons::Float64`: (default: `1e8`) Emission limit in absolute values, in million of tons of CO2
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `max_mtons::Float64`: (default: `1e8`) Emission limit in absolute values (million tCO2)
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `eligible_regions::Vector{RegionTopology}`: (default: `Vector{RegionTopology}()`) List of regions that contribute to the carbon cap constraint.
 """
@@ -37,13 +37,13 @@ mutable struct CarbonCaps <: Requirement
     max_tons_mwh::Float64
     "Year in which carbon cap will be applied"
     target_year::Int64
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
     "ID for individual policy"
     id::Int64
-    "Emission limit in absolute values, in million of tons of CO2"
+    "Emission limit in absolute values (million tCO2)"
     max_mtons::Float64
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool

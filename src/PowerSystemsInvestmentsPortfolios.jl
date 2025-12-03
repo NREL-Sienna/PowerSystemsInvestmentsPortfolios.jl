@@ -84,6 +84,7 @@ export get_technology
 export get_available_technology
 export get_available_technologies
 export get_technologies_by_name
+export get_requirement
 export get_requirements
 export get_ext
 export get_description
@@ -93,6 +94,7 @@ export get_inflation_rate
 export get_interest_rate
 export get_discount_rate
 export get_investment_schedule
+export get_base_system
 export set_description!
 export set_name!
 export set_base_year!
@@ -100,6 +102,7 @@ export set_inflation_rate!
 export set_interest_rate!
 export set_discount_rate!
 export set_investment_schedule!
+export set_base_system!
 export add_technology!
 export add_technologies!
 export add_region!
@@ -131,6 +134,7 @@ export get_variable_cost_discharge
 export get_fixed_cost
 export get_fixed_cost_charge
 export get_fixed_cost_discharge
+export get_wacc
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems
