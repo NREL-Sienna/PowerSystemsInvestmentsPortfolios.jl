@@ -171,6 +171,7 @@ include("generate_structs.jl")
 include("db_parser.jl")
 include("utils/print.jl")
 include("utils/getters.jl")
+include("update_system.jl")
 
 using DocStringExtensions
 
