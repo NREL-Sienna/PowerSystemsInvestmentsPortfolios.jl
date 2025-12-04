@@ -136,6 +136,8 @@ export get_fixed_cost_charge
 export get_fixed_cost_discharge
 export get_wacc
 
+export update_system_with_nodal_results!
+
 const PSY = PowerSystems
 const IS = InfrastructureSystems
 const MU = IS.Mustache
