@@ -133,7 +133,8 @@ function build_portfolio()
     #####################
 
     #### Wind ####
-    data = CSV.read("data_utils/ts_data.csv", DataFrame)
+    local_path = @__DIR__
+    data = CSV.read(joinpath(local_path, "data_utils/ts_data.csv"), DataFrame)
     wind_ts_vec = data[!, "Wind"] ./ 451.0
     renewables = collect(get_components(RenewableDispatch, sys))
     wind_op_costs =

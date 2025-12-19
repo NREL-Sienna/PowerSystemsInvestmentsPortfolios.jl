@@ -31,7 +31,8 @@ end
     PSIP.clear_time_series!(port)
     @test verify_time_series(port, 0, 0, 24)
 
-    data = CSV.read("data_utils/ts_data.csv", DataFrame)
+    local_path = @__DIR__
+    data = CSV.read(joinpath(local_path, "data_utils/ts_data.csv"), DataFrame)
     wind_ts_vec = data[!, "Wind"] ./ 451.0
 
     timestamps = collect(
