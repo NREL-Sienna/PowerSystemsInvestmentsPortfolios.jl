@@ -24,6 +24,8 @@ QUERIES = Dict(
     :entity_type => "SELECT entity_type FROM entities WHERE id = ?",
     :investment_timeseries => "SELECT * FROM time_series_associations WHERE owner_type = ?",
     :ts_data => "SELECT * FROM static_time_series WHERE uuid = ?",
+    :reservoir => "SELECT * FROM hydro_reservoir_connections WHERE source_id = ? OR sink_id = ?",
+    :reservoir_names => "SELECT * FROM hydro_reservoir WHERE id = ?",
     # add additional queries here as needed
 )
 
@@ -188,7 +190,7 @@ function database_to_structs(db_path::AbstractString, portfolio::Portfolio)
     add_storage_units!(portfolio, attributes, stmts)
     add_loads!(portfolio, attributes, stmts)
 
-    deserialize_timeseries!(portfolio.base_system, db)
+    deserialize_timeseries!(portfolio.base_system, db, attributes)
     deserialize_portfolio_timeseries!(portfolio, stmts)
 
     return portfolio
@@ -368,6 +370,15 @@ function parse_hydro_cost(ops_cost::Dict{String, Any})
     return operational_cost
 end
 
+function parse_hydro_res_cost(ops_cost::Dict{String, Any})
+    operational_cost = HydroReservoirCost(;
+        level_shortage_cost=ops_cost["level_shortage_cost"],
+        level_surplus_cost=ops_cost["level_surplus_cost"],
+        spillage_cost=ops_cost["spillage_cost"],
+    )
+    return operational_cost
+end
+
 function parse_operational_cost(ops_cost::Dict{String, Any})
     if ops_cost["cost_type"] == "THERMAL"
         operational_cost = parse_thermal_cost(ops_cost)
@@ -377,6 +388,8 @@ function parse_operational_cost(ops_cost::Dict{String, Any})
         operational_cost = parse_storage_cost(ops_cost)
     elseif ops_cost["cost_type"] == "HYDRO_GEN"
         operational_cost = parse_hydro_cost(ops_cost)
+    elseif ops_cost["cost_type"] == "HYDRO_RES"
+        operational_cost = parse_hydro_res_cost(ops_cost)
     else
         error("Unsupported operational cost of type $(ops_cost["cost_type"])")
     end
@@ -508,6 +521,7 @@ function add_nodal_lines!(
                     IS.LOG_GROUP_SERIALIZATION,
                 ),
             ).name
+        @show rec.id
         transport = NodalACTransportTechnology{ACBranch}(;
             name=string(rec.arc_id) * "_newline",
             id=rec.id,
@@ -599,20 +613,16 @@ function add_generation_units!(
     stmts::Dict,
 )
     for rec in IS.execute(stmts[:generation_units], nothing, IS.LOG_GROUP_SERIALIZATION)
-        #TODO: Temporary workaround since HydroEnergyReservoir no longer exists in the RTS 
-        #Can revert this back once RTS database is updated
-        # component_type = getproperty(
-        #     PowerSystems,
-        #     Symbol(
-        #         first(
-        #             IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
-        #         ).entity_type,
-        #     ),
-        # )
-        component_type =
-            first(
-                IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
-            ).entity_type
+        downstream = true
+
+        component_type = getproperty(
+            PowerSystems,
+            Symbol(
+                first(
+                    IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
+                ).entity_type,
+            ),
+        )
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         bus_name =
@@ -624,8 +634,7 @@ function add_generation_units!(
                 ),
             ).name
 
-        #if component_type == PSY.ThermalStandard
-        if component_type == "ThermalStandard"
+        if component_type == PSY.ThermalStandard
             time_limits = (
                 up=component_attr["time_limits"]["up"],
                 down=component_attr["time_limits"]["down"],
@@ -644,8 +653,7 @@ function add_generation_units!(
             )
 
             ops_cost = parse_operational_cost(component_attr["operation_cost"])
-            #generator = component_type(;
-            generator = PSY.ThermalStandard(;
+            generator = component_type(;
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
@@ -665,15 +673,13 @@ function add_generation_units!(
                 fuel=get(FUEL_MAPPING, component_attr["fuel_type"], ThermalFuels.OTHER),
             )
 
-            #elseif component_type == PSY.RenewableDispatch
-        elseif component_type == "RenewableDispatch"
+        elseif component_type == PSY.RenewableDispatch
             reactive_limits = (
                 min=component_attr["reactive_power_limits"]["min"] / rec.base_power,
                 max=component_attr["reactive_power_limits"]["max"] / rec.base_power,
             )
             ops_cost = parse_operational_cost(component_attr["operation_cost"])
-            #generator = component_type(;
-            generator = PSY.RenewableDispatch(;
+            generator = component_type(;
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
@@ -689,11 +695,9 @@ function add_generation_units!(
                 operation_cost=ops_cost,
             )
 
-            #elseif component_type == PSY.RenewableNonDispatch
-        elseif component_type == "RenewableNonDispatch"
+        elseif component_type == PSY.RenewableNonDispatch
             ops_cost = RenewableGenerationCost(nothing)
-            #generator = component_type(;
-            generator = PSY.RenewableNonDispatch(;
+            generator = component_type(;
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
@@ -706,8 +710,7 @@ function add_generation_units!(
                                rec.base_power,
                 power_factor=get(component_attr, "power_factor", 1.0),
             )
-            #elseif component_type == PSY.HydroDispatch
-        elseif component_type == "HydroDispatch"
+        elseif component_type == PSY.HydroDispatch
             time_limits = (
                 up=component_attr["time_limits"]["up"],
                 down=component_attr["time_limits"]["down"],
@@ -724,8 +727,7 @@ function add_generation_units!(
                 min=component_attr["reactive_power_limits"]["min"] / rec.base_power,
                 max=component_attr["reactive_power_limits"]["max"] / rec.base_power,
             )
-            #generator = component_type(;
-            generator = PSY.HydroDispatch(;
+            generator = component_type(;
                 name=rec.name,
                 rating=rec.rating / rec.base_power,
                 base_power=rec.base_power,
@@ -742,8 +744,7 @@ function add_generation_units!(
                 time_limits=time_limits,
             )
 
-            #elseif component_type == PSY.HydroEnergyReservoir
-        elseif component_type == "HydroEnergyReservoir"
+        elseif component_type == PSY.HydroTurbine
             active_limits = (
                 min=component_attr["active_power_limits"]["min"] / rec.base_power,
                 max=component_attr["active_power_limits"]["max"] / rec.base_power,
@@ -762,28 +763,6 @@ function add_generation_units!(
             )
             ops_cost = parse_operational_cost(component_attr["operation_cost"])
 
-            # generator = component_type(;
-            #     name=rec.name,
-            #     rating=rec.rating / rec.base_power,
-            #     base_power=rec.base_power,
-            #     available=component_attr["available"],
-            #     status=component_attr["status"],
-            #     inflow=component_attr["inflow"] / rec.base_power,
-            #     bus=PSY.get_component(PSY.ACBus, portfolio.base_system, bus_name),
-            #     time_at_status=component_attr["time_at_status"],
-            #     storage_target=component_attr["storage_target"],
-            #     prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
-            #     conversion_factor=component_attr["conversion_factor"],
-            #     storage_capacity=component_attr["storage_capacity"] / rec.base_power,
-            #     active_power_limits=active_limits,
-            #     active_power=component_attr["active_power"] / rec.base_power,
-            #     reactive_power=component_attr["reactive_power"] / rec.base_power,
-            #     reactive_power_limits=reactive_limits,
-            #     ramp_limits=ramp_limits,
-            #     time_limits=time_limits,
-            #     initial_storage=component_attr["initial_storage"] / rec.base_power,
-            #     operation_cost=ops_cost, #Add later when data is in DB
-            # )
             turbine = HydroTurbine(;
                 name=rec.name,
                 available=component_attr["available"],
@@ -798,23 +777,54 @@ function add_generation_units!(
                 ramp_limits=ramp_limits,
                 time_limits=time_limits,
                 outflow_limits=nothing,
+                powerhouse_elevation=component_attr["powerhouse_elevation"],
+                turbine_type=PSY.get_enum_value(
+                    PSY.HydroTurbineType,
+                    component_attr["turbine_type"],
+                ),
+                conversion_factor=component_attr["conversion_factor"],
+                efficiency=component_attr["efficiency"],
+            )
+            # find the correct reservoir ID associated with this turbine
+            reservoir_link = first(
+                IS.execute(stmts[:reservoir], [rec.id, rec.id], IS.LOG_GROUP_SERIALIZATION),
+            )
+            if reservoir_link.source_id !== rec.id
+                reservoir_id = reservoir_link.source_id
+                downstream = true
+            else
+                reservoir_id = reservoir_link.sink_id
+                downstream = false
+            end
+
+            reservoir_attr = get(attributes, reservoir_id, Dict{String, Any}())
+            storage_level_limits = (
+                min=reservoir_attr["storage_level_limits"]["min"],
+                max=reservoir_attr["storage_level_limits"]["max"],
+            )
+            head_to_volume_factor = LinearCurve(
+                reservoir_attr["head_to_volume_factor"]["function_data"]["proportional_term"],
+                reservoir_attr["head_to_volume_factor"]["function_data"]["constant_term"],
             )
             reservoir = HydroReservoir(;
                 name=string(rec.name, "_reservoir"),
-                available=component_attr["available"],
-                storage_level_limits=(min=0, max=1.0),
-                initial_level=component_attr["initial_storage"],
+                available=reservoir_attr["available"],
+                storage_level_limits=storage_level_limits,
+                initial_level=reservoir_attr["initial_level"],
                 spillage_limits=nothing,
-                inflow=component_attr["inflow"] / rec.base_power,
-                outflow=1.0,
-                level_targets=component_attr["storage_target"],
-                intake_elevation=0.0,
-                head_to_volume_factor=LinearCurve(1.0),
-                operation_cost=PSY.HydroReservoirCost(),
-                level_data_type=PSY.ReservoirDataType.ENERGY,
+                inflow=reservoir_attr["inflow"],
+                outflow=reservoir_attr["outflow"],
+                level_targets=get(reservoir_attr, "level_targets", nothing),
+                intake_elevation=reservoir_attr["intake_elevation"],
+                head_to_volume_factor=head_to_volume_factor,
+                operation_cost=parse_operational_cost(reservoir_attr["operation_cost"]),
+                level_data_type=PSY.get_enum_value(
+                    PSY.ReservoirDataType,
+                    reservoir_attr["level_data_type"],
+                ),
             )
         end
-        if component_type == "HydroEnergyReservoir"
+        if component_type == PSY.HydroTurbine
             if haskey(component_attr, "uuid")
                 IS.set_uuid!(IS.get_internal(turbine), Base.UUID(component_attr["uuid"]))
             else
@@ -822,7 +832,11 @@ function add_generation_units!(
             end
             add_component!(portfolio.base_system, reservoir)
             add_component!(portfolio.base_system, turbine)
-            PSY.set_downstream_turbines!(reservoir, [turbine])
+            if downstream
+                PSY.set_downstream_turbines!(reservoir, [turbine])
+            else
+                PSY.set_upstream_turbines!(reservoir, [turbine])
+            end
         else
             if haskey(component_attr, "uuid")
                 IS.set_uuid!(IS.get_internal(generator), Base.UUID(component_attr["uuid"]))
@@ -832,8 +846,7 @@ function add_generation_units!(
             add_component!(portfolio.base_system, generator)
         end
         if component_type in
-           #[PSY.ThermalStandard, PSY.RenewableDispatch, PSY.RenewableNonDispatch]
-           ["ThermalStandard", "RenewableDispatch", "RenewableNonDispatch"]
+           [PSY.ThermalStandard, PSY.RenewableDispatch, PSY.RenewableNonDispatch]
             if get_aggregation(portfolio) == PSY.ACBus
                 regions = [get_region(Node, portfolio, bus_name)]
             else
@@ -869,8 +882,7 @@ function add_generation_units!(
                 region=regions,
                 financial_data=DEFAULT_FINANCIAL_DATA,
                 available=true,
-                #power_systems_type=string(nameof(component_type)),
-                power_systems_type=component_type,
+                power_systems_type=string(nameof(component_type)),
                 operation_costs=ops_cost,
                 ramp_limits=(@isdefined ramp_limits) ? ramp_limits : (up=1.0, down=1.0),
                 time_limits=(@isdefined time_limits) ? time_limits : (up=1.0, down=1.0),
@@ -1543,18 +1555,16 @@ end
 
 function deserialize_time_series_row!(sys, db, row)
     metadata = deserialize_metadata(row)
+    component_attr = get(attributes, row.owner_id, Dict{String, Any}())
+    owner_uuid = component_attr["uuid"]
     if isa(metadata, IS.DeterministicMetadata) &&
        metadata.time_series_type <: IS.DeterministicSingleTimeSeries
-        component = PowerSystems.get_component(sys, row.owner_uuid)
+        component = PowerSystems.get_component(sys, owner_uuid)
         IS.add_metadata!(sys.data.time_series_manager.metadata_store, component, metadata)
     else
         time_array = deserialize_timedata(db, metadata, row.time_series_uuid)
         ts = IS.time_series_metadata_to_data(metadata)(metadata, time_array)
-        PowerSystems.add_time_series!(
-            sys,
-            PowerSystems.get_component(sys, row.owner_uuid),
-            ts,
-        )
+        PowerSystems.add_time_series!(sys, PowerSystems.get_component(sys, owner_uuid), ts)
     end
 end
 
@@ -1621,18 +1631,24 @@ function get_example_metadata(db)
     return time_series_uuid_rows
 end
 
-function deserialize_time_series_from_metadata!(sys::PowerSystems.System, db, metadata, row)
+function deserialize_time_series_from_metadata!(
+    sys::PowerSystems.System,
+    db,
+    metadata,
+    row,
+    owner_uuid,
+)
     time_array = deserialize_timedata(db, metadata, row.time_series_uuid)
     ts = IS.time_series_metadata_to_data(metadata)(metadata, time_array)
-    component = PowerSystems.get_component(sys, row.owner_uuid)
-    PowerSystems.add_time_series!(sys, PowerSystems.get_component(sys, row.owner_uuid), ts)
+    component = PowerSystems.get_component(sys, owner_uuid)
+    PowerSystems.add_time_series!(sys, PowerSystems.get_component(sys, owner_uuid), ts)
     if PSY.get_name(component) == "122_HYDRO_4"
         PSY.get_name(component),
         maximum(get_time_series_values(SingleTimeSeries, component, ts.name))
     end
 end
 
-function deserialize_timeseries!(sys::PowerSystems.System, db)
+function deserialize_timeseries!(sys::PowerSystems.System, db, attributes)
     DBInterface.transaction(db) do
         # For each time_series_uuid, we'll pick a "real" metadata_uuid (so no DeterministicSingleTimeSeries),
         # then we will deserialize and add them to the system. Finally, we'll go through and add_metadata!
@@ -1640,19 +1656,23 @@ function deserialize_timeseries!(sys::PowerSystems.System, db)
         serialized_metadata = Set{String}()
         for row in get_example_metadata(db)
             if row.owner_category == "Component" #Including this to skip over the temporary investment timeseries
+                component_attr = get(attributes, row.owner_id, Dict{String, Any}())
+                owner_uuid = component_attr["uuid"]
                 metadata = deserialize_metadata(row)
-                deserialize_time_series_from_metadata!(sys, db, metadata, row)
+                deserialize_time_series_from_metadata!(sys, db, metadata, row, owner_uuid)
                 push!(serialized_metadata, row.metadata_uuid)
             end
         end
         associations = DBInterface.execute(db, "SELECT * FROM time_series_associations")
         for row in associations
             if row.owner_category == "Component"
+                component_attr = get(attributes, row.owner_id, Dict{String, Any}())
+                owner_uuid = component_attr["uuid"]
                 metadata = deserialize_metadata(row)
                 if in(row.metadata_uuid, serialized_metadata)
                     continue
                 end
-                component = PowerSystems.get_component(sys, row.owner_uuid)
+                component = PowerSystems.get_component(sys, owner_uuid)
                 IS.add_metadata!(
                     sys.data.time_series_manager.metadata_store,
                     component,
