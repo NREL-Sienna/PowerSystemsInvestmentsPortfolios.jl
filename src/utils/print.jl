@@ -14,6 +14,7 @@ function Base.show(io::IO, ::MIME"text/plain", p::Portfolio)
     end
 
     println(io)
+    IS.show_time_series_data(io, p.data; backend=:auto)
     return
 end
 
@@ -104,9 +105,9 @@ function show_technologies_table(io::IO, p::Portfolio; kwargs...)
 
     tech_type_names = [(nameof(x), x) for x in tech_types]
     sort!(tech_type_names; by=x -> x[1])
-    for (i, (type_name, type)) in enumerate(tech_type_names)
+    for (i, (_, type)) in enumerate(tech_type_names)
         vals = components.data[type]
-        tech_data[i, 1] = type_name
+        tech_data[i, 1] = string(type)
         tech_data[i, 2] = length(vals)
     end
 
