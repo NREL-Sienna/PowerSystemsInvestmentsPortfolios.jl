@@ -45,6 +45,102 @@ function update_system_with_nodal_results!(
 end
 
 """
+    update_or_create_new_generator!(
+        T::Type{PSY.ThermalStandard},
+        sys::PSY.System,
+        p::Portfolio,
+        bus_name::String,
+        name::String,
+        capacity::Float64
+    )
+
+Update an existing generator's capacity or create a new generator in the system.
+
+This function searches for an existing generator of the specified type and name
+in the system. If found, it increments the generator's rating and maximum active
+power limits by the specified capacity. If not found, it creates a new generator
+with the given specifications.
+
+# Arguments
+
+  - `T::Type{PSY.ThermalStandard}`: The PowerSystems generator type
+    (e.g., ThermalStandard, RenewableDispatch)
+  - `sys::PSY.System`: The PowerSystems system to update
+  - `p::Portfolio`: The portfolio containing technology definitions and
+    specifications
+  - `bus_name::String`: The name of the bus/node where the generator is located
+  - `name::String`: The name of the generator/technology
+  - `capacity::Float64`: The capacity (in MW) to add to existing generator or
+    set for new generator
+
+# Note
+
+This function automatically sets the system units to "NATURAL_UNITS" for
+operations.
+"""
+function update_or_create_new_generator!(
+    T::Type{PSY.ThermalStandard},
+    sys::PSY.System,
+    p::Portfolio,
+    bus_name::String,
+    name::String,
+    capacity::Float64,
+)
+    # Set system units to natural units (MW, MVA) for capacity operations
+    PSY.set_units_base_system!(sys, "NATURAL_UNITS")
+
+    # Check if a generator with the same name and type already exists
+    gen = PSY.get_component(T, sys, name)
+
+    if !isnothing(gen)
+        # Generator exists: increment its capacity
+        existing_cap = PSY.get_rating(gen)
+        new_cap = existing_cap + capacity
+        set_rating!(gen, new_cap)
+        existing_min_power, existing_max_power = PSY.get_active_power_limits(gen)
+        new_max_power = existing_max_power + capacity
+        new_limits = (min=existing_min_power, max=new_max_power)
+        PSY.set_active_power_limits!(gen, new_limits)
+        return
+    else
+        # Generator doesn't exist: create a new one
+
+        # Get system base power for per-unit conversion
+        sys_base_power = PSY.get_base_power(sys)
+
+        # Retrieve the bus where this generator will be connected
+        bus_sys = PSY.get_component(PSY.ACBus, sys, bus_name)
+
+        # Get technology specifications from the portfolio
+        tech = get_technology(SupplyTechnology{T}, p, name)
+        op_cost = get_operation_costs(tech)
+        prime_mover_type = get_prime_mover_type(tech)
+        fuel = only(get_fuel(tech))
+
+        # Create new renewable generator with specified parameters
+        new_gen = T(
+            name=name,
+            available=true,                           # Generator is available for dispatch
+            status=true,                            # Generator is on by default
+            bus=bus_sys,                              # Connected bus
+            active_power=0.0,                         # Initial active power output
+            reactive_power=0.0,                       # Initial reactive power output
+            rating=capacity / sys_base_power,         # Capacity in per-unit
+            active_power_limits=(min=0.0, max=capacity / sys_base_power),     # Active power limits
+            prime_mover_type=prime_mover_type,        # Type of prime mover (e.g., PV, WT)
+            reactive_power_limits=nothing,            # No reactive power limits
+            ramp_limits=nothing,                    # No ramp limits
+            operation_cost=op_cost,                   # Operating cost structure
+            base_power=sys_base_power,                # Base power for per-unit system
+            fuel=fuel,                              # Fuel type
+        )
+
+        # Add the new generator to the system
+        PSY.add_component!(sys, new_gen)
+    end
+end
+
+"""
     update_or_create_new_generator!(T::Type{PSY.RenewableDispatch}, sys::PSY.System, 
                                    p::Portfolio, bus_name::String, name::String, 
                                    capacity::Float64)
