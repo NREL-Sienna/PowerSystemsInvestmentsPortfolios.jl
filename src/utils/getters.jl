@@ -10,12 +10,19 @@ get_out(x::InOut) = x.out
 Functions to obtain the parameter type T from various Technology types.
 """
 get_parameter_type(t::SupplyTechnology{T}) where {T} = T
+get_parameter_type(::Type{SupplyTechnology{T}}) where {T} = T
 get_parameter_type(t::StorageTechnology{T}) where {T} = T
+get_parameter_type(::Type{StorageTechnology{T}}) where {T} = T
 get_parameter_type(t::AggregateTransportTechnology{T}) where {T} = T
+get_parameter_type(::Type{AggregateTransportTechnology{T}}) where {T} = T
 get_parameter_type(t::NodalACTransportTechnology{T}) where {T} = T
+get_parameter_type(::Type{NodalACTransportTechnology{T}}) where {T} = T
 get_parameter_type(t::NodalHVDCTransportTechnology{T}) where {T} = T
+get_parameter_type(::Type{NodalHVDCTransportTechnology{T}}) where {T} = T
 get_parameter_type(t::DemandRequirement{T}) where {T} = T
+get_parameter_type(::Type{DemandRequirement{T}}) where {T} = T
 get_parameter_type(t::DemandSideTechnology{T}) where {T} = T
+get_parameter_type(::Type{DemandSideTechnology{T}}) where {T} = T
 
 """
 Calculates the amount of existing capacity (in MW) associated with a given Technology in the Portfolio.

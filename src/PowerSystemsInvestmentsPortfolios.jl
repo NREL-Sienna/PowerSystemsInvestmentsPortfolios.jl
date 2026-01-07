@@ -136,6 +136,8 @@ export get_fixed_cost_charge
 export get_fixed_cost_discharge
 export get_wacc
 
+export update_system_with_nodal_results!
+
 const PSY = PowerSystems
 const IS = InfrastructureSystems
 const MU = IS.Mustache
@@ -171,6 +173,7 @@ include("generate_structs.jl")
 include("db_parser.jl")
 include("utils/print.jl")
 include("utils/getters.jl")
+include("update_system.jl")
 
 using DocStringExtensions
 
