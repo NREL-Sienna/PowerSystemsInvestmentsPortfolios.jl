@@ -34,13 +34,22 @@ function update_system_with_nodal_results!(
         # Extract technology information from the composite key
         tech_type = key[1]      # Technology type (e.g., SupplyTechnology)
         node_name = key[2].name # Name of the node/bus where capacity is added
-        name = key[3]           # Name of the specific technology
+        tech_name = key[3]           # Name of the specific technology
+        unit_name = key[4]         # Name of the specific unit
 
         # Get the corresponding PowerSystems type for this technology
         psy_type = get_parameter_type(tech_type)
 
         # Update existing generator or create new one with the specified capacity
-        update_or_create_new_generator!(psy_type, sys, p, node_name, name, cap)
+        update_or_create_new_generator!(
+            psy_type,
+            sys,
+            p,
+            node_name,
+            tech_name,
+            unit_name,
+            cap,
+        )
     end
 end
 
@@ -50,13 +59,14 @@ end
         sys::PSY.System,
         p::Portfolio,
         bus_name::String,
-        name::String,
+        tech_name::String,
+        unit_name::String,
         capacity::Float64
     )
 
 Update an existing generator's capacity or create a new generator in the system.
 
-This function searches for an existing generator of the specified type and name
+This function searches for an existing generator of the specified type and unit name
 in the system. If found, it increments the generator's rating and maximum active
 power limits by the specified capacity. If not found, it creates a new generator
 with the given specifications.
@@ -69,7 +79,8 @@ with the given specifications.
   - `p::Portfolio`: The portfolio containing technology definitions and
     specifications
   - `bus_name::String`: The name of the bus/node where the generator is located
-  - `name::String`: The name of the generator/technology
+  - `tech_name::String`: The name of the technology
+  - `unit_name::String`: The name of the specific unit/generator
   - `capacity::Float64`: The capacity (in MW) to add to existing generator or
     set for new generator
 
@@ -83,14 +94,15 @@ function update_or_create_new_generator!(
     sys::PSY.System,
     p::Portfolio,
     bus_name::String,
-    name::String,
+    tech_name::String,
+    unit_name::String,
     capacity::Float64,
 )
     # Set system units to natural units (MW, MVA) for capacity operations
     PSY.set_units_base_system!(sys, "NATURAL_UNITS")
 
     # Check if a generator with the same name and type already exists
-    gen = PSY.get_component(T, sys, name)
+    gen = PSY.get_component(T, sys, unit_name)
 
     if !isnothing(gen)
         # Generator exists: increment its capacity
@@ -112,14 +124,14 @@ function update_or_create_new_generator!(
         bus_sys = PSY.get_component(PSY.ACBus, sys, bus_name)
 
         # Get technology specifications from the portfolio
-        tech = get_technology(SupplyTechnology{T}, p, name)
+        tech = get_technology(SupplyTechnology{T}, p, tech_name)
         op_cost = get_operation_costs(tech)
         prime_mover_type = get_prime_mover_type(tech)
         fuel = only(get_fuel(tech))
 
         # Create new renewable generator with specified parameters
         new_gen = T(
-            name=name,
+            name=unit_name,
             available=true,                           # Generator is available for dispatch
             status=true,                            # Generator is on by default
             bus=bus_sys,                              # Connected bus
@@ -142,12 +154,12 @@ end
 
 """
     update_or_create_new_generator!(T::Type{PSY.RenewableDispatch}, sys::PSY.System, 
-                                   p::Portfolio, bus_name::String, name::String, 
-                                   capacity::Float64)
+                                   p::Portfolio, bus_name::String, tech_name::String, 
+                                   unit_name::String, capacity::Float64)
 
 Update an existing renewable generator's capacity or create a new one if it doesn't exist.
 
-This function searches for a renewable generator with the specified name in the system.
+This function searches for a renewable generator with the specified unit name in the system.
 If found, it increments the generator's capacity by the specified amount. If not found,
 it creates a new RenewableDispatch generator with the given parameters and adds it to
 the system along with its time series data.
@@ -158,7 +170,8 @@ the system along with its time series data.
   - `sys::PSY.System`: The PowerSystems system to modify
   - `p::Portfolio`: The portfolio containing technology specifications
   - `bus_name::String`: Name of the bus/node where the generator is connected
-  - `name::String`: Name of the generator/technology
+  - `tech_name::String`: Name of the technology
+  - `unit_name::String`: Name of the specific unit/generator
   - `capacity::Float64`: Capacity to add (in MW for existing generators, or initial capacity for new ones)
 
 # Notes
@@ -172,14 +185,15 @@ function update_or_create_new_generator!(
     sys::PSY.System,
     p::Portfolio,
     bus_name::String,
-    name::String,
+    tech_name::String,
+    unit_name::String,
     capacity::Float64,
 )
     # Set system units to natural units (MW, MVA) for capacity operations
     PSY.set_units_base_system!(sys, "NATURAL_UNITS")
 
     # Check if a generator with the same name and type already exists
-    gen = PSY.get_component(T, sys, name)
+    gen = PSY.get_component(T, sys, unit_name)
 
     if !isnothing(gen)
         # Generator exists: increment its capacity
@@ -197,13 +211,13 @@ function update_or_create_new_generator!(
         bus_sys = PSY.get_component(PSY.ACBus, sys, bus_name)
 
         # Get technology specifications from the portfolio
-        tech = get_technology(SupplyTechnology{T}, p, name)
+        tech = get_technology(SupplyTechnology{T}, p, tech_name)
         op_cost = get_operation_costs(tech)
         prime_mover_type = get_prime_mover_type(tech)
 
         # Create new renewable generator with specified parameters
         new_gen = T(
-            name=name,
+            name=unit_name,
             available=true,                           # Generator is available for dispatch
             bus=bus_sys,                              # Connected bus
             active_power=0.0,                         # Initial active power output
