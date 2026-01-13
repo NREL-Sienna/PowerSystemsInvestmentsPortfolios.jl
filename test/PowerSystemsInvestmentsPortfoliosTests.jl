@@ -1,6 +1,7 @@
 module PowerSystemsInvestmentsPortfoliosTests
 using ReTest
 using Logging
+using TerminalLoggers
 using DataStructures
 using PowerSystems
 using PowerSystemsInvestmentsPortfolios
