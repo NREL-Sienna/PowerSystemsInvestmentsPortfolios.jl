@@ -1,5 +1,4 @@
 function build_portfolio()
-
     sys = build_system(PSITestSystems, "c_sys5_re")
     set_units_base_system!(sys, "NATURAL_UNITS")
 
