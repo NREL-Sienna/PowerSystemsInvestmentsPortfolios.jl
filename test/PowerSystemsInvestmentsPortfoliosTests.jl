@@ -132,4 +132,4 @@ export run_tests
 
 end
 
-using .InfrastructureSystemsTests
+using .PowerSystemsInvestmentsPortfoliosTests
