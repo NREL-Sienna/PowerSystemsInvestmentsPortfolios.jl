@@ -17,7 +17,7 @@ using DataFrames
 import InteractiveUtils
 import JSON3
 import Pkg
-const PSY = PowerSystems
+import PowerSystems as PSY
 
 # Automatically download and get path to CaseData artifact from test/Artifacts.toml
 const ARTIFACTS_TOML = joinpath(@__DIR__, "Artifacts.toml")
@@ -25,6 +25,7 @@ const ARTIFACT_NAME = "CaseData"
 artifact_path = Pkg.Artifacts.ensure_artifact_installed(ARTIFACT_NAME, ARTIFACTS_TOML)
 const DATA_DIR =
     joinpath(artifact_path, "PowerSystemsInvestmentsPortfoliosTestData-1.0-alpha1")
+const BASE_DIR = dirname(dirname(Base.find_package("PowerSystemsInvestmentsPortfolios")))
 
 import Aqua
 Aqua.test_unbound_args(PowerSystemsInvestmentsPortfolios)
@@ -43,6 +44,12 @@ LOG_LEVELS = Dict(
 
 include("common.jl")
 include("portfolio_5bus.jl")
+
+for filename in readdir(joinpath(BASE_DIR, "test"))
+    if startswith(filename, "test_") && endswith(filename, ".jl")
+        include(filename)
+    end
+end
 
 function get_logging_level_from_env(env_name::String, default)
     level = get(ENV, env_name, default)
