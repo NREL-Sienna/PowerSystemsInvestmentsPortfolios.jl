@@ -10,11 +10,14 @@ using TimeSeries
 using Dates
 using CSV
 using DataFrames
+using SQLite
+using DBInterface
 import InteractiveUtils
 import JSON3
 const PSIP = PowerSystemsInvestmentsPortfolios
 const IS = InfrastructureSystems
 const PSY = PowerSystems
+const DATA_DIR = "C:/Users/jpotts/Documents/GitHub/PowerSystemsInvestmentsPortfoliosTestData" # Will wait for artifact release later
 
 import Aqua
 Aqua.test_unbound_args(PowerSystemsInvestmentsPortfolios)
