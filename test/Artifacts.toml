@@ -1,0 +1,7 @@
+[CaseData]
+git-tree-sha1 = "9d83ada62d5c72c37328667c9fbeaeffc292d08a"
+lazy = true
+
+    [[CaseData.download]]
+    url = "https://github.com/NREL-Sienna/PowerSystemsInvestmentsPortfoliosTestData/archive/refs/tags/1.0-alpha1.tar.gz"
+    sha256 = "ece0995dcabe4b156a66f0763d273e48670d6c55fc376f7e0e995be1bba52c0f"
