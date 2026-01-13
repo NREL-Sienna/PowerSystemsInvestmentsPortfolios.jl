@@ -26,24 +26,24 @@ This file is auto-generated. Do not edit.
 Nodal representation of candidate AC transmission lines between two regions.
 
 # Arguments
-- `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line.
+- `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line (USD/MW).
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
 - `end_node::Node`: End node for transport technology
 - `id::Int64`: Numerical Index for AC transport technologies
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `start_node::Node`: Start node for transport technology
-- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `reactance::Float64`: Series reactance for a line (ohms)
-- `resistance::Float64`: (default: `0.0`) Technology resistance in Ohms
-- `voltage::Float64`: (default: `0.0`) Technology voltage in Volts
-- `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
+- `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
+- `reactance::Float64`: (default: `1.0`) Series reactance for a line (ohms)
+- `resistance::Float64`: (default: `1.0`) Technology resistance in Ohms
+- `voltage::Float64`: (default: `230.0`) Voltage rating of transmission line (kV)
+- `unit_size::Float64`: (default: `1.0`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Allowable capacity for a transmission line (MW)
 """
 mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
-    "Cost of adding new capacity to the nodal transmission line."
+    "Cost of adding new capacity to the nodal transmission line (USD/MW)."
     capital_costs::PSY.ValueCurve
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
@@ -57,17 +57,17 @@ mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechno
     financial_data::TechnologyFinancialData
     "Start node for transport technology"
     start_node::Node
-    "maps to a valid PowerSystems.jl for PCM modeling"
+    "Corresponding type in PowerSystems.jl to be used in PCM modeling"
     power_systems_type::String
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "Series reactance for a line (ohms)"
     reactance::Float64
     "Technology resistance in Ohms"
     resistance::Float64
-    "Technology voltage in Volts"
+    "Voltage rating of transmission line (kV)"
     voltage::Float64
     "Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)"
     unit_size::Float64
@@ -76,7 +76,7 @@ mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechno
 end
 
 
-function NodalACTransportTechnology{T}(; capital_costs=LinearCurve(0.0), available, name, end_node, id, financial_data, start_node, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), reactance, resistance=0.0, voltage=0.0, unit_size=1, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+function NodalACTransportTechnology{T}(; capital_costs=LinearCurve(0.0), available, name, end_node, id, financial_data, start_node, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), reactance=1.0, resistance=1.0, voltage=230.0, unit_size=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
     NodalACTransportTechnology{T}(capital_costs, available, name, end_node, id, financial_data, start_node, power_systems_type, internal, ext, reactance, resistance, voltage, unit_size, capacity_limits, )
 end
 

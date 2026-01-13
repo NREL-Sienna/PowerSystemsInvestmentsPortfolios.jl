@@ -18,8 +18,8 @@ Supplemental attribute used to define what existing generators are eligible for 
 # Arguments
 - `planned_retirement_year::Dict{String, Int64}`: (default: `Dict{String, Int64}()`) Optional dictionary to indicate the year in which the forced/planned retirement will occur
 - `eligible_generators::Vector{String}`: (default: `Vector()`) Names of individual generation units mapped to a technology that are eligible for retirement
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `build_year::Dict{String, Int64}`: (default: `Dict{String, Int64}()`) Optional dictionary to indicate the year in which existing generators in the base system were built
 """
 mutable struct RetirementPotential <: IS.SupplementalAttribute
@@ -27,9 +27,9 @@ mutable struct RetirementPotential <: IS.SupplementalAttribute
     planned_retirement_year::Dict{String, Int64}
     "Names of individual generation units mapped to a technology that are eligible for retirement"
     eligible_generators::Vector{String}
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "Optional dictionary to indicate the year in which existing generators in the base system were built"
     build_year::Dict{String, Int64}

@@ -82,7 +82,6 @@ function Portfolio(
             # runchecks = runchecks,
             time_series_directory=time_series_directory,
         )
-        return portfolio
         _post_deserialize_handling(
             portfolio;
             runchecks=runchecks,
@@ -129,7 +128,40 @@ function deserialize(
         end
     end
 
-    return from_dict(Portfolio, raw; from_python, kwargs...)
+    return from_dict(Portfolio, raw, filename; from_python, kwargs...)
+end
+
+function serialize(schedule::InvestmentScheduleResults)
+    start_dates = Vector{String}()
+    end_dates = Vector{String}()
+    capacity_data = Vector{Vector{Dict{String, Any}}}()
+    for (period, investments) in schedule.results
+        push!(start_dates, string(period[1]))
+        push!(end_dates, string(period[2]))
+
+        installation_list = Vector{Dict{String, Any}}()
+        for (technology, capacity) in investments
+            installation = Dict{String, Any}(
+                "technology" => string(nameof(technology[1])),
+                "parameter" => string(nameof((only(technology[1].parameters)))),
+                "name" => technology[2],
+                "installations" => capacity,
+            )
+            push!(installation_list, installation)
+        end
+        push!(capacity_data, installation_list)
+    end
+    openapi_schedule = APIServer.InvestmentScheduleResults(
+        start_dates=start_dates,
+        end_dates=end_dates,
+        results=capacity_data,
+    )
+    data = Dict{String, Any}(
+        string(name) => serialize(getproperty(openapi_schedule, name)) for
+        name in fieldnames(typeof(openapi_schedule))
+    )
+
+    return data
 end
 
 function serialize(technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
@@ -184,7 +216,8 @@ clear_ext!(port::Portfolio) = IS.clear_ext!(port.internal)
 
 function from_dict(
     ::Type{Portfolio},
-    raw::Dict{String, Any};
+    raw::Dict{String, Any},
+    filename::AbstractString;
     from_python=false,
     time_series_read_only=false,
     time_series_directory=nothing,
@@ -227,16 +260,16 @@ function from_dict(
     interest_rate = get(financial_data, "interest_rate", nothing)
 
     #Base system
-    sys = get(raw, "base_system", nothing)
-    if !isnothing(sys)
-        base_system = PSY.from_dict(PSY.System, sys)
-    else
-        base_system = PSY.System(100.0)
-    end
+    base_system_file =
+        joinpath(dirname(filename), splitext(basename(filename))[1] * "_base_system.json")
+    base_system = PSY.System(base_system_file)
 
     internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
     aggregation = PSY.ACBus
-    investment_schedule = raw["investment_schedule"]
+    investment_schedule = get(raw, "investment_schedule", nothing)
+    if !isnothing(investment_schedule)
+        investment_schedule = deserialize(InvestmentScheduleResults, investment_schedule)
+    end
     data = deserialize(
         IS.SystemData,
         raw["data"];
@@ -400,6 +433,37 @@ function deserialize(
     # Note: components need to be deserialized by the parent so that they can go through
     # the proper checks.
     return sys
+end
+
+function deserialize(::Type{InvestmentScheduleResults}, raw::Dict)
+    openapi_schedule = IS.deserialize_struct(APIServer.InvestmentScheduleResults, raw)
+
+    schedule = Dict()
+    for (i, start_date) in enumerate(openapi_schedule.start_dates)
+        end_date = openapi_schedule.end_dates[i]
+        period_tuple = (Dates.Date(start_date), Dates.Date(end_date))
+
+        schedule[period_tuple] = Dict()
+        for capacity in openapi_schedule.results[i]
+            technology_type = getproperty(
+                PowerSystemsInvestmentsPortfolios,
+                Symbol(capacity["technology"]),
+            )
+            parameter = getproperty(PowerSystems, Symbol(capacity["parameter"]))
+            technology_tuple = (technology_type{parameter}, capacity["name"])
+
+            if capacity["installations"] isa Dict
+                capacity_tuple = NamedTuple(
+                    (Symbol(key), value) for (key, value) in capacity["installations"]
+                )
+                schedule[period_tuple][technology_tuple] = capacity_tuple
+            else
+                schedule[period_tuple][technology_tuple] = capacity["installations"]
+            end
+        end
+    end
+
+    return InvestmentScheduleResults(schedule)
 end
 
 # Function copied over from IS. This version of the function is modified to deserialize using openAPI structs for PSIP supplemental attributes
@@ -623,7 +687,7 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         val = collect(
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
-                SupplyTechnology,
+                ResourceTechnology,
                 portfolio.data,
             ),
         )
@@ -639,7 +703,7 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         val = collect(
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
-                DemandRequirement,
+                DemandTechnology,
                 portfolio.data,
             ),
         )
@@ -832,6 +896,11 @@ function to_json(
     mfile = joinpath(dirname(filename), splitext(basename(filename))[1] * "_metadata.json")
     _serialize_portfolio_metadata_to_file(portfolio, mfile, user_data)
     @info "Serialized Portfolio to $filename"
+
+    # Serialize base system to a separate file
+    base_system_file =
+        joinpath(dirname(filename), splitext(basename(filename))[1] * "_base_system.json")
+    PSY.to_json(portfolio.base_system, base_system_file; pretty=pretty, force=force)
 
     return
 end

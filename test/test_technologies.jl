@@ -7,7 +7,7 @@
     @test has_supplemental_attributes(thermal, ExistingCapacity)
     @test !is_new(thermal)
     @test is_new(renewable)
-    @test get_existing_capacity_mw(p_5bus, thermal) == 791.25
+    @test get_existing_capacity_mw(p_5bus, thermal) == 79125.00
     @test get_existing_capacity_mw(p_5bus, renewable) == 0
 end
 

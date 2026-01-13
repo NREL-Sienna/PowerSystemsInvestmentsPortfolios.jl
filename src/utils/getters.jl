@@ -1,23 +1,41 @@
 """
-Functions to calculate the existing capacity associated with a PSIP Technology.
-
-If a technology has an ExistingCapacity supplemental attribute, it will use the names stored in the attribute
-to retreive relevant components from the base system and calcuate their total rated capacity.
+Utility functions to get individual attributes from custom NamedTuples.
 """
-
 get_max(x::MinMax) = x.max
 get_min(x::MinMax) = x.min
 get_in(x::InOut) = x.in
 get_out(x::InOut) = x.out
 
+"""
+Functions to obtain the parameter type T from various Technology types.
+"""
 get_parameter_type(t::SupplyTechnology{T}) where {T} = T
+get_parameter_type(::Type{SupplyTechnology{T}}) where {T} = T
 get_parameter_type(t::StorageTechnology{T}) where {T} = T
+get_parameter_type(::Type{StorageTechnology{T}}) where {T} = T
 get_parameter_type(t::AggregateTransportTechnology{T}) where {T} = T
+get_parameter_type(::Type{AggregateTransportTechnology{T}}) where {T} = T
 get_parameter_type(t::NodalACTransportTechnology{T}) where {T} = T
+get_parameter_type(::Type{NodalACTransportTechnology{T}}) where {T} = T
 get_parameter_type(t::NodalHVDCTransportTechnology{T}) where {T} = T
+get_parameter_type(::Type{NodalHVDCTransportTechnology{T}}) where {T} = T
 get_parameter_type(t::DemandRequirement{T}) where {T} = T
+get_parameter_type(::Type{DemandRequirement{T}}) where {T} = T
 get_parameter_type(t::DemandSideTechnology{T}) where {T} = T
+get_parameter_type(::Type{DemandSideTechnology{T}}) where {T} = T
 
+"""
+Calculates the amount of existing capacity (in MW) associated with a given Technology in the Portfolio.
+Technology must have an ExistingCapacity supplemental attribute attached to it to be non-zero.
+This attribute contains a list of names of existing assets in the base system that correspond to this technology.
+For StorageTechnology, this function returns existing charge/discharge capacity in MW. See
+[`get_existing_capacity_mwh`](@ref) for existing energy capacity in MWh.
+
+# Arguments
+
+  - `p::Portfolio`: The portfolio containing the base system and technology
+  - `t::Union{ResourceTechnology, TransmissionTechnology}`: The technology to get existing capacity
+"""
 function get_existing_capacity_mw(
     p::Portfolio,
     t::Union{ResourceTechnology, TransmissionTechnology},
@@ -48,12 +66,23 @@ function get_existing_capacity_mw(
             @error "Not all names in ExistingCapacity matched generators in the base system"
         end
 
-        return sum(PSY.get_rating(t) for t in comp)
+        return sum(PSY.get_rating(t) * PSY.get_base_power(p.base_system) for t in comp)
     else
         return 0.0
     end
 end
 
+"""
+Calculates the amount of existing energy capacity (in MWh) associated with a given StorageTechnology.
+Technology must have an ExistingCapacity supplemental attribute attached to it to be non-zero.
+This attribute contains a list of names of existing assets in the base system that correspond to this technology.
+To get the charge/discharge capacity in MW, see [`get_existing_capacity_mw`](@ref).
+
+# Arguments
+
+  - `p::Portfolio`: The portfolio containing the base system and technology
+  - `t::StorageTechnology`: The storage technology to get existing energy capacity
+"""
 function get_existing_capacity_mwh(p::Portfolio, t::StorageTechnology)
     if !is_new(t)
         attr = IS.get_supplemental_attributes(ExistingCapacity, t)
@@ -70,7 +99,9 @@ function get_existing_capacity_mwh(p::Portfolio, t::StorageTechnology)
             @error "Not all names in ExistingCapacity matched generators in the base system"
         end
 
-        return sum(PSY.get_storage_capacity(t) for t in comp)
+        return sum(
+            PSY.get_storage_capacity(t) * PSY.get_base_power(p.base_system) for t in comp
+        )
     else
         return 0.0
     end
@@ -131,3 +162,22 @@ Get constant fixed OM costs for storage discharge from OperationalCost in a Stor
 get_fixed_cost_discharge(t::StorageTechnology) = PSY.get_proportional_term(
     PSY.get_value_curve(PSY.get_discharge_variable_cost(get_operation_costs(t))),
 )
+
+"""
+Calculate the weighted average cost of capital (WACC) for a Technology based on its TechnologyFinancialData.
+We defined WACC such that `WACC = D * Rd * (1 - Tc) + E * Re``
+where D is the debt fraction, Rd is the debt rate, Tc is the tax rate, E is the equity fraction, and Re is the return on equity.
+
+Will return an error if the debt fraction is not between 0.0 and 1.0.
+"""
+function get_wacc(tech_financials::TechnologyFinancialData)
+    dr = tech_financials.debt_rate
+    tr = tech_financials.tax_rate
+    re = tech_financials.return_on_equity
+    df = tech_financials.debt_fraction
+    ef = 1.0 - df
+    if df > 1.0 || df < 0.0
+        error("Debt fraction must be between 0.0 and 1.0")
+    end
+    return df * dr * (1.0 - tr) + ef * re
+end

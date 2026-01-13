@@ -22,9 +22,6 @@ import InfrastructureSystems:
     InfrastructureSystemsComponent,
     InfrastructureSystemsType
 
-#import PowerSystems
-#import PowerSystems: StorageCost, ThermalGenerationCost
-
 # Using PowerSystems in order to support deserializing with PSY parametric typing
 using PowerSystems
 
@@ -40,6 +37,7 @@ import DataStructures: OrderedDict, SortedDict
 import OpenAPI
 import StringEncodings
 import HDF5
+import Tables
 
 export Portfolio
 export Technology
@@ -74,6 +72,7 @@ export RegionTopology
 export Zone
 export Node
 export PortfolioFinancialData
+export InvestmentScheduleResults
 export TechnologyFinancialData
 export TimeMapping
 
@@ -85,6 +84,7 @@ export get_technology
 export get_available_technology
 export get_available_technologies
 export get_technologies_by_name
+export get_requirement
 export get_requirements
 export get_ext
 export get_description
@@ -93,12 +93,16 @@ export get_base_year
 export get_inflation_rate
 export get_interest_rate
 export get_discount_rate
+export get_investment_schedule
+export get_base_system
 export set_description!
 export set_name!
 export set_base_year!
 export set_inflation_rate!
 export set_interest_rate!
 export set_discount_rate!
+export set_investment_schedule!
+export set_base_system!
 export add_technology!
 export add_technologies!
 export add_region!
@@ -108,10 +112,7 @@ export clear_time_series!
 export read_json_data
 export generate_invest_structs
 export generate_structs
-export db_to_dataframes
-export map_prime_mover
-export dataframe_to_structs
-export db_to_portfolio_parser
+export database_to_portfolio
 export add_supplemental_attribute!
 export remove_supplemental_attribute!
 export get_supplemental_attribute
@@ -133,6 +134,9 @@ export get_variable_cost_discharge
 export get_fixed_cost
 export get_fixed_cost_charge
 export get_fixed_cost_discharge
+export get_wacc
+
+export update_system_with_nodal_results!
 
 const PSY = PowerSystems
 const IS = InfrastructureSystems
@@ -160,6 +164,7 @@ include("models/financial_data/financial_data.jl")
 include("models/financial_data/TechnologyFinancialData.jl")
 include("models/requirements.jl")
 include("models/generated/includes.jl")
+include("investment_schedule.jl")
 
 include("portfolio.jl")
 include("time_mapping.jl")
@@ -168,6 +173,7 @@ include("generate_structs.jl")
 include("db_parser.jl")
 include("utils/print.jl")
 include("utils/getters.jl")
+include("update_system.jl")
 
 using DocStringExtensions
 

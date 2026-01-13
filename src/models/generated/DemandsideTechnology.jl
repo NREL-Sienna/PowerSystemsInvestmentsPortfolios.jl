@@ -39,9 +39,9 @@ Represents demand side technologies such as electric vehicles or hydrogen electr
 - `demand_energy_efficiency::Float64`: (default: `0.0`) Energy efficiency associated with time shifting demand. Represents energy losses due to time shifting
 - `max_demand_curtailment::Float64`: (default: `0.0`) Maximum fraction of demand that can be curtailed
 - `max_demand_delay::Float64`: (default: `0.0`) Maximum number of hours that demand can be deferred or delayed (hours).
-- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology is operated
 - `min_power::Float64`: (default: `0.0`) Minimum operation of demandside unit as a fraction of peak demand
 - `peak_demand_mw::Float64`: (default: `0.0`) Peak demand value in MW
@@ -69,11 +69,11 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnolog
     max_demand_curtailment::Float64
     "Maximum number of hours that demand can be deferred or delayed (hours)."
     max_demand_delay::Float64
-    "maps to a valid PowerSystems.jl for PCM modeling"
+    "Corresponding type in PowerSystems.jl to be used in PCM modeling"
     power_systems_type::String
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "Location where technology is operated"
     region::Vector{RegionTopology}

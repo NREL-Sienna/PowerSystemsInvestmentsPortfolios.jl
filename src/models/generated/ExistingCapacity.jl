@@ -14,14 +14,14 @@ This file is auto-generated. Do not edit.
 Supplemental attributed used to map candidate technologies in a portfolio to the existing system. Contains a list of existing generators that correspond to a SupplyTechnology.
 
 # Arguments
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `existing_technologies::Vector{String}`: (default: `Vector()`) List of individual units to map to a specific SupplyTechnology
 """
 mutable struct ExistingCapacity <: IS.SupplementalAttribute
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "List of individual units to map to a specific SupplyTechnology"
     existing_technologies::Vector{String}

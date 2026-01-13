@@ -3,32 +3,41 @@ const PORTFOLIO_KWARGS =
 
 const DATA_FORMAT_VERSION = "0.1.0"
 
-const DEFAULT_AGGREGATION = PSY.ACBus
+const DEFAULT_AGGREGATION = PSY.Area
 
 const DEFAULT_SYSTEM() = PSY.System(100.0)
 
+"""
+Stores metadata about the portfolio.
+"""
 mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
     description::Union{Nothing, String}
     data_source::Union{Nothing, String}
 end
 
+"""
+Stores financial data about the portfolio.
+
+# Arguments
+
+  - `base_year::Int64`: Base economic year. All costs will be converted to a net present value in this year.
+  - `discount_rate::Float64`: Discount rate
+  - `inflation_rate::Float64`: Inflation rate
+  - `interest_rate::Float64`: Interest rate
+"""
 mutable struct PortfolioFinancialData <: IS.InfrastructureSystemsType
-    "Base economic year. All costs will be converted to a net present value in this year."
     base_year::Int64
-    "Discount rate"
     discount_rate::Float64
-    "Inflation rate"
     inflation_rate::Float64
-    "Interest rate"
     interest_rate::Float64
 end
 
-struct Portfolio <: IS.InfrastructureSystemsType
+mutable struct Portfolio <: IS.InfrastructureSystemsType
     aggregation::Type{<:Union{PSY.ACBus, PSY.AggregationTopology}}
     data::IS.SystemData # Inputs to the model
     base_system::PSY.System #Base system storing existing data
-    investment_schedule::Dict # Investment decisions container i.e., model outputs. Container TBD
+    investment_schedule::Union{Nothing, InvestmentScheduleResults} # Investment decisions container i.e., model outputs. Container TBD
     time_series_directory::Union{Nothing, String}
     financial_data::Union{Nothing, PortfolioFinancialData}
     metadata::PortfolioMetadata
@@ -38,7 +47,7 @@ struct Portfolio <: IS.InfrastructureSystemsType
         aggregation,
         data,
         base_system::PSY.System,
-        investment_schedule::Dict,
+        investment_schedule::Union{Nothing, InvestmentScheduleResults},
         internal::IS.InfrastructureSystemsInternal;
         time_series_directory=nothing,
         financial_data=nothing,
@@ -79,7 +88,7 @@ function Portfolio(; kwargs...)
         DEFAULT_AGGREGATION,
         data,
         DEFAULT_SYSTEM(),
-        Dict(),
+        nothing,
         IS.InfrastructureSystemsInternal();
         kwargs...,
     )
@@ -94,7 +103,7 @@ function Portfolio(aggregation; kwargs...)
         aggregation,
         data,
         DEFAULT_SYSTEM(),
-        Dict(),
+        nothing,
         IS.InfrastructureSystemsInternal();
         kwargs...,
     )
@@ -109,7 +118,7 @@ function Portfolio(base_system::PSY.System; kwargs...)
         DEFAULT_AGGREGATION,
         data,
         base_system,
-        Dict(),
+        nothing,
         IS.InfrastructureSystemsInternal();
         kwargs...,
     )
@@ -124,7 +133,64 @@ function Portfolio(base_year, discount_rate, inflation_rate, interest_rate; kwar
         DEFAULT_AGGREGATION,
         data,
         DEFAULT_SYSTEM(),
-        Dict(),
+        nothing,
+        InfrastructureSystemsInternal();
+        financial_data=PortfolioFinancialData(
+            base_year,
+            discount_rate,
+            inflation_rate,
+            interest_rate,
+        ),
+        kwargs...,
+    )
+end
+
+"""
+Construct an empty `Portfolio` specifying financial data and a base system. Useful for building a Portfolio from scratch.
+"""
+function Portfolio(
+    aggregation,
+    base_system,
+    base_year,
+    discount_rate,
+    inflation_rate,
+    interest_rate;
+    kwargs...,
+)
+    data = PSY._create_system_data_from_kwargs(; kwargs...)
+    return Portfolio(
+        aggregation,
+        data,
+        base_system,
+        nothing,
+        InfrastructureSystemsInternal();
+        financial_data=PortfolioFinancialData(
+            base_year,
+            discount_rate,
+            inflation_rate,
+            interest_rate,
+        ),
+        kwargs...,
+    )
+end
+
+"""
+Construct an empty `Portfolio` specifying financial data. Useful for building a Portfolio from scratch and used in the database parser.
+"""
+function Portfolio(
+    aggregation,
+    base_year,
+    discount_rate,
+    inflation_rate,
+    interest_rate;
+    kwargs...,
+)
+    data = PSY._create_system_data_from_kwargs(; kwargs...)
+    return Portfolio(
+        aggregation,
+        data,
+        DEFAULT_SYSTEM(),
+        nothing,
         InfrastructureSystemsInternal();
         financial_data=PortfolioFinancialData(
             base_year,
@@ -150,6 +216,11 @@ get_ext(val::Portfolio) = IS.get_ext(val.internal)
 Get the base system of the portfolio.
 """
 get_base_system(val::Portfolio) = val.base_system
+
+"""
+Get the aggregation level of the portfolio.
+"""
+get_aggregation(val::Portfolio) = val.aggregation
 
 """
 Set the name of the portfolio.
@@ -192,6 +263,11 @@ Get the description of the portfolio.
 get_description(val::Portfolio) = val.metadata.description
 
 """
+Get the investment schedule of the portfolio.
+"""
+get_investment_schedule(val::Portfolio) = val.investment_schedule
+
+"""
 Return true if checks are enabled on the system.
 """
 get_runchecks(val::Portfolio) = val.runchecks[]
@@ -224,6 +300,17 @@ Set the interest rate of the portfolio.
 """
 set_interest_rate!(val::Portfolio, interest_rate::Float64) =
     val.financial_data.interest_rate = interest_rate
+
+"""
+Set the investment schedule of the portfolio.
+"""
+set_investment_schedule!(val::Portfolio, investment_schedule::InvestmentScheduleResults) =
+    val.investment_schedule = investment_schedule
+
+"""
+Set the base system of the portfolio.
+"""
+set_base_system!(val::Portfolio, system::PSY.System) = val.base_system = system
 
 function _validate_or_skip!(sys, component, skip_validation)
     if skip_validation && get_runchecks(sys)
@@ -355,7 +442,6 @@ Call collect on the result if an array is desired.
 ```julia
 iter = Portfolio.get_technologies(ThermalStandard, portfolio)
 iter = Portfolio.get_technologies(Generator, portfolio)
-iter = Portfolio.get_technologies(x -> Portfolio.get_available(x), Generator, portfolio)
 thermal_gens = get_technologies(ThermalStandard, portfolio) do gen
     get_available(gen)
 end
@@ -368,6 +454,22 @@ function get_technologies(::Type{T}, portfolio::Portfolio;) where {T <: Technolo
     return IS.get_components(T, portfolio.data)
 end
 
+"""
+Returns an iterator of technologies. T can be concrete or abstract. Specifiy a filter function to
+limits the technologies that can be considered. Call collect on the result if an array is desired.
+
+# Examples
+
+```julia
+iter = Portfolio.get_technologies(x -> Portfolio.get_available(x), Generator, portfolio)
+thermal_gens = get_technologies(ThermalStandard, portfolio) do gen
+    get_available(gen)
+end
+generators = collect(Portfolio.get_technologies(Generator, portfolio))
+```
+
+See also: [`iterate_technologies`](@ref)
+"""
 function get_technologies(
     filter_func::Function,
     ::Type{T},
@@ -400,7 +502,7 @@ function _get_technologies_by_name(
 end
 
 """
-Get the technologies of abstract type T with name. Note that PowerSystems enforces unique
+Get the technologies of abstract type T with name. Note that PowerSystemInvestmentPortfolios enforces unique
 names on each concrete type but not across concrete types.
 
 See [`get_technology`](@ref) if the concrete type is known.
@@ -416,7 +518,7 @@ function get_technologies_by_name(
 end
 
 """
-Gets components availability. Requires type T to have the method get_available implemented.
+Gets the technologies of type T where [`get_available`](@ref) is true. Requires type T to have the method get_available implemented.
 """
 
 function get_available_technologies(::Type{T}, portfolio::Portfolio) where {T <: Technology}
@@ -442,6 +544,9 @@ function is_attached(technology::T, portfolio::Portfolio) where {T <: Technology
     return is_attached(T, get_name(technology), portfolio)
 end
 
+"""
+Return true if the component is attached to the system.
+"""
 function is_attached(::Type{T}, name, portfolio::Portfolio) where {T <: Technology}
     return !isnothing(get_technology(T, portfolio, name))
 end
@@ -492,6 +597,12 @@ function remove_technologies!(portfolio::Portfolio, ::Type{T}) where {T <: Techn
     return components
 end
 
+"""
+Remove all technologies of type T from the portfolio. Provide a filter function to
+only remove technologies matching the filter.
+
+Throws ArgumentError if the type is not stored.
+"""
 function remove_technologies!(
     filter_func::Function,
     portfolio::Portfolio,
@@ -524,9 +635,9 @@ end
 ###################################
 
 """
-Add time series data to a component.
+Add time series data to a technology.
 
-Throws ArgumentError if the component is not stored in the system.
+Throws ArgumentError if the component is not stored in the portfolio.
 """
 function add_time_series!(
     portfolio::Portfolio,
@@ -543,7 +654,7 @@ Add the same time series data to multiple components.
 This is significantly more efficent than calling `add_time_series!` for each component
 individually with the same data because in this case, only one time series array is stored.
 
-Throws ArgumentError if a component is not stored in the system.
+Throws ArgumentError if a component is not stored in the portfolio.
 """
 function add_time_series!(
     portfolio::Portfolio,
@@ -555,7 +666,7 @@ function add_time_series!(
 end
 
 """
-Return the compression settings used for system data such as time series arrays.
+Return the compression settings used for portfolio data such as time series arrays.
 """
 get_compression_settings(portfolio::Portfolio) = IS.get_compression_settings(portfolio.data)
 
@@ -566,7 +677,7 @@ get_time_series_resolution(portfolio::Portfolio) =
     IS.get_time_series_resolutions(portfolio.data)
 
 """
-Remove all time series data from the system.
+Remove all time series data from the portfolio.
 """
 function clear_time_series!(portfolio::Portfolio)
     return IS.clear_time_series!(portfolio.data)
@@ -635,32 +746,6 @@ function remove_time_series!(
 end
 
 #=
-### Not sure if these methods make sense for technologies
-"""
-Set the name for a technology that is attached to the Portfolio.
-"""
-set_name!(portfolio::Portfolio, technology::Technology, name::AbstractString) =
-    set_name!(portfolio.data, technology, name)
-
-"""
-Set the name of a technology.
-
-Throws an exception if the technology is attached to a system.
-TODO: Check if this method makes sense here
-"""
-function set_name!(technology::Technology, name::AbstractString)
-    # The units setting is nothing until the component is attached to the system.
-    if get_units_setting(technology) !== nothing
-        # This is not allowed because components are stored in the system in a Dict
-        # keyed by name.
-        error(
-            "The component is attached to a system. " *
-            "Call set_name!(system, component, name) instead.",
-        )
-    end
-
-    technology.name = name
-end
 
 """
 Check system consistency and validity.
@@ -675,11 +760,6 @@ function check(sys::System)
 end
 
 =#
-
-function clear_units!(technology::Technology)
-    get_internal(technology).units_info = nothing
-    return
-end
 
 """
 Remove a technology from the portfolio by its value.
@@ -737,9 +817,9 @@ function has_technology(
     return IS.has_component(T, portfolio.data.components, name)
 end
 
-################################
+###########################
 ######### Regions #########
-################################
+###########################
 
 """
 Add a RegionTopology to the portfolio.
@@ -797,6 +877,13 @@ function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: RegionTopolog
     return IS.get_components(T, portfolio.data)
 end
 
+"""
+Get the region of type T with name. Returns nothing if no region matches. If T is an abstract
+type then the names of regions across all subtypes of T must be unique.
+
+Throws ArgumentError if T is not a concrete type and there is more than one region with
+requested name
+"""
 function get_region(
     ::Type{T},
     portfolio::Portfolio,
@@ -819,8 +906,34 @@ function add_requirement!(portfolio::Portfolio, req::Requirement)
     return IS.add_component!(portfolio.data, req, skip_validation=false)
 end
 
+"""
+Returns an iterator of requirements. T can be concrete or abstract.
+Call collect on the result if an array is desired.
+
+# Examples
+
+```julia
+iter = Portfolio.get_requirements(Requirement, portfolio)
+requirements = collect(Portfolio.get_requirements(Requirement, portfolio))
+```
+"""
 function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirement}
     return IS.get_components(T, portfolio.data)
+end
+
+"""
+Get the requirement of type T with name. Returns nothing if no requirement matches. If T is an abstract
+type then the names of requirements across all subtypes of T must be unique.
+
+Throws ArgumentError if T is not a concrete type and there is more than one requirement with
+requested name
+"""
+function get_requirement(
+    ::Type{T},
+    portfolio::Portfolio,
+    name::AbstractString,
+) where {T <: Requirement}
+    return IS.get_component(T, portfolio.data, name)
 end
 
 ###########################################
@@ -895,16 +1008,13 @@ Return a Vector of supplemental_attributes. T can be concrete or abstract.
 # Arguments
 
   - `T`: supplemental_attribute type
-  - `supplemental_attributes::SupplementalAttributes`: SupplementalAttributes in the system
-  - `filter_func::Union{Nothing, Function} = nothing`: Optional function that accepts a component
-    of type T and returns a Bool. Apply this function to each component and only return components
-    where the result is true.
+  - `supplemental_attributes::SupplementalAttributes`: SupplementalAttributes in the portfolio
 """
 function get_supplemental_attributes(
     ::Type{T},
-    component::IS.InfrastructureSystemsComponent,
+    supplemental_attributes::IS.InfrastructureSystemsComponent,
 ) where {T <: IS.SupplementalAttribute}
-    return IS.get_supplemental_attributes(T, component)
+    return IS.get_supplemental_attributes(T, supplemental_attributes)
 end
 
 """
