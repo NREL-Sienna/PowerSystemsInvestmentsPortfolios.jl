@@ -22,7 +22,8 @@ const PSY = PowerSystems
 const ARTIFACTS_TOML = joinpath(@__DIR__, "Artifacts.toml")
 const ARTIFACT_NAME = "CaseData"
 artifact_path = Pkg.Artifacts.ensure_artifact_installed(ARTIFACT_NAME, ARTIFACTS_TOML)
-const DATA_DIR = joinpath(artifact_path, "PowerSystemsInvestmentsPortfoliosTestData-1.0-alpha1")
+const DATA_DIR =
+    joinpath(artifact_path, "PowerSystemsInvestmentsPortfoliosTestData-1.0-alpha1")
 
 import Aqua
 Aqua.test_unbound_args(PowerSystemsInvestmentsPortfolios)
@@ -97,9 +98,9 @@ function run_tests(args...; kwargs...)
             config = IS.LoggingConfiguration(logging_config_filename)
         else
             config = IS.LoggingConfiguration(;
-                filename = LOG_FILE,
-                file_level = get_logging_level_from_env("SIENNA_FILE_LOG_LEVEL", "Info"),
-                console_level = get_logging_level_from_env(
+                filename=LOG_FILE,
+                file_level=get_logging_level_from_env("SIENNA_FILE_LOG_LEVEL", "Info"),
+                console_level=get_logging_level_from_env(
                     "SIENNA_CONSOLE_LOG_LEVEL",
                     "Error",
                 ),
