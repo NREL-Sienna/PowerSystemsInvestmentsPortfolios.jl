@@ -7,7 +7,7 @@
 
 ## Development
 
-Contributions to the development and enahancement of PowerSystemsInvestmentsPortfolios is welcome. Please see [CONTRIBUTING.md](https://github.com/NREL-Sienna/PowerSystemsInvestmentsPortfolios.jl/blob/main/CONTRIBUTING.md) for code contribution guidelines.
+Contributions to the development and enhancement of PowerSystemsInvestmentsPortfolios is welcome. Please see [CONTRIBUTING.md](https://github.com/NREL-Sienna/PowerSystemsInvestmentsPortfolios.jl/blob/main/CONTRIBUTING.md) for code contribution guidelines.
 
 ## License
 

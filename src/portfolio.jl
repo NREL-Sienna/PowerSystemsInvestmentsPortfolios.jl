@@ -8,7 +8,15 @@ const DEFAULT_AGGREGATION = PSY.Area
 const DEFAULT_SYSTEM() = PSY.System(100.0)
 
 """
+    PortfolioMetadata
+
 Stores metadata about the portfolio.
+
+# Fields
+
+  - `name::Union{Nothing, String}`: Name of the portfolio
+  - `description::Union{Nothing, String}`: Description of the portfolio
+  - `data_source::Union{Nothing, String}`: Source of the portfolio data
 """
 mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
     name::Union{Nothing, String}
@@ -17,14 +25,16 @@ mutable struct PortfolioMetadata <: IS.InfrastructureSystemsType
 end
 
 """
+    PortfolioFinancialData
+
 Stores financial data about the portfolio.
 
-# Arguments
+# Fields
 
   - `base_year::Int64`: Base economic year. All costs will be converted to a net present value in this year.
-  - `discount_rate::Float64`: Discount rate
-  - `inflation_rate::Float64`: Inflation rate
-  - `interest_rate::Float64`: Interest rate
+  - `discount_rate::Float64`: Discount rate for financial calculations
+  - `inflation_rate::Float64`: Inflation rate for cost adjustments
+  - `interest_rate::Float64`: Interest rate for financing calculations
 """
 mutable struct PortfolioFinancialData <: IS.InfrastructureSystemsType
     base_year::Int64
@@ -56,16 +66,6 @@ mutable struct Portfolio <: IS.InfrastructureSystemsType
         data_source=nothing,
         kwargs...,
     )
-        #TODO: Provide support to kwargs
-        #=
-        unsupported = setdiff(keys(kwargs), PORTFOLIO_KWARGS)
-        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
-        if !isnothing(get(kwargs, :unit_system, nothing))
-            @warn(
-                "unit_system kwarg ignored. The value in SystemUnitsSetting takes precedence"
-            )
-        end
-        =#
         return new(
             aggregation,
             data,

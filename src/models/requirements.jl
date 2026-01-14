@@ -1,9 +1,15 @@
 """
-Supertype for all portfolio requirements
+    Requirement
 
-Requirement include policies or other regional factors that may constrain
-expansion decisions. Common requirements are carbon caps and system
-capacity requirements.
+Supertype for all portfolio requirements.
+
+Requirements represent policies or other regional factors that may constrain
+expansion decisions. Examples include:
+- Carbon emissions caps and taxes (`CarbonCaps`, `CarbonTax`)
+- System capacity requirements (`CapacityReserveMargin`)
+- Energy share mandates (`EnergyShareRequirements`)
+- Clean energy matching requirements (`HourlyMatching`)
+- Minimum and maximum capacity limits (`MinimumCapacityRequirements`, `MaximumCapacityRequirements`)
 """
 
 abstract type Requirement <: IS.InfrastructureSystemsComponent end

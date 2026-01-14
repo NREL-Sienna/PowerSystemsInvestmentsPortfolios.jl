@@ -1,13 +1,17 @@
 """
-abstract type to represent spatial aggregations for the CEM.
+    RegionTopology
 
-Required fields for a RegionTopology Type
+Abstract type to represent spatial aggregations for investment portfolio modeling.
 
-  - name
-  - id
-  - time_series_container
-  - supplemental_attributes_container
-  - internal
+All subtypes must implement the following fields:
+
+  - `name::String`: Unique identifier for the region
+  - `id::Int`: Numeric identifier
+  - `time_series_container`: Container for time series data
+  - `supplemental_attributes_container`: Container for supplemental attributes
+  - `internal`: Internal infrastructure systems data
+
+Examples of concrete types include `Zone` and `Node`.
 """
 abstract type RegionTopology <: IS.InfrastructureSystemsComponent end
 
