@@ -872,8 +872,7 @@ function add_generation_units!(
             else
                 fuel = ThermalFuels.OTHER
             end
-            psy_type = getproperty(PowerSystems, Symbol(component_type))
-            technology = SupplyTechnology{psy_type}(;
+            technology = SupplyTechnology{component_type}(;
                 name=rec.name,
                 id=rec.id,
                 capital_costs=LinearCurve(0.0),
