@@ -14,14 +14,14 @@ This file is auto-generated. Do not edit.
 Supplemental attribute used to define a total amount of existing capacity that can be retired for a technology
 
 # Arguments
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `retirement_potential::Float64`: (default: `0.0`) Amount of pre-existing capacity for a technology that is eligible for retirement
 """
 mutable struct AggregateRetirementPotential <: IS.SupplementalAttribute
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "Amount of pre-existing capacity for a technology that is eligible for retirement"
     retirement_potential::Float64

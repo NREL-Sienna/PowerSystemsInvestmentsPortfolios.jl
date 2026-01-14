@@ -20,26 +20,26 @@ Policy requirement that the total capacity of all technologies in `eligible_reso
 
 # Arguments
 - `name::String`: The technology name
-- `max_capacity_mw::Float64`: (default: `0.0`) Maximum total capacity across all eligible resources
-- `target_year::Int64`: (default: `2050`) Year in which carbon cap will be applied
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `max_capacity_mw::Float64`: (default: `0.0`) Maximum total capacity across all eligible resources (MW)
+- `target_year::Int64`: (default: `2050`) Year in which the capacity requirement will be applied
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `id::Int64`: ID for individual policy
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `eligible_resources::Vector{ResourceTechnology}`: (default: `Vector{ResourceTechnology}()`) List of technologies that contribute to the carbon cap constraint.
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 """
 mutable struct MaximumCapacityRequirements <: Requirement
     "The technology name"
     name::String
-    "Maximum total capacity across all eligible resources"
+    "Maximum total capacity across all eligible resources (MW)"
     max_capacity_mw::Float64
-    "Year in which carbon cap will be applied"
+    "Year in which the capacity requirement will be applied"
     target_year::Int64
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
     "ID for individual policy"
     id::Int64
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "List of technologies that contribute to the carbon cap constraint."
     eligible_resources::Vector{ResourceTechnology}

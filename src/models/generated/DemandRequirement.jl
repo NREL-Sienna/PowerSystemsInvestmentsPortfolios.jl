@@ -22,34 +22,34 @@ Demand requirements for a region.
 
 # Arguments
 - `name::String`: The technology name
-- `value_of_lost_load::Float64`: Value of unserved load, USD/MWh
-- `power_systems_type::String`: maps to a valid PowerSystems.jl for PCM modeling
-- `peak_demand_mw::Float64`: (default: `0.0`) Peak demand value in MW
+- `value_of_lost_load::Float64`: Value of unserved load (USD/MWh)
+- `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
+- `peak_demand_mw::Float64`: (default: `0.0`) Peak demand value of DemandRequirement. Required if timeseries data for the DemandRequirement is normalized (MW)
 - `unserved_demand_curve::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Piecewise curve to scale the cost of unserved load based on the value of lost load
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `id::Int64`: ID for individual demand requirement
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `region::Vector{RegionTopology}`: (default: `Vector()`) Location of the demand
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
+- `region::Vector{RegionTopology}`: (default: `Vector()`) Zone or node where the demand requirement is located
 - `available::Bool`: (default: `true`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 """
 mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
     "The technology name"
     name::String
-    "Value of unserved load, USD/MWh"
+    "Value of unserved load (USD/MWh)"
     value_of_lost_load::Float64
-    "maps to a valid PowerSystems.jl for PCM modeling"
+    "Corresponding type in PowerSystems.jl to be used in PCM modeling"
     power_systems_type::String
-    "Peak demand value in MW"
+    "Peak demand value of DemandRequirement. Required if timeseries data for the DemandRequirement is normalized (MW)"
     peak_demand_mw::Float64
     "Piecewise curve to scale the cost of unserved load based on the value of lost load"
     unserved_demand_curve::PSY.ValueCurve
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
     "ID for individual demand requirement"
     id::Int64
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
-    "Location of the demand"
+    "Zone or node where the demand requirement is located"
     region::Vector{RegionTopology}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool

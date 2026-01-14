@@ -16,18 +16,18 @@ A unit of spatial aggregation for zonal capacity expansion models. Used to defin
 
 # Arguments
 - `name::String`: Name of region
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `id::Int64`: A unique zone identification number
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 """
 mutable struct Zone <: RegionTopology
     "Name of region"
     name::String
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
     "A unique zone identification number"
     id::Int64
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
 end
 

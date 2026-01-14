@@ -14,16 +14,16 @@ This file is auto-generated. Do not edit.
 Supplemental attributed used to store mapping between the PSIP Zone and the associated buses in the base system.
 
 # Arguments
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `buses::Vector{String}`: (default: `Vector()`) List of buses in the base system that are associated with a zone
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 """
 mutable struct TopologyMapping <: IS.SupplementalAttribute
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
     "List of buses in the base system that are associated with a zone"
     buses::Vector{String}
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
 end
 

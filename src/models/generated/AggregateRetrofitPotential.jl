@@ -18,20 +18,20 @@ Supplemental attribute used to define a total amount of capacity that can be ret
 # Arguments
 - `retrofit_id::Int64`: (default: `0`) Unique identifier to group retrofittable source technologies with retrofit options inside the same zone.
 - `retrofit_fraction::Float64`: (default: `0.0`) Fraction of existing capacity that is eligible for retrofits. Alternative to retrofit_potential
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `retrofit_potential::Float64`: (default: `0.0`) Amount of existing capacity for technology that can be retrofitted
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 """
 mutable struct AggregateRetrofitPotential <: IS.SupplementalAttribute
     "Unique identifier to group retrofittable source technologies with retrofit options inside the same zone."
     retrofit_id::Int64
     "Fraction of existing capacity that is eligible for retrofits. Alternative to retrofit_potential"
     retrofit_fraction::Float64
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
     "Amount of existing capacity for technology that can be retrofitted"
     retrofit_potential::Float64
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
 end
 

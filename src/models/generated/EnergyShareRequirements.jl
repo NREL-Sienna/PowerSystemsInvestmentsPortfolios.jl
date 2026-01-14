@@ -21,29 +21,29 @@ Policy requirement that the total generation of `eligible_technologies` must be 
 
 # Arguments
 - `name::String`: The policy name
-- `target_year::Int64`: (default: `2050`) Year in which carbon cap will be applied
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `target_year::Int64`: (default: `2050`) Year in which the energy share requirement will be applied
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `id::Int64`: ID for individual policy
-- `generation_fraction_requirement::Float64`: (default: `0.0`) Fraction of total demand across all eligible zones that needs to be met by qualifying resources.
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
-- `eligible_resources::Vector{ResourceTechnology}`: (default: `Vector{ResourceTechnology}()`) List of SupplyTechnologies that will meet the energy share requirement.
+- `generation_fraction_requirement::Float64`: (default: `0.0`) Fraction of total annual demand across all eligible zones that needs to be met by eligible resources.
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
+- `eligible_resources::Vector{ResourceTechnology}`: (default: `Vector{ResourceTechnology}()`) List of ResourceTechnologies that are eligible to meet the energy share requirement.
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `eligible_regions::Vector{RegionTopology}`: (default: `Vector{RegionTopology}()`) List of regions where the EnergyShareRequirement will be applied.
 """
 mutable struct EnergyShareRequirements <: Requirement
     "The policy name"
     name::String
-    "Year in which carbon cap will be applied"
+    "Year in which the energy share requirement will be applied"
     target_year::Int64
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
     "ID for individual policy"
     id::Int64
-    "Fraction of total demand across all eligible zones that needs to be met by qualifying resources."
+    "Fraction of total annual demand across all eligible zones that needs to be met by eligible resources."
     generation_fraction_requirement::Float64
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
-    "List of SupplyTechnologies that will meet the energy share requirement."
+    "List of ResourceTechnologies that are eligible to meet the energy share requirement."
     eligible_resources::Vector{ResourceTechnology}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool

@@ -22,11 +22,11 @@ Policy requirement to enforce a minimum capacity reserve margin, such that (tota
 # Arguments
 - `name::String`: The requirement name
 - `eligible_technologies::Vector{Technology}`: (default: `Vector{Technology}()`) List of technologies that can contribute to the capacity reserve margin requirement
-- `target_year::Int64`: (default: `2050`) Year in which carbon cap will be applied
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) Internal field
+- `target_year::Int64`: (default: `2050`) Year in which capacity reserve margin will be applied
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `id::Int64`: ID for individual policy
-- `capacity_reserve_fraction::Float64`: (default: `0.0`) Capacity reserve requirements, represented as a fraction of peak demand in region
-- `ext::Dict`: (default: `Dict()`) Option for providing additional data
+- `capacity_reserve_fraction::Float64`: (default: `0.0`) Capacity reserve requirements, represented as a fraction of peak demand in a region
+- `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `eligible_regions::Vector{RegionTopology}`: (default: `Vector{RegionTopology}()`) List of regions where this reserve margin is enforced
 """
@@ -35,15 +35,15 @@ mutable struct CapacityReserveMargin <: Requirement
     name::String
     "List of technologies that can contribute to the capacity reserve margin requirement"
     eligible_technologies::Vector{Technology}
-    "Year in which carbon cap will be applied"
+    "Year in which capacity reserve margin will be applied"
     target_year::Int64
-    "Internal field"
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
     internal::InfrastructureSystemsInternal
     "ID for individual policy"
     id::Int64
-    "Capacity reserve requirements, represented as a fraction of peak demand in region"
+    "Capacity reserve requirements, represented as a fraction of peak demand in a region"
     capacity_reserve_fraction::Float64
-    "Option for providing additional data"
+    "Optional dictionary to provide additional data"
     ext::Dict
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool

@@ -3,16 +3,16 @@ function build_portfolio()
     set_units_base_system!(sys, "NATURAL_UNITS")
 
     ###################
-    ### Zones ###
+    ###### Zones ######
     ###################
 
     z1 = Zone(name="Zone_1", id=1)
 
     z2 = Zone(name="Zone_2", id=2)
 
-    n1 = Node(name="node1", id=1)
+    n1 = Node(name="node1", id=3)
 
-    n2 = Node(name="node2", id=1)
+    n2 = Node(name="node2", id=4)
 
     ###################
     ### Time Series ###
@@ -41,8 +41,14 @@ function build_portfolio()
     ##### Thermals #####
     ####################
 
-    tech_financials =
-        TechnologyFinancialData(; capital_recovery_period=30, technology_base_year=2025)
+    tech_financials = TechnologyFinancialData(;
+        capital_recovery_period=30,
+        technology_base_year=2025,
+        debt_fraction=0.5,
+        debt_rate=0.07,
+        return_on_equity=0.1,
+        tax_rate=0.257,
+    )
 
     thermals = collect(get_components(ThermalStandard, sys))
     var_cost = PSY.get_variable.((get_operation_cost.((thermals))))
@@ -127,7 +133,8 @@ function build_portfolio()
     #####################
 
     #### Wind ####
-    data = CSV.read("data_utils/ts_data.csv", DataFrame)
+    local_path = @__DIR__
+    data = CSV.read(joinpath(local_path, "data_utils/ts_data.csv"), DataFrame)
     wind_ts_vec = data[!, "Wind"] ./ 451.0
     renewables = collect(get_components(RenewableDispatch, sys))
     wind_op_costs =
@@ -286,7 +293,7 @@ function build_portfolio()
     stor_kwh_capex = 745.25 #$/kW
     t_stor = StorageTechnology{PSY.EnergyReservoirStorage}(;
         name="test_storage",
-        id=1,
+        id=6,
         region=[z1],
         storage_tech=StorageTech.LIB,
         capacity_limits_discharge=(0.0, 300.0),
@@ -347,7 +354,7 @@ function build_portfolio()
     t_demand_b = DemandRequirement{PSY.PowerLoad}(
         #load_growth=0.05,
         name="demand_b",
-        id=1,
+        id=7,
         available=true,
         power_systems_type="PowerLoad",
         region=[z1],
@@ -369,7 +376,7 @@ function build_portfolio()
     t_demand_c = DemandRequirement{PSY.PowerLoad}(
         #load_growth=0.05,
         name="demand_c",
-        id=2,
+        id=8,
         available=true,
         power_systems_type="PowerLoad",
         region=[z1],
@@ -384,7 +391,7 @@ function build_portfolio()
 
     t_demand_d = DemandRequirement{PSY.PowerLoad}(
         name="demand_d",
-        id=3,
+        id=9,
         available=true,
         power_systems_type="PowerLoad",
         region=[z2],
@@ -395,7 +402,7 @@ function build_portfolio()
         name="test_demand",
         available=true,
         power_systems_type="PowerLoad",
-        id=1,
+        id=10,
         region=[z1],
     )
 
@@ -412,7 +419,7 @@ function build_portfolio()
         capital_costs=LinearCurve(5000.0),
         available=true,
         power_systems_type="TransportTechnology",
-        id=1,
+        id=11,
         financial_data=tech_financials,
     )
 
@@ -425,13 +432,13 @@ function build_portfolio()
         capital_costs=LinearCurve(5000.0),
         available=true,
         power_systems_type="TransportTechnology",
-        id=1,
+        id=12,
         financial_data=tech_financials,
     )
 
     acline = NodalACTransportTechnology{PSY.ACBranch}(
         name="test",
-        id=1,
+        id=13,
         available=true,
         power_systems_type="Nodal",
         capacity_limits=(min=0, max=900),
@@ -457,14 +464,14 @@ function build_portfolio()
 
     carbon_tax = CarbonTax(
         name="test_tax",
-        id=1,
+        id=14,
         available=true,
         target_year=2030,
         eligible_regions=[z1, z2],
     )
     carbon_cap = CarbonCaps(
         name="test_cap",
-        id=1,
+        id=15,
         available=true,
         target_year=2030,
         eligible_regions=[z1, z2],
@@ -472,7 +479,7 @@ function build_portfolio()
 
     crm = CapacityReserveMargin(
         name="test_crm",
-        id=1,
+        id=16,
         available=true,
         target_year=2030,
         eligible_regions=[z1, z2],
@@ -481,21 +488,21 @@ function build_portfolio()
 
     matching = HourlyMatching(
         name="hourly_matching",
-        id=1,
+        id=17,
         available=true,
         eligible_demand=[t_demand_c, t_demand_b],
         eligible_resources=[t_wind, t_pv1, t_pv2],
     )
     max_req = MaximumCapacityRequirements(
         name="test_max",
-        id=1,
+        id=18,
         available=true,
         target_year=2030,
         eligible_resources=[t_th, t_th_exp],
     )
     min_req = MinimumCapacityRequirements(
         name="test_min",
-        id=1,
+        id=19,
         available=true,
         target_year=2030,
         eligible_resources=[t_wind, t_pv1],
@@ -503,7 +510,7 @@ function build_portfolio()
 
     esr = EnergyShareRequirements(
         name="test_esr",
-        id=1,
+        id=20,
         available=true,
         eligible_regions=[z1, z2],
         eligible_resources=[t_wind, t_pv1, t_pv2],
@@ -617,6 +624,5 @@ function build_portfolio()
     PSIP.add_time_series!(p_5bus, t_demand_c, ts_demand_c_2028; year="2028", rep_day=4)
     PSIP.add_time_series!(p_5bus, t_demand_d, ts_demand_d_2024; year="2024", rep_day=3)
     PSIP.add_time_series!(p_5bus, t_demand_d, ts_demand_d_2028; year="2028", rep_day=4)
-
     return p_5bus
 end
