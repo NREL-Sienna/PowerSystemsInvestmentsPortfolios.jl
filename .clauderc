@@ -1,0 +1,251 @@
+package_role: data model for power system investment portfolio optimization
+julia_compat: "^1.6"
+
+design_objectives:
+  primary: performance and expressiveness
+  description: >
+    Data model library for capacity expansion and investment planning in power systems.
+    Provides the Portfolio container and component types consumed by PowerSystemsInvestments.jl.
+    All code must be written with performance in mind.
+
+  principles:
+    - Elegance and concision in both interface and implementation
+    - Fail fast with actionable error messages rather than hiding problems
+    - Validate invariants explicitly in subtle cases
+    - Avoid over-adherence to backwards compatibility for internal helpers
+
+performance_requirements:
+  priority: critical
+  reference: https://docs.julialang.org/en/v1/manual/performance-tips/
+
+  anti_patterns_to_avoid:
+    type_instability:
+      description: Functions must return consistent concrete types
+      bad: "f(x) = x > 0 ? 1 : 1.0"
+      good: "f(x) = x > 0 ? 1.0 : 1.0"
+      check: "@code_warntype"
+
+    abstract_field_types:
+      description: Struct fields must have concrete types or be parameterized
+      bad: "struct Foo; data::AbstractVector; end"
+      good: "struct Foo{T<:AbstractVector}; data::T; end"
+
+    untyped_containers:
+      bad: "Vector{Any}(), Vector{Real}()"
+      good: "Vector{Float64}(), Vector{Int}()"
+
+    non_const_globals:
+      bad: "THRESHOLD = 0.5"
+      good: "const THRESHOLD = 0.5"
+
+    unnecessary_allocations:
+      patterns:
+        - use views instead of copies (@view, @views)
+        - pre-allocate arrays instead of push! in loops
+        - use in-place operations (functions ending with !)
+
+    captured_variables:
+      description: Avoid closures that capture variables causing boxing
+      solution: pass variables as function arguments instead
+
+    splatting_penalty:
+      description: Avoid splatting (...) in performance-critical code
+
+    abstract_return_types:
+      description: Avoid returning Union types or abstract types
+
+  best_practices:
+    - use @inbounds when bounds are verified
+    - use broadcasting (dot syntax) for element-wise operations
+    - avoid try-catch in hot paths
+    - use function barriers to isolate type instability
+
+  note: >
+    Apply these guidelines with judgment. Not every function is performance-critical.
+    Focus optimization efforts on hot paths and frequently called code.
+
+file_structure:
+  src/:
+    key_files:
+      - PowerSystemsInvestmentsPortfolios.jl: main module and exports
+      - portfolio.jl: Portfolio container implementation and component management
+      - definitions.jl: basic type definitions (MinMax, InOut, UpDown)
+      - investment_schedule.jl: InvestmentScheduleResults container
+      - serialization.jl: JSON serialization/deserialization
+      - db_parser.jl: database to portfolio parsing
+      - time_mapping.jl: time period mapping utilities
+      - update_system.jl: system update with investment results
+      - generate_structs.jl: struct generation utilities
+    subdirectories:
+      models/:
+        description: component type definitions
+        files:
+          - technologies.jl: Technology abstract types
+          - regions.jl: RegionTopology abstract type
+          - requirements.jl: Requirement abstract type
+        subfolders:
+          - financial_data/: FinancialData types
+          - generated/: auto-generated struct files (DO NOT EDIT directly)
+      utils/:
+        description: utility functions
+        files:
+          - getters.jl: getter functions for technology attributes
+          - print.jl: display and printing utilities
+  test/: test suite
+  docs/: documentation source
+  scripts/: utility scripts (formatter)
+
+auto_generation:
+  description: >
+    Structs are auto-generated from JSON descriptors using Mustache templates.
+    Generated files are in src/models/generated/ and should NOT be edited directly.
+  generator: src/generate_structs.jl
+  workflow:
+    - Edit the JSON descriptor file to define/modify struct fields
+    - Run the generation command
+    - Generated files include docstrings and constructors automatically
+
+consumed_by:
+  - PowerSystemsInvestments.jl
+
+dependencies:
+  - InfrastructureSystems.jl: base types and system data management
+  - PowerSystems.jl: power system component types and parametric typing
+
+core_abstractions:
+  Portfolio:
+    description: Main container for investment portfolio data
+    fields:
+      - aggregation: spatial aggregation level (ACBus or AggregationTopology)
+      - data: IS.SystemData for storing components
+      - base_system: PowerSystems.System with existing infrastructure
+      - investment_schedule: results container for investment decisions
+      - financial_data: PortfolioFinancialData with discount/inflation/interest rates
+      - metadata: name, description, data source
+    methods: add_technology!, get_technologies, add_region!, get_regions, add_requirement!, get_requirements
+
+  Technology:
+    description: Abstract type for investment technologies
+    subtypes:
+      - ResourceTechnology: generation resources (SupplyTechnology, StorageTechnology, ColocatedSupplyStorageTechnology)
+      - TransmissionTechnology: transmission infrastructure (AggregateTransportTechnology, NodalACTransportTechnology, NodalHVDCTransportTechnology)
+      - DemandTechnology: demand-side technologies (DemandSideTechnology)
+    required_fields: name, available, power_systems_type, time_series_container, supplemental_attributes_container, internal
+
+  Requirement:
+    description: Policy constraints on expansion decisions
+    concrete_types:
+      - CarbonCaps: emissions limits
+      - CarbonTax: carbon pricing
+      - CapacityReserveMargin: reserve requirements
+      - EnergyShareRequirements: renewable portfolio standards
+      - HourlyMatching: clean energy matching
+      - MinimumCapacityRequirements: minimum build constraints
+      - MaximumCapacityRequirements: maximum build constraints
+      - DemandRequirement: demand constraints
+
+  RegionTopology:
+    description: Spatial aggregations for portfolio modeling
+    concrete_types:
+      - Zone: zonal aggregation
+      - Node: nodal representation
+    required_fields: name, id, time_series_container, supplemental_attributes_container, internal
+
+  FinancialData:
+    description: Financial parameters for cost calculations
+    concrete_types:
+      - PortfolioFinancialData: portfolio-level financial data (base_year, discount_rate, inflation_rate, interest_rate)
+      - TechnologyFinancialData: technology-specific cost data
+
+  InvestmentScheduleResults:
+    description: Container for investment decision results
+    structure: Dict mapping InvestmentPeriod => (TypeTechnology, name) => BuildCapacity
+
+  RetirementPotential:
+    description: Retirement options for existing capacity
+    variants: RetirementPotential, AggregateRetirementPotential
+
+  RetrofitPotential:
+    description: Retrofit options for existing capacity
+    variants: RetrofitPotential, AggregateRetrofitPotential
+
+  ExistingCapacity:
+    description: Existing infrastructure capacity data
+
+  TopologyMapping:
+    description: Mapping between different spatial aggregation levels
+
+test_patterns:
+  location: test/
+  runner: julia --project=test test/runtests.jl
+
+code_conventions:
+  style_guide_url: https://nrel-sienna.github.io/InfrastructureSystems.jl/stable/style/
+  formatter:
+    tool: JuliaFormatter
+    command: julia -e 'include("scripts/formatter/formatter_code.jl")'
+  key_rules:
+    constructors: use function Foo() not Foo() = ...
+    asserts: prefer InfrastructureSystems.@assert_op over @assert
+    globals: UPPER_CASE for constants
+    exports: all exports in main module file
+    comments: complete sentences, describe why not how
+
+documentation_practices:
+  framework: Diataxis (https://diataxis.fr/)
+  sienna_guide: https://nrel-sienna.github.io/InfrastructureSystems.jl/stable/docs_best_practices/explanation/
+
+  docstring_requirements:
+    scope: all elements of public interface (note IS is selective about exports)
+    include: function signatures and arguments list
+    automation: DocStringExtensions.TYPEDSIGNATURES (TYPEDFIELDS used sparingly in IS)
+    see_also: add links for functions with same name (multiple dispatch)
+
+  api_docs:
+    public: docs/src/api/public.md using @autodocs with Public=true, Private=false
+    internals: docs/src/api/internals.md
+
+common_tasks:
+  run_tests: julia --project=test test/runtests.jl
+  build_docs: julia --project=docs docs/make.jl
+  format_code: julia -e 'include("scripts/formatter/formatter_code.jl")'
+  check_format: git diff --exit-code
+  instantiate_test: julia --project=test -e 'using Pkg; Pkg.instantiate()'
+  generate_structs: julia bin/generate_structs.jl src/descriptors/structs.json src/generated/
+
+contribution_workflow:
+  branch_naming: feature/description or fix/description (branches in main repo)
+  main_branch: main
+  pr_process:
+    - Create a feature branch in the main repo
+    - Make changes following the style guide
+    - Run formatter before committing
+    - Ensure tests pass
+    - Submit pull request
+
+troubleshooting:
+  type_instability:
+    symptom: Poor performance, many allocations
+    diagnosis: "@code_warntype on suspect function"
+    solution: See performance_requirements.anti_patterns_to_avoid
+
+  formatter_fails:
+    symptom: Formatter command returns error
+    solution: julia -e 'include("scripts/formatter/formatter_code.jl")'
+
+  test_failures:
+    symptom: Tests fail unexpectedly
+    solution: julia --project=test -e 'using Pkg; Pkg.instantiate()'
+
+ai_agent_guidance:
+  code_generation_priorities:
+    - Performance matters - use concrete types in hot paths
+    - Apply anti-patterns list with judgment (not exhaustively everywhere)
+    - Run formatter on all changes
+    - Add docstrings to public interface elements
+    - Consider type stability in performance-critical functions
+
+  when_modifying_code:
+    - Read existing code patterns before making changes
+    - Maintain consistency with existing style
+    - Prefer failing fast with clear errors over silent failures

@@ -3,7 +3,7 @@
 Set of queries to extract relevant data from the database. Need to be maintained to be consistent with the most recent version of the database
 """
 #TODO: Support scenario handling
-QUERIES = Dict(
+const QUERIES = Dict(
     :zones => "SELECT * FROM planning_regions",
     :zone => "SELECT name FROM planning_regions WHERE id = ?",
     :zone_for_technology => "SELECT id FROM planning_regions WHERE name = ?",

@@ -510,8 +510,8 @@ function deserialize_components!(portfolio::Portfolio, raw)
     # Convert the array of components into type-specific arrays to allow addition by type.
     # Need to maintain an order here and deserialize regions first so they can
     # be referenced when deserializing technologies
-    technologies = OrderedDict{Any, Vector{Dict}}()
-    regions = OrderedDict{Any, Vector{Dict}}()
+    technologies = OrderedDict{Type, Vector{Dict}}()
+    regions = OrderedDict{Type, Vector{Dict}}()
     for component in raw["components"]
         type = IS.get_type_from_serialization_data(component)
         if type <: RegionTopology

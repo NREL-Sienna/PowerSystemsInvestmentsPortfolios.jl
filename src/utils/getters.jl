@@ -1,20 +1,26 @@
 """
-Utility functions to get individual attributes from custom NamedTuples.
+Get the maximum value from a MinMax NamedTuple.
 """
 get_max(x::MinMax) = x.max
+
+"""
+Get the minimum value from a MinMax NamedTuple.
+"""
 get_min(x::MinMax) = x.min
+
+"""
+Get the input value from an InOut NamedTuple.
+"""
 get_in(x::InOut) = x.in
+
+"""
+Get the output value from an InOut NamedTuple.
+"""
 get_out(x::InOut) = x.out
 
 """
-Functions to calculate the existing capacity associated with a PSIP Technology.
-
-If a technology has an ExistingCapacity supplemental attribute, it will use the names stored in the attribute
-to retrieve relevant components from the base system and calculate their total rated capacity.
-"""
-
-"""
-Functions to obtain the parameter type T from various Technology types.
+Get the PowerSystems.jl parametric type T from a parametric Technology type.
+Returns the type parameter used in the technology's type signature.
 """
 get_parameter_type(t::SupplyTechnology{T}) where {T} = T
 get_parameter_type(::Type{SupplyTechnology{T}}) where {T} = T
