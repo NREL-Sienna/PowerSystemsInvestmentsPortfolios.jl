@@ -1,9 +1,17 @@
 """
-Supertype for all structs that contain financial data
+    FinancialData
 
-Financial data include any data that is necessary to calculate total system cost.
-Examples of this data include the base financial year, the discount rate, and the capital recovery period.
-This does not include capital and operation costs, which are defined separately for each technology.
+Supertype for all structs that contain financial data.
+
+Financial data includes information necessary to calculate total system cost,
+such as:
+- Base financial year
+- Discount rates
+- Capital recovery periods
+- Technology-specific cost data
+
+Note: This does not include capital and operation costs, which are defined 
+separately for each technology via `TechnologyFinancialData`.
 """
 
 abstract type FinancialData <: IS.DeviceParameter end

@@ -118,12 +118,15 @@ function TimeMapping(
             end
         end
         if !slice_found_in_interval
-            error()
+            error(
+                "Operational slice starting at $(first(slice)) could not be mapped to any investment interval. " *
+                "Ensure all operational periods fall within defined investment intervals.",
+            )
         end
         slice_length = length(slice)
-        slice_indeces = range(slice_running_count + 1, length=slice_length)
-        consecutive_slices[sx] = collect(slice_indeces)
-        slice_running_count = last(slice_indeces)
+        slice_indices = range(slice_running_count + 1, length=slice_length)
+        consecutive_slices[sx] = collect(slice_indices)
+        slice_running_count = last(slice_indices)
         for time_stamp in slice
             time_stamps[ix] = time_stamp
             ix += 1

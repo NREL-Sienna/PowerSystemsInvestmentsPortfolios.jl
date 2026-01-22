@@ -7,6 +7,13 @@ get_in(x::InOut) = x.in
 get_out(x::InOut) = x.out
 
 """
+Functions to calculate the existing capacity associated with a PSIP Technology.
+
+If a technology has an ExistingCapacity supplemental attribute, it will use the names stored in the attribute
+to retrieve relevant components from the base system and calculate their total rated capacity.
+"""
+
+"""
 Functions to obtain the parameter type T from various Technology types.
 """
 get_parameter_type(t::SupplyTechnology{T}) where {T} = T
