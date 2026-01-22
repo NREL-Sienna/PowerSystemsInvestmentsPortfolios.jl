@@ -1,6 +1,6 @@
 name = "PowerSystemsInvestmentsPortfolios"
 uuid = "bed98974-b02a-5e2f-9fe0-a103f8c450dd"
-authors = ["Jose Daniel Lara"]
+authors = ["Sienna Team"]
 version = "0.1.0"
 
 [deps]
