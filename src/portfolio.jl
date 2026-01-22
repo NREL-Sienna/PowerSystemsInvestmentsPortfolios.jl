@@ -5,7 +5,12 @@ const DATA_FORMAT_VERSION = "0.1.0"
 
 const DEFAULT_AGGREGATION = PSY.Area
 
-const DEFAULT_SYSTEM() = PSY.System(100.0)
+"""
+Create a default empty PowerSystems.System for portfolio initialization.
+"""
+function DEFAULT_SYSTEM()
+    return PSY.System(100.0)
+end
 
 """
     PortfolioMetadata
@@ -312,29 +317,6 @@ Set the base system of the portfolio.
 """
 set_base_system!(val::Portfolio, system::PSY.System) = val.base_system = system
 
-function _validate_or_skip!(sys, component, skip_validation)
-    if skip_validation && get_runchecks(sys)
-        @warn(
-            "skip_validation is deprecated; construct System with runchecks = true or call set_runchecks!. Disabling System.runchecks"
-        )
-        set_runchecks!(sys, false)
-    end
-
-    # Always skip if system checks are disabled.
-    if !skip_validation && !get_runchecks(sys)
-        skip_validation = true
-    end
-
-    if !skip_validation
-        sanitize_component!(component, sys)
-        if !validate_component_with_system(component, sys)
-            throw(IS.InvalidValue("Invalid value for $component"))
-        end
-    end
-
-    return skip_validation
-end
-
 """
 Validate a component against System data. Return true if the instance is valid.
 
@@ -625,6 +607,11 @@ function handle_component_removal!(portfolio::Portfolio, technology::Technology)
     # clear_services!(technology)
     return
 end
+
+"""
+Clear unit system information from a technology. Currently a no-op placeholder.
+"""
+clear_units!(::Technology) = nothing
 
 function _handle_technology_removal_common!(technology)
     clear_units!(technology)
