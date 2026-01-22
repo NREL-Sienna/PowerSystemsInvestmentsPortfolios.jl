@@ -18,5 +18,5 @@ A mutable struct that stores the results of investment decisions over multiple i
       + BuildCapacity: The capacity to be built for that technology in that period
 """
 mutable struct InvestmentScheduleResults <: IS.InfrastructureSystemsType
-    results::Dict # InvestmentPeriod => (TypeTechnology, "name") => BuildCapacity
+    results::Dict{Int, Dict{Tuple{Type{<:Technology}, String}, Float64}} # InvestmentPeriod => (TypeTechnology, "name") => BuildCapacity
 end
