@@ -1,5 +1,5 @@
-include("Zone.jl")
 include("Node.jl")
+include("Zone.jl")
 include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
@@ -106,6 +106,7 @@ export get_retirement_potential
 export get_retrofit_fraction
 export get_retrofit_id
 export get_retrofit_potential
+export get_services
 export get_shift_variable_cost
 export get_start_fuel_mmbtu_per_mw
 export get_start_node
@@ -206,6 +207,7 @@ export set_retirement_potential!
 export set_retrofit_fraction!
 export set_retrofit_id!
 export set_retrofit_potential!
+export set_services!
 export set_shift_variable_cost!
 export set_start_fuel_mmbtu_per_mw!
 export set_start_node!

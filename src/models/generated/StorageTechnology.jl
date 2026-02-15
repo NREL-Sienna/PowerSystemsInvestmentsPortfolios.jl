@@ -7,6 +7,7 @@ This file is auto-generated. Do not edit.
 """
     mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
         prime_mover_type::PrimeMovers
+        services::Vector{PSY.Service}
         lifetime::Int
         available::Bool
         min_discharge_fraction::Float64
@@ -37,6 +38,7 @@ Candidate storage technology in a region.
 
 # Arguments
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
+- `services::Vector{PSY.Service}`: Services that this technology contributes to
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `min_discharge_fraction::Float64`: (default: `0.0`) Minimum discharge as a fraction of total discharge capacity
@@ -65,6 +67,8 @@ Candidate storage technology in a region.
 mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
     "Prime mover for generator"
     prime_mover_type::PrimeMovers
+    "Services that this technology contributes to"
+    services::Vector{PSY.Service}
     "Maximum number of years a technology can be active once installed (years)"
     lifetime::Int
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
@@ -116,12 +120,14 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
 end
 
 
-function StorageTechnology{T}(; prime_mover_type=PrimeMovers.OT, lifetime=100, available, min_discharge_fraction=0.0, capacity_limits_charge=nothing, name, storage_tech, duration_limits=(min=0,max=1000.0), id, losses=0.00, capital_costs_energy=LinearCurve(0.0), financial_data, operation_costs=StorageCost(), power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), capacity_limits_energy=(min=0,max=1e8), unit_size_energy=0.0, unit_size_charge=nothing, efficiency=(in=1, out=1), unit_size_discharge=0.0, capacity_limits_discharge=(min=0,max=1e8), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), ) where T <: PSY.Storage
-    StorageTechnology{T}(prime_mover_type, lifetime, available, min_discharge_fraction, capacity_limits_charge, name, storage_tech, duration_limits, id, losses, capital_costs_energy, financial_data, operation_costs, power_systems_type, internal, ext, region, capacity_limits_energy, unit_size_energy, unit_size_charge, efficiency, unit_size_discharge, capacity_limits_discharge, capital_costs_charge, capital_costs_discharge, )
+function StorageTechnology{T}(; prime_mover_type=PrimeMovers.OT, services, lifetime=100, available, min_discharge_fraction=0.0, capacity_limits_charge=nothing, name, storage_tech, duration_limits=(min=0,max=1000.0), id, losses=0.00, capital_costs_energy=LinearCurve(0.0), financial_data, operation_costs=StorageCost(), power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), capacity_limits_energy=(min=0,max=1e8), unit_size_energy=0.0, unit_size_charge=nothing, efficiency=(in=1, out=1), unit_size_discharge=0.0, capacity_limits_discharge=(min=0,max=1e8), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), ) where T <: PSY.Storage
+    StorageTechnology{T}(prime_mover_type, services, lifetime, available, min_discharge_fraction, capacity_limits_charge, name, storage_tech, duration_limits, id, losses, capital_costs_energy, financial_data, operation_costs, power_systems_type, internal, ext, region, capacity_limits_energy, unit_size_energy, unit_size_charge, efficiency, unit_size_discharge, capacity_limits_discharge, capital_costs_charge, capital_costs_discharge, )
 end
 
 """Get [`StorageTechnology`](@ref) `prime_mover_type`."""
 get_prime_mover_type(value::StorageTechnology) = value.prime_mover_type
+"""Get [`StorageTechnology`](@ref) `services`."""
+get_services(value::StorageTechnology) = value.services
 """Get [`StorageTechnology`](@ref) `lifetime`."""
 get_lifetime(value::StorageTechnology) = value.lifetime
 """Get [`StorageTechnology`](@ref) `available`."""
@@ -173,6 +179,8 @@ get_capital_costs_discharge(value::StorageTechnology) = value.capital_costs_disc
 
 """Set [`StorageTechnology`](@ref) `prime_mover_type`."""
 set_prime_mover_type!(value::StorageTechnology, val) = value.prime_mover_type = val
+"""Set [`StorageTechnology`](@ref) `services`."""
+set_services!(value::StorageTechnology, val) = value.services = val
 """Set [`StorageTechnology`](@ref) `lifetime`."""
 set_lifetime!(value::StorageTechnology, val) = value.lifetime = val
 """Set [`StorageTechnology`](@ref) `available`."""

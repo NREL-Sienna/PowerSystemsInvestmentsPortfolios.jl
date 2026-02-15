@@ -12,7 +12,7 @@ expansion decisions. Examples include:
 - Minimum and maximum capacity limits (`MinimumCapacityRequirements`, `MaximumCapacityRequirements`)
 """
 
-abstract type Requirement <: IS.InfrastructureSystemsComponent end
+abstract type Requirement <: PSY.Service end
 
 supports_time_series(::Requirement) = true
 supports_supplemental_attributes(::Requirement) = true

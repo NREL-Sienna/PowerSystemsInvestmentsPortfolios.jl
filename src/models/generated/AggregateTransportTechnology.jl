@@ -8,6 +8,7 @@ This file is auto-generated. Do not edit.
     mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
         start_region::RegionTopology
         capital_costs::PSY.ValueCurve
+        services::Vector{PSY.Service}
         available::Bool
         name::String
         id::Int64
@@ -26,6 +27,7 @@ An aggregated representation of a transmission interchange between two regions.
 # Arguments
 - `start_region::RegionTopology`: Start region for transport technology
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line. (USD/MW)
+- `services::Vector{PSY.Service}`: (default: `Vector()`) Services that this technology contributes to
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
 - `id::Int64`: Numerical Index for AC transport technologies
@@ -43,6 +45,8 @@ mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTech
     start_region::RegionTopology
     "Cost of adding new capacity to the nodal transmission line. (USD/MW)"
     capital_costs::PSY.ValueCurve
+    "Services that this technology contributes to"
+    services::Vector{PSY.Service}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Name"
@@ -68,14 +72,16 @@ mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTech
 end
 
 
-function AggregateTransportTechnology{T}(; start_region, capital_costs=LinearCurve(0.0), available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), unit_size=1, line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
-    AggregateTransportTechnology{T}(start_region, capital_costs, available, name, id, end_region, financial_data, power_systems_type, internal, ext, unit_size, line_loss, capacity_limits, )
+function AggregateTransportTechnology{T}(; start_region, capital_costs=LinearCurve(0.0), services=Vector(), available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), unit_size=1, line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+    AggregateTransportTechnology{T}(start_region, capital_costs, services, available, name, id, end_region, financial_data, power_systems_type, internal, ext, unit_size, line_loss, capacity_limits, )
 end
 
 """Get [`AggregateTransportTechnology`](@ref) `start_region`."""
 get_start_region(value::AggregateTransportTechnology) = value.start_region
 """Get [`AggregateTransportTechnology`](@ref) `capital_costs`."""
 get_capital_costs(value::AggregateTransportTechnology) = value.capital_costs
+"""Get [`AggregateTransportTechnology`](@ref) `services`."""
+get_services(value::AggregateTransportTechnology) = value.services
 """Get [`AggregateTransportTechnology`](@ref) `available`."""
 get_available(value::AggregateTransportTechnology) = value.available
 """Get [`AggregateTransportTechnology`](@ref) `name`."""
@@ -103,6 +109,8 @@ get_capacity_limits(value::AggregateTransportTechnology) = value.capacity_limits
 set_start_region!(value::AggregateTransportTechnology, val) = value.start_region = val
 """Set [`AggregateTransportTechnology`](@ref) `capital_costs`."""
 set_capital_costs!(value::AggregateTransportTechnology, val) = value.capital_costs = val
+"""Set [`AggregateTransportTechnology`](@ref) `services`."""
+set_services!(value::AggregateTransportTechnology, val) = value.services = val
 """Set [`AggregateTransportTechnology`](@ref) `available`."""
 set_available!(value::AggregateTransportTechnology, val) = value.available = val
 """Set [`AggregateTransportTechnology`](@ref) `name`."""

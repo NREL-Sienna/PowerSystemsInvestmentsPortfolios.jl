@@ -9,6 +9,7 @@ This file is auto-generated. Do not edit.
         outage_factor::Float64
         prime_mover_type::PrimeMovers
         capital_costs::PSY.ValueCurve
+        services::Vector{PSY.Service}
         lifetime::Int
         available::Bool
         co2::Dict{ThermalFuels, Float64}
@@ -37,6 +38,7 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology. Fraction of hours in a year where technology is unavailable.
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
+- `services::Vector{PSY.Service}`: (default: `Vector()`) Services that this technology contributes to
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
 - `available::Bool`: (default: `True`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `co2::Dict{ThermalFuels, Float64}`: (default: `Dict()`) Carbon Intensity of fuel
@@ -65,6 +67,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
     prime_mover_type::PrimeMovers
     "Capital costs for investing in a technology. (USD/MW)"
     capital_costs::PSY.ValueCurve
+    "Services that this technology contributes to"
+    services::Vector{PSY.Service}
     "Maximum number of years a technology can be active once installed (years)"
     lifetime::Int
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
@@ -108,8 +112,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
 end
 
 
-function SupplyTechnology{T}(; outage_factor=1.0, prime_mover_type=PrimeMovers.OT, capital_costs=LinearCurve(0.0), lifetime=100, available=True, co2=Dict(), name, id, cofire_start_limits=Dict(), financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=[ThermalFuels.OTHER], power_systems_type, cofire_level_limits=Dict(), internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), min_generation_fraction=0.0, time_limits=(up=1.0, down=1.0), unit_size=0.0, ramp_limits=(up=1.0, down=1.0), capacity_limits=(min=0, max=1e8), ) where T <: PSY.Generator
-    SupplyTechnology{T}(outage_factor, prime_mover_type, capital_costs, lifetime, available, co2, name, id, cofire_start_limits, financial_data, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_limits, internal, ext, region, min_generation_fraction, time_limits, unit_size, ramp_limits, capacity_limits, )
+function SupplyTechnology{T}(; outage_factor=1.0, prime_mover_type=PrimeMovers.OT, capital_costs=LinearCurve(0.0), services=Vector(), lifetime=100, available=True, co2=Dict(), name, id, cofire_start_limits=Dict(), financial_data, start_fuel_mmbtu_per_mw=0.0, operation_costs=ThermalGenerationCost(), fuel=[ThermalFuels.OTHER], power_systems_type, cofire_level_limits=Dict(), internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), min_generation_fraction=0.0, time_limits=(up=1.0, down=1.0), unit_size=0.0, ramp_limits=(up=1.0, down=1.0), capacity_limits=(min=0, max=1e8), ) where T <: PSY.Generator
+    SupplyTechnology{T}(outage_factor, prime_mover_type, capital_costs, services, lifetime, available, co2, name, id, cofire_start_limits, financial_data, start_fuel_mmbtu_per_mw, operation_costs, fuel, power_systems_type, cofire_level_limits, internal, ext, region, min_generation_fraction, time_limits, unit_size, ramp_limits, capacity_limits, )
 end
 
 """Get [`SupplyTechnology`](@ref) `outage_factor`."""
@@ -118,6 +122,8 @@ get_outage_factor(value::SupplyTechnology) = value.outage_factor
 get_prime_mover_type(value::SupplyTechnology) = value.prime_mover_type
 """Get [`SupplyTechnology`](@ref) `capital_costs`."""
 get_capital_costs(value::SupplyTechnology) = value.capital_costs
+"""Get [`SupplyTechnology`](@ref) `services`."""
+get_services(value::SupplyTechnology) = value.services
 """Get [`SupplyTechnology`](@ref) `lifetime`."""
 get_lifetime(value::SupplyTechnology) = value.lifetime
 """Get [`SupplyTechnology`](@ref) `available`."""
@@ -165,6 +171,8 @@ set_outage_factor!(value::SupplyTechnology, val) = value.outage_factor = val
 set_prime_mover_type!(value::SupplyTechnology, val) = value.prime_mover_type = val
 """Set [`SupplyTechnology`](@ref) `capital_costs`."""
 set_capital_costs!(value::SupplyTechnology, val) = value.capital_costs = val
+"""Set [`SupplyTechnology`](@ref) `services`."""
+set_services!(value::SupplyTechnology, val) = value.services = val
 """Set [`SupplyTechnology`](@ref) `lifetime`."""
 set_lifetime!(value::SupplyTechnology, val) = value.lifetime = val
 """Set [`SupplyTechnology`](@ref) `available`."""

@@ -7,6 +7,7 @@ This file is auto-generated. Do not edit.
 """
     mutable struct NodalHVDCTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
         capital_costs::PSY.ValueCurve
+        services::Vector{PSY.Service}
         available::Bool
         name::String
         end_node::RegionTopology
@@ -25,6 +26,7 @@ A nodal representation of candidate HVDC transmission lines between two regions.
 
 # Arguments
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line. (USD/MW)
+- `services::Vector{PSY.Service}`: (default: `Vector()`) Services that this technology contributes to
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
 - `end_node::RegionTopology`: End node for transport technology
@@ -41,6 +43,8 @@ A nodal representation of candidate HVDC transmission lines between two regions.
 mutable struct NodalHVDCTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
     "Cost of adding new capacity to the nodal transmission line. (USD/MW)"
     capital_costs::PSY.ValueCurve
+    "Services that this technology contributes to"
+    services::Vector{PSY.Service}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Name"
@@ -68,12 +72,14 @@ mutable struct NodalHVDCTransportTechnology{T <: PSY.Device} <: TransmissionTech
 end
 
 
-function NodalHVDCTransportTechnology{T}(; capital_costs=LinearCurve(0.0), available, name, end_node, id, financial_data, start_node, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), unit_size=1, line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
-    NodalHVDCTransportTechnology{T}(capital_costs, available, name, end_node, id, financial_data, start_node, power_systems_type, internal, ext, unit_size, line_loss, capacity_limits, )
+function NodalHVDCTransportTechnology{T}(; capital_costs=LinearCurve(0.0), services=Vector(), available, name, end_node, id, financial_data, start_node, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), unit_size=1, line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+    NodalHVDCTransportTechnology{T}(capital_costs, services, available, name, end_node, id, financial_data, start_node, power_systems_type, internal, ext, unit_size, line_loss, capacity_limits, )
 end
 
 """Get [`NodalHVDCTransportTechnology`](@ref) `capital_costs`."""
 get_capital_costs(value::NodalHVDCTransportTechnology) = value.capital_costs
+"""Get [`NodalHVDCTransportTechnology`](@ref) `services`."""
+get_services(value::NodalHVDCTransportTechnology) = value.services
 """Get [`NodalHVDCTransportTechnology`](@ref) `available`."""
 get_available(value::NodalHVDCTransportTechnology) = value.available
 """Get [`NodalHVDCTransportTechnology`](@ref) `name`."""
@@ -101,6 +107,8 @@ get_capacity_limits(value::NodalHVDCTransportTechnology) = value.capacity_limits
 
 """Set [`NodalHVDCTransportTechnology`](@ref) `capital_costs`."""
 set_capital_costs!(value::NodalHVDCTransportTechnology, val) = value.capital_costs = val
+"""Set [`NodalHVDCTransportTechnology`](@ref) `services`."""
+set_services!(value::NodalHVDCTransportTechnology, val) = value.services = val
 """Set [`NodalHVDCTransportTechnology`](@ref) `available`."""
 set_available!(value::NodalHVDCTransportTechnology, val) = value.available = val
 """Set [`NodalHVDCTransportTechnology`](@ref) `name`."""
