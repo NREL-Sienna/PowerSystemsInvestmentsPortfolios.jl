@@ -86,6 +86,8 @@ export get_available_technologies
 export get_technologies_by_name
 export get_requirement
 export get_requirements
+export get_contributing_technologies
+export has_requirement
 export get_ext
 export get_description
 export get_financial_data
