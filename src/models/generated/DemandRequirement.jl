@@ -6,7 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
-        services::Vector{PSY.Service}
+        requirements::Vector{Requirements}
         available::Bool
         name::String
         id::Int64
@@ -22,7 +22,7 @@ This file is auto-generated. Do not edit.
 Demand requirements for a region.
 
 # Arguments
-- `services::Vector{PSY.Service}`: (default: `Vector()`) Services that this technology contributes to
+- `requirements::Vector{Requirements}`: (default: `Vector()`) Requirements that this technology contributes to
 - `available::Bool`: (default: `true`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: The technology name
 - `id::Int64`: ID for individual demand requirement
@@ -35,8 +35,8 @@ Demand requirements for a region.
 - `peak_demand_mw::Float64`: (default: `0.0`) Peak demand value of DemandRequirement. Required if timeseries data for the DemandRequirement is normalized (MW)
 """
 mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
-    "Services that this technology contributes to"
-    services::Vector{PSY.Service}
+    "Requirements that this technology contributes to"
+    requirements::Vector{Requirements}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "The technology name"
@@ -60,12 +60,12 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
 end
 
 
-function DemandRequirement{T}(; services=Vector(), available=true, name, id, value_of_lost_load, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), unserved_demand_curve=LinearCurve(0.0), peak_demand_mw=0.0, ) where T <: PSY.StaticInjection
-    DemandRequirement{T}(services, available, name, id, value_of_lost_load, power_systems_type, internal, ext, region, unserved_demand_curve, peak_demand_mw, )
+function DemandRequirement{T}(; requirements=Vector(), available=true, name, id, value_of_lost_load, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), unserved_demand_curve=LinearCurve(0.0), peak_demand_mw=0.0, ) where T <: PSY.StaticInjection
+    DemandRequirement{T}(requirements, available, name, id, value_of_lost_load, power_systems_type, internal, ext, region, unserved_demand_curve, peak_demand_mw, )
 end
 
-"""Get [`DemandRequirement`](@ref) `services`."""
-get_services(value::DemandRequirement) = value.services
+"""Get [`DemandRequirement`](@ref) `requirements`."""
+get_requirements(value::DemandRequirement) = value.requirements
 """Get [`DemandRequirement`](@ref) `available`."""
 get_available(value::DemandRequirement) = value.available
 """Get [`DemandRequirement`](@ref) `name`."""
@@ -87,8 +87,8 @@ get_unserved_demand_curve(value::DemandRequirement) = value.unserved_demand_curv
 """Get [`DemandRequirement`](@ref) `peak_demand_mw`."""
 get_peak_demand_mw(value::DemandRequirement) = value.peak_demand_mw
 
-"""Set [`DemandRequirement`](@ref) `services`."""
-set_services!(value::DemandRequirement, val) = value.services = val
+"""Set [`DemandRequirement`](@ref) `requirements`."""
+set_requirements!(value::DemandRequirement, val) = value.requirements = val
 """Set [`DemandRequirement`](@ref) `available`."""
 set_available!(value::DemandRequirement, val) = value.available = val
 """Set [`DemandRequirement`](@ref) `name`."""

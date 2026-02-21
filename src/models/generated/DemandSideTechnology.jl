@@ -6,7 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnology
-        services::Vector{PSY.Service}
+        requirements::Vector{Requirements}
         price_per_unit::PSY.ValueCurve
         available::Bool
         name::String
@@ -29,7 +29,7 @@ This file is auto-generated. Do not edit.
 Represents demand side technologies such as electric vehicles or hydrogen electrolyzers.
 
 # Arguments
-- `services::Vector{PSY.Service}`: (default: `Vector()`) Services that this technology contributes to
+- `requirements::Vector{Requirements}`: (default: `Vector()`) Requirements that this technology contributes to
 - `price_per_unit::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: The technology name
@@ -49,8 +49,8 @@ Represents demand side technologies such as electric vehicles or hydrogen electr
 - `peak_demand_mw::Float64`: (default: `0.0`) Peak demand value in MW
 """
 mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnology
-    "Services that this technology contributes to"
-    services::Vector{PSY.Service}
+    "Requirements that this technology contributes to"
+    requirements::Vector{Requirements}
     "Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers"
     price_per_unit::PSY.ValueCurve
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
@@ -88,12 +88,12 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnolog
 end
 
 
-function DemandSideTechnology{T}(; services=Vector(), price_per_unit=LinearCurve(0.0), available, name, shift_variable_cost=LinearCurve(0.0), curtailment_cost=LinearCurve(0.0), id, technology_efficiency=0.0, max_demand_advance=0.0, demand_energy_efficiency=0.0, max_demand_curtailment=0.0, max_demand_delay=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), min_power=0.0, peak_demand_mw=0.0, ) where T <: PSY.StaticInjection
-    DemandSideTechnology{T}(services, price_per_unit, available, name, shift_variable_cost, curtailment_cost, id, technology_efficiency, max_demand_advance, demand_energy_efficiency, max_demand_curtailment, max_demand_delay, power_systems_type, internal, ext, region, min_power, peak_demand_mw, )
+function DemandSideTechnology{T}(; requirements=Vector(), price_per_unit=LinearCurve(0.0), available, name, shift_variable_cost=LinearCurve(0.0), curtailment_cost=LinearCurve(0.0), id, technology_efficiency=0.0, max_demand_advance=0.0, demand_energy_efficiency=0.0, max_demand_curtailment=0.0, max_demand_delay=0.0, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), min_power=0.0, peak_demand_mw=0.0, ) where T <: PSY.StaticInjection
+    DemandSideTechnology{T}(requirements, price_per_unit, available, name, shift_variable_cost, curtailment_cost, id, technology_efficiency, max_demand_advance, demand_energy_efficiency, max_demand_curtailment, max_demand_delay, power_systems_type, internal, ext, region, min_power, peak_demand_mw, )
 end
 
-"""Get [`DemandSideTechnology`](@ref) `services`."""
-get_services(value::DemandSideTechnology) = value.services
+"""Get [`DemandSideTechnology`](@ref) `requirements`."""
+get_requirements(value::DemandSideTechnology) = value.requirements
 """Get [`DemandSideTechnology`](@ref) `price_per_unit`."""
 get_price_per_unit(value::DemandSideTechnology) = value.price_per_unit
 """Get [`DemandSideTechnology`](@ref) `available`."""
@@ -129,8 +129,8 @@ get_min_power(value::DemandSideTechnology) = value.min_power
 """Get [`DemandSideTechnology`](@ref) `peak_demand_mw`."""
 get_peak_demand_mw(value::DemandSideTechnology) = value.peak_demand_mw
 
-"""Set [`DemandSideTechnology`](@ref) `services`."""
-set_services!(value::DemandSideTechnology, val) = value.services = val
+"""Set [`DemandSideTechnology`](@ref) `requirements`."""
+set_requirements!(value::DemandSideTechnology, val) = value.requirements = val
 """Set [`DemandSideTechnology`](@ref) `price_per_unit`."""
 set_price_per_unit!(value::DemandSideTechnology, val) = value.price_per_unit = val
 """Set [`DemandSideTechnology`](@ref) `available`."""

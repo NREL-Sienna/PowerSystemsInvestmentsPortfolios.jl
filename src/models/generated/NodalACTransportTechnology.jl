@@ -6,8 +6,8 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
+        requirements::Vector{Requirements}
         capital_costs::PSY.ValueCurve
-        services::Vector{PSY.Service}
         available::Bool
         name::String
         end_node::Node
@@ -27,8 +27,8 @@ This file is auto-generated. Do not edit.
 Nodal representation of candidate AC transmission lines between two regions.
 
 # Arguments
+- `requirements::Vector{Requirements}`: (default: `Vector()`) Requirements that this technology contributes to
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line (USD/MW).
-- `services::Vector{PSY.Service}`: (default: `Vector()`) Services that this technology contributes to
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
 - `end_node::Node`: End node for transport technology
@@ -45,10 +45,10 @@ Nodal representation of candidate AC transmission lines between two regions.
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Allowable capacity for a transmission line (MW)
 """
 mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
+    "Requirements that this technology contributes to"
+    requirements::Vector{Requirements}
     "Cost of adding new capacity to the nodal transmission line (USD/MW)."
     capital_costs::PSY.ValueCurve
-    "Services that this technology contributes to"
-    services::Vector{PSY.Service}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Name"
@@ -80,14 +80,14 @@ mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechno
 end
 
 
-function NodalACTransportTechnology{T}(; capital_costs=LinearCurve(0.0), services=Vector(), available, name, end_node, id, financial_data, start_node, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), reactance=1.0, resistance=1.0, voltage=230.0, unit_size=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
-    NodalACTransportTechnology{T}(capital_costs, services, available, name, end_node, id, financial_data, start_node, power_systems_type, internal, ext, reactance, resistance, voltage, unit_size, capacity_limits, )
+function NodalACTransportTechnology{T}(; requirements=Vector(), capital_costs=LinearCurve(0.0), available, name, end_node, id, financial_data, start_node, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), reactance=1.0, resistance=1.0, voltage=230.0, unit_size=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+    NodalACTransportTechnology{T}(requirements, capital_costs, available, name, end_node, id, financial_data, start_node, power_systems_type, internal, ext, reactance, resistance, voltage, unit_size, capacity_limits, )
 end
 
+"""Get [`NodalACTransportTechnology`](@ref) `requirements`."""
+get_requirements(value::NodalACTransportTechnology) = value.requirements
 """Get [`NodalACTransportTechnology`](@ref) `capital_costs`."""
 get_capital_costs(value::NodalACTransportTechnology) = value.capital_costs
-"""Get [`NodalACTransportTechnology`](@ref) `services`."""
-get_services(value::NodalACTransportTechnology) = value.services
 """Get [`NodalACTransportTechnology`](@ref) `available`."""
 get_available(value::NodalACTransportTechnology) = value.available
 """Get [`NodalACTransportTechnology`](@ref) `name`."""
@@ -117,10 +117,10 @@ get_unit_size(value::NodalACTransportTechnology) = value.unit_size
 """Get [`NodalACTransportTechnology`](@ref) `capacity_limits`."""
 get_capacity_limits(value::NodalACTransportTechnology) = value.capacity_limits
 
+"""Set [`NodalACTransportTechnology`](@ref) `requirements`."""
+set_requirements!(value::NodalACTransportTechnology, val) = value.requirements = val
 """Set [`NodalACTransportTechnology`](@ref) `capital_costs`."""
 set_capital_costs!(value::NodalACTransportTechnology, val) = value.capital_costs = val
-"""Set [`NodalACTransportTechnology`](@ref) `services`."""
-set_services!(value::NodalACTransportTechnology, val) = value.services = val
 """Set [`NodalACTransportTechnology`](@ref) `available`."""
 set_available!(value::NodalACTransportTechnology, val) = value.available = val
 """Set [`NodalACTransportTechnology`](@ref) `name`."""
