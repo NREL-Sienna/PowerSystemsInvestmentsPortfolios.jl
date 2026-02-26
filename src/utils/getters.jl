@@ -39,7 +39,7 @@ get_parameter_type(::Type{DemandSideTechnology{T}}) where {T} = T
 
 """
 Calculates the amount of existing capacity (in MW) associated with a given Technology in the Portfolio.
-Technology must have an ExistingCapacity supplemental attribute attached to it to be non-zero.
+Technology must have an ExistingDevices supplemental attribute attached to it to be non-zero.
 This attribute contains a list of names of existing assets in the base system that correspond to this technology.
 For StorageTechnology, this function returns existing charge/discharge capacity in MW. See
 [`get_existing_capacity_mwh`](@ref) for existing energy capacity in MWh.
@@ -54,20 +54,20 @@ function get_existing_capacity_mw(
     t::Union{ResourceTechnology, TransmissionTechnology},
 )
     if typeof(t) <: ColocatedSupplyStorageTechnology
-        @warn "Co-located technologies are not supported for ExistingCapacity, assuming an existing capacity of 0"
+        @warn "Co-located technologies are not supported for ExistingDevices, assuming an existing capacity of 0"
         return 0.0
     end
 
     if !is_new(t)
-        attr = IS.get_supplemental_attributes(ExistingCapacity, t)
+        attr = IS.get_supplemental_attributes(ExistingDevices, t)
         if length(attr) > 1
-            @warn "Multiple ExistingCapacity attributes are attached to this technology, assuming a capacity of 0.0"
+            @warn "Multiple ExistingDevices attributes are attached to this technology, assuming a capacity of 0.0"
             return 0.0
         end
 
         gen_names = get_existing_technologies(only(attr))
         if length(gen_names) == 0
-            @warn "No names listed in ExistingCapacity attribute, returning capacity of 0.0."
+            @warn "No names listed in ExistingDevices attribute, returning capacity of 0.0."
             return 0.0
         end
 
@@ -76,7 +76,7 @@ function get_existing_capacity_mw(
         # Check if any of the components returned nothing
         filtered_comp = filter(x -> !isnothing(x), comp)
         if length(filtered_comp) != length(gen_names)
-            @error "Not all names in ExistingCapacity matched generators in the base system"
+            @error "Not all names in ExistingDevices matched generators in the base system"
         end
 
         return sum(PSY.get_rating(t) * PSY.get_base_power(p.base_system) for t in comp)
@@ -87,7 +87,7 @@ end
 
 """
 Calculates the amount of existing energy capacity (in MWh) associated with a given StorageTechnology.
-Technology must have an ExistingCapacity supplemental attribute attached to it to be non-zero.
+Technology must have an ExistingDevices supplemental attribute attached to it to be non-zero.
 This attribute contains a list of names of existing assets in the base system that correspond to this technology.
 To get the charge/discharge capacity in MW, see [`get_existing_capacity_mw`](@ref).
 
@@ -98,9 +98,9 @@ To get the charge/discharge capacity in MW, see [`get_existing_capacity_mw`](@re
 """
 function get_existing_capacity_mwh(p::Portfolio, t::StorageTechnology)
     if !is_new(t)
-        attr = IS.get_supplemental_attributes(ExistingCapacity, t)
+        attr = IS.get_supplemental_attributes(ExistingDevices, t)
         if length(attr) > 1
-            @warn "Multiple ExistingCapacity attributes are attached to this technology, assuming a capacity of 0.0"
+            @warn "Multiple ExistingDevices attributes are attached to this technology, assuming a capacity of 0.0"
             return 0.0
         end
         gen_names = get_existing_technologies(only(attr))
@@ -109,7 +109,7 @@ function get_existing_capacity_mwh(p::Portfolio, t::StorageTechnology)
         # Check if any of the components returned nothing
         filtered_comp = filter(x -> !isnothing(x), comp)
         if length(filtered_comp) != length(gen_names)
-            @error "Not all names in ExistingCapacity matched generators in the base system"
+            @error "Not all names in ExistingDevices matched generators in the base system"
         end
 
         return sum(
@@ -123,7 +123,7 @@ end
 """
 Determines if a technology is a completely new build and is not associated with any pre-existing capacity
 """
-is_new(t::Technology) = !(IS.has_supplemental_attributes(ExistingCapacity, t))
+is_new(t::Technology) = !(IS.has_supplemental_attributes(ExistingDevices, t))
 
 """
 Get constant heat rate value from FuelCurve stored in a SupplyTechnology

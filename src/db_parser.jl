@@ -889,7 +889,7 @@ function add_generation_units!(
                 co2=Dict(fuel => 0.0),
             )
             add_technology!(portfolio, technology)
-            existing = ExistingCapacity(; existing_technologies=[rec.name])
+            existing = ExistingDevices(; existing_technologies=[rec.name])
             add_supplemental_attribute!(portfolio, technology, existing)
 
             set_capacity_limits!(
@@ -1012,7 +1012,7 @@ function add_storage_units!(
             capacity_limits_energy=(min=0, max=component_attr["storage_capacity"]),
         )
         add_technology!(portfolio, storage)
-        existing = ExistingCapacity(; existing_technologies=[rec.name])
+        existing = ExistingDevices(; existing_technologies=[rec.name])
         add_supplemental_attribute!(portfolio, storage, existing)
     end
 end
@@ -1310,7 +1310,7 @@ function add_system_lines!(
                 capital_costs=LinearCurve(1e5),
             )
             add_technology!(portfolio, transport)
-            existing = ExistingCapacity(; existing_technologies=[rec.name])
+            existing = ExistingDevices(; existing_technologies=[rec.name])
             add_supplemental_attribute!(portfolio, transport, existing)
             set_capacity_limits!(
                 transport,
@@ -1356,7 +1356,7 @@ function add_system_lines!(
             )
             id += 1
             add_technology!(portfolio, transport)
-            existing = ExistingCapacity(; existing_technologies=lines)
+            existing = ExistingDevices(; existing_technologies=lines)
             add_supplemental_attribute!(portfolio, transport, existing)
         end
     end
@@ -1471,7 +1471,7 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                 #If there are existing capacity associated with a technology
                 #Use an existing unit to extract timeseries
                 existing_names = get_existing_technologies(
-                    only(get_supplemental_attributes(ExistingCapacity, tech)),
+                    only(get_supplemental_attributes(ExistingDevices, tech)),
                 )
                 unit = first(
                     IS.get_components(
