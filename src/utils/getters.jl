@@ -163,6 +163,24 @@ function get_peak_demand_mw(
     end
 end
 
+function scale_conforming_load(t::DemandTechnology, p::Portfolio, year::Int64)
+    if get_conformity(t) == PSY.LoadConformity.NON_CONFORMING
+        @warn "Load is not conforming, returning original peak demand without scaling."
+        return get_peak_demand_mw(p, t)
+    else
+        peak_demand = get_peak_demand_mw(p, t)
+        growth_rate = get_growth_rate(t)
+        if is_new(t)
+            reference_year = get_new_construction_year(t)
+        else
+            reference_year = get_base_year_for_load(t, p)
+        end
+        scaled_demand = peak_demand * (1 + growth_rate) ^ (year - reference_year)
+        return scaled_demand
+    end
+end
+
+
 """
 Determines if a technology is a completely new build and is not associated with any pre-existing capacity
 """
