@@ -36,10 +36,10 @@
                 "$ref": "#/components/schemas/AggregateRetrofitPotential"
             }
         },
-        "ExistingCapacity": {
+        "ExistingDevices": {
             "type": "array",
             "items": {
-                "$ref": "#/components/schemas/ExistingCapacity"
+                "$ref": "#/components/schemas/ExistingDevices"
             }
         },
         "TopologyMapping": {
@@ -426,16 +426,16 @@
             },
             "supertype":"IS.SupplementalAttribute"
         },
-        "ExistingCapacity": {
+        "ExistingDevices": {
             "type": "object",
             "required": [
-                "existing_technologies"
+                "existing_devices"
             ],
-            "docstring": "Supplemental attributed used to map candidate technologies in a portfolio to the existing system. Contains a list of existing generators that correspond to a SupplyTechnology.",
+            "docstring": "Supplemental attributed used to map technologies in a portfolio to the existing system. For example, contains a list of existing generators that correspond to a SupplyTechnology.",
             "properties": {
-                "existing_technologies": {
+                "existing_devices": {
                     "type": "Vector{String}",
-                    "description": "List of individual units to map to a specific SupplyTechnology",
+                    "description": "List of individual existing devices to map to a specific technology in the portfolio",
                     "default": "Vector()"
                 },
                 "ext": {
@@ -980,10 +980,25 @@
                     "type": "String",
                     "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
                 },
-                "peak_demand_mw": {
+                "new_demand_mw": {
                     "type": "Float64",
-                    "description": "Peak demand value of DemandRequirement. Required if timeseries data for the DemandRequirement is normalized (MW)",
+                    "description": "The value of the peak demand to be used for new DemandRequirements.",
                     "default": "0.0"
+                },
+                "new_construction_year": {
+                    "type": "Int64",
+                    "description": "The year in which the new demand requirement will be installed. Should only be used for new demand requirements.",
+                    "default": "2020"
+                },
+                "growth_rate": {
+                    "type": "Float64",
+                    "description": "The annual growth rate of the demand requirement, used to scale present-day loads into future projections. Should only be used for conforming loads",
+                    "default": "0.0"
+                },
+                "conformity": {
+                    "type": "PSY.LoadConformity",
+                    "description": "Indicator of how the demand requirement should conform to the load profile of existing technologies in the system. Should only be used for new demand requirements.",
+                    "default": "PSY.LoadConformity.UNDEFINED"
                 },
                 "value_of_lost_load": {
                     "type": "Float64",
