@@ -130,11 +130,7 @@ This attribute contains a list of names of existing assets in the base system th
   - `p::Portfolio`: The portfolio containing the base system and technology
   - `t::DemandTechnology`: The technology to get peak demand
 """
-function get_peak_demand_mw(
-    p::Portfolio,
-    t::DemandTechnology,
-)
-
+function get_peak_demand_mw(p::Portfolio, t::DemandTechnology)
     if !is_new(t)
         attr = IS.get_supplemental_attributes(ExistingDevices, t)
         if length(attr) > 1
@@ -175,11 +171,10 @@ function scale_conforming_load(t::DemandTechnology, p::Portfolio, year::Int64)
         else
             reference_year = get_base_year_for_load(t, p)
         end
-        scaled_demand = peak_demand * (1 + growth_rate) ^ (year - reference_year)
+        scaled_demand = peak_demand * (1 + growth_rate)^(year - reference_year)
         return scaled_demand
     end
 end
-
 
 """
 Determines if a technology is a completely new build and is not associated with any pre-existing capacity
