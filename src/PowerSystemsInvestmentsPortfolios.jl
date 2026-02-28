@@ -59,7 +59,7 @@ export RetirementPotential
 export AggregateRetirementPotential
 export RetrofitPotential
 export AggregateRetrofitPotential
-export ExistingCapacity
+export ExistingDevices
 export TopologyMapping
 export CarbonCaps
 export CapacityReserveMargin
