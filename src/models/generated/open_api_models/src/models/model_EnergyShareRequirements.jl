@@ -5,7 +5,6 @@
 
     EnergyShareRequirements(;
         name=nothing,
-        uuid=nothing,
         id=nothing,
         available=nothing,
         target_year=nothing,
@@ -15,7 +14,6 @@
     )
 
     - name::String
-    - uuid::String
     - id::Int64
     - available::Bool
     - target_year::Int64
@@ -25,7 +23,6 @@
 """
 Base.@kwdef mutable struct EnergyShareRequirements <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
-    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     target_year::Union{Nothing, Int64} = nothing
@@ -35,7 +32,6 @@ Base.@kwdef mutable struct EnergyShareRequirements <: OpenAPI.APIModel
 
     function EnergyShareRequirements(
         name,
-        uuid,
         id,
         available,
         target_year,
@@ -43,33 +39,8 @@ Base.@kwdef mutable struct EnergyShareRequirements <: OpenAPI.APIModel
         eligible_resources,
         generation_fraction_requirement,
     )
-        OpenAPI.validate_property(EnergyShareRequirements, Symbol("name"), name)
-        OpenAPI.validate_property(EnergyShareRequirements, Symbol("uuid"), uuid)
-        OpenAPI.validate_property(EnergyShareRequirements, Symbol("id"), id)
-        OpenAPI.validate_property(EnergyShareRequirements, Symbol("available"), available)
-        OpenAPI.validate_property(
-            EnergyShareRequirements,
-            Symbol("target_year"),
-            target_year,
-        )
-        OpenAPI.validate_property(
-            EnergyShareRequirements,
-            Symbol("eligible_regions"),
-            eligible_regions,
-        )
-        OpenAPI.validate_property(
-            EnergyShareRequirements,
-            Symbol("eligible_resources"),
-            eligible_resources,
-        )
-        OpenAPI.validate_property(
-            EnergyShareRequirements,
-            Symbol("generation_fraction_requirement"),
-            generation_fraction_requirement,
-        )
-        return new(
+        o = new(
             name,
-            uuid,
             id,
             available,
             target_year,
@@ -77,12 +48,13 @@ Base.@kwdef mutable struct EnergyShareRequirements <: OpenAPI.APIModel
             eligible_resources,
             generation_fraction_requirement,
         )
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type EnergyShareRequirements
 
 const _property_types_EnergyShareRequirements = Dict{Symbol, String}(
     Symbol("name") => "String",
-    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("target_year") => "Int64",
@@ -93,10 +65,32 @@ const _property_types_EnergyShareRequirements = Dict{Symbol, String}(
 OpenAPI.property_type(::Type{EnergyShareRequirements}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_EnergyShareRequirements[name]))}
 
-function check_required(o::EnergyShareRequirements)
+function OpenAPI.check_required(o::EnergyShareRequirements)
     o.name === nothing && (return false)
     o.available === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::EnergyShareRequirements)
+    OpenAPI.validate_property(EnergyShareRequirements, Symbol("name"), o.name)
+    OpenAPI.validate_property(EnergyShareRequirements, Symbol("id"), o.id)
+    OpenAPI.validate_property(EnergyShareRequirements, Symbol("available"), o.available)
+    OpenAPI.validate_property(EnergyShareRequirements, Symbol("target_year"), o.target_year)
+    OpenAPI.validate_property(
+        EnergyShareRequirements,
+        Symbol("eligible_regions"),
+        o.eligible_regions,
+    )
+    OpenAPI.validate_property(
+        EnergyShareRequirements,
+        Symbol("eligible_resources"),
+        o.eligible_resources,
+    )
+    OpenAPI.validate_property(
+        EnergyShareRequirements,
+        Symbol("generation_fraction_requirement"),
+        o.generation_fraction_requirement,
+    )
 end
 
 function OpenAPI.validate_property(::Type{EnergyShareRequirements}, name::Symbol, val) end

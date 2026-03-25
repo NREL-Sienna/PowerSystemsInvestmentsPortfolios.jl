@@ -5,7 +5,6 @@
 
     DemandSideTechnology(;
         name=nothing,
-        uuid=nothing,
         id=nothing,
         available=nothing,
         region=nothing,
@@ -23,7 +22,6 @@
     )
 
     - name::String
-    - uuid::String
     - id::Int64
     - available::Bool
     - region::Vector{Int64}
@@ -41,7 +39,6 @@
 """
 Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
-    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     region::Union{Nothing, Vector{Int64}} = nothing
@@ -59,7 +56,6 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
 
     function DemandSideTechnology(
         name,
-        uuid,
         id,
         available,
         region,
@@ -75,65 +71,8 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
         curtailment_cost,
         max_demand_curtailment,
     )
-        OpenAPI.validate_property(DemandSideTechnology, Symbol("name"), name)
-        OpenAPI.validate_property(DemandSideTechnology, Symbol("uuid"), uuid)
-        OpenAPI.validate_property(DemandSideTechnology, Symbol("id"), id)
-        OpenAPI.validate_property(DemandSideTechnology, Symbol("available"), available)
-        OpenAPI.validate_property(DemandSideTechnology, Symbol("region"), region)
-        OpenAPI.validate_property(
-            DemandSideTechnology,
-            Symbol("power_systems_type"),
-            power_systems_type,
-        )
-        OpenAPI.validate_property(
-            DemandSideTechnology,
-            Symbol("technology_efficiency"),
-            technology_efficiency,
-        )
-        OpenAPI.validate_property(
-            DemandSideTechnology,
-            Symbol("price_per_unit"),
-            price_per_unit,
-        )
-        OpenAPI.validate_property(DemandSideTechnology, Symbol("min_power"), min_power)
-        OpenAPI.validate_property(
-            DemandSideTechnology,
-            Symbol("peak_demand_mw"),
-            peak_demand_mw,
-        )
-        OpenAPI.validate_property(
-            DemandSideTechnology,
-            Symbol("max_demand_delay"),
-            max_demand_delay,
-        )
-        OpenAPI.validate_property(
-            DemandSideTechnology,
-            Symbol("max_demand_advance"),
-            max_demand_advance,
-        )
-        OpenAPI.validate_property(
-            DemandSideTechnology,
-            Symbol("demand_energy_efficiency"),
-            demand_energy_efficiency,
-        )
-        OpenAPI.validate_property(
-            DemandSideTechnology,
-            Symbol("shift_variable_cost"),
-            shift_variable_cost,
-        )
-        OpenAPI.validate_property(
-            DemandSideTechnology,
-            Symbol("curtailment_cost"),
-            curtailment_cost,
-        )
-        OpenAPI.validate_property(
-            DemandSideTechnology,
-            Symbol("max_demand_curtailment"),
-            max_demand_curtailment,
-        )
-        return new(
+        o = new(
             name,
-            uuid,
             id,
             available,
             region,
@@ -149,12 +88,13 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
             curtailment_cost,
             max_demand_curtailment,
         )
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type DemandSideTechnology
 
 const _property_types_DemandSideTechnology = Dict{Symbol, String}(
     Symbol("name") => "String",
-    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("region") => "Vector{Int64}",
@@ -173,11 +113,69 @@ const _property_types_DemandSideTechnology = Dict{Symbol, String}(
 OpenAPI.property_type(::Type{DemandSideTechnology}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_DemandSideTechnology[name]))}
 
-function check_required(o::DemandSideTechnology)
+function OpenAPI.check_required(o::DemandSideTechnology)
     o.name === nothing && (return false)
     o.available === nothing && (return false)
     o.power_systems_type === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::DemandSideTechnology)
+    OpenAPI.validate_property(DemandSideTechnology, Symbol("name"), o.name)
+    OpenAPI.validate_property(DemandSideTechnology, Symbol("id"), o.id)
+    OpenAPI.validate_property(DemandSideTechnology, Symbol("available"), o.available)
+    OpenAPI.validate_property(DemandSideTechnology, Symbol("region"), o.region)
+    OpenAPI.validate_property(
+        DemandSideTechnology,
+        Symbol("power_systems_type"),
+        o.power_systems_type,
+    )
+    OpenAPI.validate_property(
+        DemandSideTechnology,
+        Symbol("technology_efficiency"),
+        o.technology_efficiency,
+    )
+    OpenAPI.validate_property(
+        DemandSideTechnology,
+        Symbol("price_per_unit"),
+        o.price_per_unit,
+    )
+    OpenAPI.validate_property(DemandSideTechnology, Symbol("min_power"), o.min_power)
+    OpenAPI.validate_property(
+        DemandSideTechnology,
+        Symbol("peak_demand_mw"),
+        o.peak_demand_mw,
+    )
+    OpenAPI.validate_property(
+        DemandSideTechnology,
+        Symbol("max_demand_delay"),
+        o.max_demand_delay,
+    )
+    OpenAPI.validate_property(
+        DemandSideTechnology,
+        Symbol("max_demand_advance"),
+        o.max_demand_advance,
+    )
+    OpenAPI.validate_property(
+        DemandSideTechnology,
+        Symbol("demand_energy_efficiency"),
+        o.demand_energy_efficiency,
+    )
+    OpenAPI.validate_property(
+        DemandSideTechnology,
+        Symbol("shift_variable_cost"),
+        o.shift_variable_cost,
+    )
+    OpenAPI.validate_property(
+        DemandSideTechnology,
+        Symbol("curtailment_cost"),
+        o.curtailment_cost,
+    )
+    OpenAPI.validate_property(
+        DemandSideTechnology,
+        Symbol("max_demand_curtailment"),
+        o.max_demand_curtailment,
+    )
 end
 
 function OpenAPI.validate_property(::Type{DemandSideTechnology}, name::Symbol, val) end

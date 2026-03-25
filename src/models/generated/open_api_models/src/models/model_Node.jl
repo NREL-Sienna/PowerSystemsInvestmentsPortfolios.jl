@@ -5,43 +5,43 @@
 
     Node(;
         name=nothing,
-        uuid=nothing,
         id=nothing,
         bus_type="PQ",
     )
 
     - name::String
-    - uuid::String
     - id::Int64
     - bus_type::String
 """
 Base.@kwdef mutable struct Node <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
-    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     bus_type::Union{Nothing, String} = "PQ"
 
-    function Node(name, uuid, id, bus_type)
-        OpenAPI.validate_property(Node, Symbol("name"), name)
-        OpenAPI.validate_property(Node, Symbol("uuid"), uuid)
-        OpenAPI.validate_property(Node, Symbol("id"), id)
-        OpenAPI.validate_property(Node, Symbol("bus_type"), bus_type)
-        return new(name, uuid, id, bus_type)
+    function Node(name, id, bus_type)
+        o = new(name, id, bus_type)
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type Node
 
 const _property_types_Node = Dict{Symbol, String}(
     Symbol("name") => "String",
-    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("bus_type") => "String",
 )
 OpenAPI.property_type(::Type{Node}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_Node[name]))}
 
-function check_required(o::Node)
+function OpenAPI.check_required(o::Node)
     o.name === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::Node)
+    OpenAPI.validate_property(Node, Symbol("name"), o.name)
+    OpenAPI.validate_property(Node, Symbol("id"), o.id)
+    OpenAPI.validate_property(Node, Symbol("bus_type"), o.bus_type)
 end
 
 function OpenAPI.validate_property(::Type{Node}, name::Symbol, val)

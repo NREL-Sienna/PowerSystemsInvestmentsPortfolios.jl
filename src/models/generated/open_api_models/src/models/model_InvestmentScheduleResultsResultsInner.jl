@@ -13,13 +13,13 @@
     - technology::String
     - parameter::String
     - name::String
-    - installations::Any
+    - installations::Vector{Float64}
 """
 Base.@kwdef mutable struct InvestmentScheduleResultsResultsInner <: OpenAPI.APIModel
     technology::Union{Nothing, String} = nothing
     parameter::Union{Nothing, String} = nothing
     name::Union{Nothing, String} = nothing
-    installations::Union{Nothing, Any} = nothing
+    installations::Union{Nothing, Vector{Float64}} = nothing
 
     function InvestmentScheduleResultsResultsInner(
         technology,
@@ -27,27 +27,9 @@ Base.@kwdef mutable struct InvestmentScheduleResultsResultsInner <: OpenAPI.APIM
         name,
         installations,
     )
-        OpenAPI.validate_property(
-            InvestmentScheduleResultsResultsInner,
-            Symbol("technology"),
-            technology,
-        )
-        OpenAPI.validate_property(
-            InvestmentScheduleResultsResultsInner,
-            Symbol("parameter"),
-            parameter,
-        )
-        OpenAPI.validate_property(
-            InvestmentScheduleResultsResultsInner,
-            Symbol("name"),
-            name,
-        )
-        OpenAPI.validate_property(
-            InvestmentScheduleResultsResultsInner,
-            Symbol("installations"),
-            installations,
-        )
-        return new(technology, parameter, name, installations)
+        o = new(technology, parameter, name, installations)
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type InvestmentScheduleResultsResultsInner
 
@@ -55,15 +37,34 @@ const _property_types_InvestmentScheduleResultsResultsInner = Dict{Symbol, Strin
     Symbol("technology") => "String",
     Symbol("parameter") => "String",
     Symbol("name") => "String",
-    Symbol("installations") => "Any",
+    Symbol("installations") => "Vector{Float64}",
 )
 OpenAPI.property_type(::Type{InvestmentScheduleResultsResultsInner}, name::Symbol) = Union{
     Nothing,
     eval(Base.Meta.parse(_property_types_InvestmentScheduleResultsResultsInner[name])),
 }
 
-function check_required(o::InvestmentScheduleResultsResultsInner)
+function OpenAPI.check_required(o::InvestmentScheduleResultsResultsInner)
     true
+end
+
+function OpenAPI.validate_properties(o::InvestmentScheduleResultsResultsInner)
+    OpenAPI.validate_property(
+        InvestmentScheduleResultsResultsInner,
+        Symbol("technology"),
+        o.technology,
+    )
+    OpenAPI.validate_property(
+        InvestmentScheduleResultsResultsInner,
+        Symbol("parameter"),
+        o.parameter,
+    )
+    OpenAPI.validate_property(InvestmentScheduleResultsResultsInner, Symbol("name"), o.name)
+    OpenAPI.validate_property(
+        InvestmentScheduleResultsResultsInner,
+        Symbol("installations"),
+        o.installations,
+    )
 end
 
 function OpenAPI.validate_property(

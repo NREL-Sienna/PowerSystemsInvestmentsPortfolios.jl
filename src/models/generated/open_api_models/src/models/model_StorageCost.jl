@@ -6,92 +6,108 @@ Cost representation for storage units
 
     StorageCost(;
         charge_variable_cost=nothing,
+        cost_type="STORAGE",
         discharge_variable_cost=nothing,
+        energy_shortage_cost=0.0,
+        energy_surplus_cost=0.0,
         fixed=0.0,
         shut_down=0.0,
         start_up=nothing,
-        energy_shortage_cost=0.0,
-        energy_surplus_cost=0.0,
     )
 
     - charge_variable_cost::CostCurve
+    - cost_type::String
     - discharge_variable_cost::CostCurve
+    - energy_shortage_cost::Float64
+    - energy_surplus_cost::Float64
     - fixed::Float64
     - shut_down::Float64
     - start_up::StorageCostStartUp
-    - energy_shortage_cost::Float64
-    - energy_surplus_cost::Float64
 """
 Base.@kwdef mutable struct StorageCost <: OpenAPI.APIModel
     charge_variable_cost = nothing # spec type: Union{ Nothing, CostCurve }
+    cost_type::Union{Nothing, String} = "STORAGE"
     discharge_variable_cost = nothing # spec type: Union{ Nothing, CostCurve }
+    energy_shortage_cost::Union{Nothing, Float64} = 0.0
+    energy_surplus_cost::Union{Nothing, Float64} = 0.0
     fixed::Union{Nothing, Float64} = 0.0
     shut_down::Union{Nothing, Float64} = 0.0
     start_up = nothing # spec type: Union{ Nothing, StorageCostStartUp }
-    energy_shortage_cost::Union{Nothing, Float64} = 0.0
-    energy_surplus_cost::Union{Nothing, Float64} = 0.0
 
     function StorageCost(
         charge_variable_cost,
+        cost_type,
         discharge_variable_cost,
+        energy_shortage_cost,
+        energy_surplus_cost,
         fixed,
         shut_down,
         start_up,
-        energy_shortage_cost,
-        energy_surplus_cost,
     )
-        OpenAPI.validate_property(
-            StorageCost,
-            Symbol("charge_variable_cost"),
+        o = new(
             charge_variable_cost,
-        )
-        OpenAPI.validate_property(
-            StorageCost,
-            Symbol("discharge_variable_cost"),
+            cost_type,
             discharge_variable_cost,
-        )
-        OpenAPI.validate_property(StorageCost, Symbol("fixed"), fixed)
-        OpenAPI.validate_property(StorageCost, Symbol("shut_down"), shut_down)
-        OpenAPI.validate_property(StorageCost, Symbol("start_up"), start_up)
-        OpenAPI.validate_property(
-            StorageCost,
-            Symbol("energy_shortage_cost"),
             energy_shortage_cost,
-        )
-        OpenAPI.validate_property(
-            StorageCost,
-            Symbol("energy_surplus_cost"),
             energy_surplus_cost,
-        )
-        return new(
-            charge_variable_cost,
-            discharge_variable_cost,
             fixed,
             shut_down,
             start_up,
-            energy_shortage_cost,
-            energy_surplus_cost,
         )
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type StorageCost
 
 const _property_types_StorageCost = Dict{Symbol, String}(
     Symbol("charge_variable_cost") => "CostCurve",
+    Symbol("cost_type") => "String",
     Symbol("discharge_variable_cost") => "CostCurve",
+    Symbol("energy_shortage_cost") => "Float64",
+    Symbol("energy_surplus_cost") => "Float64",
     Symbol("fixed") => "Float64",
     Symbol("shut_down") => "Float64",
     Symbol("start_up") => "StorageCostStartUp",
-    Symbol("energy_shortage_cost") => "Float64",
-    Symbol("energy_surplus_cost") => "Float64",
 )
 OpenAPI.property_type(::Type{StorageCost}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_StorageCost[name]))}
 
-function check_required(o::StorageCost)
+function OpenAPI.check_required(o::StorageCost)
     o.fixed === nothing && (return false)
     o.shut_down === nothing && (return false)
     o.start_up === nothing && (return false)
     true
 end
 
-function OpenAPI.validate_property(::Type{StorageCost}, name::Symbol, val) end
+function OpenAPI.validate_properties(o::StorageCost)
+    OpenAPI.validate_property(
+        StorageCost,
+        Symbol("charge_variable_cost"),
+        o.charge_variable_cost,
+    )
+    OpenAPI.validate_property(StorageCost, Symbol("cost_type"), o.cost_type)
+    OpenAPI.validate_property(
+        StorageCost,
+        Symbol("discharge_variable_cost"),
+        o.discharge_variable_cost,
+    )
+    OpenAPI.validate_property(
+        StorageCost,
+        Symbol("energy_shortage_cost"),
+        o.energy_shortage_cost,
+    )
+    OpenAPI.validate_property(
+        StorageCost,
+        Symbol("energy_surplus_cost"),
+        o.energy_surplus_cost,
+    )
+    OpenAPI.validate_property(StorageCost, Symbol("fixed"), o.fixed)
+    OpenAPI.validate_property(StorageCost, Symbol("shut_down"), o.shut_down)
+    OpenAPI.validate_property(StorageCost, Symbol("start_up"), o.start_up)
+end
+
+function OpenAPI.validate_property(::Type{StorageCost}, name::Symbol, val)
+    if name === Symbol("cost_type")
+        OpenAPI.validate_param(name, "StorageCost", :enum, val, ["STORAGE"])
+    end
+end
