@@ -585,9 +585,13 @@ function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{St
         end
     end
 
-    #Build internal from uuid and remove uuid entry
-    vals[:internal] = IS.InfrastructureSystemsInternal(; uuid=vals[:uuid])
-    delete!(vals, :uuid)
+    #Build internal from uuid if it is present and remove uuid entry
+    if haskey(vals, :uuid)
+        vals[:internal] = IS.InfrastructureSystemsInternal(; uuid=vals[:uuid])
+        delete!(vals, :uuid)
+    else
+        vals[:internal] = IS.InfrastructureSystemsInternal()
+    end
 
     struct_type_string = metadata["type"]
     struct_type = getproperty(PowerSystemsInvestmentsPortfolios, Symbol(struct_type_string))
