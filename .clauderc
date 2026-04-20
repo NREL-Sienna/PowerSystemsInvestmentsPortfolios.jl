@@ -180,7 +180,7 @@ test_patterns:
   runner: julia --project=test test/runtests.jl
 
 code_conventions:
-  style_guide_url: https://nrel-sienna.github.io/InfrastructureSystems.jl/stable/style/
+  style_guide_url: https://sienna-platform.github.io/InfrastructureSystems.jl/stable/style/
   formatter:
     tool: JuliaFormatter
     command: julia -e 'include("scripts/formatter/formatter_code.jl")'
@@ -193,7 +193,7 @@ code_conventions:
 
 documentation_practices:
   framework: Diataxis (https://diataxis.fr/)
-  sienna_guide: https://nrel-sienna.github.io/InfrastructureSystems.jl/stable/docs_best_practices/explanation/
+  sienna_guide: https://sienna-platform.github.io/InfrastructureSystems.jl/stable/docs_best_practices/explanation/
 
   docstring_requirements:
     scope: all elements of public interface (note IS is selective about exports)
