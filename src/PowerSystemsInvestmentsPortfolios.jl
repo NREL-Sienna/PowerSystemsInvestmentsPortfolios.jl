@@ -1,4 +1,5 @@
 module PowerSystemsInvestmentsPortfolios
+__precompile__(false)
 
 import InfrastructureSystems
 # TODO: Some of these re-exports may cause name collisions with PowerSystems
