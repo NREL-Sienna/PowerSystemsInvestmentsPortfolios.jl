@@ -1,5 +1,4 @@
 module PowerSystemsInvestmentsPortfolios
-__precompile__(false)
 
 import InfrastructureSystems
 # TODO: Some of these re-exports may cause name collisions with PowerSystems
@@ -153,7 +152,7 @@ export ThermalFuels
 export PrimeMovers
 export StorageTech
 
-#submodule for OpenAPI structs 
+#submodule for OpenAPI structs
 include("models/generated/open_api_models/src/APIServer.jl")
 using .APIServer
 
