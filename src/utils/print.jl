@@ -41,45 +41,39 @@ const tf_html_simple = PrettyTables.HtmlTableFormat(;
 )
 
 function Base.show(io::IO, ::MIME"text/plain", p::Portfolio)
-    show_portfolio_table(io, p; backend=Val(:auto))
-
-    components = p.data.components
-    tech_types = Vector{DataType}()
-    for component_type in keys(components.data)
-        if component_type <: Technology
-            push!(tech_types, component_type)
-        end
-    end
-
-    if !isempty(tech_types)
-        show_technologies_table(io, p; backend=Val(:auto))
-    end
-
+    show_portfolio_table(io, p; backend = Val(:auto))
+    show_technologies_table(io, p; backend = Val(:auto))
+    show_region_topology_table(io, p; backend = Val(:auto))
     println(io)
-    IS.show_time_series_data(io, p.data; backend=:auto)
+    IS.show_time_series_data(io, p.data; backend = :auto)
     return
 end
 
 function Base.show(io::IO, ::MIME"text/html", p::Portfolio)
-    show_portfolio_table(io, p; backend=Val(:html), standalone=false)
+    show_portfolio_table(io, p; backend = Val(:html), standalone = false)
     println(io)
-
-    components = p.data.components
-    tech_types = Vector{DataType}()
-    for component_type in keys(components.data)
-        if component_type <: Technology
-            push!(tech_types, component_type)
-        end
-    end
-    if !isempty(tech_types)
-        show_technologies_table(
-            io,
-            p;
-            backend=Val(:html),
-            tf=PrettyTables.tf_html_simple,
-            standalone=false,
-        )
-    end
+    show_technologies_table(
+        io,
+        p;
+        backend = Val(:html),
+        tf = tf_html_simple,
+        standalone = false,
+    )
+    show_region_topology_table(
+        io,
+        p;
+        backend = Val(:html),
+        tf = tf_html_simple,
+        standalone = false,
+    )
+    println(io)
+    IS.show_time_series_data(
+        io,
+        p.data;
+        backend = Val(:html),
+        tf = tf_html_simple,
+        standalone = false,
+    )
     return
 end
 
@@ -116,7 +110,7 @@ function Base.show(io::IO, ::MIME"text/plain", ist::Technology)
 end
 
 function show_portfolio_table(io::IO, p::Portfolio; kwargs...)
-    column_labels = ["Property", "Value"]
+    header = ["Property", "Value"]
     table = Any[
         "Name"        isnothing(get_name(p)) ? "" : get_name(p)
         "Description" isnothing(get_description(p)) ? "" : get_description(p)
@@ -135,7 +129,7 @@ function show_portfolio_table(io::IO, p::Portfolio; kwargs...)
     PrettyTables.pretty_table(
         io,
         table;
-        column_labels = column_labels,
+        header = header,
         title = "Portfolio",
         alignment = :l,
         kwargs...,
@@ -144,7 +138,7 @@ function show_portfolio_table(io::IO, p::Portfolio; kwargs...)
 end
 
 function show_technologies_table(io::IO, p::Portfolio; kwargs...)
-    column_labels = ["Type", "Count"]
+    header = ["Type", "Count"]
     components = p.data.components
     tech_types = [t for t in keys(components.data) if t <: Technology]
     isempty(tech_types) && return
@@ -160,7 +154,7 @@ function show_technologies_table(io::IO, p::Portfolio; kwargs...)
     PrettyTables.pretty_table(
         io,
         tech_data;
-        column_labels = column_labels,
+        header = header,
         title = "Technologies",
         alignment = :l,
         kwargs...,
@@ -169,7 +163,7 @@ function show_technologies_table(io::IO, p::Portfolio; kwargs...)
 end
 
 function show_region_topology_table(io::IO, p::Portfolio; kwargs...)
-    column_labels = ["Type", "Count"]
+    header = ["Type", "Count"]
     components = p.data.components
     region_types = [t for t in keys(components.data) if t <: RegionTopology]
     isempty(region_types) && return
@@ -185,7 +179,7 @@ function show_region_topology_table(io::IO, p::Portfolio; kwargs...)
     PrettyTables.pretty_table(
         io,
         region_data;
-        column_labels = column_labels,
+        header = header,
         title = "Topology",
         alignment = :l,
         kwargs...,
