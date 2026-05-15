@@ -120,8 +120,8 @@ end
 
 function Base.show(io::IO, ::MIME"text/plain", p::Portfolio)
     show_portfolio_table(io, p; backend = :auto)
-    show_technologies_table(io, p; backend = :auto)
     show_region_topology_table(io, p; backend = :auto)
+    show_technologies_table(io, p; backend = :auto)
     println(io)
     println(io, "Time Series")
     IS.show_time_series_data(io, p.data; backend = :auto)
@@ -131,14 +131,14 @@ end
 function Base.show(io::IO, ::MIME"text/html", p::Portfolio)
     show_portfolio_table(io, p; backend = :html, stand_alone = false)
     println(io)
-    show_technologies_table(
+    show_region_topology_table(
         io,
         p;
         backend = :html,
         table_format = tf_html_simple,
         stand_alone = false,
     )
-    show_region_topology_table(
+    show_technologies_table(
         io,
         p;
         backend = :html,
