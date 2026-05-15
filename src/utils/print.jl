@@ -144,33 +144,26 @@ function show_portfolio_table(io::IO, p::Portfolio; kwargs...)
 end
 
 function show_technologies_table(io::IO, p::Portfolio; kwargs...)
-    tech_header = ["Type", "Count"]
+    column_labels = ["Type", "Count"]
     components = p.data.components
-    tech_types = Vector{DataType}()
-    for component_type in keys(components.data)
-        if component_type <: Technology
-            push!(tech_types, component_type)
-        end
-    end
-    tech_data = Array{Any, 2}(undef, length(tech_types), length(tech_header))
+    tech_types = [t for t in keys(components.data) if t <: Technology]
+    isempty(tech_types) && return
 
-    tech_type_names = [(nameof(x), x) for x in tech_types]
-    sort!(tech_type_names; by=x -> x[1])
-    for (i, (_, type)) in enumerate(tech_type_names)
-        vals = components.data[type]
-        tech_data[i, 1] = string(type)
-        tech_data[i, 2] = length(vals)
+    tech_type_names = [(IS.strip_module_name(x), x) for x in tech_types]
+    sort!(tech_type_names; by = x -> x[1])
+    tech_data = Array{Any, 2}(undef, length(tech_type_names), 2)
+    for (i, (name, type)) in enumerate(tech_type_names)
+        tech_data[i, 1] = name
+        tech_data[i, 2] = length(components.data[type])
     end
-
-    if !isempty(tech_types)
-        println(io)
-        PrettyTables.pretty_table(
-            io,
-            tech_data;
-            header=tech_header,
-            title="Technologies",
-            alignment=:l,
-            kwargs...,
-        )
-    end
+    println(io)
+    PrettyTables.pretty_table(
+        io,
+        tech_data;
+        column_labels = column_labels,
+        title = "Technologies",
+        alignment = :l,
+        kwargs...,
+    )
+    return
 end
