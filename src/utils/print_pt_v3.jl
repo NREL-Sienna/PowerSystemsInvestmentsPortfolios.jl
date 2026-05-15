@@ -123,6 +123,7 @@ function Base.show(io::IO, ::MIME"text/plain", p::Portfolio)
     show_technologies_table(io, p; backend = :auto)
     show_region_topology_table(io, p; backend = :auto)
     println(io)
+    println(io, "Time Series")
     IS.show_time_series_data(io, p.data; backend = :auto)
     return
 end
@@ -145,6 +146,7 @@ function Base.show(io::IO, ::MIME"text/html", p::Portfolio)
         stand_alone = false,
     )
     println(io)
+    println(io, "Time Series")
     IS.show_time_series_data(
         io,
         p.data;
