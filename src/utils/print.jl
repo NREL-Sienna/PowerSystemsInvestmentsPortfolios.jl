@@ -167,3 +167,28 @@ function show_technologies_table(io::IO, p::Portfolio; kwargs...)
     )
     return
 end
+
+function show_region_topology_table(io::IO, p::Portfolio; kwargs...)
+    column_labels = ["Type", "Count"]
+    components = p.data.components
+    region_types = [t for t in keys(components.data) if t <: RegionTopology]
+    isempty(region_types) && return
+
+    region_type_names = [(IS.strip_module_name(x), x) for x in region_types]
+    sort!(region_type_names; by = x -> x[1])
+    region_data = Array{Any, 2}(undef, length(region_type_names), 2)
+    for (i, (name, type)) in enumerate(region_type_names)
+        region_data[i, 1] = name
+        region_data[i, 2] = length(components.data[type])
+    end
+    println(io)
+    PrettyTables.pretty_table(
+        io,
+        region_data;
+        column_labels = column_labels,
+        title = "Topology",
+        alignment = :l,
+        kwargs...,
+    )
+    return
+end

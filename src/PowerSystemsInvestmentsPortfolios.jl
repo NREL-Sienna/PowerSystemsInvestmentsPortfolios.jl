@@ -123,6 +123,8 @@ export MinMax
 export InOut
 export UpDown
 
+export show_region_topology_table
+
 export get_existing_capacity_mw
 export get_existing_capacity_mwh
 export is_new
