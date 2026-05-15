@@ -282,8 +282,7 @@ function build_portfolio()
     retire2 =
         RetirementPotential(eligible_generators=[PSY.get_name(t) for t in thermal[4:5]])
 
-    existing =
-        ExistingDevices(existing_devices=[PSY.get_name(t) for t in thermal[1:3]])
+    existing = ExistingDevices(existing_devices=[PSY.get_name(t) for t in thermal[1:3]])
     existing2 = ExistingDevices(existing_devices=["Solitude", "dummy name", "Alta"])
 
     ########################
