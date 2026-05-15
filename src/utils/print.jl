@@ -1,3 +1,45 @@
+# PrettyTables v3 removed predefined HTML table format recipes.
+# This reproduces the v2 tf_html_simple CSS for backwards-compatible Jupyter output.
+const tf_html_simple = PrettyTables.HtmlTableFormat(;
+    css = """
+    table, td, th {
+        border-collapse: collapse;
+        font-family: sans-serif;
+    }
+
+    td, th {
+        border-bottom: 0;
+        padding: 4px
+    }
+
+    tr:nth-child(odd) {
+        background: #eee;
+    }
+
+    tr:nth-child(even) {
+        background: #fff;
+    }
+
+    tr.header {
+        background: #fff !important;
+        font-weight: bold;
+    }
+
+    tr.subheader {
+        background: #fff !important;
+        color: dimgray;
+    }
+
+    tr.headerLastRow {
+        border-bottom: 2px solid black;
+    }
+
+    th.rowNumber, td.rowNumber {
+        text-align: right;
+    }
+    """,
+)
+
 function Base.show(io::IO, ::MIME"text/plain", p::Portfolio)
     show_portfolio_table(io, p; backend=Val(:auto))
 
@@ -74,19 +116,28 @@ function Base.show(io::IO, ::MIME"text/plain", ist::Technology)
 end
 
 function show_portfolio_table(io::IO, p::Portfolio; kwargs...)
-    header = ["Property", "Value"]
-    table = [
-        "Name" isnothing(get_name(p)) ? "" : get_name(p)
+    column_labels = ["Property", "Value"]
+    table = Any[
+        "Name"        isnothing(get_name(p)) ? "" : get_name(p)
         "Description" isnothing(get_description(p)) ? "" : get_description(p)
         "Aggregation" string(p.aggregation)
-        #"Discount Rate" string(p.discount_rate)
     ]
+    fd = get_financial_data(p)
+    if !isnothing(fd)
+        table = vcat(
+            table,
+            Any[
+                "Base Year"     string(fd.base_year)
+                "Discount Rate" string(fd.discount_rate)
+            ],
+        )
+    end
     PrettyTables.pretty_table(
         io,
         table;
-        header=header,
-        title="Portfolio",
-        alignment=:l,
+        column_labels = column_labels,
+        title = "Portfolio",
+        alignment = :l,
         kwargs...,
     )
     return
