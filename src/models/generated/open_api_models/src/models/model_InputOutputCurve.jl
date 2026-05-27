@@ -19,10 +19,9 @@ Base.@kwdef mutable struct InputOutputCurve <: OpenAPI.APIModel
     input_at_zero::Union{Nothing, Float64} = nothing
 
     function InputOutputCurve(curve_type, function_data, input_at_zero)
-        OpenAPI.validate_property(InputOutputCurve, Symbol("curve_type"), curve_type)
-        OpenAPI.validate_property(InputOutputCurve, Symbol("function_data"), function_data)
-        OpenAPI.validate_property(InputOutputCurve, Symbol("input_at_zero"), input_at_zero)
-        return new(curve_type, function_data, input_at_zero)
+        o = new(curve_type, function_data, input_at_zero)
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type InputOutputCurve
 
@@ -34,10 +33,16 @@ const _property_types_InputOutputCurve = Dict{Symbol, String}(
 OpenAPI.property_type(::Type{InputOutputCurve}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_InputOutputCurve[name]))}
 
-function check_required(o::InputOutputCurve)
+function OpenAPI.check_required(o::InputOutputCurve)
     o.curve_type === nothing && (return false)
     o.function_data === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::InputOutputCurve)
+    OpenAPI.validate_property(InputOutputCurve, Symbol("curve_type"), o.curve_type)
+    OpenAPI.validate_property(InputOutputCurve, Symbol("function_data"), o.function_data)
+    OpenAPI.validate_property(InputOutputCurve, Symbol("input_at_zero"), o.input_at_zero)
 end
 
 function OpenAPI.validate_property(::Type{InputOutputCurve}, name::Symbol, val)
