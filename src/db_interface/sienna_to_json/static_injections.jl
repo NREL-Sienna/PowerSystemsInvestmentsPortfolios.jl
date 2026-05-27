@@ -1,5 +1,5 @@
 function psy2openapi(energy_res::PSY.EnergyReservoirStorage, ids::IDGenerator)
-    EnergyReservoirStorage(
+    PowerOpenAPIModels.EnergyReservoirStorage(
         id=getid!(ids, energy_res),
         name=energy_res.name,
         available=energy_res.available,
@@ -32,7 +32,7 @@ function psy2openapi(energy_res::PSY.EnergyReservoirStorage, ids::IDGenerator)
 end
 
 function psy2openapi(load::PSY.ExponentialLoad, ids::IDGenerator)
-    ExponentialLoad(
+    PowerOpenAPIModels.ExponentialLoad(
         id=getid!(ids, load),
         name=load.name,
         available=load.available,
@@ -50,7 +50,7 @@ function psy2openapi(load::PSY.ExponentialLoad, ids::IDGenerator)
 end
 
 function psy2openapi(facts::PSY.FACTSControlDevice, ids::IDGenerator)
-    FACTSControlDevice(
+    PowerOpenAPIModels.FACTSControlDevice(
         id=getid!(ids, facts),
         name=facts.name,
         available=facts.available,
@@ -64,7 +64,7 @@ function psy2openapi(facts::PSY.FACTSControlDevice, ids::IDGenerator)
 end
 
 function psy2openapi(fixedadmit::PSY.FixedAdmittance, ids::IDGenerator)
-    FixedAdmittance(
+    PowerOpenAPIModels.FixedAdmittance(
         id=getid!(ids, fixedadmit),
         name=fixedadmit.name,
         available=fixedadmit.available,
@@ -75,7 +75,7 @@ function psy2openapi(fixedadmit::PSY.FixedAdmittance, ids::IDGenerator)
 end
 
 function psy2openapi(hydro::PSY.HydroDispatch, ids::IDGenerator)
-    HydroDispatch(
+    PowerOpenAPIModels.HydroDispatch(
         id=getid!(ids, hydro),
         name=hydro.name,
         available=hydro.available,
@@ -99,7 +99,7 @@ function psy2openapi(hydro::PSY.HydroDispatch, ids::IDGenerator)
 end
 
 function psy2openapi(hydro::PSY.HydroPumpTurbine, ids::IDGenerator)
-    HydroPumpTurbine(
+    PowerOpenAPIModels.HydroPumpTurbine(
         id=getid!(ids, hydro),
         name=hydro.name,
         available=hydro.available,
@@ -135,7 +135,7 @@ function psy2openapi(hydro::PSY.HydroPumpTurbine, ids::IDGenerator)
 end
 
 function psy2openapi(hydro::PSY.HydroReservoir, ids::IDGenerator)
-    HydroReservoir(
+    PowerOpenAPIModels.HydroReservoir(
         id=getid!(ids, hydro),
         name=hydro.name,
         available=hydro.available,
@@ -156,7 +156,7 @@ function psy2openapi(hydro::PSY.HydroReservoir, ids::IDGenerator)
 end
 
 function psy2openapi(hydro::PSY.HydroTurbine, ids::IDGenerator)
-    HydroTurbine(
+    PowerOpenAPIModels.HydroTurbine(
         id=getid!(ids, hydro),
         name=hydro.name,
         available=hydro.available,
@@ -184,7 +184,7 @@ function psy2openapi(hydro::PSY.HydroTurbine, ids::IDGenerator)
 end
 
 function psy2openapi(inter::PSY.InterconnectingConverter, ids::IDGenerator)
-    InterconnectingConverter(
+    PowerOpenAPIModels.InterconnectingConverter(
         id=getid!(ids, inter),
         name=inter.name,
         available=inter.available,
@@ -202,7 +202,7 @@ function psy2openapi(inter::PSY.InterconnectingConverter, ids::IDGenerator)
 end
 
 function psy2openapi(interrupt_power::PSY.InterruptiblePowerLoad, ids::IDGenerator)
-    InterruptiblePowerLoad(
+    PowerOpenAPIModels.InterruptiblePowerLoad(
         id=getid!(ids, interrupt_power),
         name=interrupt_power.name,
         available=interrupt_power.available,
@@ -225,7 +225,7 @@ function psy2openapi(interrupt_power::PSY.InterruptiblePowerLoad, ids::IDGenerat
 end
 
 function psy2openapi(interrupt_standard::PSY.InterruptibleStandardLoad, ids::IDGenerator)
-    InterruptibleStandardLoad(
+    PowerOpenAPIModels.InterruptibleStandardLoad(
         id=getid!(ids, interrupt_standard),
         name=interrupt_standard.name,
         available=interrupt_standard.available,
@@ -286,7 +286,7 @@ function psy2openapi(interrupt_standard::PSY.InterruptibleStandardLoad, ids::IDG
 end
 
 function psy2openapi(motor_load::PSY.MotorLoad, ids::IDGenerator)
-    MotorLoad(
+    PowerOpenAPIModels.MotorLoad(
         id=getid!(ids, motor_load),
         name=motor_load.name,
         available=motor_load.available,
@@ -305,7 +305,7 @@ function psy2openapi(motor_load::PSY.MotorLoad, ids::IDGenerator)
 end
 
 function psy2openapi(power_load::PSY.PowerLoad, ids::IDGenerator)
-    PowerLoad(
+    PowerOpenAPIModels.PowerLoad(
         id=getid!(ids, power_load),
         name=power_load.name,
         available=power_load.available,
@@ -321,7 +321,7 @@ function psy2openapi(power_load::PSY.PowerLoad, ids::IDGenerator)
 end
 
 function psy2openapi(renewable::PSY.RenewableDispatch, ids::IDGenerator)
-    RenewableDispatch(
+    PowerOpenAPIModels.RenewableDispatch(
         id=getid!(ids, renewable),
         name=renewable.name,
         available=renewable.available,
@@ -341,7 +341,7 @@ function psy2openapi(renewable::PSY.RenewableDispatch, ids::IDGenerator)
 end
 
 function psy2openapi(renewnondispatch::PSY.RenewableNonDispatch, ids::IDGenerator)
-    RenewableNonDispatch(
+    PowerOpenAPIModels.RenewableNonDispatch(
         id=getid!(ids, renewnondispatch),
         name=renewnondispatch.name,
         available=renewnondispatch.available,
@@ -357,7 +357,7 @@ function psy2openapi(renewnondispatch::PSY.RenewableNonDispatch, ids::IDGenerato
 end
 
 function psy2openapi(power_load::PSY.ShiftablePowerLoad, ids::IDGenerator)
-    ShiftablePowerLoad(
+    PowerOpenAPIModels.ShiftablePowerLoad(
         id=getid!(ids, power_load),
         name=power_load.name,
         available=power_load.available,
@@ -377,7 +377,7 @@ function psy2openapi(power_load::PSY.ShiftablePowerLoad, ids::IDGenerator)
 end
 
 function psy2openapi(source::PSY.Source, ids::IDGenerator)
-    Source(
+    PowerOpenAPIModels.Source(
         id=getid!(ids, source),
         name=source.name,
         available=source.available,
@@ -401,7 +401,7 @@ function psy2openapi(source::PSY.Source, ids::IDGenerator)
 end
 
 function psy2openapi(standard_load::PSY.StandardLoad, ids::IDGenerator)
-    StandardLoad(
+    PowerOpenAPIModels.StandardLoad(
         id=getid!(ids, standard_load),
         name=standard_load.name,
         available=standard_load.available,
@@ -461,7 +461,7 @@ function psy2openapi(standard_load::PSY.StandardLoad, ids::IDGenerator)
 end
 
 function psy2openapi(switch::PSY.SwitchedAdmittance, ids::IDGenerator)
-    SwitchedAdmittance(
+    PowerOpenAPIModels.SwitchedAdmittance(
         id=getid!(ids, switch),
         name=switch.name,
         available=switch.available,
@@ -476,7 +476,7 @@ function psy2openapi(switch::PSY.SwitchedAdmittance, ids::IDGenerator)
 end
 
 function psy2openapi(synch::PSY.SynchronousCondenser, ids::IDGenerator)
-    SynchronousCondenser(
+    PowerOpenAPIModels.SynchronousCondenser(
         id=getid!(ids, synch),
         name=synch.name,
         available=synch.available,
@@ -493,7 +493,7 @@ function psy2openapi(synch::PSY.SynchronousCondenser, ids::IDGenerator)
 end
 
 function psy2openapi(multi::PSY.ThermalMultiStart, ids::IDGenerator)
-    ThermalMultiStart(
+    PowerOpenAPIModels.ThermalMultiStart(
         id=getid!(ids, multi),
         name=multi.name,
         available=multi.available,
@@ -524,7 +524,7 @@ function psy2openapi(multi::PSY.ThermalMultiStart, ids::IDGenerator)
 end
 
 function psy2openapi(thermal_standard::PSY.ThermalStandard, ids::IDGenerator)
-    ThermalStandard(
+    PowerOpenAPIModels.ThermalStandard(
         id=getid!(ids, thermal_standard),
         name=thermal_standard.name,
         prime_mover_type=string(thermal_standard.prime_mover_type),

@@ -1,5 +1,5 @@
 function psip2openapi(requirement::CapacityReserveMargin, ids::IDGenerator)
-    CapacityReserveMargin(
+    PowerOpenAPIModels.CapacityReserveMargin(
         name=requirement.name,
         id=requirement.id,
         available=requirement.available,
@@ -11,7 +11,7 @@ function psip2openapi(requirement::CapacityReserveMargin, ids::IDGenerator)
 end
 
 function psip2openapi(requirement::CarbonCaps, ids::IDGenerator)
-    CarbonCaps(
+    PowerOpenAPIModels.CarbonCaps(
         name=requirement.name,
         id=requirement.id,
         available=requirement.available,
@@ -23,7 +23,7 @@ function psip2openapi(requirement::CarbonCaps, ids::IDGenerator)
 end
 
 function psip2openapi(requirement::CarbonTax, ids::IDGenerator)
-    CarbonTax(
+    PowerOpenAPIModels.CarbonTax(
         name=requirement.name,
         id=requirement.id,
         available=requirement.available,
@@ -34,7 +34,7 @@ function psip2openapi(requirement::CarbonTax, ids::IDGenerator)
 end
 
 function psip2openapi(requirement::EnergyShareRequirements, ids::IDGenerator)
-    EnergyShareRequirements(
+    PowerOpenAPIModels.EnergyShareRequirements(
         name=requirement.name,
         id=requirement.id,
         available=requirement.available,
@@ -46,7 +46,7 @@ function psip2openapi(requirement::EnergyShareRequirements, ids::IDGenerator)
 end
 
 function psip2openapi(requirement::HourlyMatching, ids::IDGenerator)
-    HourlyMatching(
+    PowerOpenAPIModels.HourlyMatching(
         name=requirement.name,
         id=requirement.id,
         available=requirement.available,
@@ -56,7 +56,7 @@ function psip2openapi(requirement::HourlyMatching, ids::IDGenerator)
 end
 
 function psip2openapi(requirement::MaximumCapacityRequirements, ids::IDGenerator)
-    MaximumCapacityRequirements(
+    PowerOpenAPIModels.MaximumCapacityRequirements(
         name=requirement.name,
         id=requirement.id,
         available=requirement.available,
@@ -67,7 +67,7 @@ function psip2openapi(requirement::MaximumCapacityRequirements, ids::IDGenerator
 end
 
 function psip2openapi(requirement::MinimumCapacityRequirements, ids::IDGenerator)
-    MinimumCapacityRequirements(
+    PowerOpenAPIModels.MinimumCapacityRequirements(
         name=requirement.name,
         id=requirement.id,
         available=requirement.available,

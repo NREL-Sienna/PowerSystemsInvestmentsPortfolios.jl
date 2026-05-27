@@ -1,5 +1,5 @@
 function psip2openapi(storage::StorageTechnology, ids::IDGenerator)
-    StorageTechnology(;
+    PowerOpenAPIModels.StorageTechnology(;
         name=storage.name,
         id=getid!(ids, storage),
         available=storage.available,
@@ -26,7 +26,7 @@ function psip2openapi(storage::StorageTechnology, ids::IDGenerator)
 end
 
 function psip2openapi(demand::DemandRequirement, ids::IDGenerator)
-    DemandRequirement(;
+    PowerOpenAPIModels.DemandRequirement(;
         name=demand.name,
         id=getid!(ids, demand),
         available=demand.available,
@@ -39,7 +39,7 @@ function psip2openapi(demand::DemandRequirement, ids::IDGenerator)
 end
 
 function psip2openapi(demand::DemandSideTechnology, ids::IDGenerator)
-    DemandSideTechnology(;
+    PowerOpenAPIModels.DemandSideTechnology(;
         name=demand.name,
         id=getid!(ids, demand),
         available=demand.available,
@@ -58,7 +58,7 @@ function psip2openapi(demand::DemandSideTechnology, ids::IDGenerator)
 end
 
 function psip2openapi(supply::SupplyTechnology, ids::IDGenerator)
-    SupplyTechnology(;
+    PowerOpenAPIModels.SupplyTechnology(;
         name=supply.name,
         id=getid!(ids, supply),
         available=supply.available,
@@ -82,7 +82,7 @@ function psip2openapi(supply::SupplyTechnology, ids::IDGenerator)
 end
 
 function psip2openapi(line::AggregateTransportTechnology, ids::IDGenerator)
-    AggregateTransportTechnology(;
+    PowerOpenAPIModels.AggregateTransportTechnology(;
         name=line.name,
         id=getid!(ids, line),
         available=line.available,
@@ -98,7 +98,7 @@ function psip2openapi(line::AggregateTransportTechnology, ids::IDGenerator)
 end
 
 function psip2openapi(line::NodalACTransportTechnology, ids::IDGenerator)
-    NodalACTransportTechnology(;
+    PowerOpenAPIModels.NodalACTransportTechnology(;
         name=line.name,
         id=getid!(ids, line),
         available=line.available,
@@ -116,7 +116,7 @@ function psip2openapi(line::NodalACTransportTechnology, ids::IDGenerator)
 end
 
 function psip2openapi(line::NodalHVDCTransportTechnology, ids::IDGenerator)
-    NodalHVDCTransportTechnology(;
+    PowerOpenAPIModels.NodalHVDCTransportTechnology(;
         name=line.name,
         id=getid!(ids, line),
         available=line.available,
@@ -132,7 +132,7 @@ function psip2openapi(line::NodalHVDCTransportTechnology, ids::IDGenerator)
 end
 
 function psip2openapi(supply::ColocatedSupplyStorageTechnology, ids::IDGenerator)
-    ColocatedSupplyStorageTechnology(; 
+    PowerOpenAPIModels.ColocatedSupplyStorageTechnology(; 
         name = supply.name,
         id=getid!(ids, supply),
         available=supply.available, 

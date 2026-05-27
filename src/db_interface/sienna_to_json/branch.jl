@@ -1,5 +1,5 @@
 function psy2openapi(area_interchange::PSY.AreaInterchange, ids::IDGenerator)
-    AreaInterchange(
+    PowerOpenAPIModels.AreaInterchange(
         id=getid!(ids, area_interchange),
         name=area_interchange.name,
         available=area_interchange.available,
@@ -16,7 +16,7 @@ function psy2openapi(area_interchange::PSY.AreaInterchange, ids::IDGenerator)
 end
 
 function psy2openapi(branch::PSY.DiscreteControlledACBranch, ids::IDGenerator)
-    DiscreteControlledACBranch(
+    PowerOpenAPIModels.DiscreteControlledACBranch(
         id=getid!(ids, branch),
         name=branch.name,
         available=branch.available,
@@ -44,7 +44,7 @@ function psy2openapi(branch::PSY.DiscreteControlledACBranch, ids::IDGenerator)
 end
 
 function psy2openapi(line::PSY.Line, ids::IDGenerator)
-    Line(
+    PowerOpenAPIModels.Line(
         id=getid!(ids, line),
         name=line.name,
         available=line.available,
@@ -91,7 +91,7 @@ function psy2openapi(line::PSY.Line, ids::IDGenerator)
 end
 
 function psy2openapi(monitored::PSY.MonitoredLine, ids::IDGenerator)
-    MonitoredLine(
+    PowerOpenAPIModels.MonitoredLine(
         id=getid!(ids, monitored),
         name=monitored.name,
         available=monitored.available,
@@ -144,7 +144,7 @@ function psy2openapi(monitored::PSY.MonitoredLine, ids::IDGenerator)
 end
 
 function psy2openapi(transformer::PSY.PhaseShiftingTransformer, ids::IDGenerator)
-    PhaseShiftingTransformer(
+    PowerOpenAPIModels.PhaseShiftingTransformer(
         id=getid!(ids, transformer),
         name=transformer.name,
         available=transformer.available,
@@ -181,7 +181,7 @@ function psy2openapi(transformer::PSY.PhaseShiftingTransformer, ids::IDGenerator
 end
 
 function psy2openapi(phase3w::PSY.PhaseShiftingTransformer3W, ids::IDGenerator)
-    PhaseShiftingTransformer3W(
+    PowerOpenAPIModels.PhaseShiftingTransformer3W(
         id=getid!(ids, phase3w),
         name=phase3w.name,
         available=phase3w.available,
@@ -297,7 +297,7 @@ function psy2openapi(phase3w::PSY.PhaseShiftingTransformer3W, ids::IDGenerator)
 end
 
 function psy2openapi(transformer::PSY.TapTransformer, ids::IDGenerator)
-    TapTransformer(
+    PowerOpenAPIModels.TapTransformer(
         id=getid!(ids, transformer),
         name=transformer.name,
         available=transformer.available,
@@ -333,7 +333,7 @@ function psy2openapi(transformer::PSY.TapTransformer, ids::IDGenerator)
 end
 
 function psy2openapi(tmodel::PSY.TModelHVDCLine, ids::IDGenerator)
-    TModelHVDCLine(
+    PowerOpenAPIModels.TModelHVDCLine(
         id=getid!(ids, tmodel),
         name=tmodel.name,
         available=tmodel.available,
@@ -352,7 +352,7 @@ function psy2openapi(tmodel::PSY.TModelHVDCLine, ids::IDGenerator)
 end
 
 function psy2openapi(transformer2w::PSY.Transformer2W, ids::IDGenerator)
-    Transformer2W(
+    PowerOpenAPIModels.Transformer2W(
         id=getid!(ids, transformer2w),
         name=transformer2w.name,
         available=transformer2w.available,
@@ -392,7 +392,7 @@ function psy2openapi(transformer2w::PSY.Transformer2W, ids::IDGenerator)
 end
 
 function psy2openapi(trans3w::PSY.Transformer3W, ids::IDGenerator)
-    Transformer3W(
+    PowerOpenAPIModels.Transformer3W(
         id=getid!(ids, trans3w),
         name=trans3w.name,
         available=trans3w.available,
@@ -507,7 +507,7 @@ function psy2openapi(trans3w::PSY.Transformer3W, ids::IDGenerator)
 end
 
 function psy2openapi(hvdc::PSY.TwoTerminalGenericHVDCLine, ids::IDGenerator)
-    TwoTerminalGenericHVDCLine(
+    PowerOpenAPIModels.TwoTerminalGenericHVDCLine(
         id=getid!(ids, hvdc),
         name=hvdc.name,
         available=hvdc.available,
@@ -530,7 +530,7 @@ function psy2openapi(hvdc::PSY.TwoTerminalGenericHVDCLine, ids::IDGenerator)
 end
 
 function psy2openapi(lcc::PSY.TwoTerminalLCCLine, ids::IDGenerator)
-    TwoTerminalLCCLine(
+    PowerOpenAPIModels.TwoTerminalLCCLine(
         id=getid!(ids, lcc),
         name=lcc.name,
         available=lcc.available,
@@ -582,7 +582,7 @@ function psy2openapi(lcc::PSY.TwoTerminalLCCLine, ids::IDGenerator)
 end
 
 function psy2openapi(vsc::PSY.TwoTerminalVSCLine, ids::IDGenerator)
-    TwoTerminalVSCLine(
+    PowerOpenAPIModels.TwoTerminalVSCLine(
         id=getid!(ids, vsc),
         name=vsc.name,
         available=vsc.available,

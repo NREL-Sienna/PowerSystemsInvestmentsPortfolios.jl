@@ -3,37 +3,37 @@ import UUIDs: UUID
 # Functions that convert and scale tuples
 
 function get_complex_number(complex_number::ComplexF64)
-    ComplexNumber(real=real(complex_number), imag=imag(complex_number))
+    PowerOpenAPIModels.ComplexNumber(real=real(complex_number), imag=imag(complex_number))
 end
 
 function get_dbd_pnts(dbd::Tuple{Float64, Float64})
-    DbdPnts(dbd1=dbd[1], dbd2=dbd[2])
+    PowerOpenAPIModels.DbdPnts(dbd1=dbd[1], dbd2=dbd[2])
 end
 
 function get_fdbd_pnts(fdbd::Tuple{Float64, Float64})
-    FdbdPnts(fdbd1=fdbd[1], fdbd2=fdbd[2])
+    PowerOpenAPIModels.FdbdPnts(fdbd1=fdbd[1], fdbd2=fdbd[2])
 end
 
 function get_from_to(from_to::NamedTuple{(:from, :to), Tuple{Float64, Float64}})
-    FromTo(from=from_to.from, to=from_to.to)
+    PowerOpenAPIModels.FromTo(from=from_to.from, to=from_to.to)
 end
 
 function get_fromto_tofrom(
     from_to::NamedTuple{(:from_to, :to_from), Tuple{Float64, Float64}},
 )
-    FromToToFrom(from_to=from_to.from_to, to_from=from_to.to_from)
+    PowerOpenAPIModels.FromToToFrom(from_to=from_to.from_to, to_from=from_to.to_from)
 end
 
 get_in_out(::Nothing) = nothing
 
 function get_in_out(in_out::NamedTuple{(:in, :out), Tuple{Float64, Float64}})
-    InOut(in=in_out.in, out=in_out.out)
+    PowerOpenAPIModels.InOut(in=in_out.in, out=in_out.out)
 end
 
 get_min_max(::Nothing) = nothing
 
 function get_min_max(min_max::NamedTuple{(:min, :max), Tuple{Float64, Float64}})
-    MinMax(min=min_max.min, max=min_max.max)
+    PowerOpenAPIModels.MinMax(min=min_max.min, max=min_max.max)
 end
 
 get_startup_shutdown(::Nothing) = nothing
@@ -41,7 +41,7 @@ get_startup_shutdown(::Nothing) = nothing
 function get_startup_shutdown(
     startup_shutdown::NamedTuple{(:startup, :shutdown), Tuple{Float64, Float64}},
 )
-    StartUpShutDown(startup=startup_shutdown.startup, shutdown=startup_shutdown.shutdown)
+    PowerOpenAPIModels.StartUpShutDown(startup=startup_shutdown.startup, shutdown=startup_shutdown.shutdown)
 end
 
 get_turbine_pump(::Nothing) = nothing
@@ -49,19 +49,19 @@ get_turbine_pump(::Nothing) = nothing
 function get_turbine_pump(
     turbine_pump::NamedTuple{(:turbine, :pump), Tuple{Float64, Float64}},
 )
-    TurbinePump(turbine=turbine_pump.turbine, pump=turbine_pump.pump)
+    PowerOpenAPIModels.TurbinePump(turbine=turbine_pump.turbine, pump=turbine_pump.pump)
 end
 
 get_up_down(::Nothing) = nothing
 
 function get_up_down(up_down::NamedTuple{(:up, :down), Tuple{Float64, Float64}})
-    UpDown(up=up_down.up, down=up_down.down)
+    PowerOpenAPIModels.UpDown(up=up_down.up, down=up_down.down)
 end
 
 get_xy_coords(::Nothing) = nothing
 
 function get_xy_coords(nt::@NamedTuple{x::Float64, y::Float64})
-    XYCoords(x=nt.x, y=nt.y)
+    PowerOpenAPIModels.XYCoords(x=nt.x, y=nt.y)
 end
 
 """
@@ -113,15 +113,15 @@ end
 # Functions that get operation costs
 
 function get_operation_cost(cost::PSY.HydroGenerationCost)
-    HydroGenerationCost(
+    PowerOpenAPIModels.HydroGenerationCost(
         cost_type="HYDRO_GEN",
-        variable=ProductionVariableCostCurve(get_variable_cost(cost.variable)),
+        variable=PowerOpenAPIModels.ProductionVariableCostCurve(get_variable_cost(cost.variable)),
         fixed=cost.fixed,
     )
 end
 
 function get_operation_cost(cost::PSY.HydroReservoirCost)
-    HydroReservoirCost(
+    PowerOpenAPIModels.HydroReservoirCost(
         cost_type="HYDRO_RES",
         level_shortage_cost=cost.level_shortage_cost,
         level_surplus_cost=cost.level_surplus_cost,
@@ -130,7 +130,7 @@ function get_operation_cost(cost::PSY.HydroReservoirCost)
 end
 
 function get_operation_cost(cost::PSY.ImportExportCost)
-    ImportExportCost(
+    PowerOpenAPIModels.ImportExportCost(
         cost_type="IMPORTEXPORT",
         import_offer_curves=get_variable_cost(cost.import_offer_curves),
         export_offer_curves=get_variable_cost(cost.export_offer_curves),
@@ -140,15 +140,15 @@ function get_operation_cost(cost::PSY.ImportExportCost)
 end
 
 function get_operation_cost(cost::PSY.LoadCost)
-    LoadCost(
+    PowerOpenAPIModels.LoadCost(
         cost_type="LOAD",
-        variable=CostCurve(get_variable_cost(cost.variable)),
+        variable=PowerOpenAPIModels.CostCurve(get_variable_cost(cost.variable)),
         fixed=cost.fixed,
     )
 end
 
 function get_operation_cost(cost::PSY.RenewableGenerationCost)
-    RenewableGenerationCost(
+    PowerOpenAPIModels.RenewableGenerationCost(
         cost_type="RENEWABLE",
         curtailment_cost=get_variable_cost(cost.curtailment_cost),
         variable=get_variable_cost(cost.variable),
@@ -157,25 +157,25 @@ function get_operation_cost(cost::PSY.RenewableGenerationCost)
 end
 
 function get_operation_cost(cost::PSY.StorageCost)
-    StorageCost(
+    PowerOpenAPIModels.StorageCost(
         cost_type="STORAGE",
         charge_variable_cost=get_variable_cost(cost.charge_variable_cost),
         discharge_variable_cost=get_variable_cost(cost.discharge_variable_cost),
         fixed=cost.fixed,
         shut_down=cost.shut_down,
-        start_up=StorageCostStartUp(get_startup(cost.start_up)),
+        start_up=PowerOpenAPIModels.StorageCostStartUp(get_startup(cost.start_up)),
         energy_shortage_cost=cost.energy_shortage_cost,
         energy_surplus_cost=cost.energy_surplus_cost,
     )
 end
 
 function get_operation_cost(cost::PSY.ThermalGenerationCost)
-    ThermalGenerationCost(
+    PowerOpenAPIModels.ThermalGenerationCost(
         cost_type="THERMAL",
-        start_up=ThermalGenerationCostStartUp(get_startup(cost.start_up)),
+        start_up=PowerOpenAPIModels.ThermalGenerationCostStartUp(get_startup(cost.start_up)),
         shut_down=cost.shut_down,
         fixed=cost.fixed,
-        variable=ProductionVariableCostCurve(get_variable_cost(cost.variable)),
+        variable=PowerOpenAPIModels.ProductionVariableCostCurve(get_variable_cost(cost.variable)),
     )
 end
 
@@ -208,21 +208,21 @@ function get_variable_cost(variable::T) where {T <: PSY.ProductionVariableCostCu
 end
 
 function get_variable_cost(variable::PSY.CostCurve)
-    CostCurve(
+    PowerOpenAPIModels.CostCurve(
         variable_cost_type="COST",
-        value_curve=ValueCurve(get_value_curve(variable.value_curve)),
-        vom_cost=get_value_curve(variable.vom_cost),
+        value_curve=PowerOpenAPIModels.ValueCurve(get_value_curve(variable.value_curve)),
+        vom_cost=PowerOpenAPIModels.ValueCurve(get_value_curve(variable.vom_cost)),
         power_units=string(variable.power_units),
     )
 end
 
 function get_variable_cost(variable::PSY.FuelCurve)
-    FuelCurve(
+    PowerOpenAPIModels.FuelCurve(
         variable_cost_type="FUEL",
-        value_curve=ValueCurve(get_value_curve(variable.value_curve)),
+        value_curve=PowerOpenAPIModels.ValueCurve(get_value_curve(variable.value_curve)),
         power_units=string(variable.power_units),
-        fuel_cost=FuelCurveFuelCost(variable.fuel_cost),
-        vom_cost=get_value_curve(variable.vom_cost),
+        fuel_cost=PowerOpenAPIModels.FuelCurveFuelCost(variable.fuel_cost),
+        vom_cost=PowerOpenAPIModels.ValueCurve(get_value_curve(variable.vom_cost)),
     )
 end
 
@@ -237,27 +237,27 @@ function get_value_curve(curve::Float64)
 end
 
 function get_value_curve(curve::PSY.AverageRateCurve)
-    AverageRateCurve(
+    PowerOpenAPIModels.AverageRateCurve(
         curve_type="AVERAGE_RATE",
-        function_data=AverageRateCurveFunctionData(get_function_data(curve.function_data)),
+        function_data=PowerOpenAPIModels.AverageRateCurveFunctionData(get_function_data(curve.function_data)),
         initial_input=curve.initial_input,
         input_at_zero=curve.input_at_zero,
     )
 end
 
 function get_value_curve(curve::PSY.IncrementalCurve)
-    IncrementalCurve(
+    PowerOpenAPIModels.IncrementalCurve(
         curve_type="INCREMENTAL",
-        function_data=IncrementalCurveFunctionData(get_function_data(curve.function_data)),
+        function_data=PowerOpenAPIModels.IncrementalCurveFunctionData(get_function_data(curve.function_data)),
         initial_input=curve.initial_input,
         input_at_zero=curve.input_at_zero,
     )
 end
 
 function get_value_curve(curve::PSY.InputOutputCurve)
-    InputOutputCurve(
+    PowerOpenAPIModels.InputOutputCurve(
         curve_type="INPUT_OUTPUT",
-        function_data=InputOutputCurveFunctionData(get_function_data(curve.function_data)),
+        function_data=PowerOpenAPIModels.InputOutputCurveFunctionData(get_function_data(curve.function_data)),
         input_at_zero=curve.input_at_zero,
     )
 end
@@ -265,7 +265,7 @@ end
 get_function_data(::Nothing) = nothing
 
 function get_function_data(function_data::PSY.LinearFunctionData)
-    LinearFunctionData(
+    PowerOpenAPIModels.LinearFunctionData(
         function_type="LINEAR",
         proportional_term=function_data.proportional_term,
         constant_term=function_data.constant_term,
@@ -273,14 +273,14 @@ function get_function_data(function_data::PSY.LinearFunctionData)
 end
 
 function get_function_data(function_data::PSY.PiecewiseLinearData)
-    PiecewiseLinearData(
+    PowerOpenAPIModels.PiecewiseLinearData(
         function_type="PIECEWISE_LINEAR",
         points=get_xy_coords.(function_data.points),
     )
 end
 
 function get_function_data(function_data::PSY.PiecewiseStepData)
-    PiecewiseStepData(
+    PowerOpenAPIModels.PiecewiseStepData(
         function_type="PIECEWISE_STEP",
         x_coords=function_data.x_coords,
         y_coords=function_data.y_coords,
@@ -288,7 +288,7 @@ function get_function_data(function_data::PSY.PiecewiseStepData)
 end
 
 function get_function_data(function_data::PSY.QuadraticFunctionData)
-    QuadraticFunctionData(
+    PowerOpenAPIModels.QuadraticFunctionData(
         function_type="QUADRATIC",
         quadratic_term=function_data.quadratic_term,
         proportional_term=function_data.proportional_term,
@@ -315,7 +315,7 @@ function get_reserve_direction(::Type{PSY.ReserveSymmetric})
 end
 
 function get_technology_financial_data(financial_data::TechnologyFinancialData) #This is actually not in openAPI, let's fix this
-    TechnologyFinancialData(;
+    PowerOpenAPIModels.TechnologyFinancialData(;
         capital_recovery_period=financial_data.capital_recovery_period,
         technology_base_year=financial_data.technology_base_year,
         debt_fraction=financial_data.debt_fraction,

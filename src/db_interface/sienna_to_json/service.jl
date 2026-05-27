@@ -1,5 +1,5 @@
 function psy2openapi(agc::PSY.AGC, ids::IDGenerator)
-    AGC(
+    PowerOpenAPIModels.AGC(
         id=getid!(ids, agc),
         name=agc.name,
         available=agc.available,
@@ -14,7 +14,7 @@ function psy2openapi(agc::PSY.AGC, ids::IDGenerator)
 end
 
 function psy2openapi(reserve::PSY.ConstantReserve{T}, ids::IDGenerator) where {T}
-    ConstantReserve(
+    PowerOpenAPIModels.ConstantReserve(
         id=getid!(ids, reserve),
         name=reserve.name,
         available=reserve.available,
@@ -29,7 +29,7 @@ function psy2openapi(reserve::PSY.ConstantReserve{T}, ids::IDGenerator) where {T
 end
 
 function psy2openapi(reserve::PSY.ConstantReserveGroup{T}, ids::IDGenerator) where {T}
-    ConstantReserveGroup(
+    PowerOpenAPIModels.ConstantReserveGroup(
         id=getid!(ids, reserve),
         name=reserve.name,
         available=reserve.available,
@@ -39,7 +39,7 @@ function psy2openapi(reserve::PSY.ConstantReserveGroup{T}, ids::IDGenerator) whe
 end
 
 function psy2openapi(reserve::PSY.ConstantReserveNonSpinning, ids::IDGenerator)
-    ConstantReserveNonSpinning(
+    PowerOpenAPIModels.ConstantReserveNonSpinning(
         id=getid!(ids, reserve),
         name=reserve.name,
         available=reserve.available,
@@ -53,7 +53,7 @@ function psy2openapi(reserve::PSY.ConstantReserveNonSpinning, ids::IDGenerator)
 end
 
 function psy2openapi(reserve::PSY.VariableReserve{T}, ids::IDGenerator) where {T}
-    VariableReserve(
+    PowerOpenAPIModels.VariableReserve(
         id=getid!(ids, reserve),
         name=reserve.name,
         available=reserve.available,
@@ -68,7 +68,7 @@ function psy2openapi(reserve::PSY.VariableReserve{T}, ids::IDGenerator) where {T
 end
 
 function psy2openapi(reserve::PSY.VariableReserveNonSpinning, ids::IDGenerator)
-    VariableReserveNonSpinning(
+    PowerOpenAPIModels.VariableReserveNonSpinning(
         id=getid!(ids, reserve),
         name=reserve.name,
         available=reserve.available,
