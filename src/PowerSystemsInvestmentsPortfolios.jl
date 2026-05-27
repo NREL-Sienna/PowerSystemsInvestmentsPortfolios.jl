@@ -38,6 +38,8 @@ import OpenAPI
 import StringEncodings
 import HDF5
 import Tables
+import PowerOpenAPIModels
+import UUIDs
 
 export Portfolio
 export Technology
@@ -112,7 +114,7 @@ export clear_time_series!
 export read_json_data
 export generate_invest_structs
 export generate_structs
-export database_to_portfolio
+#export database_to_portfolio
 export add_supplemental_attribute!
 export remove_supplemental_attribute!
 export get_supplemental_attribute
@@ -135,6 +137,8 @@ export get_fixed_cost
 export get_fixed_cost_charge
 export get_fixed_cost_discharge
 export get_wacc
+
+export db2portfolio
 
 export update_system_with_nodal_results!
 
@@ -174,6 +178,29 @@ include("db_parser.jl")
 include("utils/print.jl")
 include("utils/getters.jl")
 include("update_system.jl")
+
+include("db_interface/sienna_to_json/common.jl")
+include("db_interface/sienna_to_json/static_injections.jl")
+include("db_interface/sienna_to_json/topology.jl")
+include("db_interface/sienna_to_json/branch.jl")
+include("db_interface/sienna_to_json/service.jl")
+include("db_interface/sienna_to_json/technology.jl")
+include("db_interface/sienna_to_json/region.jl")
+include("db_interface/sienna_to_json/requirement.jl")
+include("db_interface/sienna_to_json/supplemental_attributes.jl")
+
+include("db_interface/json_to_sienna/common.jl")
+include("db_interface/json_to_sienna/topology.jl")
+include("db_interface/json_to_sienna/static_injections.jl")
+include("db_interface/json_to_sienna/branch.jl")
+include("db_interface/json_to_sienna/service.jl")
+include("db_interface/json_to_sienna/technology.jl")
+include("db_interface/json_to_sienna/region.jl")
+include("db_interface/json_to_sienna/requirement.jl")
+include("db_interface/json_to_sienna/supplemental_attributes.jl")
+
+include("db_interface/sqlite.jl")
+include("db_interface/time_series.jl")
 
 using DocStringExtensions
 
