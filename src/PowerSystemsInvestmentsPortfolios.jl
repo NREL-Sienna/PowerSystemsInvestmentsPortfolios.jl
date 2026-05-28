@@ -123,6 +123,8 @@ export MinMax
 export InOut
 export UpDown
 
+export show_region_topology_table
+
 export get_existing_capacity_mw
 export get_existing_capacity_mwh
 export is_new
@@ -172,6 +174,11 @@ include("serialization.jl")
 include("generate_structs.jl")
 include("db_parser.jl")
 include("utils/print.jl")
+@static if pkgversion(PrettyTables).major == 2
+    include("utils/print_pt_v2.jl")
+else
+    include("utils/print_pt_v3.jl")
+end
 include("utils/getters.jl")
 include("update_system.jl")
 
