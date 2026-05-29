@@ -623,6 +623,11 @@ function db2sys!(sys::PSY.System, db, resolver::Resolver; time_series=false)
             "hydro_reservoir_connections",
             "supplemental_attributes",
             "supplemental_attributes_association",
+            #Portfolios-specific tables
+            "demand_technologies",
+            "transport_technologies",
+            "storage_technologies",
+            "supply_technologies",
         )
             continue
         end
@@ -706,6 +711,14 @@ function db2portfolio!(portfolio::Portfolio, db, resolver::Resolver; time_series
             "hydro_reservoir_connections",
             "supplemental_attributes",
             "supplemental_attributes_association",
+            #System-specific tables
+            "arcs",
+            "thermal_generators",
+            "hydro_generators",
+            "storage_units",
+            "renewable_generators",
+            "transmission_lines",
+            "loads",
         )
             continue
         end

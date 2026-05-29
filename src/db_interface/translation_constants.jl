@@ -206,7 +206,7 @@ const ALL_PSIP_TYPES = [
 const PSIP_TYPES = first.(PSIP_TYPE_TO_TABLE_LIST)
 const PSIP_TO_OPENAPI_TYPE = Dict(k => v for (k, v) in zip(ALL_PSIP_TYPES, PSIP_TYPES))
 const OPENAPI_TYPE_TO_PSIP = Dict(v => k for (k, v) in zip(ALL_PSIP_TYPES, PSIP_TYPES))
-const PSIP_TYPE_NAMES = Dict(string(t) => t for t in PSIP_TYPES)
+const PSIP_TYPE_NAMES = Dict(string(nameof(t)) => t for t in ALL_PSIP_TYPES)
 
 const PSIP_DESERIALIZABLE_TYPES = [
     PowerOpenAPIModels.Zone,
