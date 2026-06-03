@@ -106,10 +106,10 @@ function update_or_create_new_generator!(
 
     if !isnothing(gen)
         # Generator exists: increment its capacity
-        existing_cap = PSY.get_rating(gen)
+        existing_cap = PSY.get_rating(gen, PSY.NU)
         new_cap = existing_cap + capacity
         set_rating!(gen, new_cap)
-        existing_min_power, existing_max_power = PSY.get_active_power_limits(gen)
+        existing_min_power, existing_max_power = PSY.get_active_power_limits(gen, PSY.NU)
         new_max_power = existing_max_power + capacity
         new_limits = (min=existing_min_power, max=new_max_power)
         PSY.set_active_power_limits!(gen, new_limits)
@@ -118,7 +118,7 @@ function update_or_create_new_generator!(
         # Generator doesn't exist: create a new one
 
         # Get system base power for per-unit conversion
-        sys_base_power = PSY.get_base_power(sys)
+        sys_base_power = PSY.get_base_power(sys, PSY.NU)
 
         # Retrieve the bus where this generator will be connected
         bus_sys = PSY.get_component(PSY.ACBus, sys, bus_name)
@@ -197,7 +197,7 @@ function update_or_create_new_generator!(
 
     if !isnothing(gen)
         # Generator exists: increment its capacity
-        existing_cap = PSY.get_rating(gen)
+        existing_cap = PSY.get_rating(gen, PSY.NU)
         new_cap = existing_cap + capacity
         set_rating!(gen, new_cap)
         return
@@ -205,7 +205,7 @@ function update_or_create_new_generator!(
         # Generator doesn't exist: create a new one
 
         # Get system base power for per-unit conversion
-        sys_base_power = PSY.get_base_power(sys)
+        sys_base_power = PSY.get_base_power(sys, PSY.NU)
 
         # Retrieve the bus where this generator will be connected
         bus_sys = PSY.get_component(PSY.ACBus, sys, bus_name)
@@ -276,7 +276,7 @@ function add_renewable_timeseries!(
     renewable_ts = PSY.SingleTimeSeries(;
         name="max_active_power",                      # Standard PowerSystems time series name
         data=ts_array,                                 # Capacity factor time series data
-        scaling_factor_multiplier=PSY.get_max_active_power,  # Scales by generator's max power
+        scaling_factor_multiplier=x -> PSY.get_max_active_power(x, PSY.NU),  # Scales by generator's max power (MW)
     )
 
     # Add the time series to the generator in the system

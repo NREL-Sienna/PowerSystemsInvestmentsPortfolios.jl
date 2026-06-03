@@ -1110,7 +1110,7 @@ function transform_natural_impedance_to_device_base(natural_units_impedance, arc
     if isnothing(base_voltage)
         error("Base voltage is not defined")
     end
-    base_power = get_base_power(sys)
+    base_power = get_base_power(sys, PSY.NU)
     z_base = base_voltage^2 / base_power
     device_base_impedance = natural_units_impedance / z_base
     return device_base_impedance
@@ -1121,7 +1121,7 @@ function transform_natural_admittance_to_device_base(natural_units_admittance, a
     if isnothing(base_voltage)
         error("Base voltage is not defined")
     end
-    base_power = get_base_power(sys)
+    base_power = get_base_power(sys, PSY.NU)
     z_base = base_voltage^2 / base_power
     device_base_impedance = natural_units_admittance * z_base
     return device_base_impedance
@@ -1199,12 +1199,13 @@ function add_system_lines!(
             )
             line = component_type(;
                 name=rec.name,
-                rating=rec.continuous_rating / get_base_power(portfolio.base_system),
+                rating=rec.continuous_rating /
+                       get_base_power(portfolio.base_system, PSY.NU),
                 arc=arc_dict[arc],
                 reactive_power_flow=component_attr["reactive_power_flow"] /
-                                    get_base_power(portfolio.base_system),
+                                    get_base_power(portfolio.base_system, PSY.NU),
                 active_power_flow=component_attr["active_power_flow"] /
-                                  get_base_power(portfolio.base_system),
+                                  get_base_power(portfolio.base_system, PSY.NU),
                 available=component_attr["available"],
                 angle_limits=angle_limits,
                 x=transform_natural_impedance_to_device_base(
@@ -1224,7 +1225,8 @@ function add_system_lines!(
         elseif component_type == PSY.Transformer2W
             line = component_type(;
                 name=rec.name,
-                rating=rec.continuous_rating / get_base_power(portfolio.base_system),
+                rating=rec.continuous_rating /
+                       get_base_power(portfolio.base_system, PSY.NU),
                 base_power=component_attr["base_power"],
                 arc=arc_dict[arc],
                 primary_shunt=transform_natural_impedance_to_device_base(
@@ -1233,9 +1235,9 @@ function add_system_lines!(
                     portfolio.base_system,
                 ),
                 reactive_power_flow=component_attr["reactive_power_flow"] /
-                                    get_base_power(portfolio.base_system),
+                                    get_base_power(portfolio.base_system, PSY.NU),
                 active_power_flow=component_attr["active_power_flow"] /
-                                  get_base_power(portfolio.base_system),
+                                  get_base_power(portfolio.base_system, PSY.NU),
                 available=component_attr["available"],
                 x=transform_natural_impedance_to_device_base(
                     component_attr["x"],
@@ -1482,7 +1484,7 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                 )
                 ts_array =
                     get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
-                    get_rating(unit)
+                    get_rating(unit, PSY.NU)
             else
                 #If technology does not have existing capacity associated with it,
                 #select a similar technology from the base system to get required timeseries
@@ -1497,7 +1499,7 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                 )
                 ts_array =
                     get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
-                    get_rating(unit)
+                    get_rating(unit, PSY.NU)
             end
             ts = SingleTimeSeries("capacity_factor", ts_array)
             add_time_series!(portfolio, tech, ts)
@@ -1514,10 +1516,10 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                 portfolio.base_system,
             ),
         )
-        if get_max_active_power(unit) != 0
+        if get_max_active_power(unit, PSY.NU) != 0
             ts_array =
                 get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
-                get_max_active_power(unit)
+                get_max_active_power(unit, PSY.NU)
         else
             ts_array = get_time_series_array(SingleTimeSeries, unit, "max_active_power")
         end
@@ -1600,7 +1602,7 @@ function deserialize_metadata(row)
         elseif field == :time_series_uuid
             data[field] = Base.UUID(val)
         elseif field == :features
-            features_array = IS.JSON3.read(val, Array)
+            features_array = JSON3.read(val, Array)
             features_dict = Dict{String, Union{Bool, Int, String}}()
             for obj in features_array
                 length(obj) != 1 && error("Invalid features: $obj")
@@ -1611,7 +1613,7 @@ function deserialize_metadata(row)
             data[field] = features_dict
         elseif field == :scaling_factor_multiplier
             if !ismissing(val)
-                val2 = IS.JSON3.read(val, Dict{String, Any})
+                val2 = JSON3.read(val, Dict{String, Any})
                 data[field] = IS.deserialize(Function, val2)
             end
         else

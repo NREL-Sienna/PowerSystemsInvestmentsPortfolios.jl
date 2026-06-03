@@ -7,7 +7,10 @@
     @test has_supplemental_attributes(thermal, ExistingCapacity)
     @test !is_new(thermal)
     @test is_new(renewable)
-    @test get_existing_capacity_mw(p_5bus, thermal) == 79125.00
+    # Solitude (520) + Park City (221.25) + Alta (50) = 791.25 MW nameplate.
+    # (Previously 79125.0 — the old code multiplied the natural-units rating by the
+    # 100 MVA base power, double-applying the base and inflating the value 100x.)
+    @test get_existing_capacity_mw(p_5bus, thermal) == 791.25
     @test get_existing_capacity_mw(p_5bus, renewable) == 0
 end
 
