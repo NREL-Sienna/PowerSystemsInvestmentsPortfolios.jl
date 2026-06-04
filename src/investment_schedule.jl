@@ -21,5 +21,5 @@ mutable struct InvestmentScheduleResults <: IS.InfrastructureSystemsType
     # InvestmentPeriod => (TypeTechnology, "name") => BuildCapacity
     # InvestmentPeriod is a (start_date, end_date) tuple and BuildCapacity is either a
     # scalar (Float64) or a NamedTuple of named build quantities, so this stays untyped.
-    results::Dict
+    results::Dict{Any, Any}
 end
