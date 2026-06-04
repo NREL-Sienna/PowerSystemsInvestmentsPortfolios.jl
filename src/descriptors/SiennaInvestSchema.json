@@ -784,7 +784,7 @@
                 "line_loss": {
                     "type": "Union{IS.LinearCurve, IS.PiecewiseIncrementalCurve}",
                     "description": "Loss model coefficients. It accepts a linear model with a constant loss and a proportional loss rate. All terms are defined as fraction of installed nameplate capacity It also accepts a Piecewise loss, with N segments to specify different proportional losses for different segments.",
-                    "default": "1.0"
+                    "default": "LinearCurve(0.0)"
                 },
                 "financial_data": {
                     "type": "TechnologyFinancialData",
@@ -854,7 +854,7 @@
               "line_loss": {
                   "type": "Float64",
                   "description": "Transmission loss for each transport technology (%)",
-                  "default": "1.0"
+                  "default": "0.0"
               },
               "financial_data": {
                 "type": "TechnologyFinancialData",

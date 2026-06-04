@@ -35,7 +35,7 @@ An aggregated representation of a transmission interchange between two regions.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
-- `line_loss::Float64`: (default: `1.0`) Transmission loss for each transport technology (%)
+- `line_loss::Float64`: (default: `0.0`) Transmission loss for each transport technology (%)
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Allowable capacity for a transmission line (MW)
 """
 mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
@@ -68,7 +68,7 @@ mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTech
 end
 
 
-function AggregateTransportTechnology{T}(; start_region, capital_costs=LinearCurve(0.0), available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), unit_size=1, line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+function AggregateTransportTechnology{T}(; start_region, capital_costs=LinearCurve(0.0), available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), unit_size=1, line_loss=0.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
     AggregateTransportTechnology{T}(start_region, capital_costs, available, name, id, end_region, financial_data, power_systems_type, internal, ext, unit_size, line_loss, capacity_limits, )
 end
 
