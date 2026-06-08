@@ -27,27 +27,9 @@ Base.@kwdef mutable struct QuadraticFunctionData <: OpenAPI.APIModel
         proportional_term,
         quadratic_term,
     )
-        OpenAPI.validate_property(
-            QuadraticFunctionData,
-            Symbol("constant_term"),
-            constant_term,
-        )
-        OpenAPI.validate_property(
-            QuadraticFunctionData,
-            Symbol("function_type"),
-            function_type,
-        )
-        OpenAPI.validate_property(
-            QuadraticFunctionData,
-            Symbol("proportional_term"),
-            proportional_term,
-        )
-        OpenAPI.validate_property(
-            QuadraticFunctionData,
-            Symbol("quadratic_term"),
-            quadratic_term,
-        )
-        return new(constant_term, function_type, proportional_term, quadratic_term)
+        o = new(constant_term, function_type, proportional_term, quadratic_term)
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type QuadraticFunctionData
 
@@ -60,12 +42,35 @@ const _property_types_QuadraticFunctionData = Dict{Symbol, String}(
 OpenAPI.property_type(::Type{QuadraticFunctionData}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_QuadraticFunctionData[name]))}
 
-function check_required(o::QuadraticFunctionData)
+function OpenAPI.check_required(o::QuadraticFunctionData)
     o.constant_term === nothing && (return false)
     o.function_type === nothing && (return false)
     o.proportional_term === nothing && (return false)
     o.quadratic_term === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::QuadraticFunctionData)
+    OpenAPI.validate_property(
+        QuadraticFunctionData,
+        Symbol("constant_term"),
+        o.constant_term,
+    )
+    OpenAPI.validate_property(
+        QuadraticFunctionData,
+        Symbol("function_type"),
+        o.function_type,
+    )
+    OpenAPI.validate_property(
+        QuadraticFunctionData,
+        Symbol("proportional_term"),
+        o.proportional_term,
+    )
+    OpenAPI.validate_property(
+        QuadraticFunctionData,
+        Symbol("quadratic_term"),
+        o.quadratic_term,
+    )
 end
 
 function OpenAPI.validate_property(::Type{QuadraticFunctionData}, name::Symbol, val)

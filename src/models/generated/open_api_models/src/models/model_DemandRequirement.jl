@@ -5,94 +5,83 @@
 
     DemandRequirement(;
         name=nothing,
-        uuid=nothing,
         id=nothing,
         available=true,
         power_systems_type=nothing,
-        peak_demand_mw=0.0,
+        conformity="UNDEFINED",
+        growth_rate=0.0,
+        new_demand_mw=0.0,
+        new_construction_year=2020,
         region=nothing,
         value_of_lost_load=nothing,
         unserved_demand_curve=nothing,
     )
 
     - name::String
-    - uuid::String
     - id::Int64
     - available::Bool
     - power_systems_type::String
-    - peak_demand_mw::Float64
+    - conformity::String
+    - growth_rate::Float64
+    - new_demand_mw::Float64
+    - new_construction_year::Int64
     - region::Vector{Int64}
     - value_of_lost_load::Float64
     - unserved_demand_curve::ValueCurve
 """
 Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
-    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = true
     power_systems_type::Union{Nothing, String} = nothing
-    peak_demand_mw::Union{Nothing, Float64} = 0.0
+    conformity::Union{Nothing, String} = "UNDEFINED"
+    growth_rate::Union{Nothing, Float64} = 0.0
+    new_demand_mw::Union{Nothing, Float64} = 0.0
+    new_construction_year::Union{Nothing, Int64} = 2020
     region::Union{Nothing, Vector{Int64}} = nothing
     value_of_lost_load::Union{Nothing, Float64} = nothing
     unserved_demand_curve = nothing # spec type: Union{ Nothing, ValueCurve }
 
     function DemandRequirement(
         name,
-        uuid,
         id,
         available,
         power_systems_type,
-        peak_demand_mw,
+        conformity,
+        growth_rate,
+        new_demand_mw,
+        new_construction_year,
         region,
         value_of_lost_load,
         unserved_demand_curve,
     )
-        OpenAPI.validate_property(DemandRequirement, Symbol("name"), name)
-        OpenAPI.validate_property(DemandRequirement, Symbol("uuid"), uuid)
-        OpenAPI.validate_property(DemandRequirement, Symbol("id"), id)
-        OpenAPI.validate_property(DemandRequirement, Symbol("available"), available)
-        OpenAPI.validate_property(
-            DemandRequirement,
-            Symbol("power_systems_type"),
-            power_systems_type,
-        )
-        OpenAPI.validate_property(
-            DemandRequirement,
-            Symbol("peak_demand_mw"),
-            peak_demand_mw,
-        )
-        OpenAPI.validate_property(DemandRequirement, Symbol("region"), region)
-        OpenAPI.validate_property(
-            DemandRequirement,
-            Symbol("value_of_lost_load"),
-            value_of_lost_load,
-        )
-        OpenAPI.validate_property(
-            DemandRequirement,
-            Symbol("unserved_demand_curve"),
-            unserved_demand_curve,
-        )
-        return new(
+        o = new(
             name,
-            uuid,
             id,
             available,
             power_systems_type,
-            peak_demand_mw,
+            conformity,
+            growth_rate,
+            new_demand_mw,
+            new_construction_year,
             region,
             value_of_lost_load,
             unserved_demand_curve,
         )
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type DemandRequirement
 
 const _property_types_DemandRequirement = Dict{Symbol, String}(
     Symbol("name") => "String",
-    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("power_systems_type") => "String",
-    Symbol("peak_demand_mw") => "Float64",
+    Symbol("conformity") => "String",
+    Symbol("growth_rate") => "Float64",
+    Symbol("new_demand_mw") => "Float64",
+    Symbol("new_construction_year") => "Int64",
     Symbol("region") => "Vector{Int64}",
     Symbol("value_of_lost_load") => "Float64",
     Symbol("unserved_demand_curve") => "ValueCurve",
@@ -100,11 +89,41 @@ const _property_types_DemandRequirement = Dict{Symbol, String}(
 OpenAPI.property_type(::Type{DemandRequirement}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_DemandRequirement[name]))}
 
-function check_required(o::DemandRequirement)
+function OpenAPI.check_required(o::DemandRequirement)
     o.name === nothing && (return false)
     o.available === nothing && (return false)
     o.power_systems_type === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::DemandRequirement)
+    OpenAPI.validate_property(DemandRequirement, Symbol("name"), o.name)
+    OpenAPI.validate_property(DemandRequirement, Symbol("id"), o.id)
+    OpenAPI.validate_property(DemandRequirement, Symbol("available"), o.available)
+    OpenAPI.validate_property(
+        DemandRequirement,
+        Symbol("power_systems_type"),
+        o.power_systems_type,
+    )
+    OpenAPI.validate_property(DemandRequirement, Symbol("conformity"), o.conformity)
+    OpenAPI.validate_property(DemandRequirement, Symbol("growth_rate"), o.growth_rate)
+    OpenAPI.validate_property(DemandRequirement, Symbol("new_demand_mw"), o.new_demand_mw)
+    OpenAPI.validate_property(
+        DemandRequirement,
+        Symbol("new_construction_year"),
+        o.new_construction_year,
+    )
+    OpenAPI.validate_property(DemandRequirement, Symbol("region"), o.region)
+    OpenAPI.validate_property(
+        DemandRequirement,
+        Symbol("value_of_lost_load"),
+        o.value_of_lost_load,
+    )
+    OpenAPI.validate_property(
+        DemandRequirement,
+        Symbol("unserved_demand_curve"),
+        o.unserved_demand_curve,
+    )
 end
 
 function OpenAPI.validate_property(::Type{DemandRequirement}, name::Symbol, val) end

@@ -16,13 +16,9 @@ Base.@kwdef mutable struct RetrofitPotential <: OpenAPI.APIModel
     uuid::Union{Nothing, String} = nothing
 
     function RetrofitPotential(eligible_generators, uuid)
-        OpenAPI.validate_property(
-            RetrofitPotential,
-            Symbol("eligible_generators"),
-            eligible_generators,
-        )
-        OpenAPI.validate_property(RetrofitPotential, Symbol("uuid"), uuid)
-        return new(eligible_generators, uuid)
+        o = new(eligible_generators, uuid)
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type RetrofitPotential
 
@@ -33,8 +29,17 @@ const _property_types_RetrofitPotential = Dict{Symbol, String}(
 OpenAPI.property_type(::Type{RetrofitPotential}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_RetrofitPotential[name]))}
 
-function check_required(o::RetrofitPotential)
+function OpenAPI.check_required(o::RetrofitPotential)
     true
+end
+
+function OpenAPI.validate_properties(o::RetrofitPotential)
+    OpenAPI.validate_property(
+        RetrofitPotential,
+        Symbol("eligible_generators"),
+        o.eligible_generators,
+    )
+    OpenAPI.validate_property(RetrofitPotential, Symbol("uuid"), o.uuid)
 end
 
 function OpenAPI.validate_property(::Type{RetrofitPotential}, name::Symbol, val) end
