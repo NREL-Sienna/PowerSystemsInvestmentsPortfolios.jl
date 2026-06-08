@@ -5,6 +5,11 @@ function _read_sql_statements(filepath::AbstractString)
     return cleaned_statements
 end
 
+# Track the SQL files as precompilation dependencies so editing them (without
+# touching any .jl) correctly invalidates the precompile cache.
+include_dependency(joinpath(@__DIR__, "schema.sql"))
+include_dependency(joinpath(@__DIR__, "triggers.sql"))
+
 const SQLITE_CREATE_STR = _read_sql_statements(joinpath(@__DIR__, "schema.sql"))
 const SQLITE_TRIGGERS_STR = [read(joinpath(@__DIR__, "triggers.sql"), String)]
 
@@ -52,6 +57,107 @@ const TABLE_SCHEMAS = Dict(
     "transmission_interchanges" => Tables.Schema(
         ["id", "name", "arc_id", "max_flow_from", "max_flow_to"],
         [Int64, String, Int64, Float64, Float64],
+    ),
+    # Shared table for Transformer3W and PhaseShiftingTransformer3W: columns are
+    # the 46 fields common to both types. Type-specific fields land in `attributes`.
+    # Column order MUST match the CREATE TABLE in schema.sql (test-schema-sync.jl).
+    "three_winding_transformers" => Tables.Schema(
+        [
+            "id",
+            "name",
+            "available",
+            "star_bus",
+            "primary_star_arc",
+            "secondary_star_arc",
+            "tertiary_star_arc",
+            "active_power_flow_primary",
+            "reactive_power_flow_primary",
+            "active_power_flow_secondary",
+            "reactive_power_flow_secondary",
+            "active_power_flow_tertiary",
+            "reactive_power_flow_tertiary",
+            "r_primary",
+            "x_primary",
+            "r_secondary",
+            "x_secondary",
+            "r_tertiary",
+            "x_tertiary",
+            "r_12",
+            "x_12",
+            "r_23",
+            "x_23",
+            "r_13",
+            "x_13",
+            "base_power_12",
+            "base_power_23",
+            "base_power_13",
+            "rating",
+            "base_voltage_primary",
+            "base_voltage_secondary",
+            "base_voltage_tertiary",
+            "g",
+            "b",
+            "primary_turns_ratio",
+            "secondary_turns_ratio",
+            "tertiary_turns_ratio",
+            "available_primary",
+            "available_secondary",
+            "available_tertiary",
+            "rating_primary",
+            "rating_secondary",
+            "rating_tertiary",
+            "control_objective_primary",
+            "control_objective_secondary",
+            "control_objective_tertiary",
+        ],
+        [
+            Int64,
+            String,
+            Bool,
+            Int64,
+            Int64,
+            Int64,
+            Int64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Float64,
+            Union{Float64, Nothing},
+            Union{Float64, Nothing},
+            Union{Float64, Nothing},
+            Union{Float64, Nothing},
+            Union{Float64, Nothing},
+            Union{Float64, Nothing},
+            Union{Float64, Nothing},
+            Union{Float64, Nothing},
+            Union{Float64, Nothing},
+            Union{Bool, Nothing},
+            Union{Bool, Nothing},
+            Union{Bool, Nothing},
+            Union{Float64, Nothing},
+            Union{Float64, Nothing},
+            Union{Float64, Nothing},
+            Union{String, Nothing},
+            Union{String, Nothing},
+            Union{String, Nothing},
+        ],
     ),
     "thermal_generators" => Tables.Schema(
         [
@@ -213,7 +319,7 @@ const TABLE_SCHEMAS = Dict(
             Union{String, Nothing},  # JSON stored as String, nullable
         ],
     ),
-    "hydro_reservoir" => Tables.Schema(
+    "hydro_reservoirs" => Tables.Schema(
         [
             "id",
             "name",
@@ -485,21 +591,65 @@ function make_sqlite!(db)
     )
     default_fuels = [
         (1, "COAL", "Coal"),
-        (2, "NATURAL_GAS", "Natural Gas"),
-        (3, "DISTILLATE_FUEL_OIL", "Distillate Fuel Oil"),
-        (4, "RESIDUAL_FUEL_OIL", "Residual Fuel Oil"),
-        (5, "NUCLEAR", "Nuclear"),
-        (6, "HYDRO", "Hydro"),
-        (7, "OTHER", "Other"),
-        (8, "WASTE", "Waste"),
-        (9, "BIOMASS", "Biomass"),
-        (10, "WIND", "Wind"),
-        (11, "SOLAR", "Solar"),
-        (12, "GEOTHERMAL", "Geothermal"),
-        (13, "OIL", "Oil"),
-        (14, "GAS", "Gas"),
+        (2, "ANTHRACITE_COAL", "Anthracite Coal"),
+        (3, "BITUMINOUS_COAL", "Bituminous Coal"),
+        (4, "LIGNITE_COAL", "Lignite Coal"),
+        (5, "SUBBITUMINOUS_COAL", "Subbituminous Coal"),
+        (6, "WASTE_COAL", "Waste Coal"),
+        (7, "REFINED_COAL", "Refined Coal"),
+        (8, "SYNTHESIS_GAS_COAL", "Synthesis Gas Coal"),
+        (9, "DISTILLATE_FUEL_OIL", "Distillate Fuel Oil"),
+        (10, "JET_FUEL", "Jet Fuel"),
+        (11, "KEROSENE", "Kerosene"),
+        (12, "PETROLEUM_COKE", "Petroleum Coke"),
+        (13, "RESIDUAL_FUEL_OIL", "Residual Fuel Oil"),
+        (14, "PROPANE", "Propane"),
+        (15, "SYNTHESIS_GAS_PETROLEUM_COKE", "Synthesis Gas Petroleum Coke"),
+        (16, "WASTE_OIL", "Waste Oil"),
+        (17, "BLASTE_FURNACE_GAS", "Blaste Furnace Gas"),
+        (18, "NATURAL_GAS", "Natural Gas"),
+        (19, "OTHER_GAS", "Other Gas"),
+        (20, "NUCLEAR", "Nuclear"),
+        (21, "AG_BYPRODUCT", "Ag Byproduct"),
+        (22, "MUNICIPAL_WASTE", "Municipal Waste"),
+        (23, "OTHER_BIOMASS_SOLIDS", "Other Biomass Solids"),
+        (24, "WOOD_WASTE_SOLIDS", "Wood Waste Solids"),
+        (26, "OTHER_BIOMASS_LIQUIDS", "Other Biomass Liquids"),
+        (27, "SLUDGE_WASTE", "Sludge Waste"),
+        (28, "BLACK_LIQUOR", "Black Liquor"),
+        (29, "WOOD_WASTE_LIQUIDS", "Wood Waste Liquids"),
+        (30, "LANDFILL_GAS", "Landfill Gas"),
+        (31, "OTHEHR_BIOMASS_GAS", "Other Biomass Gas"),
+        (32, "GEOTHERMAL", "Geothermal"),
+        (33, "WASTE_HEAT", "Waste Heat"),
+        (34, "TIREDERIVED_FUEL", "Tirederived Fuel"),
+        (35, "OTHER", "Other"),
+        (36, "WIND", "Wind"),
+        (37, "SOLAR", "Solar"),
     ]
     for (id, name, desc) in default_fuels
         DBInterface.execute(fuel_stmt, (id, name, desc))
+    end
+
+    # Insert default storage technology types based on PowerSystems.StorageTech
+    st_stmt = DBInterface.prepare(
+        db,
+        "INSERT INTO storage_technology_types (id, name, description) VALUES (?, ?, ?)",
+    )
+    default_storage_techs = [
+        (1, "PTES", "Pumped Thermal Energy Storage"),
+        (2, "LIB", "Lithium-Ion Battery"),
+        (3, "LAB", "Lead Acid Battery"),
+        (4, "FLWB", "Redox Flow Battery"),
+        (5, "SIB", "Sodium Ion Battery"),
+        (6, "ZIB", "Zinc Ion Battery"),
+        (7, "HGS", "Hydrogen Gas Storage"),
+        (8, "LAES", "Liquid Air Energy Storage"),
+        (9, "OTHER_CHEM", "Chemical Storage"),
+        (10, "OTHER_MECH", "Mechanical Storage"),
+        (11, "OTHER_THERM", "Thermal Storage"),
+    ]
+    for (id, name, desc) in default_storage_techs
+        DBInterface.execute(st_stmt, (id, name, desc))
     end
 end

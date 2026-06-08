@@ -171,7 +171,7 @@ function transform_associations!(
             return "$(meta["module"]).$(meta["function"])"
         end
     associations.id .+= counts
-    deserializable_string(x) = haskey(SiennaOpenAPIModels.TYPE_NAMES, x)
+    deserializable_string(x) = haskey(TYPE_NAMES, x)
 
     associations = associations[deserializable_string.(associations[!, "owner_type"]), :]
     associations[!, "owner_id"] =

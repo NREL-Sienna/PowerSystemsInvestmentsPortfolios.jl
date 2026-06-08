@@ -114,7 +114,6 @@ export clear_time_series!
 export read_json_data
 export generate_invest_structs
 export generate_structs
-#export database_to_portfolio
 export add_supplemental_attribute!
 export remove_supplemental_attribute!
 export get_supplemental_attribute
@@ -139,6 +138,7 @@ export get_fixed_cost_discharge
 export get_wacc
 
 export db2portfolio
+export IDGenerator
 
 export update_system_with_nodal_results!
 
@@ -174,7 +174,6 @@ include("portfolio.jl")
 include("time_mapping.jl")
 include("serialization.jl")
 include("generate_structs.jl")
-include("db_parser.jl")
 include("utils/print.jl")
 include("utils/getters.jl")
 include("update_system.jl")

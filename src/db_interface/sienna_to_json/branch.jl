@@ -525,7 +525,7 @@ function psy2openapi(hvdc::PSY.TwoTerminalGenericHVDCLine, ids::IDGenerator)
         reactive_power_limits_to=get_min_max(
             scale(hvdc.reactive_power_limits_to, PSY.get_base_power(hvdc)),
         ),
-        loss=TwoTerminalLoss(get_value_curve(hvdc.loss)),
+        loss=PowerOpenAPIModels.TwoTerminalLoss(get_value_curve(hvdc.loss)),
     )
 end
 
@@ -577,7 +577,7 @@ function psy2openapi(lcc::PSY.TwoTerminalLCCLine, ids::IDGenerator)
         reactive_power_limits_to=get_min_max(
             scale(lcc.reactive_power_limits_to, PSY.get_base_power(lcc)),
         ),
-        loss=TwoTerminalLoss(get_value_curve(lcc.loss)),
+        loss=PowerOpenAPIModels.TwoTerminalLoss(get_value_curve(lcc.loss)),
     )
 end
 

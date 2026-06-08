@@ -71,7 +71,7 @@ end
 function get_row(
     table_name::AbstractString,
     schema::Tables.Schema,
-    c::ThermalStandard,
+    c::PowerOpenAPIModels.ThermalStandard,
     ::PSY.ThermalStandard,
 )
     return tuple(
