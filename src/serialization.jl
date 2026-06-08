@@ -10,7 +10,6 @@ const _CONTAINS_SHOULD_ENCODE = Union{
     DemandTechnology,
     TransmissionTechnology,
     Requirement,
-    IS.SupplementalAttribute,
     RegionTopology,
 }
 const SYSTEM_KWARGS = Set((
@@ -52,6 +51,7 @@ const ENCODED_FIELDS = Set((
     :eligible_demand,
     :eligible_technologies,
     :uuid,
+    :conformity
 ))
 
 """
@@ -99,7 +99,7 @@ function IS.serialize(portfolio::T) where {T <: Portfolio}
     for field in fieldnames(T)
         # Exclude time_series_directory because the portfolio may get deserialized on a
         # different portfolio.
-        if field != :time_series_directory
+        if !(field in [:time_series_directory, :base_system])
             data[string(field)] = serialize(getfield(portfolio, field))
         end
     end
@@ -668,6 +668,8 @@ function serialize_custom_types(field, technology::T) where {T <: _CONTAINS_SHOU
         end
     elseif field == :uuid
         val = string(IS.get_uuid(technology))
+    elseif field == :conformity
+        val = string(get_conformity(technology))
     else
         val = getfield(technology, field)
     end
@@ -771,6 +773,8 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         val = StorageTech(getfield(base_struct, name))
     elseif name == :uuid
         val = Base.UUID(getfield(base_struct, name))
+    elseif name == :conformity
+        val = LoadConformity(getfield(base_struct, name))
     end
 
     return val
