@@ -828,7 +828,6 @@ add_region!(portfolio, zone)
 foreach(x -> add_region!(portfolio, x), Iterators.flatten((buses, generators)))
 ```
 """
-
 function add_region!(
     portfolio::Portfolio,
     zone::T;
@@ -906,6 +905,10 @@ requirements = collect(Portfolio.get_requirements(Requirement, portfolio))
 """
 function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirement}
     return IS.get_components(T, portfolio.data)
+end
+
+function get_requirements(portfolio::Portfolio)
+    return get_requirements(Requirement, portfolio)
 end
 
 """
