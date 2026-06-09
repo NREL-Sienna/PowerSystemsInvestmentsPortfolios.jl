@@ -11,6 +11,8 @@ const _CONTAINS_SHOULD_ENCODE = Union{
     TransmissionTechnology,
     Requirement,
     ExistingCapacity,
+    RetrofitPotential,
+    TopologyMapping,
     RegionTopology,
 }
 const SYSTEM_KWARGS = Set((
