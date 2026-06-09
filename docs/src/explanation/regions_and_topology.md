@@ -10,20 +10,20 @@ CurrentModule = PowerSystemsInvestmentsPortfolios
 
 Two concrete types extend `RegionTopology`:
 
-- [`Zone`](@ref) — represents a planning zone in a zonal model
-- [`Node`](@ref) — represents a bus in a nodal model
+  - [`Zone`](@ref) — represents a planning zone in a zonal model
+  - [`Node`](@ref) — represents a bus in a nodal model
 
 The choice between zonal and nodal models affects which transmission technology types are available and how PSI builds the network constraints.
 
 ## Zone vs. Node — when to use each
 
-| | [`Zone`](@ref) | [`Node`](@ref) |
-|---|---|---|
-| Typical PSY analogue | `PSY.LoadZone` | `PSY.ACBus` |
-| Spatial resolution | Planning zone (aggregate) | Individual bus |
-| Transmission model | Zonal transport capacity | Nodal AC (or HVDC) power flow |
-| Technology class | `AggregateTransportTechnology` | `NodalACTransportTechnology`, `NodalHVDCTransportTechnology` |
-| Typical use | Multi-zone capacity expansion | Power-flow-constrained investment |
+|                      | [`Zone`](@ref)                 | [`Node`](@ref)                                               |
+|:-------------------- |:------------------------------ |:------------------------------------------------------------ |
+| Typical PSY analogue | `PSY.LoadZone`                 | `PSY.ACBus`                                                  |
+| Spatial resolution   | Planning zone (aggregate)      | Individual bus                                               |
+| Transmission model   | Zonal transport capacity       | Nodal AC (or HVDC) power flow                                |
+| Technology class     | `AggregateTransportTechnology` | `NodalACTransportTechnology`, `NodalHVDCTransportTechnology` |
+| Typical use          | Multi-zone capacity expansion  | Power-flow-constrained investment                            |
 
 **Zone fields:**
 
@@ -47,7 +47,7 @@ Node(;
 Creating a zone and adding it to a portfolio:
 
 ```julia
-zone = Zone(; name = "MISO_North", id = 1)
+zone = Zone(; name="MISO_North", id=1)
 add_region!(portfolio, zone)
 ```
 
@@ -58,11 +58,12 @@ Zone and Node names are matched against the base `PSY.System` by PSI when it bui
 The same matching requirement applies to nodes: a `Node` named `"BUS_101"` must correspond to a `PSY.ACBus` named `"BUS_101"` in the `base_system`.
 
 !!! tip
+    
     When building a portfolio from an existing `PSY.System`, iterate over the system's `LoadZone` or `ACBus` components to create the corresponding `Zone` or `Node` objects — this ensures names match automatically.
 
 ```julia
 for (i, lz) in enumerate(get_components(PSY.LoadZone, base_sys))
-    add_region!(portfolio, Zone(; name = get_name(lz), id = i))
+    add_region!(portfolio, Zone(; name=get_name(lz), id=i))
 end
 ```
 
@@ -74,7 +75,7 @@ Most technologies will have a single-element region vector:
 
 ```julia
 wind = SupplyTechnology{PSY.RenewableDispatch}(;
-    region = [zone_west],
+    region=[zone_west],
     # ...
 )
 ```
@@ -83,7 +84,7 @@ For technologies that operate in multiple zones simultaneously, pass all relevan
 
 ```julia
 interregional_solar = SupplyTechnology{PSY.RenewableDispatch}(;
-    region = [zone_west, zone_east],
+    region=[zone_west, zone_east],
     # ...
 )
 ```
@@ -92,8 +93,8 @@ Requirements also accept a region vector to scope their applicability. A reserve
 
 ## See Also
 
-- [`Zone`](@ref)
-- [`Node`](@ref)
-- [`RegionTopology`](@ref)
-- [`AggregateTransportTechnology`](@ref)
-- [`NodalACTransportTechnology`](@ref)
+  - [`Zone`](@ref)
+  - [`Node`](@ref)
+  - [`RegionTopology`](@ref)
+  - [`AggregateTransportTechnology`](@ref)
+  - [`NodalACTransportTechnology`](@ref)

@@ -14,16 +14,16 @@ The parser handles: region creation, technology construction (supply, storage, t
 
 The database parser maps SiennaGridDB relational tables to PSIP types:
 
-| Database concept | PSIP type |
-|---|---|
-| `planning_regions` table rows | [`Zone`](@ref) |
-| `balancing_topologies` rows | [`Node`](@ref) (nodal models) |
-| `supply_technologies` rows | [`SupplyTechnology`](@ref) |
-| `generation_units` rows | [`ExistingDevices`](@ref) supplemental attribute |
-| `storage_units` rows | [`StorageTechnology`](@ref) |
-| `transport_technologies` rows | [`AggregateTransportTechnology`](@ref) |
-| `loads` rows | [`DemandRequirement`](@ref) |
-| `time_series_associations` rows | InfrastructureSystems time series attachments |
+| Database concept                | PSIP type                                        |
+|:------------------------------- |:------------------------------------------------ |
+| `planning_regions` table rows   | [`Zone`](@ref)                                   |
+| `balancing_topologies` rows     | [`Node`](@ref) (nodal models)                    |
+| `supply_technologies` rows      | [`SupplyTechnology`](@ref)                       |
+| `generation_units` rows         | [`ExistingDevices`](@ref) supplemental attribute |
+| `storage_units` rows            | [`StorageTechnology`](@ref)                      |
+| `transport_technologies` rows   | [`AggregateTransportTechnology`](@ref)           |
+| `loads` rows                    | [`DemandRequirement`](@ref)                      |
+| `time_series_associations` rows | InfrastructureSystems time series attachments    |
 
 ## How to invoke it
 
@@ -39,12 +39,13 @@ portfolio = database_to_portfolio(
     0.025,                       # inflation_rate
     0.05,                        # interest_rate
     2030;                        # base_year
-    aggregation = PSY.LoadZone,  # optional: spatial resolution (default PSY.Area)
-    system = base_sys,           # optional: PSY.System with existing grid data
+    aggregation=PSY.LoadZone,  # optional: spatial resolution (default PSY.Area)
+    system=base_sys,           # optional: PSY.System with existing grid data
 )
 ```
 
 !!! warning
+    
     The `database_to_portfolio` interface reflects the current SiennaGridDB schema. As SiennaGridDB evolves, field mappings and query names may change. For the current interface, consult the `db_parser.jl` source and the SiennaGridDB documentation.
 
 ## Status and future direction
@@ -55,12 +56,12 @@ Note that the parser's SQL queries are tightly coupled to the current SiennaGrid
 
 ## See also
 
-- [`Zone`](@ref)
-- [`Node`](@ref)
-- [`SupplyTechnology`](@ref)
-- [`StorageTechnology`](@ref)
-- [`AggregateTransportTechnology`](@ref)
-- [`DemandRequirement`](@ref)
-- [`add_technology!`](@ref)
-- [`add_region!`](@ref)
-- [`add_requirement!`](@ref)
+  - [`Zone`](@ref)
+  - [`Node`](@ref)
+  - [`SupplyTechnology`](@ref)
+  - [`StorageTechnology`](@ref)
+  - [`AggregateTransportTechnology`](@ref)
+  - [`DemandRequirement`](@ref)
+  - [`add_technology!`](@ref)
+  - [`add_region!`](@ref)
+  - [`add_requirement!`](@ref)

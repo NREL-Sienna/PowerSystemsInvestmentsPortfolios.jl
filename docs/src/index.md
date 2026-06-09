@@ -55,20 +55,22 @@ There are five main sections containing different information:
 [Diataxis](https://diataxis.fr/) documentation framework.
 
 !!! tip "New to PowerSystems.jl?"
+    
     PSIP builds on top of `PowerSystems.jl` (PSY). If you are coming from a different
     capacity expansion tool (GenX, Switch, PLEXOS), here is the minimum you need to know:
-
-    - A **System** is a container for all power grid components at a single point in time.
-      Think of it as a database of buses, generators, lines, and loads.
-    - A **Component** is any typed object in the System: a bus (`ACBus`), a generator
-      (`ThermalStandard`, `RenewableDispatch`), a load (`PowerLoad`).
-    - **Time series** in a System are hourly or sub-hourly profiles (capacity factors,
-      demand) stored outside the component struct for memory efficiency.
-
+    
+      - A **System** is a container for all power grid components at a single point in time.
+        Think of it as a database of buses, generators, lines, and loads.
+      - A **Component** is any typed object in the System: a bus (`ACBus`), a generator
+        (`ThermalStandard`, `RenewableDispatch`), a load (`PowerLoad`).
+      - **Time series** in a System are hourly or sub-hourly profiles (capacity factors,
+        demand) stored outside the component struct for memory efficiency.
+    
     For a full introduction, see the
     [PowerSystems.jl tutorials](https://sienna-platform.github.io/PowerSystems.jl/stable/tutorials/generated_creating_system/).
 
 !!! tip "Already familiar with PowerSystems.jl?"
+    
     The mental model transfers directly: [`Portfolio`](@ref) is to PSIP what `System` is
     to PSY. Jump straight to the [Quick Start Guide](@ref "Quick Start Guide") or the
     [Tutorials](@ref "Create and Explore a Portfolio") to get started.
@@ -86,6 +88,7 @@ Pkg.add("PowerSystemsInvestmentsPortfolios")
 ```
 
 !!! note
+    
     `PowerSystemsInvestmentsPortfolios.jl` uses
     [`InfrastructureSystems.jl`](https://sienna-platform.github.io/InfrastructureSystems.jl/stable/)
     as a utility library. Many methods are re-exported from `InfrastructureSystems.jl`.

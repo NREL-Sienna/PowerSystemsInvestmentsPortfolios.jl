@@ -13,6 +13,7 @@ A [`DemandRequirement{T}`](@ref) represents a load that must be served in a regi
 **Key fields:** `name`, `id`, `available`, `region` (`Vector{RegionTopology}`), `power_systems_type`
 
 !!! note
+    
     `DemandRequirement` encodes a demand that the optimizer must satisfy — it is the demand side of the supply-demand balance constraint, not a policy requirement. See [`Requirement`](@ref) for policy constraints.
 
 ```@docs

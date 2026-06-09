@@ -7,6 +7,7 @@ CurrentModule = PowerSystemsInvestmentsPortfolios
 Requirements represent policy constraints added to a portfolio via [`add_requirement!`](@ref). Each type adds one or more constraints to the optimization problem.
 
 !!! note
+    
     All requirement types use `add_requirement!`, not `add_technology!`.
 
 CO₂ emissions limit. Use `max_tons_mwh` for an intensity cap (tCO₂/MWh) or `max_mtons` for an absolute annual cap (million tCO₂).

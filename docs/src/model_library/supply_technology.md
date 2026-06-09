@@ -10,11 +10,11 @@ A [`SupplyTechnology{T}`](@ref) represents a candidate generation technology for
 
 `T` must be a subtype of `PSY.Generator`. Common choices:
 
-| `T` | Typical technology |
-|---|---|
-| `PSY.ThermalStandard` | Gas CCGT, coal, nuclear |
+| `T`                     | Typical technology                  |
+|:----------------------- |:----------------------------------- |
+| `PSY.ThermalStandard`   | Gas CCGT, coal, nuclear             |
 | `PSY.RenewableDispatch` | Variable renewable (wind, solar PV) |
-| `PSY.HydroDispatch` | Run-of-river hydropower |
+| `PSY.HydroDispatch`     | Run-of-river hydropower             |
 
 ## Key field groups
 

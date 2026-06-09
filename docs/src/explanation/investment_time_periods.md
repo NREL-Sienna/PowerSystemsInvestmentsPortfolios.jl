@@ -8,15 +8,15 @@ CurrentModule = PowerSystemsInvestmentsPortfolios
 
 Capacity expansion models must answer two questions at very different time scales:
 
-- **When and where should new capacity be built?** Investment decisions span planning horizons of 10–30 years (e.g., 2025–2050), where committing to a new power plant or transmission line locks in capital for decades.
-- **Will that capacity operate reliably?** Operational adequacy is determined hour by hour, driven by the variability of renewable generation and load over a typical year.
+  - **When and where should new capacity be built?** Investment decisions span planning horizons of 10–30 years (e.g., 2025–2050), where committing to a new power plant or transmission line locks in capital for decades.
+  - **Will that capacity operate reliably?** Operational adequacy is determined hour by hour, driven by the variability of renewable generation and load over a typical year.
 
 Simulating every hour of every year across a full planning horizon is computationally intractable for most real-world systems. A 25-year horizon with 8 760 hours per year produces over 200 000 time steps — and capacity expansion models already carry large combinatorial investment decision spaces.
 
 Capacity expansion models therefore use two separate time dimensions:
 
-- **Investment periods** — multi-year planning windows (e.g., 2025–2029, 2030–2034) during which no new construction is assumed to take place mid-window. At the boundary between windows, investment decisions are made: which technologies to build, expand, or retire.
-- **Representative operational periods** — a small set of days (or weeks) sampled from a full year to capture the seasonal and diurnal variability of renewable generation and demand without simulating every hour of every year.
+  - **Investment periods** — multi-year planning windows (e.g., 2025–2029, 2030–2034) during which no new construction is assumed to take place mid-window. At the boundary between windows, investment decisions are made: which technologies to build, expand, or retire.
+  - **Representative operational periods** — a small set of days (or weeks) sampled from a full year to capture the seasonal and diurnal variability of renewable generation and demand without simulating every hour of every year.
 
 These two dimensions are independent. Each investment period is represented operationally by the same set of representative days, re-weighted to account for the characteristics of that window.
 
@@ -31,8 +31,8 @@ PSIP uses `InvestmentIntervals` internally to represent investment periods:
 ```julia
 struct InvestmentIntervals
     time_stamps::Vector{NTuple{2, Dates.Date}}  # (start_date, end_date) per period
-    map_to_operational_slices::Dict{Int,Vector{Int}}
-    map_to_feasibility_slices::Dict{Int,Vector{Int}}
+    map_to_operational_slices::Dict{Int, Vector{Int}}
+    map_to_feasibility_slices::Dict{Int, Vector{Int}}
 end
 ```
 
@@ -67,6 +67,7 @@ PSIP uses InfrastructureSystems (IS) `SingleTimeSeries` for all profiles. Two ca
 **Operational time series** are hourly or sub-hourly profiles for capacity factors, demand, and similar quantities. They are attached with keys such as `"ops_variable_cap_factor"` for variable renewable capacity factors or `"ops_demand"` for load profiles. The metadata on each time series chunk identifies which representative day it belongs to via `(year, rep_day)` key-value pairs.
 
 !!! note
+    
     The time series key names (e.g., `"inv_capex"`, `"ops_variable_cap_factor"`, `"ops_demand"`) are conventions expected by PSI. Using non-standard key names will cause PSI to ignore or error on the time series data. Refer to the PSI documentation for the full list of expected keys.
 
 ## The `InvestmentIntervals` and `OperationalPeriods` structs
@@ -77,7 +78,7 @@ They are documented here for completeness and for users who need to inspect the 
 
 ## See Also
 
-- [`InvestmentIntervals`](@ref)
-- [`OperationalPeriods`](@ref)
-- [`TimeMapping`](@ref)
-- [`SupplyTechnology`](@ref)
+  - [`InvestmentIntervals`](@ref)
+  - [`OperationalPeriods`](@ref)
+  - [`TimeMapping`](@ref)
+  - [`SupplyTechnology`](@ref)

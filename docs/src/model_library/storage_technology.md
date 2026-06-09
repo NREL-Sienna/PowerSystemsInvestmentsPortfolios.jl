@@ -10,8 +10,8 @@ A [`StorageTechnology{T}`](@ref) represents a candidate energy storage technolog
 
 `T` must be a subtype of `PSY.Storage`. The most common choice:
 
-| `T` | Typical technology |
-|---|---|
+| `T`                          | Typical technology                        |
+|:---------------------------- |:----------------------------------------- |
 | `PSY.EnergyReservoirStorage` | Battery (lithium-ion, flow), pumped hydro |
 
 ## Key field groups

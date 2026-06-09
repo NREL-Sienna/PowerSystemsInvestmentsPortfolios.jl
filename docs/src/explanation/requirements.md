@@ -14,13 +14,14 @@ Conceptually, each requirement adds one or more constraints to the optimization 
 
 `Requirement <: IS.InfrastructureSystemsComponent` is the abstract base for all policy constraints. Requirements are distinct from technologies:
 
-| | `Technology` subtypes | `Requirement` subtypes |
-|---|---|---|
-| Added via | `add_technology!` | `add_requirement!` |
-| Role | Investment candidate | Policy constraint |
-| Parameterized by PSY type? | Yes (`{T}`) | No |
+|                            | `Technology` subtypes | `Requirement` subtypes |
+|:-------------------------- |:--------------------- |:---------------------- |
+| Added via                  | `add_technology!`     | `add_requirement!`     |
+| Role                       | Investment candidate  | Policy constraint      |
+| Parameterized by PSY type? | Yes (`{T}`)           | No                     |
 
 !!! note
+    
     Requirements must be added to a portfolio with `add_requirement!`, not `add_technology!`. Passing a requirement to `add_technology!` will throw a method error.
 
 ## Requirement Types
@@ -29,8 +30,8 @@ Conceptually, each requirement adds one or more constraints to the optimization 
 
 [`CarbonCaps`](@ref) enforces a CO₂ emissions limit. It operates in two modes:
 
-- `max_tons_mwh` caps the emission *intensity* of the system (tCO₂/MWh of total generation).
-- `max_mtons` caps the *absolute* annual volume of CO₂ emissions (million tCO₂/year).
+  - `max_tons_mwh` caps the emission *intensity* of the system (tCO₂/MWh of total generation).
+  - `max_mtons` caps the *absolute* annual volume of CO₂ emissions (million tCO₂/year).
 
 Use `CarbonCaps` to model carbon budget constraints, clean electricity standards that limit emissions per unit of output, or absolute tonnage limits set by regulation.
 
@@ -68,8 +69,8 @@ This is a strictly stronger constraint than `EnergyShareRequirements`. A portfol
 
 Several requirement types accept `eligible_regions` and `eligible_resources` vectors to scope their effect spatially and by technology type.
 
-- `eligible_regions::Vector{RegionTopology}` — when set, the requirement applies only within those planning zones or nodes. An empty vector means the requirement applies globally across all regions.
-- `eligible_resources::Vector{ResourceTechnology}` — the set of technology candidates that count toward satisfying (or are counted against) the requirement. For `EnergyShareRequirements`, only generation from listed technologies counts toward the annual fraction. For `MinimumCapacityRequirements` and `MaximumCapacityRequirements`, only the listed technologies contribute to the capacity total being bounded.
+  - `eligible_regions::Vector{RegionTopology}` — when set, the requirement applies only within those planning zones or nodes. An empty vector means the requirement applies globally across all regions.
+  - `eligible_resources::Vector{ResourceTechnology}` — the set of technology candidates that count toward satisfying (or are counted against) the requirement. For `EnergyShareRequirements`, only generation from listed technologies counts toward the annual fraction. For `MinimumCapacityRequirements` and `MaximumCapacityRequirements`, only the listed technologies contribute to the capacity total being bounded.
 
 Both fields allow one requirement object to target a specific subset of the modeled system without creating separate requirement objects for each region or resource class.
 
@@ -79,12 +80,12 @@ Both fields allow one requirement object to target a specific subset of the mode
 
 ## See Also
 
-- [`Requirement`](@ref)
-- [`CarbonCaps`](@ref)
-- [`CarbonTax`](@ref)
-- [`CapacityReserveMargin`](@ref)
-- [`EnergyShareRequirements`](@ref)
-- [`HourlyMatching`](@ref)
-- [`MinimumCapacityRequirements`](@ref)
-- [`MaximumCapacityRequirements`](@ref)
-- [`add_requirement!`](@ref)
+  - [`Requirement`](@ref)
+  - [`CarbonCaps`](@ref)
+  - [`CarbonTax`](@ref)
+  - [`CapacityReserveMargin`](@ref)
+  - [`EnergyShareRequirements`](@ref)
+  - [`HourlyMatching`](@ref)
+  - [`MinimumCapacityRequirements`](@ref)
+  - [`MaximumCapacityRequirements`](@ref)
+  - [`add_requirement!`](@ref)
