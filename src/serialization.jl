@@ -51,7 +51,7 @@ const ENCODED_FIELDS = Set((
     :eligible_demand,
     :eligible_technologies,
     :uuid,
-    :conformity
+    :conformity,
 ))
 
 """
