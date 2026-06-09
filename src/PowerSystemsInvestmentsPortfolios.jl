@@ -75,6 +75,8 @@ export PortfolioFinancialData
 export InvestmentScheduleResults
 export TechnologyFinancialData
 export TimeMapping
+export InvestmentIntervals
+export OperationalPeriods
 
 export get_name
 export get_description
@@ -105,6 +107,7 @@ export set_investment_schedule!
 export set_base_system!
 export add_technology!
 export add_technologies!
+export remove_technology!
 export add_region!
 export add_requirement!
 export add_time_series!
