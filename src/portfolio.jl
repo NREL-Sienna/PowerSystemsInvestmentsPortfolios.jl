@@ -716,7 +716,7 @@ Remove the time series data for a component and time series type.
 function remove_time_series!(
     portfolio::Portfolio,
     ::Type{T},
-    component::PSY.Component,
+    component::Technology,
     name::String,
 ) where {T <: PSY.TimeSeriesData}
     return IS.remove_time_series!(portfolio.data, T, component, name)
