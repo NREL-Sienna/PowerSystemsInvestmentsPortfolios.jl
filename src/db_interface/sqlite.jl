@@ -837,3 +837,134 @@ function db2openapi_json(
 
     return output_path
 end
+
+function portfolio2openapi_json(
+    db,
+    output_path::AbstractString;
+    time_series::Bool=false,
+    time_series_data::Bool=false,
+)
+    components_dict = Dict{String, Vector{Dict{String, Any}}}()
+
+    # foreach_component_dict(db, ALL_DESERIALIZABLE_TYPES) do OPENAPI_T, dict
+    #     type_name = string(nameof(OPENAPI_T))
+    #     if !haskey(components_dict, type_name)
+    #         components_dict[type_name] = Vector{Dict{String, Any}}()
+    #     end
+    #     push!(components_dict[type_name], dict)
+    # end
+
+    # sa_dict = Dict{String, Vector{Dict{String, Any}}}()
+    # for OPENAPI_T in ALL_SA_OPENAPI_TYPES
+    #     type_name = string(nameof(OPENAPI_T))
+    #     rows = DBInterface.execute(
+    #         db,
+    #         "SELECT id, value FROM supplemental_attributes WHERE TYPE = ?",
+    #         (type_name,),
+    #     )
+    #     for row in rows
+    #         if !haskey(sa_dict, type_name)
+    #             sa_dict[type_name] = Vector{Dict{String, Any}}()
+    #         end
+    #         push!(sa_dict[type_name], JSON.parse(row.value))
+    #     end
+    # end
+
+    # sa_assocs = [
+    #     Dict("attribute_id" => r.attribute_id, "entity_id" => r.entity_id) for r in
+    #     DBInterface.execute(db, "SELECT * FROM supplemental_attributes_association")
+    # ]
+
+    # output = Dict{String, Any}(
+    #     "system" => Dict{String, Any}(
+    #         "name" => system_name,
+    #         "base_power" => base_power,
+    #         "description" => description,
+    #     ),
+    #     "components" => components_dict,
+    #     "supplemental_attributes" => sa_dict,
+    #     "supplemental_attribute_associations" => sa_assocs,
+    # )
+
+    # if time_series
+    #     output["time_series"] = export_time_series_dict(db; include_data=time_series_data)
+    # end
+
+    # open(output_path, "w") do io
+    #     JSON.print(io, output, 2)
+    # end
+
+    # return output_path
+end
+
+function system2openapi_json(
+    system,
+    output_path::AbstractString;
+    time_series::Bool=false,
+    time_series_data::Bool=false,
+)
+    components_dict = Dict{String, Vector{Dict{String, Any}}}()
+
+    # foreach_component_dict(db, ALL_DESERIALIZABLE_TYPES) do OPENAPI_T, dict
+    #     type_name = string(nameof(OPENAPI_T))
+    #     if !haskey(components_dict, type_name)
+    #         components_dict[type_name] = Vector{Dict{String, Any}}()
+    #     end
+    #     push!(components_dict[type_name], dict)
+    # end
+
+    # for (T, OPENAPI_T) in zip(ALL_PSY_TYPES, ALL_TYPES)
+    #     components = PSY.get_components(T, sys)
+    #     for component in components
+    #         openapi_obj = sienna2openapi(component, IDGenerator())
+    #         dict = OpenAPI.to_dict(openapi_obj)
+    #         type_name = string(nameof(OPENAPI_T))
+    #         if !haskey(components_dict, type_name)
+    #             components_dict[type_name] = Vector{Dict{String, Any}}()
+    #         end
+    #         push!(components_dict[type_name], dict)
+    #     end
+    # end
+
+    # sa_dict = Dict{String, Vector{Dict{String, Any}}}()
+    # for OPENAPI_T in ALL_SA_OPENAPI_TYPES
+    #     type_name = string(nameof(OPENAPI_T))
+    #     rows = DBInterface.execute(
+    #         db,
+    #         "SELECT id, value FROM supplemental_attributes WHERE TYPE = ?",
+    #         (type_name,),
+    #     )
+    #     for row in rows
+    #         if !haskey(sa_dict, type_name)
+    #             sa_dict[type_name] = Vector{Dict{String, Any}}()
+    #         end
+    #         push!(sa_dict[type_name], JSON.parse(row.value))
+    #     end
+    # end
+
+    # sa_assocs = [
+    #     Dict("attribute_id" => r.attribute_id, "entity_id" => r.entity_id) for r in
+    #     DBInterface.execute(db, "SELECT * FROM supplemental_attributes_association")
+    # ]
+
+    # output = Dict{String, Any}(
+    #     "system" => Dict{String, Any}(
+    #         "name" => PSY.get_name(system),
+    #         "base_power" => PSY.get_base_power(system),
+    #         "description" => PSY.get_description(system),
+    #     ),
+    #     "components" => components_dict,
+    #     "supplemental_attributes" => sa_dict,
+    #     "supplemental_attribute_associations" => sa_assocs,
+    # )
+
+    # if time_series
+    #     output["time_series"] = export_time_series_dict(db; include_data=time_series_data)
+    # end
+
+    # open(output_path, "w") do io
+    #     JSON.print(io, output, 2)
+    # end
+
+    # return output_path
+end
