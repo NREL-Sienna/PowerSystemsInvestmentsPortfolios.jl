@@ -52,11 +52,7 @@ export get_demand_energy_efficiency
 export get_duration_limits
 export get_efficiency
 export get_efficiency_storage
-export get_eligible_demand
 export get_eligible_generators
-export get_eligible_regions
-export get_eligible_resources
-export get_eligible_technologies
 export get_end_node
 export get_end_region
 export get_existing_devices
@@ -105,6 +101,7 @@ export get_prime_mover_type
 export get_ramp_limits
 export get_reactance
 export get_region
+export get_requirements
 export get_resistance
 export get_retirement_potential
 export get_retrofit_fraction
@@ -156,11 +153,7 @@ export set_demand_energy_efficiency!
 export set_duration_limits!
 export set_efficiency!
 export set_efficiency_storage!
-export set_eligible_demand!
 export set_eligible_generators!
-export set_eligible_regions!
-export set_eligible_resources!
-export set_eligible_technologies!
 export set_end_node!
 export set_end_region!
 export set_existing_devices!
@@ -209,6 +202,7 @@ export set_prime_mover_type!
 export set_ramp_limits!
 export set_reactance!
 export set_region!
+export set_requirements!
 export set_resistance!
 export set_retirement_potential!
 export set_retrofit_fraction!

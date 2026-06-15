@@ -13,7 +13,6 @@ This file is auto-generated. Do not edit.
         id::Int64
         ext::Dict
         available::Bool
-        eligible_regions::Vector{RegionTopology}
     end
 
 Policy requirement that defines an additional cost penalty per ton of CO2 produced in the target in the eligible regions
@@ -26,7 +25,6 @@ Policy requirement that defines an additional cost penalty per ton of CO2 produc
 - `id::Int64`: ID for individual policy
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
-- `eligible_regions::Vector{RegionTopology}`: (default: `Vector{RegionTopology}()`) List of regions that contribute to the carbon cap constraint.
 """
 mutable struct CarbonTax <: Requirement
     "The requirement name"
@@ -43,13 +41,11 @@ mutable struct CarbonTax <: Requirement
     ext::Dict
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
-    "List of regions that contribute to the carbon cap constraint."
-    eligible_regions::Vector{RegionTopology}
 end
 
 
-function CarbonTax(; name, target_year=2050, tax_dollars_per_ton=0.0, internal=InfrastructureSystemsInternal(), id, ext=Dict(), available, eligible_regions=Vector{RegionTopology}(), )
-    CarbonTax(name, target_year, tax_dollars_per_ton, internal, id, ext, available, eligible_regions, )
+function CarbonTax(; name, target_year=2050, tax_dollars_per_ton=0.0, internal=InfrastructureSystemsInternal(), id, ext=Dict(), available, )
+    CarbonTax(name, target_year, tax_dollars_per_ton, internal, id, ext, available, )
 end
 
 """Get [`CarbonTax`](@ref) `name`."""
@@ -66,8 +62,6 @@ get_id(value::CarbonTax) = value.id
 get_ext(value::CarbonTax) = value.ext
 """Get [`CarbonTax`](@ref) `available`."""
 get_available(value::CarbonTax) = value.available
-"""Get [`CarbonTax`](@ref) `eligible_regions`."""
-get_eligible_regions(value::CarbonTax) = value.eligible_regions
 
 """Set [`CarbonTax`](@ref) `name`."""
 set_name!(value::CarbonTax, val) = value.name = val
@@ -83,8 +77,6 @@ set_id!(value::CarbonTax, val) = value.id = val
 set_ext!(value::CarbonTax, val) = value.ext = val
 """Set [`CarbonTax`](@ref) `available`."""
 set_available!(value::CarbonTax, val) = value.available = val
-"""Set [`CarbonTax`](@ref) `eligible_regions`."""
-set_eligible_regions!(value::CarbonTax, val) = value.eligible_regions = val
 
 function serialize_openapi_struct(technology::CarbonTax, vals...)
     base_struct = APIServer.CarbonTax(; vals...)

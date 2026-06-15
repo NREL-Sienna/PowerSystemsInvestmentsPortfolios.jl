@@ -926,6 +926,20 @@ function get_requirement(
     return IS.get_component(T, portfolio.data, name)
 end
 
+"""
+Return a vector of devices contributing to the requirement.
+"""
+function get_contributing_technologies(
+    port::Portfolio,
+    requirement::T,
+) where {T <: Requirement}
+    #throw_if_not_attached(requirement, port)
+    return [
+        x for x in get_technologies(supports_requirements, Technology, port) if
+        has_requirement(x, requirement)
+    ]
+end
+
 ###########################################
 ######### Supplemental Attributes #########
 ###########################################

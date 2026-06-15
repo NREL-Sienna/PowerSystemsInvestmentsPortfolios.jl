@@ -25,3 +25,17 @@ get_time_series_container(val::Technology) = val.time_series_container
 get_supplemental_attributes_container(val::Technology) =
     val.supplemental_attributes_container
 supports_time_series(::Technology) = true
+supports_requirements(::Technology) = true
+
+"""
+Return true if the requirement is attached to the Technology.
+"""
+function has_requirement(technology::Technology, requirement::Requirement)
+    for _requirement in get_requirements(technology)
+        if IS.get_uuid(_requirement) == IS.get_uuid(requirement)
+            return true
+        end
+    end
+
+    return false
+end

@@ -40,11 +40,11 @@ import HDF5
 import Tables
 
 export Portfolio
+export Requirement
 export Technology
 export ResourceTechnology
 export DemandTechnology
 export TransmissionTechnology
-export Requirement
 export FinancialData
 export RegionTopology
 export SupplyTechnology
@@ -88,6 +88,8 @@ export get_available_technologies
 export get_technologies_by_name
 export get_requirement
 export get_requirements
+export get_contributing_technologies
+export has_requirement
 export get_ext
 export get_description
 export get_financial_data
@@ -163,11 +165,11 @@ using .APIServer
 
 include("definitions.jl")
 
+include("models/requirements.jl")
 include("models/technologies.jl")
 include("models/regions.jl")
 include("models/financial_data/financial_data.jl")
 include("models/financial_data/TechnologyFinancialData.jl")
-include("models/requirements.jl")
 include("models/generated/includes.jl")
 include("investment_schedule.jl")
 

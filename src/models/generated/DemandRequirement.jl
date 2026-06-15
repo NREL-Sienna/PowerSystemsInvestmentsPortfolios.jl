@@ -6,6 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
+        requirements::Vector{Requirement}
         available::Bool
         name::String
         id::Int64
@@ -24,6 +25,7 @@ This file is auto-generated. Do not edit.
 Demand requirements for a region.
 
 # Arguments
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `available::Bool`: (default: `true`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: The technology name
 - `id::Int64`: ID for individual demand requirement
@@ -39,6 +41,8 @@ Demand requirements for a region.
 - `new_demand_mw::Float64`: (default: `0.0`) The value of the peak demand to be used for new DemandRequirements.
 """
 mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "The technology name"
@@ -68,10 +72,12 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
 end
 
 
-function DemandRequirement{T}(; available=true, name, id, conformity=PSY.LoadConformity.UNDEFINED, growth_rate=0.0, power_systems_type, value_of_lost_load, internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), unserved_demand_curve=LinearCurve(0.0), new_construction_year=2020, new_demand_mw=0.0, ) where T <: PSY.StaticInjection
-    DemandRequirement{T}(available, name, id, conformity, growth_rate, power_systems_type, value_of_lost_load, internal, ext, region, unserved_demand_curve, new_construction_year, new_demand_mw, )
+function DemandRequirement{T}(; requirements=Vector(), available=true, name, id, conformity=PSY.LoadConformity.UNDEFINED, growth_rate=0.0, power_systems_type, value_of_lost_load, internal=InfrastructureSystemsInternal(), ext=Dict(), region=Vector(), unserved_demand_curve=LinearCurve(0.0), new_construction_year=2020, new_demand_mw=0.0, ) where T <: PSY.StaticInjection
+    DemandRequirement{T}(requirements, available, name, id, conformity, growth_rate, power_systems_type, value_of_lost_load, internal, ext, region, unserved_demand_curve, new_construction_year, new_demand_mw, )
 end
 
+"""Get [`DemandRequirement`](@ref) `requirements`."""
+get_requirements(value::DemandRequirement) = value.requirements
 """Get [`DemandRequirement`](@ref) `available`."""
 get_available(value::DemandRequirement) = value.available
 """Get [`DemandRequirement`](@ref) `name`."""
@@ -99,6 +105,8 @@ get_new_construction_year(value::DemandRequirement) = value.new_construction_yea
 """Get [`DemandRequirement`](@ref) `new_demand_mw`."""
 get_new_demand_mw(value::DemandRequirement) = value.new_demand_mw
 
+"""Set [`DemandRequirement`](@ref) `requirements`."""
+set_requirements!(value::DemandRequirement, val) = value.requirements = val
 """Set [`DemandRequirement`](@ref) `available`."""
 set_available!(value::DemandRequirement, val) = value.available = val
 """Set [`DemandRequirement`](@ref) `name`."""
