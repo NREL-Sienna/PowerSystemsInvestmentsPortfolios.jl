@@ -6,7 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
-        requirements::Vector{Requirements}
+        requirements::Vector{Requirement}
         outage_factor::Float64
         prime_mover_type::PrimeMovers
         capital_costs::PSY.ValueCurve
@@ -35,7 +35,7 @@ This file is auto-generated. Do not edit.
 Candidate generation technology for a region. Can represent either a thermal or renewable generation technology
 
 # Arguments
-- `requirements::Vector{Requirements}`: (default: `Vector()`) Requirements that this technology contributes to
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology. Fraction of hours in a year where technology is unavailable.
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
@@ -61,8 +61,8 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Minimum and maximum allowable installed capacity for a technology (MW)
 """
 mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
-    "Requirements that this technology contributes to"
-    requirements::Vector{Requirements}
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Derating factor to account for planned or forced outages of a technology. Fraction of hours in a year where technology is unavailable."
     outage_factor::Float64
     "Prime mover for generator"

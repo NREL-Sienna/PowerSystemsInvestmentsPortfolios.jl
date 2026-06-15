@@ -6,7 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: ResourceTechnology
-        requirements::Vector{Requirements}
+        requirements::Vector{Requirement}
         operation_costs_power::PSY.OperationalCost
         lifetime_storage::Int
         available::Bool
@@ -44,7 +44,7 @@ This file is auto-generated. Do not edit.
 Supply Technology that supports a StorageTechnology co-located with wind and solar generation
 
 # Arguments
-- `requirements::Vector{Requirements}`: (default: `Vector()`) Requirements that this technology contributes to
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `operation_costs_power::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a storage technology
 - `lifetime_storage::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
 - `available::Bool`: (default: `True`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
@@ -79,8 +79,8 @@ Supply Technology that supports a StorageTechnology co-located with wind and sol
 - `capital_costs_solar::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
 """
 mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: ResourceTechnology
-    "Requirements that this technology contributes to"
-    requirements::Vector{Requirements}
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Fixed and variable O&M costs for a storage technology"
     operation_costs_power::PSY.OperationalCost
     "Maximum number of years a technology can be active once installed (years)"

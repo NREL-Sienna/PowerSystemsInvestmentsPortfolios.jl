@@ -6,7 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
-        requirements::Vector{Requirements}
+        requirements::Vector{Requirement}
         capital_costs::PSY.ValueCurve
         available::Bool
         name::String
@@ -27,7 +27,7 @@ This file is auto-generated. Do not edit.
 Nodal representation of candidate AC transmission lines between two regions.
 
 # Arguments
-- `requirements::Vector{Requirements}`: (default: `Vector()`) Requirements that this technology contributes to
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line (USD/MW).
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
@@ -45,8 +45,8 @@ Nodal representation of candidate AC transmission lines between two regions.
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Allowable capacity for a transmission line (MW)
 """
 mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
-    "Requirements that this technology contributes to"
-    requirements::Vector{Requirements}
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Cost of adding new capacity to the nodal transmission line (USD/MW)."
     capital_costs::PSY.ValueCurve
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"

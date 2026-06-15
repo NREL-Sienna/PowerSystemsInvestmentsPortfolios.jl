@@ -6,7 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnology
-        requirements::Vector{Requirements}
+        requirements::Vector{Requirement}
         price_per_unit::PSY.ValueCurve
         available::Bool
         name::String
@@ -29,7 +29,7 @@ This file is auto-generated. Do not edit.
 Represents demand side technologies such as electric vehicles or hydrogen electrolyzers.
 
 # Arguments
-- `requirements::Vector{Requirements}`: (default: `Vector()`) Requirements that this technology contributes to
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `price_per_unit::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: The technology name
@@ -49,8 +49,8 @@ Represents demand side technologies such as electric vehicles or hydrogen electr
 - `peak_demand_mw::Float64`: (default: `0.0`) Peak demand value in MW
 """
 mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnology
-    "Requirements that this technology contributes to"
-    requirements::Vector{Requirements}
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers"
     price_per_unit::PSY.ValueCurve
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"

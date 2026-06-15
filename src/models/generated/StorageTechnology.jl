@@ -6,7 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
-        requirements::Vector{Requirements}
+        requirements::Vector{Requirement}
         prime_mover_type::PrimeMovers
         lifetime::Int
         available::Bool
@@ -37,7 +37,7 @@ This file is auto-generated. Do not edit.
 Candidate storage technology in a region.
 
 # Arguments
-- `requirements::Vector{Requirements}`: (default: `Vector()`) Requirements that this technology contributes to
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover for generator
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
@@ -65,8 +65,8 @@ Candidate storage technology in a region.
 - `capital_costs_discharge::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
 """
 mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
-    "Requirements that this technology contributes to"
-    requirements::Vector{Requirements}
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Prime mover for generator"
     prime_mover_type::PrimeMovers
     "Maximum number of years a technology can be active once installed (years)"

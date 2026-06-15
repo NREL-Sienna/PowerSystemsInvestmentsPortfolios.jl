@@ -6,7 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
-        requirements::Vector{Requirements}
+        requirements::Vector{Requirement}
         available::Bool
         name::String
         id::Int64
@@ -25,7 +25,7 @@ This file is auto-generated. Do not edit.
 Demand requirements for a region.
 
 # Arguments
-- `requirements::Vector{Requirements}`: (default: `Vector()`) Requirements that this technology contributes to
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `available::Bool`: (default: `true`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: The technology name
 - `id::Int64`: ID for individual demand requirement
@@ -41,8 +41,8 @@ Demand requirements for a region.
 - `new_demand_mw::Float64`: (default: `0.0`) The value of the peak demand to be used for new DemandRequirements.
 """
 mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
-    "Requirements that this technology contributes to"
-    requirements::Vector{Requirements}
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "The technology name"
@@ -105,6 +105,8 @@ get_new_construction_year(value::DemandRequirement) = value.new_construction_yea
 """Get [`DemandRequirement`](@ref) `new_demand_mw`."""
 get_new_demand_mw(value::DemandRequirement) = value.new_demand_mw
 
+"""Set [`DemandRequirement`](@ref) `requirements`."""
+set_requirements!(value::DemandRequirement, val) = value.requirements = val
 """Set [`DemandRequirement`](@ref) `available`."""
 set_available!(value::DemandRequirement, val) = value.available = val
 """Set [`DemandRequirement`](@ref) `name`."""

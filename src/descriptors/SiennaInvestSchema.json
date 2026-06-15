@@ -292,6 +292,11 @@
                     "type": "TechnologyFinancialData",
                     "description": "Struct containing relevant financial information for a technology"
                 },
+                "requirements": {
+                    "type": "Vector{Requirement}",
+                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+                    "default": "Vector()"
+                },
                 "ext": {
                     "type": "Dict",
                     "default": "Dict()",
@@ -626,6 +631,11 @@
                     "type": "TechnologyFinancialData",
                     "description": "Struct containing relevant financial information for a technology"
                 },
+                "requirements": {
+                    "type": "Vector{Requirement}",
+                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+                    "default": "Vector()"
+                },
                 "ext": {
                     "type": "Dict",
                     "default": "Dict()",
@@ -720,6 +730,11 @@
                     "description": "Variable operation and maintenance costs associated with flexible demand deferral/advancement",
                     "default": "LinearCurve(0.0)"
                 },
+                "requirements": {
+                    "type": "Vector{Requirement}",
+                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+                    "default": "Vector()"
+                },
                 "ext": {
                     "type": "Dict",
                     "default": "Dict()",
@@ -790,6 +805,11 @@
                     "type": "TechnologyFinancialData",
                     "description": "Struct containing relevant financial information for a technology"
                 },
+                "requirements": {
+                    "type": "Vector{Requirement}",
+                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+                    "default": "Vector()"
+                },
                 "ext": {
                     "type": "Dict",
                     "default": "Dict()",
@@ -859,6 +879,11 @@
               "financial_data": {
                 "type": "TechnologyFinancialData",
                 "description": "Struct containing relevant financial information for a technology"
+              },
+              "requirements": {
+                    "type": "Vector{Requirement}",
+                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+                    "default": "Vector()"
               },
               "ext": {
                   "type": "Dict",
@@ -940,6 +965,11 @@
                   "type": "TechnologyFinancialData",
                   "description": "Struct containing relevant financial information for a technology"
                 },
+                "requirements": {
+                    "type": "Vector{Requirement}",
+                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+                    "default": "Vector()"
+                },
                 "ext": {
                     "type": "Dict",
                     "default": "Dict()",
@@ -1014,6 +1044,11 @@
                     "description": "Zone or node where the demand requirement is located",
                     "default": "Vector()"
                 },
+                "requirements": {
+                    "type": "Vector{Requirement}",
+                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+                    "default": "Vector()"
+                },
                 "ext": {
                     "type": "Dict",
                     "default": "Dict()",
@@ -1047,11 +1082,6 @@
                 "id": {
                     "type": "Int64",
                     "description": "ID for individual policy"
-                },
-                "eligible_regions": {
-                    "type": "Vector{RegionTopology}",
-                    "description": "List of regions that contribute to the carbon cap constraint.",
-                    "default": "Vector{RegionTopology}()"
                 },
                 "max_tons_mwh": {
                     "type": "Float64",
@@ -1106,11 +1136,6 @@
                     "description": "Year in which carbon tax will be applied",
                     "default": "2050"
                 },
-                "eligible_regions": {
-                    "type": "Vector{RegionTopology}",
-                    "description": "List of regions that contribute to the carbon cap constraint.",
-                    "default": "Vector{RegionTopology}()"
-                },
                 "tax_dollars_per_ton": {
                     "type": "Float64",
                     "description": "Cost penalty per ton of CO2 emitted by technologies in the eligible regions during the target year (USD/tCO2)",
@@ -1148,16 +1173,6 @@
                 "id": {
                     "type": "Int64",
                     "description": "ID for individual policy"
-                },
-                "eligible_regions": {
-                    "type": "Vector{RegionTopology}",
-                    "description": "List of regions where this reserve margin is enforced",
-                    "default": "Vector{RegionTopology}()"
-                },
-                "eligible_technologies": {
-                    "type": "Vector{Technology}",
-                    "description": "List of technologies that can contribute to the capacity reserve margin requirement",
-                    "default": "Vector{Technology}()"
                 },
                 "target_year": {
                     "type": "Int64",
@@ -1201,11 +1216,6 @@
                 "id": {
                     "type": "Int64",
                     "description": "ID for individual policy"
-                },
-                "eligible_resources": {
-                    "type": "Vector{ResourceTechnology}",
-                    "description": "List of resources that contribute to the capacity requirement.",
-                    "default": "Vector{ResourceTechnology}()"
                 },
                 "min_capacity_mw": {
                     "type": "Float64",
@@ -1255,16 +1265,6 @@
                     "description": "Year in which the energy share requirement will be applied",
                     "default": "2050"
                 },
-                "eligible_regions": {
-                    "type": "Vector{RegionTopology}",
-                    "description": "List of regions where the EnergyShareRequirement will be applied.",
-                    "default": "Vector{RegionTopology}()"
-                },
-                "eligible_resources": {
-                    "type": "Vector{ResourceTechnology}",
-                    "description": "List of ResourceTechnologies that are eligible to meet the energy share requirement.",
-                    "default": "Vector{ResourceTechnology}()"
-                },
                 "generation_fraction_requirement": {
                     "type": "Float64",
                     "description": "Fraction of total annual demand across all eligible zones that needs to be met by eligible resources.",
@@ -1303,16 +1303,6 @@
                     "type": "Bool",
                     "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
                 },
-                "eligible_resources": {
-                    "type": "Vector{ResourceTechnology}",
-                    "description": "List of technologies eligible to provide hourly generation for demand side technologies.",
-                    "default": "Vector{ResourceTechnology}()"
-                },
-                "eligible_demand": {
-                    "type": "Vector{DemandTechnology}",
-                    "description": "List of demand side technologies that need to be met with hourly matching.",
-                    "default": "Vector{DemandTechnology}()"
-                },
                 "ext": {
                     "type": "Dict",
                     "default": "Dict()",
@@ -1345,11 +1335,6 @@
                 "id": {
                     "type": "Int64",
                     "description": "ID for individual policy"
-                },
-                "eligible_resources": {
-                    "type": "Vector{ResourceTechnology}",
-                    "description": "List of technologies that contribute to the carbon cap constraint.",
-                    "default": "Vector{ResourceTechnology}()"
                 },
                 "max_capacity_mw": {
                     "type": "Float64",
@@ -1592,6 +1577,11 @@
                 "inverter_supply_ratio": {
                     "type": "Float64",
                     "description": "Ratio of generation capacity to grid connection capacity"
+                },
+                "requirements": {
+                    "type": "Vector{Requirement}",
+                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+                    "default": "Vector()"
                 },
                 "ext": {
                     "type": "Dict",
