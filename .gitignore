@@ -41,6 +41,7 @@ docs/site/
 Manifest.toml
 .vscode
 *.h5
+docs/superpowers/
 
 ################################################################################
 #                              Operating systems                               #
@@ -126,4 +127,3 @@ $RECYCLE.BIN/
 
 ## Acknowledgements
 # Many thanks to `https://gitignore.io/`, written and maintained by Joe Blau, which contributed much material to this gitignore file.
-SiennaInvestSchema.json

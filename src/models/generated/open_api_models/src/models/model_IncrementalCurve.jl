@@ -22,11 +22,9 @@ Base.@kwdef mutable struct IncrementalCurve <: OpenAPI.APIModel
     input_at_zero::Union{Nothing, Float64} = nothing
 
     function IncrementalCurve(curve_type, function_data, initial_input, input_at_zero)
-        OpenAPI.validate_property(IncrementalCurve, Symbol("curve_type"), curve_type)
-        OpenAPI.validate_property(IncrementalCurve, Symbol("function_data"), function_data)
-        OpenAPI.validate_property(IncrementalCurve, Symbol("initial_input"), initial_input)
-        OpenAPI.validate_property(IncrementalCurve, Symbol("input_at_zero"), input_at_zero)
-        return new(curve_type, function_data, initial_input, input_at_zero)
+        o = new(curve_type, function_data, initial_input, input_at_zero)
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type IncrementalCurve
 
@@ -39,10 +37,17 @@ const _property_types_IncrementalCurve = Dict{Symbol, String}(
 OpenAPI.property_type(::Type{IncrementalCurve}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_IncrementalCurve[name]))}
 
-function check_required(o::IncrementalCurve)
+function OpenAPI.check_required(o::IncrementalCurve)
     o.curve_type === nothing && (return false)
     o.function_data === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::IncrementalCurve)
+    OpenAPI.validate_property(IncrementalCurve, Symbol("curve_type"), o.curve_type)
+    OpenAPI.validate_property(IncrementalCurve, Symbol("function_data"), o.function_data)
+    OpenAPI.validate_property(IncrementalCurve, Symbol("initial_input"), o.initial_input)
+    OpenAPI.validate_property(IncrementalCurve, Symbol("input_at_zero"), o.input_at_zero)
 end
 
 function OpenAPI.validate_property(::Type{IncrementalCurve}, name::Symbol, val)

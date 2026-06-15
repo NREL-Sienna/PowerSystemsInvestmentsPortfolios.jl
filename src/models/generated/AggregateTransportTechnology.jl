@@ -37,7 +37,7 @@ An aggregated representation of a transmission interchange between two regions.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
-- `line_loss::Float64`: (default: `1.0`) Transmission loss for each transport technology (%)
+- `line_loss::Float64`: (default: `0.0`) Transmission loss for each transport technology (%)
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Allowable capacity for a transmission line (MW)
 """
 mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTechnology

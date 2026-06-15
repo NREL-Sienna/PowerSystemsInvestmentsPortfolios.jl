@@ -16,13 +16,9 @@ Base.@kwdef mutable struct PiecewiseLinearData <: OpenAPI.APIModel
     points::Union{Nothing, Vector} = nothing # spec type: Union{ Nothing, Vector{XYCoords} }
 
     function PiecewiseLinearData(function_type, points)
-        OpenAPI.validate_property(
-            PiecewiseLinearData,
-            Symbol("function_type"),
-            function_type,
-        )
-        OpenAPI.validate_property(PiecewiseLinearData, Symbol("points"), points)
-        return new(function_type, points)
+        o = new(function_type, points)
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type PiecewiseLinearData
 
@@ -33,10 +29,15 @@ const _property_types_PiecewiseLinearData = Dict{Symbol, String}(
 OpenAPI.property_type(::Type{PiecewiseLinearData}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_PiecewiseLinearData[name]))}
 
-function check_required(o::PiecewiseLinearData)
+function OpenAPI.check_required(o::PiecewiseLinearData)
     o.function_type === nothing && (return false)
     o.points === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::PiecewiseLinearData)
+    OpenAPI.validate_property(PiecewiseLinearData, Symbol("function_type"), o.function_type)
+    OpenAPI.validate_property(PiecewiseLinearData, Symbol("points"), o.points)
 end
 
 function OpenAPI.validate_property(::Type{PiecewiseLinearData}, name::Symbol, val)

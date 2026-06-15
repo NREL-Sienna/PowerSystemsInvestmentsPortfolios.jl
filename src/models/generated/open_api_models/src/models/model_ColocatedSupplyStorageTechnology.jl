@@ -5,14 +5,11 @@
 
     ColocatedSupplyStorageTechnology(;
         name=nothing,
-        uuid=nothing,
         id=nothing,
         power_systems_type=nothing,
-        base_year=nothing,
         region=nothing,
         financial_data=nothing,
         available=nothing,
-        balancing_topology=nothing,
         capital_costs_solar=nothing,
         operation_costs_solar=nothing,
         capacity_limits_solar=nothing,
@@ -40,14 +37,11 @@
     )
 
     - name::String
-    - uuid::String
     - id::Int64
     - power_systems_type::String
-    - base_year::Int64
     - region::Vector{Int64}
-    - financial_data::Any
+    - financial_data::TechnologyFinancialData
     - available::Bool
-    - balancing_topology::String
     - capital_costs_solar::ValueCurve
     - operation_costs_solar::RenewableGenerationCost
     - capacity_limits_solar::MinMax
@@ -75,14 +69,11 @@
 """
 Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
-    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     power_systems_type::Union{Nothing, String} = nothing
-    base_year::Union{Nothing, Int64} = nothing
     region::Union{Nothing, Vector{Int64}} = nothing
-    financial_data::Union{Nothing, Any} = nothing
+    financial_data = nothing # spec type: Union{ Nothing, TechnologyFinancialData }
     available::Union{Nothing, Bool} = nothing
-    balancing_topology::Union{Nothing, String} = nothing
     capital_costs_solar = nothing # spec type: Union{ Nothing, ValueCurve }
     operation_costs_solar = nothing # spec type: Union{ Nothing, RenewableGenerationCost }
     capacity_limits_solar = nothing # spec type: Union{ Nothing, MinMax }
@@ -110,14 +101,11 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
 
     function ColocatedSupplyStorageTechnology(
         name,
-        uuid,
         id,
         power_systems_type,
-        base_year,
         region,
         financial_data,
         available,
-        balancing_topology,
         capital_costs_solar,
         operation_costs_solar,
         capacity_limits_solar,
@@ -143,169 +131,13 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         inverter_efficiency,
         inverter_supply_ratio,
     )
-        OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("name"), name)
-        OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("uuid"), uuid)
-        OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("id"), id)
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("power_systems_type"),
-            power_systems_type,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("base_year"),
-            base_year,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("region"),
-            region,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("financial_data"),
-            financial_data,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("available"),
-            available,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("balancing_topology"),
-            balancing_topology,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("capital_costs_solar"),
-            capital_costs_solar,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("operation_costs_solar"),
-            operation_costs_solar,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("capacity_limits_solar"),
-            capacity_limits_solar,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("lifetime_solar"),
-            lifetime_solar,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("capital_costs_wind"),
-            capital_costs_wind,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("operation_costs_wind"),
-            operation_costs_wind,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("capacity_limits_wind"),
-            capacity_limits_wind,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("lifetime_wind"),
-            lifetime_wind,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("capital_costs_energy"),
-            capital_costs_energy,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("capital_costs_power"),
-            capital_costs_power,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("operation_costs_energy"),
-            operation_costs_energy,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("operation_costs_power"),
-            operation_costs_power,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("capacity_power_limits"),
-            capacity_power_limits,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("capacity_energy_limits"),
-            capacity_energy_limits,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("duration_limits"),
-            duration_limits,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("efficiency_storage"),
-            efficiency_storage,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("losses_storage"),
-            losses_storage,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("lifetime_storage"),
-            lifetime_storage,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("max_inverter_capacity"),
-            max_inverter_capacity,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("min_inverter_capacity"),
-            min_inverter_capacity,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("capital_costs_inverter"),
-            capital_costs_inverter,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("operation_costs_inverter"),
-            operation_costs_inverter,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("inverter_efficiency"),
-            inverter_efficiency,
-        )
-        OpenAPI.validate_property(
-            ColocatedSupplyStorageTechnology,
-            Symbol("inverter_supply_ratio"),
-            inverter_supply_ratio,
-        )
-        return new(
+        o = new(
             name,
-            uuid,
             id,
             power_systems_type,
-            base_year,
             region,
             financial_data,
             available,
-            balancing_topology,
             capital_costs_solar,
             operation_costs_solar,
             capacity_limits_solar,
@@ -331,19 +163,18 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
             inverter_efficiency,
             inverter_supply_ratio,
         )
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type ColocatedSupplyStorageTechnology
 
 const _property_types_ColocatedSupplyStorageTechnology = Dict{Symbol, String}(
     Symbol("name") => "String",
-    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("power_systems_type") => "String",
-    Symbol("base_year") => "Int64",
     Symbol("region") => "Vector{Int64}",
-    Symbol("financial_data") => "Any",
+    Symbol("financial_data") => "TechnologyFinancialData",
     Symbol("available") => "Bool",
-    Symbol("balancing_topology") => "String",
     Symbol("capital_costs_solar") => "ValueCurve",
     Symbol("operation_costs_solar") => "RenewableGenerationCost",
     Symbol("capacity_limits_solar") => "MinMax",
@@ -374,11 +205,152 @@ OpenAPI.property_type(::Type{ColocatedSupplyStorageTechnology}, name::Symbol) = 
     eval(Base.Meta.parse(_property_types_ColocatedSupplyStorageTechnology[name])),
 }
 
-function check_required(o::ColocatedSupplyStorageTechnology)
+function OpenAPI.check_required(o::ColocatedSupplyStorageTechnology)
     o.name === nothing && (return false)
     o.power_systems_type === nothing && (return false)
     o.available === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::ColocatedSupplyStorageTechnology)
+    OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("name"), o.name)
+    OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("id"), o.id)
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("power_systems_type"),
+        o.power_systems_type,
+    )
+    OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("region"), o.region)
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("financial_data"),
+        o.financial_data,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("available"),
+        o.available,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("capital_costs_solar"),
+        o.capital_costs_solar,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("operation_costs_solar"),
+        o.operation_costs_solar,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("capacity_limits_solar"),
+        o.capacity_limits_solar,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("lifetime_solar"),
+        o.lifetime_solar,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("capital_costs_wind"),
+        o.capital_costs_wind,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("operation_costs_wind"),
+        o.operation_costs_wind,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("capacity_limits_wind"),
+        o.capacity_limits_wind,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("lifetime_wind"),
+        o.lifetime_wind,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("capital_costs_energy"),
+        o.capital_costs_energy,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("capital_costs_power"),
+        o.capital_costs_power,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("operation_costs_energy"),
+        o.operation_costs_energy,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("operation_costs_power"),
+        o.operation_costs_power,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("capacity_power_limits"),
+        o.capacity_power_limits,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("capacity_energy_limits"),
+        o.capacity_energy_limits,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("duration_limits"),
+        o.duration_limits,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("efficiency_storage"),
+        o.efficiency_storage,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("losses_storage"),
+        o.losses_storage,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("lifetime_storage"),
+        o.lifetime_storage,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("max_inverter_capacity"),
+        o.max_inverter_capacity,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("min_inverter_capacity"),
+        o.min_inverter_capacity,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("capital_costs_inverter"),
+        o.capital_costs_inverter,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("operation_costs_inverter"),
+        o.operation_costs_inverter,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("inverter_efficiency"),
+        o.inverter_efficiency,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("inverter_supply_ratio"),
+        o.inverter_supply_ratio,
+    )
 end
 
 function OpenAPI.validate_property(

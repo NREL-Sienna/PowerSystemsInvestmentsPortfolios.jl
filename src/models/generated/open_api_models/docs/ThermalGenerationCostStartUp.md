@@ -7,6 +7,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **value** | This is a oneOf model. The value must be exactly one of the following types: Float64, StartUpStages | Start-up cost can take linear or multi-stage cost | [optional] 
 
+The discriminator field is `startup_stages_type` with the following mapping:
+ - `STAGES`: `StartUpStages`
 
 
 

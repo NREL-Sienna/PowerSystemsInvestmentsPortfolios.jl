@@ -5,7 +5,6 @@
 
     CapacityReserveMargin(;
         name=nothing,
-        uuid=nothing,
         id=nothing,
         available=nothing,
         eligible_regions=nothing,
@@ -15,7 +14,6 @@
     )
 
     - name::String
-    - uuid::String
     - id::Int64
     - available::Bool
     - eligible_regions::Vector{Int64}
@@ -25,7 +23,6 @@
 """
 Base.@kwdef mutable struct CapacityReserveMargin <: OpenAPI.APIModel
     name::Union{Nothing, String} = nothing
-    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
     available::Union{Nothing, Bool} = nothing
     eligible_regions::Union{Nothing, Vector{Int64}} = nothing
@@ -35,7 +32,6 @@ Base.@kwdef mutable struct CapacityReserveMargin <: OpenAPI.APIModel
 
     function CapacityReserveMargin(
         name,
-        uuid,
         id,
         available,
         eligible_regions,
@@ -43,29 +39,8 @@ Base.@kwdef mutable struct CapacityReserveMargin <: OpenAPI.APIModel
         target_year,
         capacity_reserve_fraction,
     )
-        OpenAPI.validate_property(CapacityReserveMargin, Symbol("name"), name)
-        OpenAPI.validate_property(CapacityReserveMargin, Symbol("uuid"), uuid)
-        OpenAPI.validate_property(CapacityReserveMargin, Symbol("id"), id)
-        OpenAPI.validate_property(CapacityReserveMargin, Symbol("available"), available)
-        OpenAPI.validate_property(
-            CapacityReserveMargin,
-            Symbol("eligible_regions"),
-            eligible_regions,
-        )
-        OpenAPI.validate_property(
-            CapacityReserveMargin,
-            Symbol("eligible_technologies"),
-            eligible_technologies,
-        )
-        OpenAPI.validate_property(CapacityReserveMargin, Symbol("target_year"), target_year)
-        OpenAPI.validate_property(
-            CapacityReserveMargin,
-            Symbol("capacity_reserve_fraction"),
-            capacity_reserve_fraction,
-        )
-        return new(
+        o = new(
             name,
-            uuid,
             id,
             available,
             eligible_regions,
@@ -73,12 +48,13 @@ Base.@kwdef mutable struct CapacityReserveMargin <: OpenAPI.APIModel
             target_year,
             capacity_reserve_fraction,
         )
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type CapacityReserveMargin
 
 const _property_types_CapacityReserveMargin = Dict{Symbol, String}(
     Symbol("name") => "String",
-    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
     Symbol("available") => "Bool",
     Symbol("eligible_regions") => "Vector{Int64}",
@@ -89,10 +65,32 @@ const _property_types_CapacityReserveMargin = Dict{Symbol, String}(
 OpenAPI.property_type(::Type{CapacityReserveMargin}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_CapacityReserveMargin[name]))}
 
-function check_required(o::CapacityReserveMargin)
+function OpenAPI.check_required(o::CapacityReserveMargin)
     o.name === nothing && (return false)
     o.available === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::CapacityReserveMargin)
+    OpenAPI.validate_property(CapacityReserveMargin, Symbol("name"), o.name)
+    OpenAPI.validate_property(CapacityReserveMargin, Symbol("id"), o.id)
+    OpenAPI.validate_property(CapacityReserveMargin, Symbol("available"), o.available)
+    OpenAPI.validate_property(
+        CapacityReserveMargin,
+        Symbol("eligible_regions"),
+        o.eligible_regions,
+    )
+    OpenAPI.validate_property(
+        CapacityReserveMargin,
+        Symbol("eligible_technologies"),
+        o.eligible_technologies,
+    )
+    OpenAPI.validate_property(CapacityReserveMargin, Symbol("target_year"), o.target_year)
+    OpenAPI.validate_property(
+        CapacityReserveMargin,
+        Symbol("capacity_reserve_fraction"),
+        o.capacity_reserve_fraction,
+    )
 end
 
 function OpenAPI.validate_property(::Type{CapacityReserveMargin}, name::Symbol, val) end

@@ -39,7 +39,7 @@ get_parameter_type(::Type{DemandSideTechnology{T}}) where {T} = T
 
 """
 Calculates the amount of existing capacity (in MW) associated with a given Technology in the Portfolio.
-Technology must have an ExistingCapacity supplemental attribute attached to it to be non-zero.
+Technology must have an ExistingDevices supplemental attribute attached to it to be non-zero.
 This attribute contains a list of names of existing assets in the base system that correspond to this technology.
 For StorageTechnology, this function returns existing charge/discharge capacity in MW. See
 [`get_existing_capacity_mwh`](@ref) for existing energy capacity in MWh.
@@ -54,20 +54,20 @@ function get_existing_capacity_mw(
     t::Union{ResourceTechnology, TransmissionTechnology},
 )
     if typeof(t) <: ColocatedSupplyStorageTechnology
-        @warn "Co-located technologies are not supported for ExistingCapacity, assuming an existing capacity of 0"
+        @warn "Co-located technologies are not supported for ExistingDevices, assuming an existing capacity of 0"
         return 0.0
     end
 
     if !is_new(t)
-        attr = IS.get_supplemental_attributes(ExistingCapacity, t)
+        attr = IS.get_supplemental_attributes(ExistingDevices, t)
         if length(attr) > 1
-            @warn "Multiple ExistingCapacity attributes are attached to this technology, assuming a capacity of 0.0"
+            @warn "Multiple ExistingDevices attributes are attached to this technology, assuming a capacity of 0.0"
             return 0.0
         end
 
-        gen_names = get_existing_technologies(only(attr))
+        gen_names = get_existing_devices(only(attr))
         if length(gen_names) == 0
-            @warn "No names listed in ExistingCapacity attribute, returning capacity of 0.0."
+            @warn "No names listed in ExistingDevices attribute, returning capacity of 0.0."
             return 0.0
         end
 
@@ -76,7 +76,7 @@ function get_existing_capacity_mw(
         # Check if any of the components returned nothing
         filtered_comp = filter(x -> !isnothing(x), comp)
         if length(filtered_comp) != length(gen_names)
-            @error "Not all names in ExistingCapacity matched generators in the base system"
+            @error "Not all names in ExistingDevices matched generators in the base system"
         end
 
         return sum(PSY.get_rating(t) * PSY.get_base_power(p.base_system) for t in comp)
@@ -87,7 +87,7 @@ end
 
 """
 Calculates the amount of existing energy capacity (in MWh) associated with a given StorageTechnology.
-Technology must have an ExistingCapacity supplemental attribute attached to it to be non-zero.
+Technology must have an ExistingDevices supplemental attribute attached to it to be non-zero.
 This attribute contains a list of names of existing assets in the base system that correspond to this technology.
 To get the charge/discharge capacity in MW, see [`get_existing_capacity_mw`](@ref).
 
@@ -98,18 +98,18 @@ To get the charge/discharge capacity in MW, see [`get_existing_capacity_mw`](@re
 """
 function get_existing_capacity_mwh(p::Portfolio, t::StorageTechnology)
     if !is_new(t)
-        attr = IS.get_supplemental_attributes(ExistingCapacity, t)
+        attr = IS.get_supplemental_attributes(ExistingDevices, t)
         if length(attr) > 1
-            @warn "Multiple ExistingCapacity attributes are attached to this technology, assuming a capacity of 0.0"
+            @warn "Multiple ExistingDevices attributes are attached to this technology, assuming a capacity of 0.0"
             return 0.0
         end
-        gen_names = get_existing_technologies(only(attr))
+        gen_names = get_existing_devices(only(attr))
         comp = PSY.get_component.(get_parameter_type(t), Ref(p.base_system), gen_names)
 
         # Check if any of the components returned nothing
         filtered_comp = filter(x -> !isnothing(x), comp)
         if length(filtered_comp) != length(gen_names)
-            @error "Not all names in ExistingCapacity matched generators in the base system"
+            @error "Not all names in ExistingDevices matched generators in the base system"
         end
 
         return sum(
@@ -121,9 +121,65 @@ function get_existing_capacity_mwh(p::Portfolio, t::StorageTechnology)
 end
 
 """
+Calculates the peak demand (in MW) associated with a given Technology in the Portfolio.
+Technology must have an ExistingDevices supplemental attribute attached to it to be non-zero.
+This attribute contains a list of names of existing assets in the base system that correspond to this technology.
+
+# Arguments
+
+  - `p::Portfolio`: The portfolio containing the base system and technology
+  - `t::DemandTechnology`: The technology to get peak demand
+"""
+function get_peak_demand_mw(p::Portfolio, t::DemandTechnology)
+    if !is_new(t)
+        attr = IS.get_supplemental_attributes(ExistingDevices, t)
+        if length(attr) > 1
+            @warn "Multiple ExistingDevices attributes are attached to this technology, assuming a peak demand of 0.0"
+            return 0.0
+        end
+
+        gen_names = get_existing_devices(only(attr))
+        if length(gen_names) == 0
+            @warn "No names listed in ExistingDevices attribute, returning peak demand of 0.0."
+            return 0.0
+        end
+
+        comp = PSY.get_component.(get_parameter_type(t), Ref(p.base_system), gen_names)
+
+        # Check if any of the components returned nothing
+        filtered_comp = filter(x -> !isnothing(x), comp)
+        if length(filtered_comp) != length(gen_names)
+            @error "Not all names in ExistingDevices matched generators in the base system"
+        end
+
+        return sum(PSY.get_max_active_power(t) for t in comp)
+    else
+        @warn "Demand technology has no existing loads attached, returning a peak demand of 0.0. If this technology is meant to represent existing demand, please attach an ExistingDevices supplemental attribute with the names of the corresponding loads in the base system."
+        return 0.0
+    end
+end
+
+function scale_conforming_load(t::DemandTechnology, p::Portfolio, year::Int64)
+    if get_conformity(t) == PSY.LoadConformity.NON_CONFORMING
+        @warn "Load is not conforming, returning original peak demand without scaling."
+        return get_peak_demand_mw(p, t)
+    else
+        peak_demand = get_peak_demand_mw(p, t)
+        growth_rate = get_growth_rate(t)
+        if is_new(t)
+            reference_year = get_new_construction_year(t)
+        else
+            reference_year = get_base_year_for_load(t, p)
+        end
+        scaled_demand = peak_demand * (1 + growth_rate)^(year - reference_year)
+        return scaled_demand
+    end
+end
+
+"""
 Determines if a technology is a completely new build and is not associated with any pre-existing capacity
 """
-is_new(t::Technology) = !(IS.has_supplemental_attributes(ExistingCapacity, t))
+is_new(t::Technology) = !(IS.has_supplemental_attributes(ExistingDevices, t))
 
 """
 Get constant heat rate value from FuelCurve stored in a SupplyTechnology
@@ -175,6 +231,11 @@ Get constant fixed OM costs for storage discharge from OperationalCost in a Stor
 get_fixed_cost_discharge(t::StorageTechnology) = PSY.get_proportional_term(
     PSY.get_value_curve(PSY.get_discharge_variable_cost(get_operation_costs(t))),
 )
+
+"""
+Get the base year for a DemandRequirement, which is the same as the base year for the portfolio it belongs to.
+"""
+get_base_year_for_load(t::DemandRequirement, p::Portfolio) = get_base_year(p)
 
 """
 Calculate the weighted average cost of capital (WACC) for a Technology based on its TechnologyFinancialData.
