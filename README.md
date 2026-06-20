@@ -11,4 +11,4 @@ Contributions to the development and enhancement of PowerSystemsInvestmentsPortf
 
 ## License
 
-PowerSystemsInvestmentsPortfolios is released under a BSD [license](https://github.com/NREL/PowerSystemsInvestmentsPortfolios/blob/main/LICENSE). PowerSystemsInvestmentsPortfolios has been developed at the U.S. Department of Energy's National Laboratory of the Rockies ([NLR](https://www.nrel.gov/))
+PowerSystemsInvestmentsPortfolios is released under a BSD [license](https://github.com/Sienna-Platform/PowerSystemsInvestmentsPortfolios/blob/main/LICENSE). PowerSystemsInvestmentsPortfolios has been developed at the U.S. Department of Energy's National Laboratory of the Rockies (formerly known as NREL)([NLR](https://www.nrel.gov/))
