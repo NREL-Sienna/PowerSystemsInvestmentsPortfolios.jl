@@ -1,3 +1,5 @@
+isdefined(Base, :__precompile__) && __precompile__()
+
 module PowerSystemsInvestmentsPortfolios
 
 import InfrastructureSystems
@@ -24,6 +26,7 @@ import InfrastructureSystems:
 
 # Using PowerSystems in order to support deserializing with PSY parametric typing
 using PowerSystems
+import PowerSystems: ThermalFuels, PrimeMovers, StorageTech, ACBusTypes
 
 import JSONSchema
 import JSON3
@@ -38,6 +41,8 @@ import OpenAPI
 import StringEncodings
 import HDF5
 import Tables
+import Unitful
+using Unitful: @dimension, @u_str, @refunit, @unit, Quantity, Units, uconvert, ustrip
 
 export Portfolio
 export Technology
@@ -147,11 +152,9 @@ const PSY = PowerSystems
 const IS = InfrastructureSystems
 const MU = IS.Mustache
 
-##### Imports #####
-
-import PowerSystems: ThermalFuels, PrimeMovers, StorageTech, ACBusTypes
-
-##### Exports #####
+export USD, ustrip, uconvert, @u_str
+export POWER, IMPEDANCE, ADMITTANCE, VOLTAGE, CURRENT, TIME, ENERGY
+export natural_unit
 
 export ThermalFuels
 export PrimeMovers
@@ -162,6 +165,9 @@ include("models/generated/open_api_models/src/APIServer.jl")
 using .APIServer
 
 include("definitions.jl")
+
+include("units/types.jl")
+include("units/conversions.jl")
 
 include("models/technologies.jl")
 include("models/regions.jl")
@@ -186,6 +192,14 @@ include("utils/getters.jl")
 include("update_system.jl")
 
 using DocStringExtensions
+
+const localunits = Unitful.basefactors
+const localpromotion = copy(Unitful.promotion)
+function __init__()
+    merge!(Unitful.basefactors, localunits)
+    merge!(Unitful.promotion, localpromotion)
+    Unitful.register(PowerSystemsInvestmentsPortfolios)
+end
 
 @template (FUNCTIONS, METHODS) = """
                                  $(TYPEDSIGNATURES)

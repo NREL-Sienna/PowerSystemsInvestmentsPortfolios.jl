@@ -251,7 +251,9 @@
                 "unit_size": {
                     "type": "Float64",
                     "description": "Used for discrete investment decisions. Size of each unit being built (MW)",
-                    "default": "0.0"
+                    "default": "0.0",
+                    "needs_conversion": true,
+                    "conversion_unit": ":mw"
                 },
                 "capacity_limits": {
                     "type": "MinMax",

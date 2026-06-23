@@ -152,8 +152,12 @@ get_region(value::SupplyTechnology) = value.region
 get_min_generation_fraction(value::SupplyTechnology) = value.min_generation_fraction
 """Get [`SupplyTechnology`](@ref) `time_limits`."""
 get_time_limits(value::SupplyTechnology) = value.time_limits
-"""Get [`SupplyTechnology`](@ref) `unit_size`."""
-get_unit_size(value::SupplyTechnology) = value.unit_size
+"""Get [`SupplyTechnology`](@ref) `unit_size` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_unit_size_unitful`](@ref)."""
+get_unit_size(value::SupplyTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:unit_size), Val(:mw), units))
+"""Get [`SupplyTechnology`](@ref) `unit_size` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_unit_size`](@ref)."""
+get_unit_size_unitful(value::SupplyTechnology, units) = get_value(value, Val(:unit_size), Val(:mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_unit_size), ::Type{SupplyTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_unit_size_unitful), ::Type{SupplyTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 """Get [`SupplyTechnology`](@ref) `ramp_limits`."""
 get_ramp_limits(value::SupplyTechnology) = value.ramp_limits
 """Get [`SupplyTechnology`](@ref) `capacity_limits`."""
@@ -200,7 +204,7 @@ set_min_generation_fraction!(value::SupplyTechnology, val) = value.min_generatio
 """Set [`SupplyTechnology`](@ref) `time_limits`."""
 set_time_limits!(value::SupplyTechnology, val) = value.time_limits = val
 """Set [`SupplyTechnology`](@ref) `unit_size`."""
-set_unit_size!(value::SupplyTechnology, val) = value.unit_size = val
+set_unit_size!(value::SupplyTechnology, val) = value.unit_size = set_value(value, Val(:unit_size), val, Val(:mw))
 """Set [`SupplyTechnology`](@ref) `ramp_limits`."""
 set_ramp_limits!(value::SupplyTechnology, val) = value.ramp_limits = val
 """Set [`SupplyTechnology`](@ref) `capacity_limits`."""

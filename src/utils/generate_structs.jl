@@ -66,12 +66,16 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
 
         parameters = Vector{Dict}()
         for (field, values) in properties
+            @show field, values
             param = Dict{String, Any}()
 
             param["struct_name"] = item["struct_name"]
             param["name"] = field
             param["data_type"] = values["type"]
-            param["comment"] = values["description"]
+            param["comment"] = get(values, "description", "")
+            param["exlude_getter"] = get(values, "exclude_getter", false)
+            param["conversion_unit"] = get(values, "conversion_unit", "nothing")
+            param["needs_conversion"] = get(values, "needs_conversion", false)
 
             if haskey(param, "valid_range")
                 if typeof(param["valid_range"]) == Dict{String, Any}
@@ -99,15 +103,33 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
             accessor_name = accessor_module * "get_" * param["name"]
             setter_name = accessor_module * "set_" * param["name"] * "!"
 
-            push!(
-                accessors,
-                Dict(
-                    "name" => param["name"],
-                    "accessor" => accessor_name,
-                    "create_docstring" => create_docstring,
-                    "needs_conversion" => get(param, "needs_conversion", false),
-                ),
-            )
+            conversion_unit = get(param, "conversion_unit", "nothing")
+            include_getter = !get(param, "exclude_getter", false)
+            if include_getter
+                push!(
+                    accessors,
+                    Dict(
+                        "name" => param["name"],
+                        "accessor" => accessor_name,
+                        "create_docstring" => create_docstring,
+                        "needs_conversion" => get(param, "needs_conversion", false),
+                        "conversion_unit" => conversion_unit,
+                        "display_units" => get(param, "display_units", "NU"),
+                        # The units trait dispatches on the component's concrete
+                        # type, so parametric structs need the `Type{Name{T}} where`
+                        # form (`Type{Name}` is the UnionAll and never matches a
+                        # concrete `Name{...}`); concrete structs use the exact form.
+                        "units_type_sig" => if haskey(item, "parametric")
+                            "Type{$(item["struct_name"]){T}}"
+                        else
+                            "Type{$(item["struct_name"])}"
+                        end,
+                        # The bound is substituted inside a literal `where {T <: …}`
+                        # template fragment (values get HTML-escaped; literals don't).
+                        "units_bound" => get(item, "parametric", false),
+                    ),
+                )
+            end
 
             include_setter = !get(param, "exclude_setter", false)
             if include_setter
@@ -119,6 +141,7 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
                         "data_type" => param["data_type"],
                         "create_docstring" => create_docstring,
                         "needs_conversion" => get(param, "needs_conversion", false),
+                        "conversion_unit" => conversion_unit,
                     ),
                 )
             end
