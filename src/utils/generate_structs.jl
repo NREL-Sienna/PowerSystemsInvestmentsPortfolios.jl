@@ -36,7 +36,8 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
     unique_accessor_functions = Set{String}()
     unique_setter_functions = Set{String}()
 
-    for (struct_name, input) in data.data["components"]["schemas"]
+    for input in data.data["components"]
+        struct_name = input["name"]
         properties = input["properties"]
         item = Dict{String, Any}()
         item["has_internal"] = false
@@ -65,12 +66,11 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
         end
 
         parameters = Vector{Dict}()
-        for (field, values) in properties
-            @show field, values
+        for values in properties
             param = Dict{String, Any}()
 
             param["struct_name"] = item["struct_name"]
-            param["name"] = field
+            param["name"] = values["name"]
             param["data_type"] = values["type"]
             param["comment"] = get(values, "description", "")
             param["exlude_getter"] = get(values, "exclude_getter", false)
@@ -146,7 +146,7 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
                 )
             end
 
-            if field != "internal" && accessor_module == ""
+            if param["name"] != "internal" && accessor_module == ""
                 push!(unique_accessor_functions, accessor_name)
                 push!(unique_setter_functions, setter_name)
             end
