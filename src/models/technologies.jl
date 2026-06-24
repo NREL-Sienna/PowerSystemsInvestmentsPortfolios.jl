@@ -75,9 +75,6 @@ function _convert_from_default_units(base, v::LinearFunctionData, cu, u)
     new_proportional_units = u[2] / u[1]
     new_constant_units = u[2]
 
-    @show proportional_units, new_proportional_units
-    @show constant_units, new_constant_units
-
     return LinearFunctionData(
         IS._strip_units(
             convert_units(
@@ -144,9 +141,46 @@ function _convert_from_default_units(base, v::PiecewiseStepData, cu, u)
 end
 
 # ---- ValueCurves ----
+function _convert_from_default_units(base, v::InputOutputCurve, cu, u)
+    if cu == Val(:usd_per_mw)
+        y_unit = Val(:usd)
+    else
+        y_unit = Val(:mmbtu)
+    end
+    return InputOutputCurve(
+        _convert_from_default_units(base, v.function_data, cu, u),
+        IS._strip_units(_convert_from_default_units(base, v.input_at_zero, y_unit, u[2])),
+    )
+end
+
+function _convert_from_default_units(base, v::IncrementalCurve, cu, u)
+    if cu == Val(:usd_per_mw)
+        y_unit = Val(:usd)
+    else
+        y_unit = Val(:mmbtu)
+    end
+    return IncrementalCurve(
+        _convert_from_default_units(base, v.function_data, cu, u),
+        IS._strip_units(_convert_from_default_units(base, v.initial_input, y_unit, u[2])),
+        IS._strip_units(_convert_from_default_units(base, v.input_at_zero, y_unit, u[2])),
+    )
+end
+
+function _convert_from_default_units(base, v::AverageRateCurve, cu, u)
+    if cu == Val(:usd_per_mw)
+        y_unit = Val(:usd)
+    else
+        y_unit = Val(:mmbtu)
+    end
+    return AverageRateCurve(
+        _convert_from_default_units(base, v.function_data, cu, u),
+        IS._strip_units(_convert_from_default_units(base, v.initial_input, y_unit, u[2])),
+        IS._strip_units(_convert_from_default_units(base, v.input_at_zero, y_unit, u[2])),
+    )
+end
 
 #######################################################
-# set_value: accept Unitful.Quantity or RelativeQuantity; return DU scalar
+# set_value: accept Unitful.Quantity or RelativeQuantity; return NU scalar
 #######################################################
 
 # ---- From Unitful.Quantity (natural units): inverse engine conversion ----
@@ -165,3 +199,6 @@ _unit_category(::Val{:yr}) = INV_TIME
 _unit_category(::Val{:usd_per_mw}) = POWER_COST
 _unit_category(::Val{:usd_per_mwh}) = ENERGY_COST
 _unit_category(::Val{:usd_per_mmbtu}) = FUEL_COST
+_unit_category(::Val{:usd}) = COST
+_unit_category(::Val{:mmbtu}) = FUEL
+_unit_category(::Val{:mmbtu_per_mwh}) = FUEL_CONSUMPTION

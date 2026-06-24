@@ -132,8 +132,12 @@ get_co2(value::SupplyTechnology) = value.co2
 get_cofire_start_limits(value::SupplyTechnology) = value.cofire_start_limits
 """Get [`SupplyTechnology`](@ref) `cofire_level_limits`."""
 get_cofire_level_limits(value::SupplyTechnology) = value.cofire_level_limits
-"""Get [`SupplyTechnology`](@ref) `capital_costs`."""
-get_capital_costs(value::SupplyTechnology) = value.capital_costs
+"""Get [`SupplyTechnology`](@ref) `capital_costs` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capital_costs_unitful`](@ref)."""
+get_capital_costs(value::SupplyTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capital_costs), Val(:usd_per_mw), units))
+"""Get [`SupplyTechnology`](@ref) `capital_costs` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capital_costs`](@ref)."""
+get_capital_costs_unitful(value::SupplyTechnology, units) = get_value(value, Val(:capital_costs), Val(:usd_per_mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs), ::Type{SupplyTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_unitful), ::Type{SupplyTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 """Get [`SupplyTechnology`](@ref) `operation_costs`."""
 get_operation_costs(value::SupplyTechnology) = value.operation_costs
 """Get [`SupplyTechnology`](@ref) `unit_size` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_unit_size_unitful`](@ref)."""
@@ -150,12 +154,8 @@ InfrastructureSystems.display_units_arg(::typeof(get_capacity_limits), ::Type{Su
 InfrastructureSystems.display_units_arg(::typeof(get_capacity_limits_unitful), ::Type{SupplyTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 """Get [`SupplyTechnology`](@ref) `outage_factor`."""
 get_outage_factor(value::SupplyTechnology) = value.outage_factor
-"""Get [`SupplyTechnology`](@ref) `min_generation_fraction` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_min_generation_fraction_unitful`](@ref)."""
-get_min_generation_fraction(value::SupplyTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:min_generation_fraction), Val(:mw), units))
-"""Get [`SupplyTechnology`](@ref) `min_generation_fraction` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_min_generation_fraction`](@ref)."""
-get_min_generation_fraction_unitful(value::SupplyTechnology, units) = get_value(value, Val(:min_generation_fraction), Val(:mw), units)
-InfrastructureSystems.display_units_arg(::typeof(get_min_generation_fraction), ::Type{SupplyTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
-InfrastructureSystems.display_units_arg(::typeof(get_min_generation_fraction_unitful), ::Type{SupplyTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`SupplyTechnology`](@ref) `min_generation_fraction`."""
+get_min_generation_fraction(value::SupplyTechnology) = value.min_generation_fraction
 """Get [`SupplyTechnology`](@ref) `ramp_limits`."""
 get_ramp_limits(value::SupplyTechnology) = value.ramp_limits
 """Get [`SupplyTechnology`](@ref) `time_limits` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_time_limits_unitful`](@ref)."""
@@ -204,7 +204,7 @@ set_cofire_start_limits!(value::SupplyTechnology, val) = value.cofire_start_limi
 """Set [`SupplyTechnology`](@ref) `cofire_level_limits`."""
 set_cofire_level_limits!(value::SupplyTechnology, val) = value.cofire_level_limits = val
 """Set [`SupplyTechnology`](@ref) `capital_costs`."""
-set_capital_costs!(value::SupplyTechnology, val) = value.capital_costs = val
+set_capital_costs!(value::SupplyTechnology, val) = value.capital_costs = set_value(value, Val(:capital_costs), val, Val(:usd_per_mw))
 """Set [`SupplyTechnology`](@ref) `operation_costs`."""
 set_operation_costs!(value::SupplyTechnology, val) = value.operation_costs = val
 """Set [`SupplyTechnology`](@ref) `unit_size`."""
@@ -214,7 +214,7 @@ set_capacity_limits!(value::SupplyTechnology, val) = value.capacity_limits = set
 """Set [`SupplyTechnology`](@ref) `outage_factor`."""
 set_outage_factor!(value::SupplyTechnology, val) = value.outage_factor = val
 """Set [`SupplyTechnology`](@ref) `min_generation_fraction`."""
-set_min_generation_fraction!(value::SupplyTechnology, val) = value.min_generation_fraction = set_value(value, Val(:min_generation_fraction), val, Val(:mw))
+set_min_generation_fraction!(value::SupplyTechnology, val) = value.min_generation_fraction = val
 """Set [`SupplyTechnology`](@ref) `ramp_limits`."""
 set_ramp_limits!(value::SupplyTechnology, val) = value.ramp_limits = val
 """Set [`SupplyTechnology`](@ref) `time_limits`."""

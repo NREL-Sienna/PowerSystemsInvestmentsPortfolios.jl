@@ -149,7 +149,9 @@
           "name": "capital_costs",
           "type": "PSY.ValueCurve",
           "description": "Capital costs for investing in a technology. (USD/MW)",
-          "default": "LinearCurve(0.0)"
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
         },
         {
           "name": "operation_costs",
@@ -183,9 +185,7 @@
           "name": "min_generation_fraction",
           "type": "Float64",
           "description": "Minimum generation as a fraction of total capacity (MW)",
-          "default": "0.0",
-          "needs_conversion": true,
-          "conversion_unit": ":mw"
+          "default": "0.0"
         },
         {
           "name": "ramp_limits",
