@@ -23,6 +23,7 @@ struct CurrentCategory <: UnitCategory end
 struct CostCategory <: UnitCategory end
 struct PowerCostCategory <: UnitCategory end
 struct EnergyCostCategory <: UnitCategory end
+struct FuelCostCategory <: UnitCategory end
 struct OPSTimeCategory <: UnitCategory end
 struct INVTimeCategory <: UnitCategory end
 struct EnergyCategory <: UnitCategory end
@@ -35,6 +36,7 @@ const CURRENT = CurrentCategory()
 const COST = CostCategory()
 const POWER_COST = PowerCostCategory()
 const ENERGY_COST = EnergyCostCategory()
+const FUEL_COST = FuelCostCategory()
 const OPS_TIME = OPSTimeCategory()
 const INV_TIME = INVTimeCategory()
 const ENERGY = EnergyCategory()
@@ -54,8 +56,9 @@ natural_unit(::INVTimeCategory) = u"yr"
 natural_unit(::EnergyCategory) = natural_unit(POWER) * natural_unit(OPS_TIME)
 
 natural_unit(::CostCategory) = USD
-natural_unit(::PowerCostCategory) = USD / u"MW"
-natural_unit(::EnergyCostCategory) = USD / (u"MW" * u"hr")
+natural_unit(::PowerCostCategory) = (u"MW", USD)
+natural_unit(::EnergyCostCategory) = (u"MW" * u"hr", USD)
+natural_unit(::FuelCostCategory) = (MMBtu, USD)
 
 # --- Return value with its default natural units ---
 function convert_units(c, val::Number, cat::UnitCategory, to::NaturalUnit)
@@ -65,6 +68,12 @@ end
 # --- Convert from natural units to a target Unitful unit ---
 function convert_units(c, val::Number, cat::UnitCategory, to::Unitful.Units)
     val = val * natural_unit(cat)
+    return uconvert(to, val)
+end
+
+function convert_units(c, val::Number, cat::Unitful.Units, to::Unitful.Units)
+    @show "ENTERED"
+    val = val * cat
     return uconvert(to, val)
 end
 
