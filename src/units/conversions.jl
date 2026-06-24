@@ -38,9 +38,6 @@ const ENERGY_COST = EnergyCostCategory()
 const OPS_TIME = OPSTimeCategory()
 const INV_TIME = INVTimeCategory()
 const ENERGY = EnergyCategory()
-# ============================================================
-# natural_unit, base_value, system_base_value
-# ============================================================
 
 """
     natural_unit(category) → Unitful.Units
