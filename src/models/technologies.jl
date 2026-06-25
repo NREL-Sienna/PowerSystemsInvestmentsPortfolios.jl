@@ -179,6 +179,30 @@ function _convert_from_default_units(base, v::AverageRateCurve, cu, u)
     )
 end
 
+# ---- CostCurve ----
+function _convert_from_default_units(base, v::CostCurve, cu, u)
+    return CostCurve(
+        _convert_from_default_units(base, v.value_curve, cu, u),
+        _convert_from_default_units(base, v.vom_cost, cu, u),
+    )
+end
+
+# ---- FuelCurve ----
+# FuelCurve is a special case because it has fields for energy cost, fuel consumption, and fuel cost. 
+# The conversion unit is used to determine which of these fields is being converted. 
+# The function will convert the value_curve, startup_fuel_offtake, and vom_cost fields using the appropriate conversion unit. 
+# The fuel_cost field is only converted if it is a Float64, otherwise it is returned as is.
+# To resolve this we require a tuple of three units: (energy_unit, fuel_unit, currency unit). 
+function _convert_from_default_units(base, v::FuelCurve, cu, u)
+    # Skip conversion if fuel_cost is not a float
+    return FuelCurve(
+        _convert_from_default_units(base, v.value_curve, _unit_category(Val(:mmbtu_per_mwh)), (u[1], u[2])),
+        isa(v.fuel_cost, Float64) ? _convert_from_default_units(base, v.fuel_cost, _unit_category(Val(:usd_per_mmbtu)), u[3]/u[2]) : v.fuel_cost,
+        _convert_from_default_units(base, v.startup_fuel_offtake, _unit_category(Val(:mmbtu_per_mwh)), (u[1], u[2])),
+        _convert_from_default_units(base, v.vom_cost, _unit_category(Val(:usd_per_mwh)), (u[1], u[3])),
+    )
+end
+
 #######################################################
 # set_value: accept Unitful.Quantity or RelativeQuantity; return NU scalar
 #######################################################
@@ -202,3 +226,4 @@ _unit_category(::Val{:usd_per_mmbtu}) = FUEL_COST
 _unit_category(::Val{:usd}) = COST
 _unit_category(::Val{:mmbtu}) = FUEL
 _unit_category(::Val{:mmbtu_per_mwh}) = FUEL_CONSUMPTION
+_unit_category(::Val{:fuel_curve}) = FUEL_CURVE

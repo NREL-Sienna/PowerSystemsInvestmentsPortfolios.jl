@@ -23,6 +23,7 @@ struct CurrentCategory <: UnitCategory end
 struct CostCategory <: UnitCategory end
 struct FuelCategory <: UnitCategory end
 struct FuelConsumptionCategory <: UnitCategory end
+struct FuelCurveCategory <: UnitCategory end
 struct PowerCostCategory <: UnitCategory end
 struct EnergyCostCategory <: UnitCategory end
 struct FuelCostCategory <: UnitCategory end
@@ -38,6 +39,7 @@ const CURRENT = CurrentCategory()
 const COST = CostCategory()
 const FUEL = FuelCategory()
 const FUEL_CONSUMPTION = FuelConsumptionCategory()
+const FUEL_CURVE = FuelCurveCategory()
 const POWER_COST = PowerCostCategory()
 const ENERGY_COST = EnergyCostCategory()
 const FUEL_COST = FuelCostCategory()
@@ -66,6 +68,7 @@ natural_unit(::EnergyCostCategory) = (u"MW" * u"hr", USD)
 natural_unit(::FuelCategory) = MMBtu
 natural_unit(::FuelConsumptionCategory) = (u"MW" * u"hr", MMBtu)
 natural_unit(::FuelCostCategory) = (MMBtu, USD)
+natural_unit(::FuelCurveCategory) = (u"MW" * u"hr", MMBtu, USD)
 
 # --- Return value with its default natural units ---
 function convert_units(c, val::Number, cat::UnitCategory, to::NaturalUnit)
