@@ -47,6 +47,13 @@ const OPS_TIME = OPSTimeCategory()
 const INV_TIME = INVTimeCategory()
 const ENERGY = EnergyCategory()
 
+const FuelCurveUnits = NamedTuple{
+    (:energy_unit, :fuel_unit, :currency_unit),
+    T,
+} where {T <: Tuple{<:Unitful.Units, <:Unitful.Units, <:Unitful.Units}}
+const ConversionUnits =
+    NamedTuple{(:x_unit, :y_unit), T} where {T <: Tuple{<:Unitful.Units, <:Unitful.Units}}
+
 """
     natural_unit(category) → Unitful.Units
 
@@ -62,13 +69,14 @@ natural_unit(::INVTimeCategory) = u"yr"
 natural_unit(::EnergyCategory) = natural_unit(POWER) * natural_unit(OPS_TIME)
 
 natural_unit(::CostCategory) = USD
-natural_unit(::PowerCostCategory) = (u"MW", USD)
-natural_unit(::EnergyCostCategory) = (u"MW" * u"hr", USD)
+natural_unit(::PowerCostCategory) = (x_unit=u"MW", y_unit=USD)
+natural_unit(::EnergyCostCategory) = (x_unit=u"MW" * u"hr", y_unit=USD)
 
 natural_unit(::FuelCategory) = MMBtu
-natural_unit(::FuelConsumptionCategory) = (u"MW" * u"hr", MMBtu)
-natural_unit(::FuelCostCategory) = (MMBtu, USD)
-natural_unit(::FuelCurveCategory) = (u"MW" * u"hr", MMBtu, USD)
+natural_unit(::FuelConsumptionCategory) = (x_unit=u"MW" * u"hr", y_unit=MMBtu)
+natural_unit(::FuelCostCategory) = (x_unit=MMBtu, y_unit=USD)
+natural_unit(::FuelCurveCategory) =
+    (energy_unit=u"MW" * u"hr", fuel_unit=MMBtu, currency_unit=USD)
 
 # --- Return value with its default natural units ---
 function convert_units(c, val::Number, cat::UnitCategory, to::NaturalUnit)

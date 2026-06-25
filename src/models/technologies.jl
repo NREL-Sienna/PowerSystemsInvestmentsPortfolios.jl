@@ -65,15 +65,23 @@ _convert_from_default_units(base, v::UpDown, cu, u) = (
     down=_convert_from_default_units(base, v.down, cu, u),
 )
 
+#######################################################
+# Unit-aware methods for converting cost functions in Sienna.
+# Current design is intended to support the following function types:
+# - Cost (USD) as a function of power output and/or installed capacity (MW)
+# - Fuel consumption (MMBtu) as a function of energy production (MWh)
+# - Fuel cost (USD) as a function of fuel consumption (MMBtu)
+#######################################################
+
 # ----Function Data----
-function _convert_from_default_units(base, v::LinearFunctionData, cu, u)
+function _convert_from_default_units(base, v::LinearFunctionData, cu, u::ConversionUnits)
     units = natural_unit(_unit_category(cu))
 
-    proportional_units = units[2] / units[1]
-    constant_units = units[2]
+    proportional_units = units.y_unit / units.x_unit
+    constant_units = units.y_unit
 
-    new_proportional_units = u[2] / u[1]
-    new_constant_units = u[2]
+    new_proportional_units = u.y_unit / u.x_unit
+    new_constant_units = u.y_unit
 
     return LinearFunctionData(
         IS._strip_units(
@@ -90,15 +98,15 @@ function _convert_from_default_units(base, v::LinearFunctionData, cu, u)
     )
 end
 
-function _convert_from_default_units(base, v::QuadraticFunctionData, cu, u)
+function _convert_from_default_units(base, v::QuadraticFunctionData, cu, u::ConversionUnits)
     units = natural_unit(_unit_category(cu))
-    quadratic_units = units[2] / (units[1]^2)
-    proportional_units = units[2] / units[1]
-    constant_units = units[2]
+    quadratic_units = units.y_unit / (units.x_unit^2)
+    proportional_units = units.y_unit / units.x_unit
+    constant_units = units.y_unit
 
-    new_quadratic_units = u[2] / (u[1]^2)
-    new_proportional_units = u[2] / u[1]
-    new_constant_units = u[2]
+    new_quadratic_units = u.y_unit / (u.x_unit^2)
+    new_proportional_units = u.y_unit / u.x_unit
+    new_constant_units = u.y_unit
     return QuadraticFunctionData(
         IS._strip_units(
             convert_units(base, v.quadratic_term, quadratic_units, new_quadratic_units),
@@ -117,70 +125,91 @@ function _convert_from_default_units(base, v::QuadraticFunctionData, cu, u)
     )
 end
 
-function _convert_from_default_units(base, v::PiecewiseLinearData, cu, u)
+function _convert_from_default_units(base, v::PiecewiseLinearData, cu, u::ConversionUnits)
     units = natural_unit(_unit_category(cu))
     data = get_points(v)
 
     return PiecewiseLinearData([
         (
-            IS._strip_units(convert_units(base, x, units[1], u[1])),
-            IS._strip_units(convert_units(base, y, units[2], u[2])),
+            IS._strip_units(convert_units(base, x, units.x_unit, u.x_unit)),
+            IS._strip_units(convert_units(base, y, units.y_unit, u.y_unit)),
         ) for (x, y) in data
     ])
 end
 
-function _convert_from_default_units(base, v::PiecewiseStepData, cu, u)
+function _convert_from_default_units(base, v::PiecewiseStepData, cu, u::ConversionUnits)
     units = natural_unit(_unit_category(cu))
-    y_units = units[2] / units[1]
-    new_y_units = u[2] / u[1]
-
-    return PiecewiseStepData(
-        [IS._strip_units(convert_units(base, x, units[1], u[1])) for x in v.x_coords],
-        [IS._strip_units(convert_units(base, y, y_units, new_y_units)) for y in v.y_coords],
-    )
+    if cu == Val(:mmbtu_per_mwh)
+        return PiecewiseStepData(
+            [
+                IS._strip_units(convert_units(base, x, units.x_unit, u.x_unit)) for
+                x in v.x_coords
+            ],
+            [
+                IS._strip_units(
+                    convert_units(
+                        base,
+                        y,
+                        units.y_unit / units.x_unit,
+                        u.y_unit / u.x_unit,
+                    ),
+                ) for y in v.y_coords
+            ],
+        )
+    end
 end
 
 # ---- ValueCurves ----
-function _convert_from_default_units(base, v::InputOutputCurve, cu, u)
-    if cu == Val(:usd_per_mw)
-        y_unit = Val(:usd)
-    else
+function _convert_from_default_units(base, v::InputOutputCurve, cu, u::ConversionUnits)
+    if cu == Val(:mmbtu_per_mwh)
         y_unit = Val(:mmbtu)
+    else
+        y_unit = Val(:usd)
     end
     return InputOutputCurve(
         _convert_from_default_units(base, v.function_data, cu, u),
-        IS._strip_units(_convert_from_default_units(base, v.input_at_zero, y_unit, u[2])),
+        IS._strip_units(
+            _convert_from_default_units(base, v.input_at_zero, y_unit, u.y_unit),
+        ),
     )
 end
 
-function _convert_from_default_units(base, v::IncrementalCurve, cu, u)
-    if cu == Val(:usd_per_mw)
-        y_unit = Val(:usd)
-    else
+function _convert_from_default_units(base, v::IncrementalCurve, cu, u::ConversionUnits)
+    if cu == Val(:mmbtu_per_mwh)
         y_unit = Val(:mmbtu)
+    else
+        y_unit = Val(:usd)
     end
     return IncrementalCurve(
         _convert_from_default_units(base, v.function_data, cu, u),
-        IS._strip_units(_convert_from_default_units(base, v.initial_input, y_unit, u[2])),
-        IS._strip_units(_convert_from_default_units(base, v.input_at_zero, y_unit, u[2])),
+        IS._strip_units(
+            _convert_from_default_units(base, v.initial_input, y_unit, u.y_unit),
+        ),
+        IS._strip_units(
+            _convert_from_default_units(base, v.input_at_zero, y_unit, u.y_unit),
+        ),
     )
 end
 
-function _convert_from_default_units(base, v::AverageRateCurve, cu, u)
-    if cu == Val(:usd_per_mw)
-        y_unit = Val(:usd)
-    else
+function _convert_from_default_units(base, v::AverageRateCurve, cu, u::ConversionUnits)
+    if cu == Val(:mmbtu_per_mwh)
         y_unit = Val(:mmbtu)
+    else
+        y_unit = Val(:usd)
     end
     return AverageRateCurve(
         _convert_from_default_units(base, v.function_data, cu, u),
-        IS._strip_units(_convert_from_default_units(base, v.initial_input, y_unit, u[2])),
-        IS._strip_units(_convert_from_default_units(base, v.input_at_zero, y_unit, u[2])),
+        IS._strip_units(
+            _convert_from_default_units(base, v.initial_input, y_unit, u.y_unit),
+        ),
+        IS._strip_units(
+            _convert_from_default_units(base, v.input_at_zero, y_unit, u.y_unit),
+        ),
     )
 end
 
 # ---- CostCurve ----
-function _convert_from_default_units(base, v::CostCurve, cu, u)
+function _convert_from_default_units(base, v::CostCurve, cu, u::ConversionUnits)
     return CostCurve(
         _convert_from_default_units(base, v.value_curve, cu, u),
         _convert_from_default_units(base, v.vom_cost, cu, u),
@@ -188,18 +217,33 @@ function _convert_from_default_units(base, v::CostCurve, cu, u)
 end
 
 # ---- FuelCurve ----
-# FuelCurve is a special case because it has fields for energy cost, fuel consumption, and fuel cost. 
-# The conversion unit is used to determine which of these fields is being converted. 
-# The function will convert the value_curve, startup_fuel_offtake, and vom_cost fields using the appropriate conversion unit. 
-# The fuel_cost field is only converted if it is a Float64, otherwise it is returned as is.
-# To resolve this we require a tuple of three units: (energy_unit, fuel_unit, currency unit). 
-function _convert_from_default_units(base, v::FuelCurve, cu, u)
-    # Skip conversion if fuel_cost is not a float
+function _convert_from_default_units(base, v::FuelCurve, cu, u::FuelCurveUnits)
+    # Construct conversion units for fields of FuelCurve
+    fuel_consumption_units = (x_unit=u.energy_unit, y_unit=u.fuel_unit)
+    vom_cost_units = (x_unit=u.energy_unit, y_unit=u.currency_unit)
+
+    default_fuel_cost = natural_unit(FuelCostCategory())
+    default_fuel_cost_units = default_fuel_cost.y_unit / default_fuel_cost.x_unit
+    fuel_cost_units = u.currency_unit / u.fuel_unit
+
     return FuelCurve(
-        _convert_from_default_units(base, v.value_curve, Val(:mmbtu_per_mwh), (u[1], u[2])),
-        isa(v.fuel_cost, Float64) ? IS._strip_units(convert_units(base, v.fuel_cost, u"USD/MMBtu", u[3]/u[2])) : v.fuel_cost,
-        _convert_from_default_units(base, v.startup_fuel_offtake, Val(:mmbtu_per_mwh), (u[1], u[2])),
-        _convert_from_default_units(base, v.vom_cost, Val(:usd_per_mwh), (u[1], u[3])),
+        _convert_from_default_units(
+            base,
+            v.value_curve,
+            Val(:mmbtu_per_mwh),
+            fuel_consumption_units,
+        ),
+        isa(v.fuel_cost, Float64) ?
+        IS._strip_units(
+            convert_units(base, v.fuel_cost, default_fuel_cost_units, fuel_cost_units),
+        ) : v.fuel_cost,
+        _convert_from_default_units(
+            base,
+            v.startup_fuel_offtake,
+            Val(:mmbtu_per_mwh),
+            fuel_consumption_units,
+        ),
+        _convert_from_default_units(base, v.vom_cost, Val(:usd_per_mwh), vom_cost_units),
     )
 end
 

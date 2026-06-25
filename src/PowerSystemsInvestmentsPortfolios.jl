@@ -154,7 +154,7 @@ const MU = IS.Mustache
 
 export USD, MMBtu, ustrip, uconvert, @u_str
 export POWER, IMPEDANCE, ADMITTANCE, VOLTAGE, CURRENT, TIME, ENERGY
-export natural_unit
+export natural_unit, ConversionUnits, FuelCurveUnits
 
 export ThermalFuels
 export PrimeMovers
