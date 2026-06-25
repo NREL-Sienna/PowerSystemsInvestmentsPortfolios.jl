@@ -196,10 +196,10 @@ end
 function _convert_from_default_units(base, v::FuelCurve, cu, u)
     # Skip conversion if fuel_cost is not a float
     return FuelCurve(
-        _convert_from_default_units(base, v.value_curve, _unit_category(Val(:mmbtu_per_mwh)), (u[1], u[2])),
-        isa(v.fuel_cost, Float64) ? _convert_from_default_units(base, v.fuel_cost, _unit_category(Val(:usd_per_mmbtu)), u[3]/u[2]) : v.fuel_cost,
-        _convert_from_default_units(base, v.startup_fuel_offtake, _unit_category(Val(:mmbtu_per_mwh)), (u[1], u[2])),
-        _convert_from_default_units(base, v.vom_cost, _unit_category(Val(:usd_per_mwh)), (u[1], u[3])),
+        _convert_from_default_units(base, v.value_curve, Val(:mmbtu_per_mwh), (u[1], u[2])),
+        isa(v.fuel_cost, Float64) ? IS._strip_units(convert_units(base, v.fuel_cost, u"USD/MMBtu", u[3]/u[2])) : v.fuel_cost,
+        _convert_from_default_units(base, v.startup_fuel_offtake, Val(:mmbtu_per_mwh), (u[1], u[2])),
+        _convert_from_default_units(base, v.vom_cost, Val(:usd_per_mwh), (u[1], u[3])),
     )
 end
 
