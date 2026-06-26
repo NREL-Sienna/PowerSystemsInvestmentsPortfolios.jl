@@ -85,7 +85,13 @@ end
 
 # --- Convert from natural units to a target Unitful unit ---
 function convert_units(c, val::Number, cat::UnitCategory, to::Unitful.Units)
-    val = val * natural_unit(cat)
+    units = natural_unit(cat)
+    #TODO: make these separate functions for each category to avoid this check
+    if isa(units, Unitful.Units)
+        val = val * units
+    else
+        val = val * (units.y_unit / units.x_unit)
+    end
     return uconvert(to, val)
 end
 

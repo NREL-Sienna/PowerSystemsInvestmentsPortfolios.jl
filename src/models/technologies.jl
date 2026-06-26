@@ -65,6 +65,22 @@ _convert_from_default_units(base, v::UpDown, cu, u) = (
     down=_convert_from_default_units(base, v.down, cu, u),
 )
 
+_convert_from_default_units(base, v::PSY.StartUpShutDown, cu, u) = (
+    startup=_convert_from_default_units(base, v.startup, cu, u),
+    shutdown=_convert_from_default_units(base, v.shutdown, cu, u),
+)
+
+_convert_from_default_units(base, v::PSY.StartUpStages, cu, u) = (
+    hot=IS._strip_units(_convert_from_default_units(base, v.hot, cu, u)),
+    warm=IS._strip_units(_convert_from_default_units(base, v.warm, cu, u)),
+    cold=IS._strip_units(_convert_from_default_units(base, v.cold, cu, u)),
+)
+
+_convert_from_default_units(base, v::PSY.STORAGE_OPERATION_MODES, cu, u) = (
+    charge=IS._strip_units(_convert_from_default_units(base, v.charge, cu, u)),
+    discharge=IS._strip_units(_convert_from_default_units(base, v.discharge, cu, u)),
+)
+
 #######################################################
 # Unit-aware methods for converting cost functions in Sienna.
 # Current design is intended to support the following function types:
@@ -244,6 +260,224 @@ function _convert_from_default_units(base, v::FuelCurve, cu, u::FuelCurveUnits)
             fuel_consumption_units,
         ),
         _convert_from_default_units(base, v.vom_cost, Val(:usd_per_mwh), vom_cost_units),
+    )
+end
+
+# ---- OperationalCost Structs ----
+function _convert_from_default_units(base, v::ThermalGenerationCost, cu, u::FuelCurveUnits)
+    if isa(get_variable(v), CostCurve)
+        @error "Variable Cost is a CostCurve. Use ConversionUnits for conversion."
+    end
+
+    cost_units = natural_unit(_unit_category(cu))
+    if isa(get_start_up(v), PSY.StartUpStages)
+        start_up = _convert_from_default_units(
+            base,
+            get_start_up(v),
+            Val(:usd_per_mwh),
+            u.currency_unit / u.energy_unit,
+        )
+    else
+        start_up = IS._strip_units(
+            convert_units(
+                base,
+                get_start_up(v),
+                cost_units.currency_unit / cost_units.energy_unit,
+                u.currency_unit / u.energy_unit,
+            ),
+        )
+    end
+    return ThermalGenerationCost(
+        _convert_from_default_units(base, v.variable, cu, u),
+        IS._strip_units(
+            convert_units(
+                base,
+                v.fixed,
+                cost_units.currency_unit / cost_units.energy_unit,
+                u.currency_unit / u.energy_unit,
+            ),
+        ),
+        start_up,
+        IS._strip_units(
+            convert_units(
+                base,
+                get_shut_down(v),
+                cost_units.currency_unit / cost_units.energy_unit,
+                u.currency_unit / u.energy_unit,
+            ),
+        ),
+    )
+end
+
+function _convert_from_default_units(base, v::ThermalGenerationCost, cu, u::ConversionUnits)
+    if isa(get_variable(v), FuelCurve)
+        @error "Variable Cost is a FuelCurve. Use FuelCurveUnits for conversion."
+    end
+
+    cost_units = natural_unit(_unit_category(cu))
+    if isa(PSY.get_start_up(v), PSY.StartUpStages)
+        start_up = _convert_from_default_units(
+            base,
+            get_start_up(v),
+            Val(:usd_per_mwh),
+            u.y_unit / u.x_unit,
+        )
+    else
+        start_up = IS._strip_units(
+            convert_units(
+                base,
+                PSY.get_start_up(v),
+                cost_units.y_unit / cost_units.x_unit,
+                u.y_unit / u.x_unit,
+            ),
+        )
+    end
+
+    return ThermalGenerationCost(
+        _convert_from_default_units(base, v.variable, cu, u),
+        IS._strip_units(
+            convert_units(
+                base,
+                v.fixed,
+                cost_units.y_unit / cost_units.x_unit,
+                u.y_unit / u.x_unit,
+            ),
+        ),
+        start_up,
+        IS._strip_units(
+            convert_units(
+                base,
+                PSY.get_shut_down(v),
+                cost_units.y_unit / cost_units.x_unit,
+                u.y_unit / u.x_unit,
+            ),
+        ),
+    )
+end
+
+function _convert_from_default_units(base, v::HydroGenerationCost, cu, u::FuelCurveUnits)
+    if isa(get_variable(v), CostCurve)
+        @error "Variable Cost is a CostCurve. Use ConversionUnits for conversion."
+    end
+
+    cost_units = natural_unit(_unit_category(cu))
+    return HydroGenerationCost(
+        _convert_from_default_units(base, v.variable, cu, u),
+        IS._strip_units(
+            convert_units(
+                base,
+                v.fixed,
+                cost_units.currency_unit / cost_units.energy_unit,
+                u.currency_unit / u.energy_unit,
+            ),
+        ),
+    )
+end
+
+function _convert_from_default_units(base, v::HydroGenerationCost, cu, u::ConversionUnits)
+    if isa(get_variable(v), FuelCurve)
+        @error "Variable Cost is a FuelCurve. Use FuelCurveUnits for conversion."
+    end
+
+    cost_units = natural_unit(_unit_category(cu))
+    return HydroGenerationCost(
+        _convert_from_default_units(base, v.variable, cu, u),
+        IS._strip_units(
+            convert_units(
+                base,
+                v.fixed,
+                cost_units.y_unit / cost_units.x_unit,
+                u.y_unit / u.x_unit,
+            ),
+        ),
+    )
+end
+
+function _convert_from_default_units(base, v::StorageCost, cu, u::ConversionUnits)
+    if isa(get_variable(v), CostCurve)
+        @error "Variable Cost is a CostCurve. Use ConversionUnits for conversion."
+    end
+
+    cost_units = natural_unit(_unit_category(cu))
+    #TODO: Adjust conversion functions to remove the need for this check
+    if isa(get_start_up(v), PSY.STORAGE_OPERATION_MODES)
+        start_up = _convert_from_default_units(
+            base,
+            get_start_up(v),
+            Val(:usd_per_mwh),
+            u.y_unit / u.x_unit,
+        )
+    else
+        start_up = IS._strip_units(
+            convert_units(
+                base,
+                get_start_up(v),
+                cost_units.y_unit / cost_units.x_unit,
+                u.y_unit / u.x_unit,
+            ),
+        )
+    end
+    return StorageCost(
+        _convert_from_default_units(base, v.charge_variable_cost, cu, u),
+        _convert_from_default_units(base, v.discharge_variable_cost, cu, u),
+        IS._strip_units(
+            convert_units(
+                base,
+                v.fixed,
+                cost_units.y_unit / cost_units.x_unit,
+                u.y_unit / u.x_unit,
+            ),
+        ),
+        start_up,
+        IS._strip_units(
+            convert_units(
+                base,
+                get_shut_down(v),
+                cost_units.y_unit / cost_units.x_unit,
+                u.y_unit / u.x_unit,
+            ),
+        ),
+        IS._strip_units(
+            convert_units(
+                base,
+                get_energy_shortage_cost(v),
+                cost_units.y_unit / cost_units.x_unit,
+                u.y_unit / u.x_unit,
+            ),
+        ),
+        IS._strip_units(
+            convert_units(
+                base,
+                get_energy_surplus_cost(v),
+                cost_units.y_unit / cost_units.x_unit,
+                u.y_unit / u.x_unit,
+            ),
+        ),
+    )
+end
+
+function _convert_from_default_units(
+    base,
+    v::RenewableGenerationCost,
+    cu,
+    u::ConversionUnits,
+)
+    if isa(get_variable(v), FuelCurve)
+        @error "Variable Cost is a FuelCurve. Use FuelCurveUnits for conversion."
+    end
+
+    cost_units = natural_unit(_unit_category(cu))
+    return RenewableGenerationCost(
+        _convert_from_default_units(base, v.variable, cu, u),
+        _convert_from_default_units(base, v.curtailment, cu, u),
+        IS._strip_units(
+            convert_units(
+                base,
+                v.fixed,
+                cost_units.y_unit / cost_units.x_unit,
+                u.y_unit / u.x_unit,
+            ),
+        ),
     )
 end
 
