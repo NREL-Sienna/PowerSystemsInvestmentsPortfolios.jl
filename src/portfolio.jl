@@ -732,22 +732,6 @@ function remove_time_series!(
     return IS.remove_time_series!(portfolio.data, T)
 end
 
-#=
-
-"""
-Check system consistency and validity.
-"""
-function check(sys::System)
-    buses = get_components(ACBus, sys)
-    slack_bus_check(buses)
-    buscheck(buses)
-    critical_components_check(sys)
-    adequacy_check(sys)
-    return
-end
-
-=#
-
 """
 Remove a technology from the portfolio by its value.
 
