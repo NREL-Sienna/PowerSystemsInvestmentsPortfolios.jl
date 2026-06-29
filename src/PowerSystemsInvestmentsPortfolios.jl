@@ -20,7 +20,8 @@ import InfrastructureSystems:
     CostCurve,
     LinearCurve,
     InfrastructureSystemsComponent,
-    InfrastructureSystemsType
+    InfrastructureSystemsType,
+    get_available
 
 # Using PowerSystems in order to support deserializing with PSY parametric typing
 using PowerSystems
@@ -127,6 +128,7 @@ export from_json
 export MinMax
 export InOut
 export UpDown
+export set_units_base_system!
 
 export show_region_topology_table
 

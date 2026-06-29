@@ -28,11 +28,30 @@ supports_time_series(::Technology) = true
 supports_requirements(::Technology) = true
 
 """
-Return true if the requirement is attached to the Technology.
+Return true if a specific requirement is attached to the Technology.
 """
 function has_requirement(technology::Technology, requirement::Requirement)
+    if !supports_requirements(technology)
+        return false
+    end
     for _requirement in get_requirements(technology)
         if IS.get_uuid(_requirement) == IS.get_uuid(requirement)
+            return true
+        end
+    end
+
+    return false
+end
+
+"""
+Return true if a technology has any requirements of type T attached to it.
+"""
+function has_requirement(technology::Technology, ::Type{T}) where {T <: Requirement}
+    if !supports_requirements(technology)
+        return false
+    end
+    for _requirement in get_requirements(technology)
+        if isa(_requirement, T)
             return true
         end
     end
