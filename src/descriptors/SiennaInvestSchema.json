@@ -246,7 +246,7 @@
                 "operation_costs": {
                     "type": "PSY.OperationalCost",
                     "description": "Fixed and variable O&M costs for a technology",
-                    "default": "ThermalGenerationCost()"
+                    "default": "ThermalGenerationCost(nothing)"
                 },
                 "unit_size": {
                     "type": "Float64",
@@ -570,7 +570,7 @@
                 "operation_costs": {
                     "type": "PSY.OperationalCost",
                     "description": "Fixed and variable O&M costs for a technology",
-                    "default": "StorageCost()"
+                    "default": "StorageCost(nothing)"
                 },
                 "min_discharge_fraction": {
                     "type": "Float64",
@@ -1466,7 +1466,7 @@
                 "operation_costs_solar": {
                     "type": "PSY.OperationalCost",
                     "description": "Fixed and variable O&M costs for a technology",
-                    "default": "ThermalGenerationCost()"
+                    "default": "ThermalGenerationCost(nothing)"
                 },
                 "capacity_limits_solar": {
                     "type": "MinMax",
@@ -1486,7 +1486,7 @@
                 "operation_costs_wind": {
                     "type": "PSY.OperationalCost",
                     "description": "Fixed and variable O&M costs for a technology",
-                    "default": "ThermalGenerationCost()"
+                    "default": "ThermalGenerationCost(nothing)"
                 },
                 "capacity_limits_wind": {
                     "type": "MinMax",
@@ -1511,12 +1511,12 @@
                 "operation_costs_energy": {
                     "type": "PSY.OperationalCost",
                     "description": "Fixed and variable O&M costs for a storage technology",
-                    "default": "StorageCost()"
+                    "default": "StorageCost(nothing)"
                 },
                 "operation_costs_power": {
                     "type": "PSY.OperationalCost",
                     "description": "Fixed and variable O&M costs for a storage technology",
-                    "default": "StorageCost()"
+                    "default": "StorageCost(nothing)"
                 },
                 "capacity_power_limits": {
                     "type": "MinMax",
