@@ -84,16 +84,16 @@ end
     p_5bus = build_portfolio()
     # cheap_thermal uses a FuelCurve — heat_rate and fuel_cost are defined
     thermal = get_technology(SupplyTechnology{ThermalStandard}, p_5bus, "cheap_thermal")
-    @test get_heat_rate(thermal) isa Float64
-    @test get_heat_rate(thermal) > 0
-    @test get_fuel_cost(thermal) isa Float64
-    @test get_fuel_cost(thermal) == 1.12
+    @test PSIP.get_heat_rate(thermal) isa Float64
+    @test PSIP.get_heat_rate(thermal) > 0
+    @test PSIP.get_fuel_cost(thermal) isa Float64
+    @test PSIP.get_fuel_cost(thermal) == 1.12
 
     # both FuelCurve and CostCurve technologies expose get_variable_cost
     expensive =
         get_technology(SupplyTechnology{ThermalStandard}, p_5bus, "expensive_thermal")
-    @test get_variable_cost(expensive) isa Float64
-    @test get_variable_cost(thermal) isa Float64
+    @test PSIP.get_variable_cost(expensive) isa Float64
+    @test PSIP.get_variable_cost(thermal) isa Float64
 end
 
 @testset "get_variable_cost_charge / get_variable_cost_discharge" begin
