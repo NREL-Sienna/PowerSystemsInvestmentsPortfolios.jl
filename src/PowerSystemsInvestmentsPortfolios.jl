@@ -20,7 +20,8 @@ import InfrastructureSystems:
     CostCurve,
     LinearCurve,
     InfrastructureSystemsComponent,
-    InfrastructureSystemsType
+    InfrastructureSystemsType,
+    get_available
 
 # Using PowerSystems in order to support deserializing with PSY parametric typing
 using PowerSystems
