@@ -10,7 +10,7 @@ const _CONTAINS_SHOULD_ENCODE = Union{
     DemandTechnology,
     TransmissionTechnology,
     Requirement,
-    IS.SupplementalAttribute,
+    ExistingCapacity,
     RegionTopology,
 }
 const SYSTEM_KWARGS = Set((
@@ -131,7 +131,7 @@ function deserialize(
     return from_dict(Portfolio, raw, filename; from_python, kwargs...)
 end
 
-function serialize(schedule::InvestmentScheduleResults)
+function IS.serialize(schedule::InvestmentScheduleResults)
     start_dates = Vector{String}()
     end_dates = Vector{String}()
     capacity_data = Vector{Vector{Dict{String, Any}}}()
@@ -164,7 +164,7 @@ function serialize(schedule::InvestmentScheduleResults)
     return data
 end
 
-function serialize(technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
+function IS.serialize(technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
     api_struct = serialize_openapi_struct(technology)
 
     struct_type = typeof(technology)
@@ -585,9 +585,13 @@ function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{St
         end
     end
 
-    #Build internal from uuid and remove uuid entry
-    vals[:internal] = IS.InfrastructureSystemsInternal(; uuid=vals[:uuid])
-    delete!(vals, :uuid)
+    #Build internal from uuid if it is present and remove uuid entry
+    if haskey(vals, :uuid)
+        vals[:internal] = IS.InfrastructureSystemsInternal(; uuid=vals[:uuid])
+        delete!(vals, :uuid)
+    else
+        vals[:internal] = IS.InfrastructureSystemsInternal()
+    end
 
     struct_type_string = metadata["type"]
     struct_type = getproperty(PowerSystemsInvestmentsPortfolios, Symbol(struct_type_string))

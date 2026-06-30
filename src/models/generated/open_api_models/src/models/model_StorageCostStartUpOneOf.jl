@@ -16,9 +16,9 @@ Base.@kwdef mutable struct StorageCostStartUpOneOf <: OpenAPI.APIModel
     discharge::Union{Nothing, Float64} = nothing
 
     function StorageCostStartUpOneOf(charge, discharge)
-        OpenAPI.validate_property(StorageCostStartUpOneOf, Symbol("charge"), charge)
-        OpenAPI.validate_property(StorageCostStartUpOneOf, Symbol("discharge"), discharge)
-        return new(charge, discharge)
+        o = new(charge, discharge)
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type StorageCostStartUpOneOf
 
@@ -27,8 +27,13 @@ const _property_types_StorageCostStartUpOneOf =
 OpenAPI.property_type(::Type{StorageCostStartUpOneOf}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_StorageCostStartUpOneOf[name]))}
 
-function check_required(o::StorageCostStartUpOneOf)
+function OpenAPI.check_required(o::StorageCostStartUpOneOf)
     true
+end
+
+function OpenAPI.validate_properties(o::StorageCostStartUpOneOf)
+    OpenAPI.validate_property(StorageCostStartUpOneOf, Symbol("charge"), o.charge)
+    OpenAPI.validate_property(StorageCostStartUpOneOf, Symbol("discharge"), o.discharge)
 end
 
 function OpenAPI.validate_property(::Type{StorageCostStartUpOneOf}, name::Symbol, val) end
