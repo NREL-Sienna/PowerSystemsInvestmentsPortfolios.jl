@@ -953,20 +953,13 @@ function remove_supplemental_attribute!(
 end
 
 """
-Remove the supplemental attribute from the system and all attached components.
-"""
-function remove_supplemental_attribute!(p::Portfolio, attribute::IS.SupplementalAttribute)
-    return IS.remove_supplemental_attribute!(p.data, attribute)
-end
-
-"""
 Remove all supplemental attributes with the given type from the system.
 """
 function remove_supplemental_attributes!(
     ::Type{T},
     p::Portfolio,
 ) where {T <: IS.SupplementalAttribute}
-    return IS.remove_supplemental_attributes!(T, p.data)
+    return IS.remove_supplemental_attributes!(p.data, T)
 end
 
 """
