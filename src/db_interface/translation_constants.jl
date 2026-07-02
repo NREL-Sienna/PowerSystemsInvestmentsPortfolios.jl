@@ -234,6 +234,7 @@ const ALL_SA_PSIP_TYPES = [
     RetirementPotential,
     AggregateRetrofitPotential,
     RetrofitPotential,
+    TopologyMapping
 ]
 
 const ALL_SA_PSIP_OPENAPI_TYPES = [
@@ -242,6 +243,7 @@ const ALL_SA_PSIP_OPENAPI_TYPES = [
     PowerOpenAPIModels.RetirementPotential,
     PowerOpenAPIModels.AggregateRetrofitPotential,
     PowerOpenAPIModels.RetrofitPotential,
+    PowerOpenAPIModels.TopologyMapping
 ]
 
 const SA_PSIP_TO_OPENAPI =
