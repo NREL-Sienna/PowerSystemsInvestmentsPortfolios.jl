@@ -787,7 +787,7 @@ function db2openapi_json(
 )
     components_dict = Dict{String, Vector{Dict{String, Any}}}()
 
-    foreach_component_dict(db, ALL_DESERIALIZABLE_TYPES) do OPENAPI_T, dict
+    foreach_component_dict(db, PSY_DESERIALIZABLE_TYPES) do OPENAPI_T, dict
         type_name = string(nameof(OPENAPI_T))
         if !haskey(components_dict, type_name)
             components_dict[type_name] = Vector{Dict{String, Any}}()
@@ -838,133 +838,201 @@ function db2openapi_json(
     return output_path
 end
 
+# Ported from IS. Since we are using OpenAPI we don't want to serialize the entire SystemData object
+# just the time series data.
+function serialize_time_series!(data::IS.SystemData, output::Dict{String, Any}, output_path::AbstractString)
+    if isempty(data.time_series_manager.data_store)
+        output["time_series_compression_enabled"] =
+            IS.get_compression_settings(data.time_series_manager.data_store).enabled
+        output["time_series_in_memory"] =
+            data.time_series_manager.data_store isa IS.InMemoryTimeSeriesStorage
+    else
+        base = splitext(basename(output_path))[1]
+        time_series_base_name =
+            IS._get_secondary_basename(base, IS.TIME_SERIES_STORAGE_FILE)
+        time_series_storage_file = joinpath(dirname(output_path), time_series_base_name)
+        IS.serialize(data.time_series_manager.data_store, time_series_storage_file)
+        IS.to_h5_file(
+            data.time_series_manager.metadata_store,
+            time_series_storage_file,
+        )
+        output["time_series_storage_file"] = time_series_base_name
+        output["time_series_storage_type"] =
+            string(typeof(data.time_series_manager.data_store))
+    end
+end
+
 function portfolio2openapi_json(
-    db,
+    portfolio::Portfolio,
     output_path::AbstractString;
     time_series::Bool=false,
-    time_series_data::Bool=false,
+    base_system::Bool=false
 )
     components_dict = Dict{String, Vector{Dict{String, Any}}}()
 
-    # foreach_component_dict(db, ALL_DESERIALIZABLE_TYPES) do OPENAPI_T, dict
-    #     type_name = string(nameof(OPENAPI_T))
-    #     if !haskey(components_dict, type_name)
-    #         components_dict[type_name] = Vector{Dict{String, Any}}()
-    #     end
-    #     push!(components_dict[type_name], dict)
-    # end
+    id = IDGenerator()
+    for OPENAPI_T in PSIP_DESERIALIZABLE_TYPES
+        type_name = string(nameof(OPENAPI_T))
+        psip_type = OPENAPI_TYPE_TO_PSIP[OPENAPI_T]
+        if !haskey(components_dict, type_name)
+            components_dict[type_name] = Vector{Dict{String, Any}}()
+        end
+        if psip_type <: RegionTopology
+            components = get_regions(psip_type, portfolio)
+        elseif psip_type <: Technology
+            components = get_technologies(psip_type, portfolio)
+        else
+            components = get_requirements(psip_type, portfolio)
+        end
+        for component in components
+            openapi_obj = sienna2openapi(component, id)
+            dict = JSON.parse(OpenAPI.to_json(openapi_obj))
+            push!(components_dict[type_name], dict)
+        end
+    end
+    
+    sa_dict = Dict{String, Vector{Dict{String, Any}}}()
+    for OPENAPI_T in ALL_SA_PSIP_OPENAPI_TYPES
+        type_name = string(nameof(OPENAPI_T))
+        psip_type = SA_OPENAPI_TO_PSIP[OPENAPI_T]
+        if !haskey(sa_dict, type_name)
+            sa_dict[type_name] = Vector{Dict{String, Any}}()
+        end
+        attributes = get_supplemental_attributes(psip_type, portfolio)
+        for attribute in attributes
+            openapi_obj = sienna2openapi(attribute, id)
+            dict = JSON.parse(OpenAPI.to_json(openapi_obj))
+            push!(sa_dict[type_name], dict)
+        end
+    end
+    
+    associations = portfolio.data.supplemental_attribute_manager.associations
+    sa_assocs = IS.to_records(associations)
 
-    # sa_dict = Dict{String, Vector{Dict{String, Any}}}()
-    # for OPENAPI_T in ALL_SA_OPENAPI_TYPES
-    #     type_name = string(nameof(OPENAPI_T))
-    #     rows = DBInterface.execute(
-    #         db,
-    #         "SELECT id, value FROM supplemental_attributes WHERE TYPE = ?",
-    #         (type_name,),
-    #     )
-    #     for row in rows
-    #         if !haskey(sa_dict, type_name)
-    #             sa_dict[type_name] = Vector{Dict{String, Any}}()
-    #         end
-    #         push!(sa_dict[type_name], JSON.parse(row.value))
-    #     end
-    # end
+    # Storing UUID mapping in the JSON to ensure compatibility with supplemental attributes
+    # and timeseries. My understanding is that we want to phase out UUIDs anyway so this
+    # will be a temporary fix
+    output = Dict{String, Any}(
+        "aggregation" => string(get_aggregation(portfolio)),
+        "metadata" => get_metadata(portfolio),
+        "financial_data" => IS.serialize(get_financial_data(portfolio)),
+        "investment_schedule" => IS.serialize(get_investment_schedule(portfolio)),
+        "components" => components_dict,
+        "supplemental_attributes" => sa_dict,
+        "supplemental_attribute_associations" => sa_assocs,
+        "id2uuid" => Dict(v => string(k) for (k, v) in id.uuid2int)
+    )
 
-    # sa_assocs = [
-    #     Dict("attribute_id" => r.attribute_id, "entity_id" => r.entity_id) for r in
-    #     DBInterface.execute(db, "SELECT * FROM supplemental_attributes_association")
-    # ]
+    if time_series
+        serialize_time_series!(portfolio.data, output, output_path)
+    end
 
-    # output = Dict{String, Any}(
-    #     "system" => Dict{String, Any}(
-    #         "name" => system_name,
-    #         "base_power" => base_power,
-    #         "description" => description,
-    #     ),
-    #     "components" => components_dict,
-    #     "supplemental_attributes" => sa_dict,
-    #     "supplemental_attribute_associations" => sa_assocs,
+    if base_system
+        base_system_file =
+            joinpath(dirname(output_path), splitext(basename(output_path))[1] * "_base_system.json")
+        system2openapi_json(
+            get_base_system(portfolio),
+            base_system_file;
+            time_series=time_series,
+        )
+        output["base_system"] = base_system_file
+    end
+
+    open(output_path, "w") do io
+        JSON.print(io, output, 2)
+    end
+
+    return output_path
+end
+
+function openapi_json2portfolio(file_path::AbstractString; kwargs...)
+    ext = lowercase(splitext(file_path)[2])
+    if ext == ".json"
+        unsupported = setdiff(keys(kwargs), SYSTEM_KWARGS)
+        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
+        runchecks = get(kwargs, :runchecks, false)
+        time_series_read_only = get(kwargs, :time_series_read_only, false)
+        time_series_directory = get(kwargs, :time_series_directory, nothing)
+        portfolio = deserialize(
+            Portfolio,
+            file_path;
+            from_python=from_python,
+            time_series_read_only=time_series_read_only,
+            # runchecks = runchecks,
+            time_series_directory=time_series_directory,
+        )
+        _post_deserialize_handling(
+            portfolio;
+            runchecks=runchecks,
+            assign_new_uuids=assign_new_uuids,
+        )
+        return portfolio
+    else
+        throw(DataFormatError("$file_path is not a supported file type"))
+    end
+    # for timeseries: Use line 328 deserialize function
+    # supplemental_attribute_manager = IS.SupplementalAttributeManager(
+    #     IS.SupplementalAttributesByType(IS.SupplementalAttributesByType()),
+    #     IS.from_records(IS.SupplementalAttributeAssociations, []),
     # )
-
-    # if time_series
-    #     output["time_series"] = export_time_series_dict(db; include_data=time_series_data)
-    # end
-
-    # open(output_path, "w") do io
-    #     JSON.print(io, output, 2)
-    # end
-
-    # return output_path
 end
 
 function system2openapi_json(
     system,
     output_path::AbstractString;
     time_series::Bool=false,
-    time_series_data::Bool=false,
 )
     components_dict = Dict{String, Vector{Dict{String, Any}}}()
 
-    # foreach_component_dict(db, ALL_DESERIALIZABLE_TYPES) do OPENAPI_T, dict
-    #     type_name = string(nameof(OPENAPI_T))
-    #     if !haskey(components_dict, type_name)
-    #         components_dict[type_name] = Vector{Dict{String, Any}}()
-    #     end
-    #     push!(components_dict[type_name], dict)
-    # end
+    id = IDGenerator()
+    for OPENAPI_T in PSY_DESERIALIZABLE_TYPES
+        type_name = string(nameof(OPENAPI_T))
+        psy_type = OPENAPI_TYPE_TO_PSY[OPENAPI_T]
+        if !haskey(components_dict, type_name)
+            components_dict[type_name] = Vector{Dict{String, Any}}()
+        end
+        components = PSY.get_components(psy_type, system)
+        for component in components
+            openapi_obj = sienna2openapi(component, id)
+            dict = JSON.parse(OpenAPI.to_json(openapi_obj))
+            push!(components_dict[type_name], dict)
+        end
+    end
+    
+    sa_dict = Dict{String, Vector{Dict{String, Any}}}()
+    for OPENAPI_T in ALL_SA_OPENAPI_TYPES
+        type_name = string(nameof(OPENAPI_T))
+        psy_type = SA_OPENAPI_TO_PSY[OPENAPI_T]
+        if !haskey(sa_dict, type_name)
+            sa_dict[type_name] = Vector{Dict{String, Any}}()
+        end
+        attributes = PSY.get_supplemental_attributes(psy_type, system)
+        for attribute in attributes
+            openapi_obj = sienna2openapi(attribute, id)
+            dict = JSON.parse(OpenAPI.to_json(openapi_obj))
+            push!(sa_dict[type_name], dict)
+        end
+    end
+    
+    associations = system.data.supplemental_attribute_manager.associations
+    sa_assocs = IS.to_records(associations)
 
-    # for (T, OPENAPI_T) in zip(ALL_PSY_TYPES, ALL_TYPES)
-    #     components = PSY.get_components(T, sys)
-    #     for component in components
-    #         openapi_obj = sienna2openapi(component, IDGenerator())
-    #         dict = OpenAPI.to_dict(openapi_obj)
-    #         type_name = string(nameof(OPENAPI_T))
-    #         if !haskey(components_dict, type_name)
-    #             components_dict[type_name] = Vector{Dict{String, Any}}()
-    #         end
-    #         push!(components_dict[type_name], dict)
-    #     end
-    # end
+    output = Dict{String, Any}(
+        "frequency" => string(get_frequency(system)),
+        "metadata" => IS.serialize(system.metadata),
+        "components" => components_dict,
+        "supplemental_attributes" => sa_dict,
+        "supplemental_attribute_associations" => sa_assocs,
+        "id2uuid" => Dict(v => string(k) for (k, v) in id.uuid2int)
+    )
 
-    # sa_dict = Dict{String, Vector{Dict{String, Any}}}()
-    # for OPENAPI_T in ALL_SA_OPENAPI_TYPES
-    #     type_name = string(nameof(OPENAPI_T))
-    #     rows = DBInterface.execute(
-    #         db,
-    #         "SELECT id, value FROM supplemental_attributes WHERE TYPE = ?",
-    #         (type_name,),
-    #     )
-    #     for row in rows
-    #         if !haskey(sa_dict, type_name)
-    #             sa_dict[type_name] = Vector{Dict{String, Any}}()
-    #         end
-    #         push!(sa_dict[type_name], JSON.parse(row.value))
-    #     end
-    # end
+    if time_series
+        serialize_time_series!(system.data, output, output_path)
+    end
 
-    # sa_assocs = [
-    #     Dict("attribute_id" => r.attribute_id, "entity_id" => r.entity_id) for r in
-    #     DBInterface.execute(db, "SELECT * FROM supplemental_attributes_association")
-    # ]
+    open(output_path, "w") do io
+        JSON.print(io, output, 2)
+    end
 
-    # output = Dict{String, Any}(
-    #     "system" => Dict{String, Any}(
-    #         "name" => PSY.get_name(system),
-    #         "base_power" => PSY.get_base_power(system),
-    #         "description" => PSY.get_description(system),
-    #     ),
-    #     "components" => components_dict,
-    #     "supplemental_attributes" => sa_dict,
-    #     "supplemental_attribute_associations" => sa_assocs,
-    # )
-
-    # if time_series
-    #     output["time_series"] = export_time_series_dict(db; include_data=time_series_data)
-    # end
-
-    # open(output_path, "w") do io
-    #     JSON.print(io, output, 2)
-    # end
-
-    # return output_path
+    return output_path
 end

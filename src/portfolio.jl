@@ -268,6 +268,16 @@ Get the description of the portfolio.
 get_description(val::Portfolio) = val.metadata.description
 
 """
+Get the data source of the portfolio.
+"""
+get_data_source(val::Portfolio) = val.metadata.data_source
+
+"""
+Get the metadata of the portfolio.
+"""
+get_metadata(val::Portfolio) = val.metadata
+
+"""
 Get the investment schedule of the portfolio.
 """
 get_investment_schedule(val::Portfolio) = val.investment_schedule
@@ -305,6 +315,12 @@ Set the interest rate of the portfolio.
 """
 set_interest_rate!(val::Portfolio, interest_rate::Float64) =
     val.financial_data.interest_rate = interest_rate
+    
+"""
+Set the financial data of the portfolio.
+"""
+set_financial_data!(val::Portfolio, financial_data::PortfolioFinancialData) =
+    val.financial_data = financial_data
 
 """
 Set the investment schedule of the portfolio.

@@ -80,6 +80,7 @@ export TimeMapping
 
 export get_name
 export get_description
+export get_data_source
 export get_regions
 export get_technologies
 export get_technology
@@ -89,7 +90,6 @@ export get_technologies_by_name
 export get_requirement
 export get_requirements
 export get_ext
-export get_description
 export get_financial_data
 export get_base_year
 export get_inflation_rate
@@ -105,6 +105,7 @@ export set_interest_rate!
 export set_discount_rate!
 export set_investment_schedule!
 export set_base_system!
+export set_financial_data!
 export add_technology!
 export add_technologies!
 export add_region!

@@ -93,7 +93,7 @@ const PSY_TYPE_NAMES = Dict(string(nameof(t)) => t for t in ALL_PSY_TYPES)
 
 const ALL_SA_PSY_TYPES = [IS.GeographicInfo]
 
-const ALL_SA_OPENAPI_TYPES = [GeographicInfo]
+const ALL_SA_OPENAPI_TYPES = [PowerOpenAPIModels.GeographicInfo]
 
 const SA_PSY_TO_OPENAPI =
     Dict(k => v for (k, v) in zip(ALL_SA_PSY_TYPES, ALL_SA_OPENAPI_TYPES))
