@@ -81,7 +81,10 @@ function openapi2psip(supply::PowerOpenAPIModels.SupplyTechnology, resolver::Res
     )
 end
 
-function openapi2psip(line::PowerOpenAPIModels.AggregateTransportTechnology, resolver::Resolver)
+function openapi2psip(
+    line::PowerOpenAPIModels.AggregateTransportTechnology,
+    resolver::Resolver,
+)
     AggregateTransportTechnology{getproperty(PSY, Symbol(line.power_systems_type))}(;
         name=line.name,
         id=line.id,
@@ -97,7 +100,10 @@ function openapi2psip(line::PowerOpenAPIModels.AggregateTransportTechnology, res
     )
 end
 
-function openapi2psip(line::PowerOpenAPIModels.NodalACTransportTechnology, resolver::Resolver)
+function openapi2psip(
+    line::PowerOpenAPIModels.NodalACTransportTechnology,
+    resolver::Resolver,
+)
     NodalACTransportTechnology{getproperty(PSY, Symbol(line.power_systems_type))}(;
         name=line.name,
         id=line.id,
@@ -115,7 +121,10 @@ function openapi2psip(line::PowerOpenAPIModels.NodalACTransportTechnology, resol
     )
 end
 
-function openapi2psip(line::PowerOpenAPIModels.NodalHVDCTransportTechnology, resolver::Resolver)
+function openapi2psip(
+    line::PowerOpenAPIModels.NodalHVDCTransportTechnology,
+    resolver::Resolver,
+)
     NodalHVDCTransportTechnology{getproperty(PSY, Symbol(line.power_systems_type))}(;
         name=line.name,
         id=line.id,

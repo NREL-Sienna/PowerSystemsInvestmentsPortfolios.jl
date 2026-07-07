@@ -1,4 +1,7 @@
-function openapi2psy(energy_res::PowerOpenAPIModels.EnergyReservoirStorage, resolver::Resolver)
+function openapi2psy(
+    energy_res::PowerOpenAPIModels.EnergyReservoirStorage,
+    resolver::Resolver,
+)
     PSY.EnergyReservoirStorage(;
         name=energy_res.name,
         available=energy_res.available,
@@ -203,7 +206,10 @@ function openapi2psy(inter::PowerOpenAPIModels.InterconnectingConverter, resolve
     )
 end
 
-function openapi2psy(interrupt_power::PowerOpenAPIModels.InterruptiblePowerLoad, resolver::Resolver)
+function openapi2psy(
+    interrupt_power::PowerOpenAPIModels.InterruptiblePowerLoad,
+    resolver::Resolver,
+)
     PSY.InterruptiblePowerLoad(
         name=interrupt_power.name,
         available=interrupt_power.available,
@@ -224,7 +230,10 @@ function openapi2psy(interrupt_power::PowerOpenAPIModels.InterruptiblePowerLoad,
     )
 end
 
-function openapi2psy(interrupt_standard::PowerOpenAPIModels.InterruptibleStandardLoad, resolver::Resolver)
+function openapi2psy(
+    interrupt_standard::PowerOpenAPIModels.InterruptibleStandardLoad,
+    resolver::Resolver,
+)
     PSY.InterruptibleStandardLoad(
         name=interrupt_standard.name,
         available=interrupt_standard.available,

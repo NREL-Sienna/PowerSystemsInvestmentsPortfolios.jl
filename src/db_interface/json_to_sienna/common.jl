@@ -167,6 +167,10 @@ get_sienna_fuel_dictionary(dict::Dict{String, MinMax}) =
 
 get_sienna_startup(::Nothing) = nothing
 
+function get_sienna_startup(startup::Int64)
+    return Float64(startup)
+end
+
 function get_sienna_startup(startup::Float64)
     return startup
 end
@@ -255,15 +259,21 @@ end
 
 get_sienna_function_data(::Nothing) = nothing
 
-function get_sienna_function_data(function_data::PowerOpenAPIModels.AverageRateCurveFunctionData)
+function get_sienna_function_data(
+    function_data::PowerOpenAPIModels.AverageRateCurveFunctionData,
+)
     get_sienna_function_data(function_data.value)
 end
 
-function get_sienna_function_data(function_data::PowerOpenAPIModels.IncrementalCurveFunctionData)
+function get_sienna_function_data(
+    function_data::PowerOpenAPIModels.IncrementalCurveFunctionData,
+)
     get_sienna_function_data(function_data.value)
 end
 
-function get_sienna_function_data(function_data::PowerOpenAPIModels.InputOutputCurveFunctionData)
+function get_sienna_function_data(
+    function_data::PowerOpenAPIModels.InputOutputCurveFunctionData,
+)
     get_sienna_function_data(function_data.value)
 end
 
@@ -290,7 +300,9 @@ function get_sienna_function_data(function_data::PowerOpenAPIModels.QuadraticFun
     )
 end
 
-function get_sienna_technology_financial_data(financial_data::PowerOpenAPIModels.TechnologyFinancialData)
+function get_sienna_technology_financial_data(
+    financial_data::PowerOpenAPIModels.TechnologyFinancialData,
+)
     TechnologyFinancialData(
         capital_recovery_period=financial_data.capital_recovery_period,
         technology_base_year=financial_data.technology_base_year,
@@ -328,10 +340,7 @@ mutable struct Resolver
     id2uuid::Dict{Int64, UUID}
 end
 
-function resolver_from_id_generator(
-    idgen::IDGenerator,
-    sys::Union{PSY.System, Portfolio},
-)
+function resolver_from_id_generator(idgen::IDGenerator, sys::Union{PSY.System, Portfolio})
     inverted_dict = Dict()
     for (uuid, id) in idgen.uuid2int
         inverted_dict[id] = uuid
@@ -357,8 +366,9 @@ function resolve_owner(resolve::Resolver, id::Int64)
 end
 
 #type dispatch for PSY and PSIP functions
-openapi2sienna(component::PSY.Component, ids::IDGenerator) = openapi2psy(component, ids)
+openapi2sienna(component::PSY.Component, resolver::Resolver) =
+    openapi2psy(component, resolver)
 openapi2sienna(
     component::Union{RegionTopology, Technology, Requirement},
-    ids::IDGenerator,
-) = openapi2psip(component, ids)
+    resolver::Resolver,
+) = openapi2psip(component, resolver)

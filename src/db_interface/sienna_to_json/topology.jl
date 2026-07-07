@@ -15,7 +15,11 @@ function psy2openapi(bus::PSY.ACBus, ids::IDGenerator)
 end
 
 function psy2openapi(arc::PSY.Arc, ids::IDGenerator)
-    PowerOpenAPIModels.Arc(id=getid!(ids, arc), from=getid!(ids, arc.from), to=getid!(ids, arc.to))
+    PowerOpenAPIModels.Arc(
+        id=getid!(ids, arc),
+        from=getid!(ids, arc.from),
+        to=getid!(ids, arc.to),
+    )
 end
 
 function psy2openapi(area::PSY.Area, ids::IDGenerator)

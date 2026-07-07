@@ -1,4 +1,7 @@
-function openapi2psip(requirement::PowerOpenAPIModels.CapacityReserveMargin, resolver::Resolver)
+function openapi2psip(
+    requirement::PowerOpenAPIModels.CapacityReserveMargin,
+    resolver::Resolver,
+)
     CapacityReserveMargin(
         name=requirement.name,
         id=requirement.id,
@@ -33,7 +36,10 @@ function openapi2psip(requirement::PowerOpenAPIModels.CarbonTax, resolver::Resol
     )
 end
 
-function openapi2psip(requirement::PowerOpenAPIModels.EnergyShareRequirements, resolver::Resolver)
+function openapi2psip(
+    requirement::PowerOpenAPIModels.EnergyShareRequirements,
+    resolver::Resolver,
+)
     EnergyShareRequirements(
         name=requirement.name,
         id=requirement.id,
@@ -55,7 +61,10 @@ function openapi2psip(requirement::PowerOpenAPIModels.HourlyMatching, resolver::
     )
 end
 
-function openapi2psip(requirement::PowerOpenAPIModels.MaximumCapacityRequirements, resolver::Resolver)
+function openapi2psip(
+    requirement::PowerOpenAPIModels.MaximumCapacityRequirements,
+    resolver::Resolver,
+)
     MaximumCapacityRequirements(
         name=requirement.name,
         id=requirement.id,
@@ -66,7 +75,10 @@ function openapi2psip(requirement::PowerOpenAPIModels.MaximumCapacityRequirement
     )
 end
 
-function openapi2psip(requirement::PowerOpenAPIModels.MinimumCapacityRequirements, resolver::Resolver)
+function openapi2psip(
+    requirement::PowerOpenAPIModels.MinimumCapacityRequirements,
+    resolver::Resolver,
+)
     MinimumCapacityRequirements(
         name=requirement.name,
         id=requirement.id,

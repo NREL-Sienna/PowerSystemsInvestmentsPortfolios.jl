@@ -41,7 +41,10 @@ get_startup_shutdown(::Nothing) = nothing
 function get_startup_shutdown(
     startup_shutdown::NamedTuple{(:startup, :shutdown), Tuple{Float64, Float64}},
 )
-    PowerOpenAPIModels.StartUpShutDown(startup=startup_shutdown.startup, shutdown=startup_shutdown.shutdown)
+    PowerOpenAPIModels.StartUpShutDown(
+        startup=startup_shutdown.startup,
+        shutdown=startup_shutdown.shutdown,
+    )
 end
 
 get_turbine_pump(::Nothing) = nothing
@@ -115,7 +118,9 @@ end
 function get_operation_cost(cost::PSY.HydroGenerationCost)
     PowerOpenAPIModels.HydroGenerationCost(
         cost_type="HYDRO_GEN",
-        variable=PowerOpenAPIModels.ProductionVariableCostCurve(get_variable_cost(cost.variable)),
+        variable=PowerOpenAPIModels.ProductionVariableCostCurve(
+            get_variable_cost(cost.variable),
+        ),
         fixed=cost.fixed,
     )
 end
@@ -172,10 +177,14 @@ end
 function get_operation_cost(cost::PSY.ThermalGenerationCost)
     PowerOpenAPIModels.ThermalGenerationCost(
         cost_type="THERMAL",
-        start_up=PowerOpenAPIModels.ThermalGenerationCostStartUp(get_startup(cost.start_up)),
+        start_up=PowerOpenAPIModels.ThermalGenerationCostStartUp(
+            get_startup(cost.start_up),
+        ),
         shut_down=cost.shut_down,
         fixed=cost.fixed,
-        variable=PowerOpenAPIModels.ProductionVariableCostCurve(get_variable_cost(cost.variable)),
+        variable=PowerOpenAPIModels.ProductionVariableCostCurve(
+            get_variable_cost(cost.variable),
+        ),
     )
 end
 
@@ -239,7 +248,9 @@ end
 function get_value_curve(curve::PSY.AverageRateCurve)
     PowerOpenAPIModels.AverageRateCurve(
         curve_type="AVERAGE_RATE",
-        function_data=PowerOpenAPIModels.AverageRateCurveFunctionData(get_function_data(curve.function_data)),
+        function_data=PowerOpenAPIModels.AverageRateCurveFunctionData(
+            get_function_data(curve.function_data),
+        ),
         initial_input=curve.initial_input,
         input_at_zero=curve.input_at_zero,
     )
@@ -248,7 +259,9 @@ end
 function get_value_curve(curve::PSY.IncrementalCurve)
     PowerOpenAPIModels.IncrementalCurve(
         curve_type="INCREMENTAL",
-        function_data=PowerOpenAPIModels.IncrementalCurveFunctionData(get_function_data(curve.function_data)),
+        function_data=PowerOpenAPIModels.IncrementalCurveFunctionData(
+            get_function_data(curve.function_data),
+        ),
         initial_input=curve.initial_input,
         input_at_zero=curve.input_at_zero,
     )
@@ -257,7 +270,9 @@ end
 function get_value_curve(curve::PSY.InputOutputCurve)
     PowerOpenAPIModels.InputOutputCurve(
         curve_type="INPUT_OUTPUT",
-        function_data=PowerOpenAPIModels.InputOutputCurveFunctionData(get_function_data(curve.function_data)),
+        function_data=PowerOpenAPIModels.InputOutputCurveFunctionData(
+            get_function_data(curve.function_data),
+        ),
         input_at_zero=curve.input_at_zero,
     )
 end

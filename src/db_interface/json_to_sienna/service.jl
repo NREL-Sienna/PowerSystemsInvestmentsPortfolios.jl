@@ -33,7 +33,10 @@ function openapi2psy(reserve::PowerOpenAPIModels.ConstantReserveGroup, resolver:
     )
 end
 
-function openapi2psy(reserve::PowerOpenAPIModels.ConstantReserveNonSpinning, resolver::Resolver)
+function openapi2psy(
+    reserve::PowerOpenAPIModels.ConstantReserveNonSpinning,
+    resolver::Resolver,
+)
     PSY.ConstantReserveNonSpinning(
         name=reserve.name,
         available=reserve.available,
@@ -59,7 +62,10 @@ function openapi2psy(reserve::PowerOpenAPIModels.VariableReserve, resolver::Reso
     )
 end
 
-function openapi2psy(reserve::PowerOpenAPIModels.VariableReserveNonSpinning, resolver::Resolver)
+function openapi2psy(
+    reserve::PowerOpenAPIModels.VariableReserveNonSpinning,
+    resolver::Resolver,
+)
     PSY.VariableReserveNonSpinning(
         name=reserve.name,
         available=reserve.available,

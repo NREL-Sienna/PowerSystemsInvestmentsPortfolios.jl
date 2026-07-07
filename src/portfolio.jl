@@ -315,7 +315,7 @@ Set the interest rate of the portfolio.
 """
 set_interest_rate!(val::Portfolio, interest_rate::Float64) =
     val.financial_data.interest_rate = interest_rate
-    
+
 """
 Set the financial data of the portfolio.
 """

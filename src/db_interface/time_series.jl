@@ -302,9 +302,8 @@ function deserialize_metadata(row)
     return metadata
 end
 
-_owner_type_in_clause(
-    names,
-) = "owner_type IN ($(join(("'$k'" for k in keys(names)), ", ")))"
+_owner_type_in_clause(names) =
+    "owner_type IN ($(join(("'$k'" for k in keys(names)), ", ")))"
 
 function get_example_metadata(db, sys::PSY.System)
     clause = _owner_type_in_clause(PSY_TYPE_NAMES)
@@ -336,11 +335,7 @@ function deserialize_time_series_from_metadata!(
     IS.add_time_series!(sys.data, resolve_owner(resolver, row.owner_id), ts)
 end
 
-function deserialize_timeseries!(
-    sys::Union{PSY.System, Portfolio},
-    db,
-    resolver::Resolver,
-)
+function deserialize_timeseries!(sys::Union{PSY.System, Portfolio}, db, resolver::Resolver)
     DBInterface.transaction(db) do
         # For each time_series_uuid, we'll pick a "real" metadata_uuid (so no DeterministicSingleTimeSeries),
         # then we will deserialize and add them to the system. Finally, we'll go through and add_metadata!

@@ -1,4 +1,7 @@
-function openapi2psy(area_interchange::PowerOpenAPIModels.AreaInterchange, resolver::Resolver)
+function openapi2psy(
+    area_interchange::PowerOpenAPIModels.AreaInterchange,
+    resolver::Resolver,
+)
     PSY.AreaInterchange(
         name=area_interchange.name,
         available=area_interchange.available,
@@ -15,7 +18,10 @@ function openapi2psy(area_interchange::PowerOpenAPIModels.AreaInterchange, resol
     )
 end
 
-function openapi2psy(branch::PowerOpenAPIModels.DiscreteControlledACBranch, resolver::Resolver)
+function openapi2psy(
+    branch::PowerOpenAPIModels.DiscreteControlledACBranch,
+    resolver::Resolver,
+)
     PSY.DiscreteControlledACBranch(
         name=branch.name,
         available=branch.available,
@@ -145,7 +151,10 @@ function openapi2psy(monitored::PowerOpenAPIModels.MonitoredLine, resolver::Reso
     )
 end
 
-function openapi2psy(transformer::PowerOpenAPIModels.PhaseShiftingTransformer, resolver::Resolver)
+function openapi2psy(
+    transformer::PowerOpenAPIModels.PhaseShiftingTransformer,
+    resolver::Resolver,
+)
     PSY.PhaseShiftingTransformer(
         name=transformer.name,
         available=transformer.available,
@@ -179,7 +188,10 @@ function openapi2psy(transformer::PowerOpenAPIModels.PhaseShiftingTransformer, r
     )
 end
 
-function openapi2psy(phase3w::PowerOpenAPIModels.PhaseShiftingTransformer3W, resolver::Resolver)
+function openapi2psy(
+    phase3w::PowerOpenAPIModels.PhaseShiftingTransformer3W,
+    resolver::Resolver,
+)
     PSY.PhaseShiftingTransformer3W(
         name=phase3w.name,
         available=phase3w.available,
@@ -510,7 +522,10 @@ function openapi2psy(trans3w::PowerOpenAPIModels.Transformer3W, resolver::Resolv
     )
 end
 
-function openapi2psy(hvdc::PowerOpenAPIModels.TwoTerminalGenericHVDCLine, resolver::Resolver)
+function openapi2psy(
+    hvdc::PowerOpenAPIModels.TwoTerminalGenericHVDCLine,
+    resolver::Resolver,
+)
     PSY.TwoTerminalGenericHVDCLine(
         name=hvdc.name,
         available=hvdc.available,

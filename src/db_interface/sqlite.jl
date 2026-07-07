@@ -840,11 +840,15 @@ end
 
 # Ported from IS. Since we are using OpenAPI we don't want to serialize the entire SystemData object
 # just the time series data.
-function serialize_time_series!(data::IS.SystemData, output::Dict{String, Any}, output_path::AbstractString)
+function serialize_time_series!(
+    data::IS.SystemData,
+    output::Dict{String, Any},
+    output_path::AbstractString,
+)
     if isempty(data.time_series_manager.data_store)
-        output["time_series_compression_enabled"] =
+        output["data"]["time_series_compression_enabled"] =
             IS.get_compression_settings(data.time_series_manager.data_store).enabled
-        output["time_series_in_memory"] =
+        output["data"]["time_series_in_memory"] =
             data.time_series_manager.data_store isa IS.InMemoryTimeSeriesStorage
     else
         base = splitext(basename(output_path))[1]
@@ -852,12 +856,9 @@ function serialize_time_series!(data::IS.SystemData, output::Dict{String, Any}, 
             IS._get_secondary_basename(base, IS.TIME_SERIES_STORAGE_FILE)
         time_series_storage_file = joinpath(dirname(output_path), time_series_base_name)
         IS.serialize(data.time_series_manager.data_store, time_series_storage_file)
-        IS.to_h5_file(
-            data.time_series_manager.metadata_store,
-            time_series_storage_file,
-        )
-        output["time_series_storage_file"] = time_series_base_name
-        output["time_series_storage_type"] =
+        IS.to_h5_file(data.time_series_manager.metadata_store, time_series_storage_file)
+        output["data"]["time_series_storage_file"] = time_series_storage_file
+        output["data"]["time_series_storage_type"] =
             string(typeof(data.time_series_manager.data_store))
     end
 end
@@ -866,7 +867,7 @@ function portfolio2openapi_json(
     portfolio::Portfolio,
     output_path::AbstractString;
     time_series::Bool=false,
-    base_system::Bool=false
+    base_system::Bool=false,
 )
     components_dict = Dict{String, Vector{Dict{String, Any}}}()
 
@@ -890,7 +891,7 @@ function portfolio2openapi_json(
             push!(components_dict[type_name], dict)
         end
     end
-    
+
     sa_dict = Dict{String, Vector{Dict{String, Any}}}()
     for OPENAPI_T in ALL_SA_PSIP_OPENAPI_TYPES
         type_name = string(nameof(OPENAPI_T))
@@ -905,7 +906,7 @@ function portfolio2openapi_json(
             push!(sa_dict[type_name], dict)
         end
     end
-    
+
     associations = portfolio.data.supplemental_attribute_manager.associations
     sa_assocs = IS.to_records(associations)
 
@@ -913,14 +914,20 @@ function portfolio2openapi_json(
     # and timeseries. My understanding is that we want to phase out UUIDs anyway so this
     # will be a temporary fix
     output = Dict{String, Any}(
+        "data_format_version" => DATA_FORMAT_VERSION,
         "aggregation" => string(get_aggregation(portfolio)),
         "metadata" => get_metadata(portfolio),
         "financial_data" => IS.serialize(get_financial_data(portfolio)),
         "investment_schedule" => IS.serialize(get_investment_schedule(portfolio)),
-        "components" => components_dict,
-        "supplemental_attributes" => sa_dict,
-        "supplemental_attribute_associations" => sa_assocs,
-        "id2uuid" => Dict(v => string(k) for (k, v) in id.uuid2int)
+        "data" => Dict{String, Any}(
+            "subsystems" => Dict{String, Any}(),
+            "components" => components_dict,
+            "supplemental_attribute_manager" => Dict{String, Any}(
+                "attributes" => sa_dict,
+                "associations" => sa_assocs,
+            ),
+            "id2uuid" => Dict(v => string(k) for (k, v) in id.uuid2int),
+        ),
     )
 
     if time_series
@@ -928,8 +935,10 @@ function portfolio2openapi_json(
     end
 
     if base_system
-        base_system_file =
-            joinpath(dirname(output_path), splitext(basename(output_path))[1] * "_base_system.json")
+        base_system_file = joinpath(
+            dirname(output_path),
+            splitext(basename(output_path))[1] * "_base_system.json",
+        )
         system2openapi_json(
             get_base_system(portfolio),
             base_system_file;
@@ -945,43 +954,61 @@ function portfolio2openapi_json(
     return output_path
 end
 
-function openapi_json2portfolio(file_path::AbstractString; kwargs...)
-    ext = lowercase(splitext(file_path)[2])
-    if ext == ".json"
-        unsupported = setdiff(keys(kwargs), SYSTEM_KWARGS)
-        !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
-        runchecks = get(kwargs, :runchecks, false)
-        time_series_read_only = get(kwargs, :time_series_read_only, false)
-        time_series_directory = get(kwargs, :time_series_directory, nothing)
-        portfolio = deserialize(
-            Portfolio,
-            file_path;
-            from_python=from_python,
-            time_series_read_only=time_series_read_only,
-            # runchecks = runchecks,
-            time_series_directory=time_series_directory,
-        )
-        _post_deserialize_handling(
-            portfolio;
-            runchecks=runchecks,
-            assign_new_uuids=assign_new_uuids,
-        )
-        return portfolio
-    else
-        throw(DataFormatError("$file_path is not a supported file type"))
-    end
-    # for timeseries: Use line 328 deserialize function
-    # supplemental_attribute_manager = IS.SupplementalAttributeManager(
-    #     IS.SupplementalAttributesByType(IS.SupplementalAttributesByType()),
-    #     IS.from_records(IS.SupplementalAttributeAssociations, []),
-    # )
-end
+# function openapi_json2portfolio(file_path::AbstractString; kwargs...)
+#     ext = lowercase(splitext(file_path)[2])
+#     if ext == ".json"
+#         time_series_read_only = get(kwargs, :time_series_read_only, false)
+#         time_series_directory = get(kwargs, :time_series_directory, nothing)
+#         data = deserialize(
+#             IS.SystemData,
+#             raw["data"];
+#             from_python=from_python,
+#             time_series_read_only=time_series_read_only,
+#             time_series_directory=time_series_directory,
+#         )
+#         portfolio = Portfolio(
+#             aggregation,
+#             data,
+#             base_system,
+#             investment_schedule,
+#             internal;
+#             financial_data=PortfolioFinancialData(
+#                 base_year,
+#                 discount_rate,
+#                 inflation_rate,
+#                 interest_rate,
+#             ),
+#             name=name,
+#             description=description,
+#             parsed_kwargs...,
+#         )
+#         portfolio.data.supplemental_attribute_manager = deserialize_attributes(
+#             portfolio,
+#             IS.SupplementalAttributeManager,
+#             get(
+#                 raw["data"],
+#                 "supplemental_attribute_manager",
+#                 Dict("attributes" => [], "associations" => []),
+#             ),
+#             portfolio.data.time_series_manager,
+#         )
+#         if raw["data_format_version"] != DATA_FORMAT_VERSION
+#             pre_deserialize_conversion!(raw, portfolio)
+#         end
 
-function system2openapi_json(
-    system,
-    output_path::AbstractString;
-    time_series::Bool=false,
-)
+#         ext = get_ext(portfolio)
+#         return portfolio
+#     else
+#         throw(DataFormatError("$file_path is not a supported file type"))
+#     end
+#     # for timeseries: Use line 328 deserialize function
+#     # supplemental_attribute_manager = IS.SupplementalAttributeManager(
+#     #     IS.SupplementalAttributesByType(IS.SupplementalAttributesByType()),
+#     #     IS.from_records(IS.SupplementalAttributeAssociations, []),
+#     # )
+# end
+
+function system2openapi_json(system, output_path::AbstractString; time_series::Bool=false)
     components_dict = Dict{String, Vector{Dict{String, Any}}}()
 
     id = IDGenerator()
@@ -998,7 +1025,7 @@ function system2openapi_json(
             push!(components_dict[type_name], dict)
         end
     end
-    
+
     sa_dict = Dict{String, Vector{Dict{String, Any}}}()
     for OPENAPI_T in ALL_SA_OPENAPI_TYPES
         type_name = string(nameof(OPENAPI_T))
@@ -1013,17 +1040,20 @@ function system2openapi_json(
             push!(sa_dict[type_name], dict)
         end
     end
-    
+
     associations = system.data.supplemental_attribute_manager.associations
     sa_assocs = IS.to_records(associations)
 
     output = Dict{String, Any}(
         "frequency" => string(get_frequency(system)),
         "metadata" => IS.serialize(system.metadata),
-        "components" => components_dict,
-        "supplemental_attributes" => sa_dict,
-        "supplemental_attribute_associations" => sa_assocs,
-        "id2uuid" => Dict(v => string(k) for (k, v) in id.uuid2int)
+        "data" => Dict{String, Any}(
+            "subsystems" => IS.serialize(get_subsystems(system)),
+            "components" => components_dict,
+            "supplemental_attributes" => sa_dict,
+            "supplemental_attribute_associations" => sa_assocs,
+            "id2uuid" => Dict(v => string(k) for (k, v) in id.uuid2int),
+        ),
     )
 
     if time_series
