@@ -134,14 +134,14 @@ function Base.show(io::IO, ::MIME"text/html", p::Portfolio)
         p;
         backend=:html,
         table_format=tf_html_simple,
-        stand_alone=false,
+        standalone=false,
     )
     show_technologies_table(
         io,
         p;
         backend=:html,
         table_format=tf_html_simple,
-        stand_alone=false,
+        standalone=false,
     )
     println(io)
     println(io, "Time Series")
@@ -150,7 +150,7 @@ function Base.show(io::IO, ::MIME"text/html", p::Portfolio)
         p.data;
         backend=:html,
         table_format=tf_html_simple,
-        stand_alone=false,
+        standalone=false,
     )
     return
 end

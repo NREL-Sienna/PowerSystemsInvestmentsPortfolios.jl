@@ -26,7 +26,7 @@ Technology (abstract) <: IS.InfrastructureSystemsComponent
 ## Requirement hierarchy
 
 ```
-Requirement (abstract) <: IS.InfrastructureSystemsComponent
+Requirement (abstract) <: PSY.Service
 ├── CarbonCaps
 ├── CarbonTax
 ├── CapacityReserveMargin

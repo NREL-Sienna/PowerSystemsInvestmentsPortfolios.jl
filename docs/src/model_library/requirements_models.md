@@ -28,13 +28,13 @@ Requires installed capacity to exceed peak demand by `capacity_reserve_fraction`
 CapacityReserveMargin
 ```
 
-Requires that at least `generation_fraction_requirement` of total annual energy is served by `eligible_resources` (e.g., renewables portfolio standard).
+Requires that at least `generation_fraction_requirement` of total annual energy is served by contributing technologies (e.g., renewables portfolio standard).
 
 ```@docs
 EnergyShareRequirements
 ```
 
-Requires `eligible_resources` to cover `eligible_demand` in every hour of the year (24/7 carbon-free energy matching).
+Requires generation from contributing supply tecnologies to match demand from contributing demand technologies in every hour of the year (24/7 carbon-free energy matching).
 
 ```@docs
 HourlyMatching
