@@ -548,41 +548,6 @@ function deserialize_components!(portfolio::Portfolio, raw)
     # deserialize_and_add!()
 end
 
-function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{String, Any})
-    vals = Dict{Symbol, Any}()
-    struct_type = typeof(base_struct)
-
-    #TODO: Add get_component wrappers for IS functions
-    for (name, type) in zip(fieldnames(struct_type), fieldtypes(struct_type))
-        if name in ENCODED_FIELDS
-            vals[name] = deserialize_custom_types(name, base_struct, portfolio)
-        else
-            vals[name] = getfield(base_struct, name)
-        end
-    end
-
-    #Build internal from uuid if it is present and remove uuid entry
-    if haskey(vals, :uuid)
-        vals[:internal] = IS.InfrastructureSystemsInternal(; uuid=vals[:uuid])
-        delete!(vals, :uuid)
-    else
-        vals[:internal] = IS.InfrastructureSystemsInternal()
-    end
-
-    struct_type_string = metadata["type"]
-    struct_type = getproperty(PowerSystemsInvestmentsPortfolios, Symbol(struct_type_string))
-    if haskey(metadata, "parameters")
-        parameter_string = metadata["parameters"][1]
-        #TODO: Generalize this later. Will all future parameterizing be with PSY structs?
-        parameter = getproperty(PowerSystems, Symbol(parameter_string))
-        model_struct = struct_type{parameter}(; vals...)
-    else
-        model_struct = struct_type(; vals...)
-    end
-
-    return model_struct
-end
-
 function IS.deserialize(
     ::Type{T},
     data::Dict,
