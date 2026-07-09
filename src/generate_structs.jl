@@ -1,26 +1,5 @@
 import Mustache
 
-const SERIALIZATION_TEMPLATE = """
-{{#has_parametric}}
-function serialize_openapi_struct(technology::{{struct_name}}{T}, vals...) where T <: {{parametric}}
-    base_struct = APIServer.{{struct_name}}(; vals...)
-    return base_struct
-end
-{{/has_parametric}}
-
-{{^has_parametric}}
-function serialize_openapi_struct(technology::{{struct_name}}, vals...)
-    base_struct = APIServer.{{struct_name}}(; vals...)
-    return base_struct
-end
-{{/has_parametric}}
-
-function deserialize_openapi_struct(::Type{<:{{struct_name}}}, vals::Dict)
-    return IS.deserialize_struct(APIServer.{{struct_name}}, vals)
-end
-
-"""
-
 #=
 =#
 function read_json_data(filename::String)
@@ -168,9 +147,6 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
         open(filename, "w") do io
             write(io, strip(MU.render(IS.STRUCT_TEMPLATE, item)))
             write(io, "\n\n")
-
-            write(io, strip(MU.render(SERIALIZATION_TEMPLATE, item)))
-            write(io, "\n")
 
             push!(struct_names, item["struct_name"])
         end

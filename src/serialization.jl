@@ -579,47 +579,6 @@ function IS.deserialize(
     return base_struct
 end
 
-# Handle cases where the data types in the OpenAPI struct do not match the PSIP struct
-function serialize_custom_types(field, technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
-
-    #For fields with references to other structs, serialize with
-    #the id of that struct and convert enums to strings
-    if field in [
-        :region,
-        :eligible_regions,
-        :eligible_resources,
-        :eligible_technologies,
-        :eligible_demand,
-    ]
-        comps = getfield(technology, field)
-        val = [get_id(c) for c in comps]
-    elseif field in [:start_region, :end_region, :start_node, :end_node]
-        val = get_id(getfield(technology, field))
-    elseif field in [:prime_mover_type, :storage_tech, :bus_type]
-        val = string(getfield(technology, field))
-    elseif field == :fuel
-        val = [string(f) for f in getfield(technology, field)]
-    elseif field == :heat_rate_mmbtu_per_mwh
-        fuel_params = getfield(technology, field)
-        val = Dict{String, ValueCurve}()
-        for (k, v) in fuel_params
-            val[string(k)] = v
-        end
-    elseif field in [:co2, :cofire_start_limits, :cofire_level_limits]
-        fuel_params = getfield(technology, field)
-        val = Dict{String, Float64}()
-        for (k, v) in fuel_params
-            val[string(k)] = v
-        end
-    elseif field == :uuid
-        val = string(IS.get_uuid(technology))
-    else
-        val = getfield(technology, field)
-    end
-
-    return val
-end
-
 """
 Allow types to implement handling of special cases during deserialization.
 
@@ -658,6 +617,8 @@ Refer to [`check_component`](@ref) for exceptions thrown if `check = true`.
 function to_json(
     portfolio::Portfolio,
     filename::AbstractString;
+    base_system=false,
+    time_series=false,
     user_data=nothing,
     pretty=false,
     force=false,
@@ -666,19 +627,36 @@ function to_json(
     IS.prepare_for_serialization_to_file!(portfolio.data, filename; force=force)
     data = to_json(portfolio; pretty=pretty)
 
-    open(filename, "w") do io
-        write(io, data)
+    data["metadata"] = _serialize_portfolio_metadata(portfolio, user_data)
+    if pretty
+        open(filename, "w") do io
+            JSON3.pretty(io, data)
+        end
+    else
+        open(filename, "w") do io
+            JSON3.write(io, data)
+        end
     end
-
-    mfile = joinpath(dirname(filename), splitext(basename(filename))[1] * "_metadata.json")
-    _serialize_portfolio_metadata_to_file(portfolio, mfile, user_data)
     @info "Serialized Portfolio to $filename"
 
     # Serialize base system to a separate file
-    base_system_file =
-        joinpath(dirname(filename), splitext(basename(filename))[1] * "_base_system.json")
-    PSY.to_json(portfolio.base_system, base_system_file; pretty=pretty, force=force)
+    if time_series
+        serialize_time_series!(portfolio.data, output, output_path)
+    end
 
+    if base_system
+        base_system_file = joinpath(
+            dirname(output_path),
+            splitext(basename(output_path))[1] * "_base_system.json",
+        )
+        system2openapi_json(
+            get_base_system(portfolio),
+            base_system_file;
+            time_series=time_series,
+        )
+        output["base_system"] = base_system_file
+    end
+    
     return
 end
 
@@ -700,12 +678,14 @@ function to_json(obj::T; pretty=false, indent=2) where {T <: InfrastructureSyste
     end
 end
 
-function _serialize_portfolio_metadata_to_file(portfolio::Portfolio, filename, user_data)
+function _serialize_portfolio_metadata(portfolio::Portfolio, user_data)
     name = get_name(portfolio)
     description = get_description(portfolio)
+    data_source = get_data_source(portfolio),
     metadata = OrderedDict(
         "name" => isnothing(name) ? "" : name,
         "description" => isnothing(description) ? "" : description,
+        "data_source" => isnothing(data_source) ? "" : data_source,
         "component_counts" => IS.get_component_counts_by_type(portfolio.data),
         "time_series_counts" => IS.get_time_series_counts_by_type(portfolio.data),
     )
@@ -713,11 +693,7 @@ function _serialize_portfolio_metadata_to_file(portfolio::Portfolio, filename, u
         metadata["user_data"] = user_data
     end
 
-    open(filename, "w") do io
-        JSON3.pretty(io, metadata)
-    end
-
-    @info "Serialized Portfolio metadata to $filename"
+    return metadata
 end
 
 """

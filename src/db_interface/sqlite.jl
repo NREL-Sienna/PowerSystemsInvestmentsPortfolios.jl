@@ -916,7 +916,13 @@ function portfolio2openapi_json(
     output = Dict{String, Any}(
         "data_format_version" => DATA_FORMAT_VERSION,
         "aggregation" => string(get_aggregation(portfolio)),
-        "metadata" => get_metadata(portfolio),
+        "metadata" => OrderedDict(
+            "name" => isnothing(get_name(portfolio)) ? "" : get_name(portfolio),
+            "description" => isnothing(get_description(portfolio)) ? "" : get_description(portfolio),
+            "data_source" => isnothing(get_data_source(portfolio)) ? "" : get_data_source(portfolio),
+            "component_counts" => IS.get_component_counts_by_type(portfolio.data),
+            "time_series_counts" => IS.get_time_series_counts_by_type(portfolio.data),
+        ),
         "financial_data" => IS.serialize(get_financial_data(portfolio)),
         "investment_schedule" => IS.serialize(get_investment_schedule(portfolio)),
         "data" => Dict{String, Any}(
