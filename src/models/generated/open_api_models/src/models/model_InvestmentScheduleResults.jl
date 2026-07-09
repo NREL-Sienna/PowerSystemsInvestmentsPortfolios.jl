@@ -34,6 +34,9 @@ OpenAPI.property_type(::Type{InvestmentScheduleResults}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_InvestmentScheduleResults[name]))}
 
 function OpenAPI.check_required(o::InvestmentScheduleResults)
+    o.start_dates === nothing && (return false)
+    o.end_dates === nothing && (return false)
+    o.results === nothing && (return false)
     true
 end
 

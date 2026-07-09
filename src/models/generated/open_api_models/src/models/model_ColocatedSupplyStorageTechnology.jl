@@ -4,12 +4,12 @@
 @doc raw"""ColocatedSupplyStorageTechnology
 
     ColocatedSupplyStorageTechnology(;
-        name=nothing,
         id=nothing,
+        name=nothing,
+        available=nothing,
         power_systems_type=nothing,
         region=nothing,
         financial_data=nothing,
-        available=nothing,
         capital_costs_solar=nothing,
         operation_costs_solar=nothing,
         capacity_limits_solar=nothing,
@@ -34,14 +34,15 @@
         operation_costs_inverter=nothing,
         inverter_efficiency=nothing,
         inverter_supply_ratio=nothing,
+        requirements=nothing,
     )
 
-    - name::String
     - id::Int64
+    - name::String
+    - available::Bool
     - power_systems_type::String
     - region::Vector{Int64}
     - financial_data::TechnologyFinancialData
-    - available::Bool
     - capital_costs_solar::ValueCurve
     - operation_costs_solar::RenewableGenerationCost
     - capacity_limits_solar::MinMax
@@ -66,14 +67,15 @@
     - operation_costs_inverter::ProductionVariableCostCurve
     - inverter_efficiency::Float64
     - inverter_supply_ratio::Float64
+    - requirements::Vector{Int64}
 """
 Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
-    name::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
+    name::Union{Nothing, String} = nothing
+    available::Union{Nothing, Bool} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     region::Union{Nothing, Vector{Int64}} = nothing
     financial_data = nothing # spec type: Union{ Nothing, TechnologyFinancialData }
-    available::Union{Nothing, Bool} = nothing
     capital_costs_solar = nothing # spec type: Union{ Nothing, ValueCurve }
     operation_costs_solar = nothing # spec type: Union{ Nothing, RenewableGenerationCost }
     capacity_limits_solar = nothing # spec type: Union{ Nothing, MinMax }
@@ -98,14 +100,15 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
     operation_costs_inverter = nothing # spec type: Union{ Nothing, ProductionVariableCostCurve }
     inverter_efficiency::Union{Nothing, Float64} = nothing
     inverter_supply_ratio::Union{Nothing, Float64} = nothing
+    requirements::Union{Nothing, Vector{Int64}} = nothing
 
     function ColocatedSupplyStorageTechnology(
-        name,
         id,
+        name,
+        available,
         power_systems_type,
         region,
         financial_data,
-        available,
         capital_costs_solar,
         operation_costs_solar,
         capacity_limits_solar,
@@ -130,14 +133,15 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
         operation_costs_inverter,
         inverter_efficiency,
         inverter_supply_ratio,
+        requirements,
     )
         o = new(
-            name,
             id,
+            name,
+            available,
             power_systems_type,
             region,
             financial_data,
-            available,
             capital_costs_solar,
             operation_costs_solar,
             capacity_limits_solar,
@@ -162,6 +166,7 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
             operation_costs_inverter,
             inverter_efficiency,
             inverter_supply_ratio,
+            requirements,
         )
         OpenAPI.validate_properties(o)
         return o
@@ -169,12 +174,12 @@ Base.@kwdef mutable struct ColocatedSupplyStorageTechnology <: OpenAPI.APIModel
 end # type ColocatedSupplyStorageTechnology
 
 const _property_types_ColocatedSupplyStorageTechnology = Dict{Symbol, String}(
-    Symbol("name") => "String",
     Symbol("id") => "Int64",
+    Symbol("name") => "String",
+    Symbol("available") => "Bool",
     Symbol("power_systems_type") => "String",
     Symbol("region") => "Vector{Int64}",
     Symbol("financial_data") => "TechnologyFinancialData",
-    Symbol("available") => "Bool",
     Symbol("capital_costs_solar") => "ValueCurve",
     Symbol("operation_costs_solar") => "RenewableGenerationCost",
     Symbol("capacity_limits_solar") => "MinMax",
@@ -199,6 +204,7 @@ const _property_types_ColocatedSupplyStorageTechnology = Dict{Symbol, String}(
     Symbol("operation_costs_inverter") => "ProductionVariableCostCurve",
     Symbol("inverter_efficiency") => "Float64",
     Symbol("inverter_supply_ratio") => "Float64",
+    Symbol("requirements") => "Vector{Int64}",
 )
 OpenAPI.property_type(::Type{ColocatedSupplyStorageTechnology}, name::Symbol) = Union{
     Nothing,
@@ -206,15 +212,45 @@ OpenAPI.property_type(::Type{ColocatedSupplyStorageTechnology}, name::Symbol) = 
 }
 
 function OpenAPI.check_required(o::ColocatedSupplyStorageTechnology)
+    o.id === nothing && (return false)
     o.name === nothing && (return false)
-    o.power_systems_type === nothing && (return false)
     o.available === nothing && (return false)
+    o.power_systems_type === nothing && (return false)
+    o.region === nothing && (return false)
+    o.financial_data === nothing && (return false)
+    o.capital_costs_solar === nothing && (return false)
+    o.operation_costs_solar === nothing && (return false)
+    o.capacity_limits_solar === nothing && (return false)
+    o.lifetime_solar === nothing && (return false)
+    o.capital_costs_wind === nothing && (return false)
+    o.operation_costs_wind === nothing && (return false)
+    o.capacity_limits_wind === nothing && (return false)
+    o.lifetime_wind === nothing && (return false)
+    o.capital_costs_energy === nothing && (return false)
+    o.capital_costs_power === nothing && (return false)
+    o.operation_costs_energy === nothing && (return false)
+    o.operation_costs_power === nothing && (return false)
+    o.capacity_power_limits === nothing && (return false)
+    o.capacity_energy_limits === nothing && (return false)
+    o.duration_limits === nothing && (return false)
+    o.efficiency_storage === nothing && (return false)
+    o.max_inverter_capacity === nothing && (return false)
+    o.min_inverter_capacity === nothing && (return false)
+    o.capital_costs_inverter === nothing && (return false)
+    o.operation_costs_inverter === nothing && (return false)
+    o.inverter_efficiency === nothing && (return false)
+    o.inverter_supply_ratio === nothing && (return false)
     true
 end
 
 function OpenAPI.validate_properties(o::ColocatedSupplyStorageTechnology)
-    OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("name"), o.name)
     OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("id"), o.id)
+    OpenAPI.validate_property(ColocatedSupplyStorageTechnology, Symbol("name"), o.name)
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("available"),
+        o.available,
+    )
     OpenAPI.validate_property(
         ColocatedSupplyStorageTechnology,
         Symbol("power_systems_type"),
@@ -225,11 +261,6 @@ function OpenAPI.validate_properties(o::ColocatedSupplyStorageTechnology)
         ColocatedSupplyStorageTechnology,
         Symbol("financial_data"),
         o.financial_data,
-    )
-    OpenAPI.validate_property(
-        ColocatedSupplyStorageTechnology,
-        Symbol("available"),
-        o.available,
     )
     OpenAPI.validate_property(
         ColocatedSupplyStorageTechnology,
@@ -350,6 +381,11 @@ function OpenAPI.validate_properties(o::ColocatedSupplyStorageTechnology)
         ColocatedSupplyStorageTechnology,
         Symbol("inverter_supply_ratio"),
         o.inverter_supply_ratio,
+    )
+    OpenAPI.validate_property(
+        ColocatedSupplyStorageTechnology,
+        Symbol("requirements"),
+        o.requirements,
     )
 end
 

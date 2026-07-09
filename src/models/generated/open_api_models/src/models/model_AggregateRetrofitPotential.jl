@@ -4,28 +4,37 @@
 @doc raw"""AggregateRetrofitPotential
 
     AggregateRetrofitPotential(;
+        id=nothing,
         retrofit_id=nothing,
         retrofit_potential=0.0,
         retrofit_fraction=nothing,
     )
 
+    - id::Int64
     - retrofit_id::Int64
     - retrofit_potential::Float64
     - retrofit_fraction::Float64
 """
 Base.@kwdef mutable struct AggregateRetrofitPotential <: OpenAPI.APIModel
+    id::Union{Nothing, Int64} = nothing
     retrofit_id::Union{Nothing, Int64} = nothing
     retrofit_potential::Union{Nothing, Float64} = 0.0
     retrofit_fraction::Union{Nothing, Float64} = nothing
 
-    function AggregateRetrofitPotential(retrofit_id, retrofit_potential, retrofit_fraction)
-        o = new(retrofit_id, retrofit_potential, retrofit_fraction)
+    function AggregateRetrofitPotential(
+        id,
+        retrofit_id,
+        retrofit_potential,
+        retrofit_fraction,
+    )
+        o = new(id, retrofit_id, retrofit_potential, retrofit_fraction)
         OpenAPI.validate_properties(o)
         return o
     end
 end # type AggregateRetrofitPotential
 
 const _property_types_AggregateRetrofitPotential = Dict{Symbol, String}(
+    Symbol("id") => "Int64",
     Symbol("retrofit_id") => "Int64",
     Symbol("retrofit_potential") => "Float64",
     Symbol("retrofit_fraction") => "Float64",
@@ -34,11 +43,14 @@ OpenAPI.property_type(::Type{AggregateRetrofitPotential}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_AggregateRetrofitPotential[name]))}
 
 function OpenAPI.check_required(o::AggregateRetrofitPotential)
+    o.id === nothing && (return false)
     o.retrofit_id === nothing && (return false)
+    o.retrofit_fraction === nothing && (return false)
     true
 end
 
 function OpenAPI.validate_properties(o::AggregateRetrofitPotential)
+    OpenAPI.validate_property(AggregateRetrofitPotential, Symbol("id"), o.id)
     OpenAPI.validate_property(
         AggregateRetrofitPotential,
         Symbol("retrofit_id"),

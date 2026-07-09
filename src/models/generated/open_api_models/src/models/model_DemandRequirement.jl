@@ -4,8 +4,8 @@
 @doc raw"""DemandRequirement
 
     DemandRequirement(;
-        name=nothing,
         id=nothing,
+        name=nothing,
         available=true,
         power_systems_type=nothing,
         conformity="UNDEFINED",
@@ -15,10 +15,11 @@
         region=nothing,
         value_of_lost_load=nothing,
         unserved_demand_curve=nothing,
+        requirements=nothing,
     )
 
-    - name::String
     - id::Int64
+    - name::String
     - available::Bool
     - power_systems_type::String
     - conformity::String
@@ -28,10 +29,11 @@
     - region::Vector{Int64}
     - value_of_lost_load::Float64
     - unserved_demand_curve::ValueCurve
+    - requirements::Vector{Int64}
 """
 Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
-    name::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
+    name::Union{Nothing, String} = nothing
     available::Union{Nothing, Bool} = true
     power_systems_type::Union{Nothing, String} = nothing
     conformity::Union{Nothing, String} = "UNDEFINED"
@@ -41,10 +43,11 @@ Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
     region::Union{Nothing, Vector{Int64}} = nothing
     value_of_lost_load::Union{Nothing, Float64} = nothing
     unserved_demand_curve = nothing # spec type: Union{ Nothing, ValueCurve }
+    requirements::Union{Nothing, Vector{Int64}} = nothing
 
     function DemandRequirement(
-        name,
         id,
+        name,
         available,
         power_systems_type,
         conformity,
@@ -54,10 +57,11 @@ Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
         region,
         value_of_lost_load,
         unserved_demand_curve,
+        requirements,
     )
         o = new(
-            name,
             id,
+            name,
             available,
             power_systems_type,
             conformity,
@@ -67,6 +71,7 @@ Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
             region,
             value_of_lost_load,
             unserved_demand_curve,
+            requirements,
         )
         OpenAPI.validate_properties(o)
         return o
@@ -74,8 +79,8 @@ Base.@kwdef mutable struct DemandRequirement <: OpenAPI.APIModel
 end # type DemandRequirement
 
 const _property_types_DemandRequirement = Dict{Symbol, String}(
-    Symbol("name") => "String",
     Symbol("id") => "Int64",
+    Symbol("name") => "String",
     Symbol("available") => "Bool",
     Symbol("power_systems_type") => "String",
     Symbol("conformity") => "String",
@@ -85,20 +90,24 @@ const _property_types_DemandRequirement = Dict{Symbol, String}(
     Symbol("region") => "Vector{Int64}",
     Symbol("value_of_lost_load") => "Float64",
     Symbol("unserved_demand_curve") => "ValueCurve",
+    Symbol("requirements") => "Vector{Int64}",
 )
 OpenAPI.property_type(::Type{DemandRequirement}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_DemandRequirement[name]))}
 
 function OpenAPI.check_required(o::DemandRequirement)
+    o.id === nothing && (return false)
     o.name === nothing && (return false)
-    o.available === nothing && (return false)
     o.power_systems_type === nothing && (return false)
+    o.region === nothing && (return false)
+    o.value_of_lost_load === nothing && (return false)
+    o.unserved_demand_curve === nothing && (return false)
     true
 end
 
 function OpenAPI.validate_properties(o::DemandRequirement)
-    OpenAPI.validate_property(DemandRequirement, Symbol("name"), o.name)
     OpenAPI.validate_property(DemandRequirement, Symbol("id"), o.id)
+    OpenAPI.validate_property(DemandRequirement, Symbol("name"), o.name)
     OpenAPI.validate_property(DemandRequirement, Symbol("available"), o.available)
     OpenAPI.validate_property(
         DemandRequirement,
@@ -124,6 +133,7 @@ function OpenAPI.validate_properties(o::DemandRequirement)
         Symbol("unserved_demand_curve"),
         o.unserved_demand_curve,
     )
+    OpenAPI.validate_property(DemandRequirement, Symbol("requirements"), o.requirements)
 end
 
 function OpenAPI.validate_property(::Type{DemandRequirement}, name::Symbol, val) end

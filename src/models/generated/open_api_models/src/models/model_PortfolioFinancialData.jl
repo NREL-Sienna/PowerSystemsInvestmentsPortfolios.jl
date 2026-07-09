@@ -4,64 +4,57 @@
 @doc raw"""PortfolioFinancialData
 
     PortfolioFinancialData(;
-        name=nothing,
+        id=nothing,
         discount_rate=0.0,
         inflation_rate=0.0,
         interest_rate=0.0,
         base_year=nothing,
-        id=nothing,
     )
 
-    - name::String
+    - id::Int64
     - discount_rate::Float64
     - inflation_rate::Float64
     - interest_rate::Float64
     - base_year::Int64
-    - id::Int64
 """
 Base.@kwdef mutable struct PortfolioFinancialData <: OpenAPI.APIModel
-    name::Union{Nothing, String} = nothing
+    id::Union{Nothing, Int64} = nothing
     discount_rate::Union{Nothing, Float64} = 0.0
     inflation_rate::Union{Nothing, Float64} = 0.0
     interest_rate::Union{Nothing, Float64} = 0.0
     base_year::Union{Nothing, Int64} = nothing
-    id::Union{Nothing, Int64} = nothing
 
     function PortfolioFinancialData(
-        name,
+        id,
         discount_rate,
         inflation_rate,
         interest_rate,
         base_year,
-        id,
     )
-        o = new(name, discount_rate, inflation_rate, interest_rate, base_year, id)
+        o = new(id, discount_rate, inflation_rate, interest_rate, base_year)
         OpenAPI.validate_properties(o)
         return o
     end
 end # type PortfolioFinancialData
 
 const _property_types_PortfolioFinancialData = Dict{Symbol, String}(
-    Symbol("name") => "String",
+    Symbol("id") => "Int64",
     Symbol("discount_rate") => "Float64",
     Symbol("inflation_rate") => "Float64",
     Symbol("interest_rate") => "Float64",
     Symbol("base_year") => "Int64",
-    Symbol("id") => "Int64",
 )
 OpenAPI.property_type(::Type{PortfolioFinancialData}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_PortfolioFinancialData[name]))}
 
 function OpenAPI.check_required(o::PortfolioFinancialData)
-    o.name === nothing && (return false)
-    o.discount_rate === nothing && (return false)
-    o.inflation_rate === nothing && (return false)
+    o.id === nothing && (return false)
     o.base_year === nothing && (return false)
     true
 end
 
 function OpenAPI.validate_properties(o::PortfolioFinancialData)
-    OpenAPI.validate_property(PortfolioFinancialData, Symbol("name"), o.name)
+    OpenAPI.validate_property(PortfolioFinancialData, Symbol("id"), o.id)
     OpenAPI.validate_property(
         PortfolioFinancialData,
         Symbol("discount_rate"),
@@ -78,7 +71,6 @@ function OpenAPI.validate_properties(o::PortfolioFinancialData)
         o.interest_rate,
     )
     OpenAPI.validate_property(PortfolioFinancialData, Symbol("base_year"), o.base_year)
-    OpenAPI.validate_property(PortfolioFinancialData, Symbol("id"), o.id)
 end
 
 function OpenAPI.validate_property(::Type{PortfolioFinancialData}, name::Symbol, val) end

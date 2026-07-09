@@ -4,8 +4,8 @@
 @doc raw"""DemandSideTechnology
 
     DemandSideTechnology(;
-        name=nothing,
         id=nothing,
+        name=nothing,
         available=nothing,
         region=nothing,
         power_systems_type=nothing,
@@ -19,10 +19,11 @@
         shift_variable_cost=nothing,
         curtailment_cost=nothing,
         max_demand_curtailment=nothing,
+        requirements=nothing,
     )
 
-    - name::String
     - id::Int64
+    - name::String
     - available::Bool
     - region::Vector{Int64}
     - power_systems_type::String
@@ -36,10 +37,11 @@
     - shift_variable_cost::ValueCurve
     - curtailment_cost::ValueCurve
     - max_demand_curtailment::Float64
+    - requirements::Vector{Int64}
 """
 Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
-    name::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
+    name::Union{Nothing, String} = nothing
     available::Union{Nothing, Bool} = nothing
     region::Union{Nothing, Vector{Int64}} = nothing
     power_systems_type::Union{Nothing, String} = nothing
@@ -53,10 +55,11 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
     shift_variable_cost = nothing # spec type: Union{ Nothing, ValueCurve }
     curtailment_cost = nothing # spec type: Union{ Nothing, ValueCurve }
     max_demand_curtailment::Union{Nothing, Float64} = nothing
+    requirements::Union{Nothing, Vector{Int64}} = nothing
 
     function DemandSideTechnology(
-        name,
         id,
+        name,
         available,
         region,
         power_systems_type,
@@ -70,10 +73,11 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
         shift_variable_cost,
         curtailment_cost,
         max_demand_curtailment,
+        requirements,
     )
         o = new(
-            name,
             id,
+            name,
             available,
             region,
             power_systems_type,
@@ -87,6 +91,7 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
             shift_variable_cost,
             curtailment_cost,
             max_demand_curtailment,
+            requirements,
         )
         OpenAPI.validate_properties(o)
         return o
@@ -94,8 +99,8 @@ Base.@kwdef mutable struct DemandSideTechnology <: OpenAPI.APIModel
 end # type DemandSideTechnology
 
 const _property_types_DemandSideTechnology = Dict{Symbol, String}(
-    Symbol("name") => "String",
     Symbol("id") => "Int64",
+    Symbol("name") => "String",
     Symbol("available") => "Bool",
     Symbol("region") => "Vector{Int64}",
     Symbol("power_systems_type") => "String",
@@ -109,20 +114,30 @@ const _property_types_DemandSideTechnology = Dict{Symbol, String}(
     Symbol("shift_variable_cost") => "ValueCurve",
     Symbol("curtailment_cost") => "ValueCurve",
     Symbol("max_demand_curtailment") => "Float64",
+    Symbol("requirements") => "Vector{Int64}",
 )
 OpenAPI.property_type(::Type{DemandSideTechnology}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_DemandSideTechnology[name]))}
 
 function OpenAPI.check_required(o::DemandSideTechnology)
+    o.id === nothing && (return false)
     o.name === nothing && (return false)
     o.available === nothing && (return false)
+    o.region === nothing && (return false)
     o.power_systems_type === nothing && (return false)
+    o.price_per_unit === nothing && (return false)
+    o.max_demand_delay === nothing && (return false)
+    o.max_demand_advance === nothing && (return false)
+    o.demand_energy_efficiency === nothing && (return false)
+    o.shift_variable_cost === nothing && (return false)
+    o.curtailment_cost === nothing && (return false)
+    o.max_demand_curtailment === nothing && (return false)
     true
 end
 
 function OpenAPI.validate_properties(o::DemandSideTechnology)
-    OpenAPI.validate_property(DemandSideTechnology, Symbol("name"), o.name)
     OpenAPI.validate_property(DemandSideTechnology, Symbol("id"), o.id)
+    OpenAPI.validate_property(DemandSideTechnology, Symbol("name"), o.name)
     OpenAPI.validate_property(DemandSideTechnology, Symbol("available"), o.available)
     OpenAPI.validate_property(DemandSideTechnology, Symbol("region"), o.region)
     OpenAPI.validate_property(
@@ -176,6 +191,7 @@ function OpenAPI.validate_properties(o::DemandSideTechnology)
         Symbol("max_demand_curtailment"),
         o.max_demand_curtailment,
     )
+    OpenAPI.validate_property(DemandSideTechnology, Symbol("requirements"), o.requirements)
 end
 
 function OpenAPI.validate_property(::Type{DemandSideTechnology}, name::Symbol, val) end
