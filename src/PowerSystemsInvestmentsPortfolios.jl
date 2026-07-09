@@ -157,10 +157,6 @@ export ThermalFuels
 export PrimeMovers
 export StorageTech
 
-#submodule for OpenAPI structs 
-include("models/generated/open_api_models/src/APIServer.jl")
-using .APIServer
-
 include("definitions.jl")
 
 include("models/technologies.jl")
