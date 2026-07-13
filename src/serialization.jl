@@ -23,36 +23,6 @@ const SYSTEM_KWARGS = Set((
     :name,
     :description,
 ))
-const ENCODED_FIELDS = Set((
-    :duration_limits,
-    :capacity_limits,
-    :capacity_limits_energy,
-    :capacity_limits_discharge,
-    :capacity_limits_charge,
-    :angle_limits,
-    :co2,
-    :fuel,
-    :prime_mover_type,
-    :heat_rate_mmbtu_per_mwh,
-    :storage_tech,
-    :cofire_level_limits,
-    :cofire_start_limits,
-    :bus_type,
-    :node,
-    :region,
-    :start_region,
-    :end_region,
-    :start_node,
-    :end_node,
-    :efficiency,
-    :ramp_limits,
-    :time_limits,
-    :eligible_regions,
-    :eligible_resources,
-    :eligible_demand,
-    :eligible_technologies,
-    :uuid,
-))
 
 """
 Constructs a Portfolio from a file path ending with .json
@@ -153,36 +123,6 @@ function IS.serialize(schedule::InvestmentScheduleResults)
         string(name) => serialize(getproperty(openapi_schedule, name)) for
         name in fieldnames(typeof(openapi_schedule))
     )
-
-    return data
-end
-
-function IS.serialize(technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
-    api_struct = serialize_openapi_struct(technology)
-
-    struct_type = typeof(technology)
-    api_type = typeof(api_struct)
-
-    # Build OpenAPI struct from modeling struct
-    for field in fieldnames(api_type)
-        if field in ENCODED_FIELDS
-            value = serialize_custom_types(field, technology)
-        else
-            value = getfield(technology, field)
-        end
-
-        setfield!(api_struct, field, value)
-    end
-
-    data = Dict{String, Any}(
-        string(name) => serialize(getproperty(api_struct, name)) for
-        name in fieldnames(typeof(api_struct))
-    )
-
-    add_serialization_metadata!(data, struct_type)
-    if !isempty(struct_type.parameters)
-        data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
-    end
 
     return data
 end
@@ -624,30 +564,34 @@ function to_json(
     force=false,
     runchecks=false,
 )
-    IS.prepare_for_serialization_to_file!(portfolio.data, filename; force=force)
-    data = to_json(portfolio; pretty=pretty)
+    # IS.prepare_for_serialization_to_file!(portfolio.data, filename; force=force)
+    # data = to_json(portfolio; pretty=pretty)
 
-    data["metadata"] = _serialize_portfolio_metadata(portfolio, user_data)
-    if pretty
-        open(filename, "w") do io
-            JSON3.pretty(io, data)
-        end
-    else
-        open(filename, "w") do io
-            JSON3.write(io, data)
-        end
-    end
-    @info "Serialized Portfolio to $filename"
+    # data["metadata"] = _serialize_portfolio_metadata(portfolio, user_data)
 
-    # Serialize base system to a separate file
-    if time_series
-        serialize_time_series!(portfolio.data, output, output_path)
-    end
+    # Storing UUID mapping in the JSON to ensure compatibility with supplemental attributes
+    # and timeseries. My understanding is that we want to phase out UUIDs anyway so this
+    # will be a temporary fix
+    output = Dict{String, Any}(
+        "data_format_version" => DATA_FORMAT_VERSION,
+        "aggregation" => string(get_aggregation(portfolio)),
+        "metadata" => OrderedDict(
+            "name" => isnothing(get_name(portfolio)) ? "" : get_name(portfolio),
+            "description" => isnothing(get_description(portfolio)) ? "" : get_description(portfolio),
+            "data_source" => isnothing(get_data_source(portfolio)) ? "" : get_data_source(portfolio),
+            "component_counts" => IS.get_component_counts_by_type(portfolio.data),
+            "time_series_counts" => IS.get_time_series_counts_by_type(portfolio.data),
+        ),
+        "financial_data" => IS.serialize(get_financial_data(portfolio)),
+        "investment_schedule" => IS.serialize(get_investment_schedule(portfolio)),
+    )
+
+    serialize!(portfolio.data, output, filename; time_series=time_series)
 
     if base_system
         base_system_file = joinpath(
-            dirname(output_path),
-            splitext(basename(output_path))[1] * "_base_system.json",
+            dirname(filename),
+            splitext(basename(filename))[1] * "_base_system.json",
         )
         system2openapi_json(
             get_base_system(portfolio),
@@ -656,9 +600,95 @@ function to_json(
         )
         output["base_system"] = base_system_file
     end
-    
+
+    if pretty
+        open(filename, "w") do io
+            JSON3.pretty(io, output)
+        end
+    else
+        open(filename, "w") do io
+            JSON3.write(io, output)
+        end
+    end
+    @info "Serialized Portfolio to $filename"
+
     return
 end
+
+# Similar to existing functions in IS. Updated to use OpenAPI.
+function serialize!(
+    data::IS.SystemData,
+    output::Dict{String, Any},
+    output_path::AbstractString;
+    time_series=false
+)
+
+    components_dict = Dict{String, Vector{Dict{String, Any}}}()
+
+    id = IDGenerator()
+    for OPENAPI_T in PSIP_DESERIALIZABLE_TYPES
+        type_name = string(nameof(OPENAPI_T))
+        psip_type = OPENAPI_TYPE_TO_PSIP[OPENAPI_T]
+        if !haskey(components_dict, type_name)
+            components_dict[type_name] = Vector{Dict{String, Any}}()
+        end
+
+        components = IS.get_components(psip_type, data)
+        for component in components
+            openapi_obj = sienna2openapi(component, id)
+            dict = JSON.parse(OpenAPI.to_json(openapi_obj))
+            push!(components_dict[type_name], dict)
+        end
+    end
+
+    sa_dict = Dict{String, Vector{Dict{String, Any}}}()
+    for OPENAPI_T in ALL_SA_PSIP_OPENAPI_TYPES
+        type_name = string(nameof(OPENAPI_T))
+        psip_type = SA_OPENAPI_TO_PSIP[OPENAPI_T]
+        if !haskey(sa_dict, type_name)
+            sa_dict[type_name] = Vector{Dict{String, Any}}()
+        end
+        attributes = IS.get_supplemental_attributes(psip_type, data)
+        for attribute in attributes
+            openapi_obj = sienna2openapi(attribute, id)
+            dict = JSON.parse(OpenAPI.to_json(openapi_obj))
+            push!(sa_dict[type_name], dict)
+        end
+    end
+
+    associations = data.supplemental_attribute_manager.associations
+    sa_assocs = IS.to_records(associations)
+
+    output["data"] = Dict{String, Any}(
+            "subsystems" => Dict{String, Any}(),
+            "components" => components_dict,
+            "supplemental_attribute_manager" => Dict{String, Any}(
+                "attributes" => sa_dict,
+                "associations" => sa_assocs,
+            ),
+            "id2uuid" => Dict(v => string(k) for (k, v) in id.uuid2int),
+        )
+
+    if time_series
+        if isempty(data.time_series_manager.data_store)
+            output["data"]["time_series_compression_enabled"] =
+                IS.get_compression_settings(data.time_series_manager.data_store).enabled
+            output["data"]["time_series_in_memory"] =
+                data.time_series_manager.data_store isa IS.InMemoryTimeSeriesStorage
+        else
+            base = splitext(basename(output_path))[1]
+            time_series_base_name =
+                IS._get_secondary_basename(base, IS.TIME_SERIES_STORAGE_FILE)
+            time_series_storage_file = joinpath(dirname(output_path), time_series_base_name)
+            IS.serialize(data.time_series_manager.data_store, time_series_storage_file)
+            IS.to_h5_file(data.time_series_manager.metadata_store, time_series_storage_file)
+            output["data"]["time_series_storage_file"] = time_series_storage_file
+            output["data"]["time_series_storage_type"] =
+                string(typeof(data.time_series_manager.data_store))
+        end
+    end
+end
+
 
 """
 Serializes a InfrastructureSystemsType to a JSON string.
