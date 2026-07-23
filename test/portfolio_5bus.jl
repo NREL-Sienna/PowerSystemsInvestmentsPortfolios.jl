@@ -273,10 +273,6 @@ function build_portfolio()
 
     thermal = collect(IS.get_components(ThermalStandard, sys))
 
-    retro1 = AggregateRetrofitPotential(retrofit_id=1, retrofit_fraction=0.5)
-
-    retire1 = AggregateRetirementPotential(retirement_potential=100.0)
-
     retro2 = RetrofitPotential(eligible_generators=[PSY.get_name(t) for t in thermal[1:3]])
 
     retire2 =
