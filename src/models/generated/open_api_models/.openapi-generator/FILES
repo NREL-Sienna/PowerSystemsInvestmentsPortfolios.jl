@@ -1,7 +1,5 @@
 .openapi-generator-ignore
 README.md
-docs/AggregateRetirementPotential.md
-docs/AggregateRetrofitPotential.md
 docs/AggregateTransportTechnology.md
 docs/AverageRateCurve.md
 docs/AverageRateCurveFunctionData.md
@@ -56,8 +54,6 @@ docs/XYCoords.md
 docs/Zone.md
 src/APIServer.jl
 src/modelincludes.jl
-src/models/model_AggregateRetirementPotential.jl
-src/models/model_AggregateRetrofitPotential.jl
 src/models/model_AggregateTransportTechnology.jl
 src/models/model_AverageRateCurve.jl
 src/models/model_AverageRateCurveFunctionData.jl

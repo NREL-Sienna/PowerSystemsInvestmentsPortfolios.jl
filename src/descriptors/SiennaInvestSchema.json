@@ -18,22 +18,10 @@
                 "$ref": "#/components/schemas/RetirementPotential"
             }
         },
-        "AggregateRetirementPotentials": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/AggregateRetirementPotential"
-            }
-        },
         "RetrofitPotentials": {
             "type": "array",
             "items": {
                 "$ref": "#/components/schemas/RetrofitPotential"
-            }
-        },
-        "AggregateRetrofitPotentials": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/AggregateRetrofitPotential"
             }
         },
         "ExistingDevices": {
@@ -325,38 +313,18 @@
                 },
                 "planned_retirement_year": {
                     "type": "Dict{String, Int64}",
-                    "description": "Optional dictionary to indicate the year in which the forced/planned retirement will occur",
+                    "description": "Optional dictionary to indicate the year in which the forced/planned retirement will occur. If not specified, the lifetime of the technology will be used to determine the planned retirement year.",
                     "default": "Dict{String, Int64}()"
                 },
                 "build_year": {
                     "type": "Dict{String, Int64}",
-                    "description": "Optional dictionary to indicate the year in which existing generators in the base system were built",
+                    "description": "Optional dictionary to indicate the year in which existing generators in the base system were built. If not specified, it will be assumed that the generator was built in the first year of the simulation.",
                     "default": "Dict{String, Int64}()"
                 },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"IS.SupplementalAttribute"
-        },
-        "AggregateRetirementPotential": {
-            "type": "object",
-            "required": [
-                "retirement_potential"
-            ],
-            "docstring": "Supplemental attribute used to define a total amount of existing capacity that can be retired for a technology",
-            "properties": {
-                "retirement_potential": {
-                    "type": "Float64",
-                    "description": "Amount of pre-existing capacity for a technology that is eligible for retirement",
-                    "default": "0.0"
+                "retirement_cost": {
+                    "type": "PSY.ValueCurve",
+                    "description": "Cost of retiring an existing generator. (USD/MW)",
+                    "default": "LinearCurve(0.0)"
                 },
                 "ext": {
                     "type": "Dict",
@@ -383,40 +351,15 @@
                     "description": "Names of individual generation units mapped to this technology that can be retrofitted",
                     "default": "Vector()"
                 },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"IS.SupplementalAttribute"
-        },
-        "AggregateRetrofitPotential": {
-            "type": "object",
-            "required": [
-                "retrofit_id"
-            ],
-            "docstring": "Supplemental attribute used to define a total amount of capacity that can be retrofit for a SupplyTechnology",
-            "properties": {
-                "retrofit_id": {
-                    "type": "Int64",
-                    "description": "Unique identifier to group retrofittable source technologies with retrofit options inside the same zone.",
-                    "default": "0"
-                },
-                "retrofit_potential": {
-                    "type": "Float64",
-                    "description": "Amount of existing capacity for technology that can be retrofitted",
-                    "default": "0.0"
-                },
                 "retrofit_fraction": {
                     "type": "Float64",
-                    "description": "Fraction of existing capacity that is eligible for retrofits. Alternative to retrofit_potential",
-                    "default": "0.0"
+                    "description": "Fraction of existing capacity that is eligible for retrofits.",
+                    "default": "1.0"
+                },
+                "retrofit_cost": {
+                    "type": "PSY.ValueCurve",
+                    "description": "Cost of retrofitting an existing generator to a new technology. (USD/MW)",
+                    "default": "LinearCurve(0.0)"
                 },
                 "ext": {
                     "type": "Dict",
