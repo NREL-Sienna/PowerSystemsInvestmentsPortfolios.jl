@@ -24,7 +24,7 @@ This file is auto-generated. Do not edit.
         cofire_level_limits::Dict{ThermalFuels, MinMax}
         internal::InfrastructureSystemsInternal
         ext::Dict
-        region::Vector{RegionTopology}
+        region::Vector{PSY.Topology}
         min_generation_fraction::Float64
         time_limits::UpDown
         unit_size::Float64
@@ -53,7 +53,7 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `cofire_level_limits::Dict{ThermalFuels, MinMax}`: (default: `Dict()`) Minimum and maximum blending level (%) of each fuel during normal generation process for multi-fuel generator
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
-- `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology operates. Can be a zone or node.
+- `region::Vector{PSY.Topology}`: (default: `Vector()`) Location where technology operates. Can be a zone or node.
 - `min_generation_fraction::Float64`: (default: `0.0`) Minimum generation as a fraction of total capacity (MW)
 - `time_limits::UpDown`: (default: `(up=1.0, down=1.0)`) Minimum amount of time a resource has to stay in the committed or shutdown state (hours).
 - `unit_size::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
@@ -98,7 +98,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
     "Optional dictionary to provide additional data"
     ext::Dict
     "Location where technology operates. Can be a zone or node."
-    region::Vector{RegionTopology}
+    region::Vector{PSY.Topology}
     "Minimum generation as a fraction of total capacity (MW)"
     min_generation_fraction::Float64
     "Minimum amount of time a resource has to stay in the committed or shutdown state (hours)."

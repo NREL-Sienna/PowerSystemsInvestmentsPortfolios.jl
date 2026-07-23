@@ -21,7 +21,7 @@ This file is auto-generated. Do not edit.
         power_systems_type::String
         internal::InfrastructureSystemsInternal
         ext::Dict
-        region::Vector{RegionTopology}
+        region::Vector{PSY.Topology}
         min_power::Float64
         peak_demand_mw::Float64
     end
@@ -44,7 +44,7 @@ Represents demand side technologies such as electric vehicles or hydrogen electr
 - `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
-- `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology is operated
+- `region::Vector{PSY.Topology}`: (default: `Vector()`) Location where technology is operated
 - `min_power::Float64`: (default: `0.0`) Minimum operation of demandside unit as a fraction of peak demand
 - `peak_demand_mw::Float64`: (default: `0.0`) Peak demand value in MW
 """
@@ -80,7 +80,7 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnolog
     "Optional dictionary to provide additional data"
     ext::Dict
     "Location where technology is operated"
-    region::Vector{RegionTopology}
+    region::Vector{PSY.Topology}
     "Minimum operation of demandside unit as a fraction of peak demand"
     min_power::Float64
     "Peak demand value in MW"

@@ -7,12 +7,12 @@ This file is auto-generated. Do not edit.
 """
     mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
         requirements::Vector{Requirement}
-        start_region::RegionTopology
+        start_region::PSY.AggregationTopology
         capital_costs::PSY.ValueCurve
         available::Bool
         name::String
         id::Int64
-        end_region::RegionTopology
+        end_region::PSY.AggregationTopology
         financial_data::TechnologyFinancialData
         power_systems_type::String
         internal::InfrastructureSystemsInternal
@@ -26,12 +26,12 @@ An aggregated representation of a transmission interchange between two regions.
 
 # Arguments
 - `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
-- `start_region::RegionTopology`: Start region for transport technology
+- `start_region::PSY.AggregationTopology`: Start region for transport technology
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line. (USD/MW)
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
 - `id::Int64`: Numerical Index for AC transport technologies
-- `end_region::RegionTopology`: End region for transport technology
+- `end_region::PSY.AggregationTopology`: End region for transport technology
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
@@ -44,7 +44,7 @@ mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTech
     "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
     requirements::Vector{Requirement}
     "Start region for transport technology"
-    start_region::RegionTopology
+    start_region::PSY.AggregationTopology
     "Cost of adding new capacity to the nodal transmission line. (USD/MW)"
     capital_costs::PSY.ValueCurve
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
@@ -54,7 +54,7 @@ mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTech
     "Numerical Index for AC transport technologies"
     id::Int64
     "End region for transport technology"
-    end_region::RegionTopology
+    end_region::PSY.AggregationTopology
     "Struct containing relevant financial information for a technology"
     financial_data::TechnologyFinancialData
     "Corresponding type in PowerSystems.jl to be used in PCM modeling"

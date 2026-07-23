@@ -1,5 +1,3 @@
-include("Node.jl")
-include("Zone.jl")
 include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
@@ -9,8 +7,8 @@ include("AggregateRetrofitPotential.jl")
 include("MaximumCapacityRequirements.jl")
 include("TopologyMapping.jl")
 include("CapacityReserveMargin.jl")
-include("NodalHVDCTransportTechnology.jl")
 include("DemandSideTechnology.jl")
+include("NodalHVDCTransportTechnology.jl")
 include("EnergyShareRequirements.jl")
 include("AggregateRetirementPotential.jl")
 include("AggregateTransportTechnology.jl")
@@ -24,7 +22,6 @@ include("ColocatedSupplyStorageTechnology.jl")
 
 export get_available
 export get_build_year
-export get_bus_type
 export get_buses
 export get_capacity_energy_limits
 export get_capacity_limits
@@ -125,7 +122,6 @@ export get_value_of_lost_load
 export get_voltage
 export set_available!
 export set_build_year!
-export set_bus_type!
 export set_buses!
 export set_capacity_energy_limits!
 export set_capacity_limits!

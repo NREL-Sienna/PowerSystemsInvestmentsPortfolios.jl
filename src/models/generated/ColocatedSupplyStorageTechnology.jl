@@ -31,7 +31,7 @@ This file is auto-generated. Do not edit.
         operation_costs_wind::PSY.OperationalCost
         efficiency_storage::InOut
         ext::Dict
-        region::Vector{RegionTopology}
+        region::Vector{PSY.Topology}
         losses_storage::Float64
         inverter_supply_ratio::Float64
         capital_costs_wind::PSY.ValueCurve
@@ -69,7 +69,7 @@ Supply Technology that supports a StorageTechnology co-located with wind and sol
 - `operation_costs_wind::PSY.OperationalCost`: (default: `ThermalGenerationCost(nothing)`) Fixed and variable O&M costs for a technology
 - `efficiency_storage::InOut`: (default: `(in=1, out=1)`) Efficiency of charging storage (fraction of total charge (in) and discharge (out) capacity
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
-- `region::Vector{RegionTopology}`: (default: `Vector()`) Zone where tech operates in
+- `region::Vector{PSY.Topology}`: (default: `Vector()`) Zone where tech operates in
 - `losses_storage::Float64`: (default: `0.0`) Power loss (fraction of stored energy per hour)
 - `inverter_supply_ratio::Float64`: Ratio of generation capacity to grid connection capacity
 - `capital_costs_wind::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
@@ -130,7 +130,7 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: ResourceT
     "Optional dictionary to provide additional data"
     ext::Dict
     "Zone where tech operates in"
-    region::Vector{RegionTopology}
+    region::Vector{PSY.Topology}
     "Power loss (fraction of stored energy per hour)"
     losses_storage::Float64
     "Ratio of generation capacity to grid connection capacity"

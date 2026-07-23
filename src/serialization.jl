@@ -6,7 +6,7 @@ const PARAMETERS_KEY = "parameters"
 const CONSTRUCT_WITH_PARAMETERS_KEY = "construct_with_parameters"
 const FUNCTION_KEY = "function"
 const _CONTAINS_SHOULD_ENCODE =
-    Union{ResourceTechnology, DemandTechnology, TransmissionTechnology, RegionTopology}
+    Union{ResourceTechnology, DemandTechnology, TransmissionTechnology}
 const SYSTEM_KWARGS = Set((
     :internal,
     :runchecks,
@@ -506,21 +506,12 @@ function deserialize_components!(portfolio::Portfolio, raw)
     # Need to maintain an order here and deserialize regions first so they can
     # be referenced when deserializing technologies
     technologies = OrderedDict{Type, Vector{Dict}}()
-    regions = OrderedDict{Type, Vector{Dict}}()
     for component in raw["components"]
         type = IS.get_type_from_serialization_data(component)
-        if type <: RegionTopology
-            components = get(regions, type, nothing)
-            if components === nothing
-                components = Vector{Dict}()
-                regions[type] = components
-            end
-        else
-            components = get(technologies, type, nothing)
-            if components === nothing
-                components = Vector{Dict}()
-                technologies[type] = components
-            end
+        components = get(technologies, type, nothing)
+        if components === nothing
+            components = Vector{Dict}()
+            technologies[type] = components
         end
         push!(components, component)
     end

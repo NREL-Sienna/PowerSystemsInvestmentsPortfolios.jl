@@ -10,10 +10,10 @@ This file is auto-generated. Do not edit.
         capital_costs::PSY.ValueCurve
         available::Bool
         name::String
-        end_node::Node
+        end_node::PSY.Bus
         id::Int64
         financial_data::TechnologyFinancialData
-        start_node::Node
+        start_node::PSY.Bus
         power_systems_type::String
         internal::InfrastructureSystemsInternal
         ext::Dict
@@ -31,10 +31,10 @@ Nodal representation of candidate AC transmission lines between two regions.
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line (USD/MW).
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
-- `end_node::Node`: End node for transport technology
+- `end_node::PSY.Bus`: End node for transport technology
 - `id::Int64`: Numerical Index for AC transport technologies
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
-- `start_node::Node`: Start node for transport technology
+- `start_node::PSY.Bus`: Start node for transport technology
 - `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
@@ -54,13 +54,13 @@ mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechno
     "Name"
     name::String
     "End node for transport technology"
-    end_node::Node
+    end_node::PSY.Bus
     "Numerical Index for AC transport technologies"
     id::Int64
     "Struct containing relevant financial information for a technology"
     financial_data::TechnologyFinancialData
     "Start node for transport technology"
-    start_node::Node
+    start_node::PSY.Bus
     "Corresponding type in PowerSystems.jl to be used in PCM modeling"
     power_systems_type::String
     "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"

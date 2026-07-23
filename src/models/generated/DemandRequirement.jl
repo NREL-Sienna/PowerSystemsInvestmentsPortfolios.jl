@@ -16,7 +16,7 @@ This file is auto-generated. Do not edit.
         value_of_lost_load::Float64
         internal::InfrastructureSystemsInternal
         ext::Dict
-        region::Vector{RegionTopology}
+        region::Vector{PSY.Topology}
         unserved_demand_curve::PSY.ValueCurve
         new_construction_year::Int64
         new_demand_mw::Float64
@@ -35,7 +35,7 @@ Demand requirements for a region.
 - `value_of_lost_load::Float64`: Value of unserved load (USD/MWh)
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
-- `region::Vector{RegionTopology}`: (default: `Vector()`) Zone or node where the demand requirement is located
+- `region::Vector{PSY.Topology}`: (default: `Vector()`) Topologies where the demand requirement is located
 - `unserved_demand_curve::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Piecewise curve to scale the cost of unserved load based on the value of lost load
 - `new_construction_year::Int64`: (default: `2020`) The year in which the new demand requirement will be installed. Should only be used for new demand requirements.
 - `new_demand_mw::Float64`: (default: `0.0`) The value of the peak demand to be used for new DemandRequirements.
@@ -61,8 +61,8 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
     internal::InfrastructureSystemsInternal
     "Optional dictionary to provide additional data"
     ext::Dict
-    "Zone or node where the demand requirement is located"
-    region::Vector{RegionTopology}
+    "Topologies where the demand requirement is located"
+    region::Vector{PSY.Topology}
     "Piecewise curve to scale the cost of unserved load based on the value of lost load"
     unserved_demand_curve::PSY.ValueCurve
     "The year in which the new demand requirement will be installed. Should only be used for new demand requirements."

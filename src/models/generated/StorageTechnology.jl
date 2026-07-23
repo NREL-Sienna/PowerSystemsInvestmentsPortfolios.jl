@@ -23,7 +23,7 @@ This file is auto-generated. Do not edit.
         power_systems_type::String
         internal::InfrastructureSystemsInternal
         ext::Dict
-        region::Vector{RegionTopology}
+        region::Vector{PSY.Topology}
         capacity_limits_energy::MinMax
         unit_size_energy::Float64
         unit_size_charge::Union{Nothing, Float64}
@@ -54,7 +54,7 @@ Candidate storage technology in a region.
 - `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
-- `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology is operated
+- `region::Vector{PSY.Topology}`: (default: `Vector()`) Location where technology is operated
 - `capacity_limits_energy::MinMax`: (default: `(min=0,max=1e8)`) allowable installed energy capacity for a storage technology (MWh)
 - `unit_size_energy::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MWh)
 - `unit_size_charge::Union{Nothing, Float64}`: (default: `nothing`) Used for discrete investment decisions. Unit size of charging capacity (MW)
@@ -100,7 +100,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
     "Optional dictionary to provide additional data"
     ext::Dict
     "Location where technology is operated"
-    region::Vector{RegionTopology}
+    region::Vector{PSY.Topology}
     "allowable installed energy capacity for a storage technology (MWh)"
     capacity_limits_energy::MinMax
     "Used for discrete investment decisions. Size of each unit being built (MWh)"

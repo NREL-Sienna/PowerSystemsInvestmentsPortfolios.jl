@@ -47,7 +47,6 @@ export ResourceTechnology
 export DemandTechnology
 export TransmissionTechnology
 export FinancialData
-export RegionTopology
 export SupplyTechnology
 export ColocatedSupplyStorageTechnology
 export NodalACTransportTechnology
@@ -69,9 +68,6 @@ export HourlyMatching
 export EnergyShareRequirements
 export MinimumCapacityRequirements
 export MaximumCapacityRequirements
-export RegionTopology
-export Zone
-export Node
 export PortfolioFinancialData
 export InvestmentScheduleResults
 export TechnologyFinancialData

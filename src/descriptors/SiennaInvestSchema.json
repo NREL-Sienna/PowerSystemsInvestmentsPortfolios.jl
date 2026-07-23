@@ -131,18 +131,6 @@
             "items": {
                 "$ref": "#/components/schemas/ColocatedSupplyStorageTechnology"
             }
-        },
-        "Zone": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/Zone"
-            }
-        },
-        "Node": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/Node"
-            }
         }
     },
     "components": {
@@ -165,7 +153,7 @@
                     "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
                 },
                 "region": {
-                    "type": "Vector{RegionTopology}",
+                    "type": "Vector{PSY.Topology}",
                     "description": "Location where technology operates. Can be a zone or node.",
                     "default": "Vector()"
                 },
@@ -495,7 +483,7 @@
                     "description": "The technology name"
                 },
                 "region": {
-                    "type": "Vector{RegionTopology}",
+                    "type": "Vector{PSY.Topology}",
                     "description": "Location where technology is operated",
                     "default": "Vector()"
                 },
@@ -676,7 +664,7 @@
                     "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
                 },
                 "region": {
-                    "type": "Vector{RegionTopology}",
+                    "type": "Vector{PSY.Topology}",
                     "description": "Location where technology is operated",
                     "default": "Vector()"
                 },
@@ -774,11 +762,11 @@
                     "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
                 },
                 "start_node": {
-                    "type": "RegionTopology",
+                    "type": "PSY.Bus",
                     "description": "Start node for transport technology"
                 },
                 "end_node": {
-                    "type": "RegionTopology",
+                    "type": "PSY.Bus",
                     "description": "End node for transport technology"
                 },
                 "capacity_limits": {
@@ -849,11 +837,11 @@
                   "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
               },
               "start_region": {
-                  "type": "RegionTopology",
+                  "type": "PSY.AggregationTopology",
                   "description": "Start region for transport technology"
               },
               "end_region": {
-                  "type": "RegionTopology",
+                  "type": "PSY.AggregationTopology",
                   "description": "End region for transport technology"
               },
               "capacity_limits": {
@@ -924,11 +912,11 @@
                     "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
                 },
                 "start_node": {
-                    "type": "Node",
+                    "type": "PSY.Bus",
                     "description": "Start node for transport technology"
                 },
                 "end_node": {
-                    "type": "Node",
+                    "type": "PSY.Bus",
                     "description": "End node for transport technology"
                 },
                 "capacity_limits": {
@@ -1040,8 +1028,8 @@
                     "default": "LinearCurve(0.0)"
                 },
                 "region": {
-                    "type": "Vector{RegionTopology}",
-                    "description": "Zone or node where the demand requirement is located",
+                    "type": "Vector{PSY.Topology}",
+                    "description": "Topologies where the demand requirement is located",
                     "default": "Vector()"
                 },
                 "requirements": {
@@ -1359,74 +1347,6 @@
             },
             "supertype":"Requirement"
         },
-        "Zone": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "docstring": "A unit of spatial aggregation for zonal capacity expansion models. Used to define locations for supply, demand, transport, and storage technologies and relevant policy requirements.",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "Name of region"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "A unique zone identification number"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"RegionTopology"
-        },
-        "Node": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "docstring": "A unit of spatial aggregation for nodal capacity expansion models. Used to define locations for supply, demand, transport, and storage technologies and relevant policy requirements.",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "Name of region"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "A unique node identification number"
-                },
-                "bus_type": {
-                    "type": "ACBusTypes",
-                    "enum": [
-                        "ACBusTypes.PQ",
-                        "ACBusTypes.PV",
-                        "ACBusTypes.REF",
-                        "ACBusTypes.ISOLATED",
-                        "ACBusTypes.SLACK"
-                    ],
-                    "default": "ACBusTypes.PQ",
-                    "description": "AC Bus Type for a node"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"RegionTopology"
-        },
         "ColocatedSupplyStorageTechnology": {
             "type": "object",
             "required": [
@@ -1445,7 +1365,7 @@
                     "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
                 },
                 "region": {
-                    "type": "Vector{RegionTopology}",
+                    "type": "Vector{PSY.Topology}",
                     "description": "Zone where tech operates in",
                     "default": "Vector()"
                 },
