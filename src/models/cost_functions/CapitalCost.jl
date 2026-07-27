@@ -2,16 +2,16 @@
 $(TYPEDEF)
 $(TYPEDFIELDS)
 
-    CapitalCost(capital, interconnection)
-    CapitalCost(; capital, interconnection)
+    CapitalCost(capital_cost, interconnection_cost)
+    CapitalCost(; capital_cost, interconnection_cost)
 
 An investment cost for candidate generation and transmission technologies which includes 
 overnight capital costs and last-mile interconnection costs.
 """
 
 @kwdef mutable struct CapitalCost <: InvestmentCost
-    capital::ValueCurve
-    interconnection::Float64
+    capital_cost::ValueCurve
+    interconnection_cost::Float64
 end
 
 # Constructor for demo purposes; non-functional.
@@ -20,19 +20,19 @@ function CapitalCost(::Nothing)
 end
 
 """
-Return the `capital` field of [`CapitalCost`](@ref).
+Return the `capital_cost` field of [`CapitalCost`](@ref).
 """
-get_capital(value::CapitalCost) = value.capital
+get_capital_cost(value::CapitalCost) = value.capital_cost
 """
-Return the `interconnection` field of [`CapitalCost`](@ref).
+Return the `interconnection_cost` field of [`CapitalCost`](@ref).
 """
-get_interconnection(value::CapitalCost) = value.interconnection
+get_interconnection_cost(value::CapitalCost) = value.interconnection_cost
 
 """
-Set the `capital` field of [`CapitalCost`](@ref).
+Set the `capital_cost` field of [`CapitalCost`](@ref).
 """
-set_capital!(value::CapitalCost, val) = value.capital = val
+set_capital_cost!(value::CapitalCost, val) = value.capital_cost = val
 """
-Set the `interconnection` field of [`CapitalCost`](@ref).
+Set the `interconnection_cost` field of [`CapitalCost`](@ref).
 """
-set_interconnection!(value::CapitalCost, val) = value.interconnection = val
+set_interconnection_cost!(value::CapitalCost, val) = value.interconnection_cost = val

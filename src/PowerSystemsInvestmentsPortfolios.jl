@@ -143,6 +143,7 @@ export UpDown
 export set_units_base_system!
 export CapitalCost
 export InvestmentCost
+export StorageCapitalCost
 
 export show_region_topology_table
 
@@ -183,6 +184,8 @@ include("definitions.jl")
 
 include("models/cost_functions/investment_cost.jl")
 include("models/cost_functions/CapitalCost.jl")
+include("models/cost_functions/StorageCapitalCost.jl")
+
 include("models/requirements.jl")
 include("models/technologies.jl")
 include("models/regions.jl")
