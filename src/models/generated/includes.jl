@@ -36,12 +36,9 @@ export get_capacity_limits_wind
 export get_capacity_power_limits
 export get_capacity_reserve_fraction
 export get_capital_costs
-export get_capital_costs_charge
-export get_capital_costs_discharge
-export get_capital_costs_energy
 export get_capital_costs_inverter
-export get_capital_costs_power
 export get_capital_costs_solar
+export get_capital_costs_storage
 export get_capital_costs_wind
 export get_co2
 export get_cofire_level_limits
@@ -137,12 +134,9 @@ export set_capacity_limits_wind!
 export set_capacity_power_limits!
 export set_capacity_reserve_fraction!
 export set_capital_costs!
-export set_capital_costs_charge!
-export set_capital_costs_discharge!
-export set_capital_costs_energy!
 export set_capital_costs_inverter!
-export set_capital_costs_power!
 export set_capital_costs_solar!
+export set_capital_costs_storage!
 export set_capital_costs_wind!
 export set_co2!
 export set_cofire_level_limits!
