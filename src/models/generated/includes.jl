@@ -89,7 +89,7 @@ export get_operation_costs_inverter
 export get_operation_costs_power
 export get_operation_costs_solar
 export get_operation_costs_wind
-export get_outage_factor
+export get_outage_factors
 export get_peak_demand_mw
 export get_planned_retirement_year
 export get_power_systems_type
@@ -187,7 +187,7 @@ export set_operation_costs_inverter!
 export set_operation_costs_power!
 export set_operation_costs_solar!
 export set_operation_costs_wind!
-export set_outage_factor!
+export set_outage_factors!
 export set_peak_demand_mw!
 export set_planned_retirement_year!
 export set_power_systems_type!

@@ -258,10 +258,10 @@
                     "description": "Minimum and maximum allowable installed capacity for a technology (MW)",
                     "default": "(min=0, max=1e8)"
                 },
-                "outage_factor": {
-                    "type": "Float64",
+                "outage_factors": {
+                    "type": "OutageFactors",
                     "description": "Derating factor to account for planned or forced outages of a technology. Fraction of hours in a year where technology is unavailable.",
-                    "default": "1.0"
+                    "default": "(planned=0.0, forced=0.0)"
                 },
                 "min_generation_fraction": {
                     "type": "Float64",

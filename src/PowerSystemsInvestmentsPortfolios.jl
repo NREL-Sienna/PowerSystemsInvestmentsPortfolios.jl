@@ -144,6 +144,7 @@ export set_units_base_system!
 export CapitalCost
 export InvestmentCost
 export StorageCapitalCost
+export OutageFactors
 
 export show_region_topology_table
 
