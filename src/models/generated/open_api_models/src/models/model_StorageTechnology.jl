@@ -4,11 +4,10 @@
 @doc raw"""StorageTechnology
 
     StorageTechnology(;
-        name=nothing,
-        uuid=nothing,
-        region=nothing,
         id=nothing,
+        name=nothing,
         available=nothing,
+        region=nothing,
         power_systems_type=nothing,
         min_discharge_fraction=0.0,
         prime_mover_type="OT",
@@ -27,14 +26,14 @@
         efficiency=nothing,
         losses=1.0,
         lifetime=100,
+        requirements=nothing,
         financial_data=nothing,
     )
 
-    - name::String
-    - uuid::String
-    - region::Vector{Int64}
     - id::Int64
+    - name::String
     - available::Bool
+    - region::Vector{Int64}
     - power_systems_type::String
     - min_discharge_fraction::Float64
     - prime_mover_type::String
@@ -53,14 +52,14 @@
     - efficiency::InOut
     - losses::Float64
     - lifetime::Int64
-    - financial_data::Any
+    - requirements::Vector{Int64}
+    - financial_data::TechnologyFinancialData
 """
 Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
-    name::Union{Nothing, String} = nothing
-    uuid::Union{Nothing, String} = nothing
-    region::Union{Nothing, Vector{Int64}} = nothing
     id::Union{Nothing, Int64} = nothing
+    name::Union{Nothing, String} = nothing
     available::Union{Nothing, Bool} = nothing
+    region::Union{Nothing, Vector{Int64}} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     min_discharge_fraction::Union{Nothing, Float64} = 0.0
     prime_mover_type::Union{Nothing, String} = "OT"
@@ -79,14 +78,14 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
     efficiency = nothing # spec type: Union{ Nothing, InOut }
     losses::Union{Nothing, Float64} = 1.0
     lifetime::Union{Nothing, Int64} = 100
-    financial_data::Union{Nothing, Any} = nothing
+    requirements::Union{Nothing, Vector{Int64}} = nothing
+    financial_data = nothing # spec type: Union{ Nothing, TechnologyFinancialData }
 
     function StorageTechnology(
-        name,
-        uuid,
-        region,
         id,
+        name,
         available,
+        region,
         power_systems_type,
         min_discharge_fraction,
         prime_mover_type,
@@ -105,98 +104,14 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         efficiency,
         losses,
         lifetime,
+        requirements,
         financial_data,
     )
-        OpenAPI.validate_property(StorageTechnology, Symbol("name"), name)
-        OpenAPI.validate_property(StorageTechnology, Symbol("uuid"), uuid)
-        OpenAPI.validate_property(StorageTechnology, Symbol("region"), region)
-        OpenAPI.validate_property(StorageTechnology, Symbol("id"), id)
-        OpenAPI.validate_property(StorageTechnology, Symbol("available"), available)
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("power_systems_type"),
-            power_systems_type,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("min_discharge_fraction"),
-            min_discharge_fraction,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("prime_mover_type"),
-            prime_mover_type,
-        )
-        OpenAPI.validate_property(StorageTechnology, Symbol("storage_tech"), storage_tech)
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("capital_costs_energy"),
-            capital_costs_energy,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("capital_costs_charge"),
-            capital_costs_charge,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("capital_costs_discharge"),
-            capital_costs_discharge,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("operation_costs"),
-            operation_costs,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("unit_size_discharge"),
-            unit_size_discharge,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("unit_size_charge"),
-            unit_size_charge,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("unit_size_energy"),
-            unit_size_energy,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("capacity_limits_charge"),
-            capacity_limits_charge,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("capacity_limits_discharge"),
-            capacity_limits_discharge,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("capacity_limits_energy"),
-            capacity_limits_energy,
-        )
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("duration_limits"),
-            duration_limits,
-        )
-        OpenAPI.validate_property(StorageTechnology, Symbol("efficiency"), efficiency)
-        OpenAPI.validate_property(StorageTechnology, Symbol("losses"), losses)
-        OpenAPI.validate_property(StorageTechnology, Symbol("lifetime"), lifetime)
-        OpenAPI.validate_property(
-            StorageTechnology,
-            Symbol("financial_data"),
-            financial_data,
-        )
-        return new(
-            name,
-            uuid,
-            region,
+        o = new(
             id,
+            name,
             available,
+            region,
             power_systems_type,
             min_discharge_fraction,
             prime_mover_type,
@@ -215,17 +130,19 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
             efficiency,
             losses,
             lifetime,
+            requirements,
             financial_data,
         )
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type StorageTechnology
 
 const _property_types_StorageTechnology = Dict{Symbol, String}(
-    Symbol("name") => "String",
-    Symbol("uuid") => "String",
-    Symbol("region") => "Vector{Int64}",
     Symbol("id") => "Int64",
+    Symbol("name") => "String",
     Symbol("available") => "Bool",
+    Symbol("region") => "Vector{Int64}",
     Symbol("power_systems_type") => "String",
     Symbol("min_discharge_fraction") => "Float64",
     Symbol("prime_mover_type") => "String",
@@ -244,16 +161,113 @@ const _property_types_StorageTechnology = Dict{Symbol, String}(
     Symbol("efficiency") => "InOut",
     Symbol("losses") => "Float64",
     Symbol("lifetime") => "Int64",
-    Symbol("financial_data") => "Any",
+    Symbol("requirements") => "Vector{Int64}",
+    Symbol("financial_data") => "TechnologyFinancialData",
 )
 OpenAPI.property_type(::Type{StorageTechnology}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_StorageTechnology[name]))}
 
-function check_required(o::StorageTechnology)
+function OpenAPI.check_required(o::StorageTechnology)
+    o.id === nothing && (return false)
     o.name === nothing && (return false)
     o.available === nothing && (return false)
+    o.region === nothing && (return false)
     o.power_systems_type === nothing && (return false)
+    o.storage_tech === nothing && (return false)
+    o.capital_costs_energy === nothing && (return false)
+    o.capital_costs_charge === nothing && (return false)
+    o.capital_costs_discharge === nothing && (return false)
+    o.operation_costs === nothing && (return false)
+    o.capacity_limits_charge === nothing && (return false)
+    o.capacity_limits_discharge === nothing && (return false)
+    o.capacity_limits_energy === nothing && (return false)
+    o.duration_limits === nothing && (return false)
+    o.efficiency === nothing && (return false)
+    o.financial_data === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::StorageTechnology)
+    OpenAPI.validate_property(StorageTechnology, Symbol("id"), o.id)
+    OpenAPI.validate_property(StorageTechnology, Symbol("name"), o.name)
+    OpenAPI.validate_property(StorageTechnology, Symbol("available"), o.available)
+    OpenAPI.validate_property(StorageTechnology, Symbol("region"), o.region)
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("power_systems_type"),
+        o.power_systems_type,
+    )
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("min_discharge_fraction"),
+        o.min_discharge_fraction,
+    )
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("prime_mover_type"),
+        o.prime_mover_type,
+    )
+    OpenAPI.validate_property(StorageTechnology, Symbol("storage_tech"), o.storage_tech)
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("capital_costs_energy"),
+        o.capital_costs_energy,
+    )
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("capital_costs_charge"),
+        o.capital_costs_charge,
+    )
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("capital_costs_discharge"),
+        o.capital_costs_discharge,
+    )
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("operation_costs"),
+        o.operation_costs,
+    )
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("unit_size_discharge"),
+        o.unit_size_discharge,
+    )
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("unit_size_charge"),
+        o.unit_size_charge,
+    )
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("unit_size_energy"),
+        o.unit_size_energy,
+    )
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("capacity_limits_charge"),
+        o.capacity_limits_charge,
+    )
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("capacity_limits_discharge"),
+        o.capacity_limits_discharge,
+    )
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("capacity_limits_energy"),
+        o.capacity_limits_energy,
+    )
+    OpenAPI.validate_property(
+        StorageTechnology,
+        Symbol("duration_limits"),
+        o.duration_limits,
+    )
+    OpenAPI.validate_property(StorageTechnology, Symbol("efficiency"), o.efficiency)
+    OpenAPI.validate_property(StorageTechnology, Symbol("losses"), o.losses)
+    OpenAPI.validate_property(StorageTechnology, Symbol("lifetime"), o.lifetime)
+    OpenAPI.validate_property(StorageTechnology, Symbol("requirements"), o.requirements)
+    OpenAPI.validate_property(StorageTechnology, Symbol("financial_data"), o.financial_data)
 end
 
 function OpenAPI.validate_property(::Type{StorageTechnology}, name::Symbol, val)

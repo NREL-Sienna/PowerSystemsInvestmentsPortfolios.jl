@@ -25,16 +25,9 @@ Base.@kwdef mutable struct FuelCurve <: OpenAPI.APIModel
     vom_cost = nothing # spec type: Union{ Nothing, InputOutputCurve }
 
     function FuelCurve(fuel_cost, power_units, value_curve, variable_cost_type, vom_cost)
-        OpenAPI.validate_property(FuelCurve, Symbol("fuel_cost"), fuel_cost)
-        OpenAPI.validate_property(FuelCurve, Symbol("power_units"), power_units)
-        OpenAPI.validate_property(FuelCurve, Symbol("value_curve"), value_curve)
-        OpenAPI.validate_property(
-            FuelCurve,
-            Symbol("variable_cost_type"),
-            variable_cost_type,
-        )
-        OpenAPI.validate_property(FuelCurve, Symbol("vom_cost"), vom_cost)
-        return new(fuel_cost, power_units, value_curve, variable_cost_type, vom_cost)
+        o = new(fuel_cost, power_units, value_curve, variable_cost_type, vom_cost)
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type FuelCurve
 
@@ -48,13 +41,21 @@ const _property_types_FuelCurve = Dict{Symbol, String}(
 OpenAPI.property_type(::Type{FuelCurve}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_FuelCurve[name]))}
 
-function check_required(o::FuelCurve)
+function OpenAPI.check_required(o::FuelCurve)
     o.fuel_cost === nothing && (return false)
     o.power_units === nothing && (return false)
     o.value_curve === nothing && (return false)
     o.variable_cost_type === nothing && (return false)
     o.vom_cost === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::FuelCurve)
+    OpenAPI.validate_property(FuelCurve, Symbol("fuel_cost"), o.fuel_cost)
+    OpenAPI.validate_property(FuelCurve, Symbol("power_units"), o.power_units)
+    OpenAPI.validate_property(FuelCurve, Symbol("value_curve"), o.value_curve)
+    OpenAPI.validate_property(FuelCurve, Symbol("variable_cost_type"), o.variable_cost_type)
+    OpenAPI.validate_property(FuelCurve, Symbol("vom_cost"), o.vom_cost)
 end
 
 function OpenAPI.validate_property(::Type{FuelCurve}, name::Symbol, val)

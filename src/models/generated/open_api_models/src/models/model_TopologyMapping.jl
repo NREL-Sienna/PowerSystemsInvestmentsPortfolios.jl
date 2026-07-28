@@ -4,31 +4,38 @@
 @doc raw"""TopologyMapping
 
     TopologyMapping(;
+        id=nothing,
         buses=nothing,
-        uuid=nothing,
     )
 
+    - id::Int64
     - buses::Vector{String}
-    - uuid::String
 """
 Base.@kwdef mutable struct TopologyMapping <: OpenAPI.APIModel
+    id::Union{Nothing, Int64} = nothing
     buses::Union{Nothing, Vector{String}} = nothing
-    uuid::Union{Nothing, String} = nothing
 
-    function TopologyMapping(buses, uuid)
-        OpenAPI.validate_property(TopologyMapping, Symbol("buses"), buses)
-        OpenAPI.validate_property(TopologyMapping, Symbol("uuid"), uuid)
-        return new(buses, uuid)
+    function TopologyMapping(id, buses)
+        o = new(id, buses)
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type TopologyMapping
 
 const _property_types_TopologyMapping =
-    Dict{Symbol, String}(Symbol("buses") => "Vector{String}", Symbol("uuid") => "String")
+    Dict{Symbol, String}(Symbol("id") => "Int64", Symbol("buses") => "Vector{String}")
 OpenAPI.property_type(::Type{TopologyMapping}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_TopologyMapping[name]))}
 
-function check_required(o::TopologyMapping)
+function OpenAPI.check_required(o::TopologyMapping)
+    o.id === nothing && (return false)
+    o.buses === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::TopologyMapping)
+    OpenAPI.validate_property(TopologyMapping, Symbol("id"), o.id)
+    OpenAPI.validate_property(TopologyMapping, Symbol("buses"), o.buses)
 end
 
 function OpenAPI.validate_property(::Type{TopologyMapping}, name::Symbol, val) end

@@ -16,9 +16,9 @@ Base.@kwdef mutable struct InOut <: OpenAPI.APIModel
     out::Union{Nothing, Float64} = nothing
 
     function InOut(in, out)
-        OpenAPI.validate_property(InOut, Symbol("in"), in)
-        OpenAPI.validate_property(InOut, Symbol("out"), out)
-        return new(in, out)
+        o = new(in, out)
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type InOut
 
@@ -27,8 +27,13 @@ const _property_types_InOut =
 OpenAPI.property_type(::Type{InOut}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_InOut[name]))}
 
-function check_required(o::InOut)
+function OpenAPI.check_required(o::InOut)
     true
+end
+
+function OpenAPI.validate_properties(o::InOut)
+    OpenAPI.validate_property(InOut, Symbol("in"), o.in)
+    OpenAPI.validate_property(InOut, Symbol("out"), o.out)
 end
 
 function OpenAPI.validate_property(::Type{InOut}, name::Symbol, val) end

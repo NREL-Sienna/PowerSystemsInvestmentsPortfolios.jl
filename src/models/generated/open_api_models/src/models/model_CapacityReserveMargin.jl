@@ -4,95 +4,67 @@
 @doc raw"""CapacityReserveMargin
 
     CapacityReserveMargin(;
-        name=nothing,
-        uuid=nothing,
         id=nothing,
+        name=nothing,
         available=nothing,
-        eligible_regions=nothing,
-        eligible_technologies=nothing,
         target_year=nothing,
         capacity_reserve_fraction=0.0,
     )
 
-    - name::String
-    - uuid::String
     - id::Int64
+    - name::String
     - available::Bool
-    - eligible_regions::Vector{Int64}
-    - eligible_technologies::Vector{Int64}
     - target_year::Int64
     - capacity_reserve_fraction::Float64
 """
 Base.@kwdef mutable struct CapacityReserveMargin <: OpenAPI.APIModel
-    name::Union{Nothing, String} = nothing
-    uuid::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
+    name::Union{Nothing, String} = nothing
     available::Union{Nothing, Bool} = nothing
-    eligible_regions::Union{Nothing, Vector{Int64}} = nothing
-    eligible_technologies::Union{Nothing, Vector{Int64}} = nothing
     target_year::Union{Nothing, Int64} = nothing
     capacity_reserve_fraction::Union{Nothing, Float64} = 0.0
 
     function CapacityReserveMargin(
-        name,
-        uuid,
         id,
+        name,
         available,
-        eligible_regions,
-        eligible_technologies,
         target_year,
         capacity_reserve_fraction,
     )
-        OpenAPI.validate_property(CapacityReserveMargin, Symbol("name"), name)
-        OpenAPI.validate_property(CapacityReserveMargin, Symbol("uuid"), uuid)
-        OpenAPI.validate_property(CapacityReserveMargin, Symbol("id"), id)
-        OpenAPI.validate_property(CapacityReserveMargin, Symbol("available"), available)
-        OpenAPI.validate_property(
-            CapacityReserveMargin,
-            Symbol("eligible_regions"),
-            eligible_regions,
-        )
-        OpenAPI.validate_property(
-            CapacityReserveMargin,
-            Symbol("eligible_technologies"),
-            eligible_technologies,
-        )
-        OpenAPI.validate_property(CapacityReserveMargin, Symbol("target_year"), target_year)
-        OpenAPI.validate_property(
-            CapacityReserveMargin,
-            Symbol("capacity_reserve_fraction"),
-            capacity_reserve_fraction,
-        )
-        return new(
-            name,
-            uuid,
-            id,
-            available,
-            eligible_regions,
-            eligible_technologies,
-            target_year,
-            capacity_reserve_fraction,
-        )
+        o = new(id, name, available, target_year, capacity_reserve_fraction)
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type CapacityReserveMargin
 
 const _property_types_CapacityReserveMargin = Dict{Symbol, String}(
-    Symbol("name") => "String",
-    Symbol("uuid") => "String",
     Symbol("id") => "Int64",
+    Symbol("name") => "String",
     Symbol("available") => "Bool",
-    Symbol("eligible_regions") => "Vector{Int64}",
-    Symbol("eligible_technologies") => "Vector{Int64}",
     Symbol("target_year") => "Int64",
     Symbol("capacity_reserve_fraction") => "Float64",
 )
 OpenAPI.property_type(::Type{CapacityReserveMargin}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_CapacityReserveMargin[name]))}
 
-function check_required(o::CapacityReserveMargin)
+function OpenAPI.check_required(o::CapacityReserveMargin)
+    o.id === nothing && (return false)
     o.name === nothing && (return false)
     o.available === nothing && (return false)
+    o.target_year === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::CapacityReserveMargin)
+    OpenAPI.validate_property(CapacityReserveMargin, Symbol("id"), o.id)
+    OpenAPI.validate_property(CapacityReserveMargin, Symbol("name"), o.name)
+    OpenAPI.validate_property(CapacityReserveMargin, Symbol("available"), o.available)
+    OpenAPI.validate_property(CapacityReserveMargin, Symbol("target_year"), o.target_year)
+    OpenAPI.validate_property(
+        CapacityReserveMargin,
+        Symbol("capacity_reserve_fraction"),
+        o.capacity_reserve_fraction,
+    )
 end
 
 function OpenAPI.validate_property(::Type{CapacityReserveMargin}, name::Symbol, val) end

@@ -16,9 +16,9 @@ Base.@kwdef mutable struct XYCoords <: OpenAPI.APIModel
     y::Union{Nothing, Float64} = nothing
 
     function XYCoords(x, y)
-        OpenAPI.validate_property(XYCoords, Symbol("x"), x)
-        OpenAPI.validate_property(XYCoords, Symbol("y"), y)
-        return new(x, y)
+        o = new(x, y)
+        OpenAPI.validate_properties(o)
+        return o
     end
 end # type XYCoords
 
@@ -27,10 +27,15 @@ const _property_types_XYCoords =
 OpenAPI.property_type(::Type{XYCoords}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_XYCoords[name]))}
 
-function check_required(o::XYCoords)
+function OpenAPI.check_required(o::XYCoords)
     o.x === nothing && (return false)
     o.y === nothing && (return false)
     true
+end
+
+function OpenAPI.validate_properties(o::XYCoords)
+    OpenAPI.validate_property(XYCoords, Symbol("x"), o.x)
+    OpenAPI.validate_property(XYCoords, Symbol("y"), o.y)
 end
 
 function OpenAPI.validate_property(::Type{XYCoords}, name::Symbol, val) end

@@ -6,6 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
+        requirements::Vector{Requirement}
         start_region::RegionTopology
         capital_costs::PSY.ValueCurve
         available::Bool
@@ -24,6 +25,7 @@ This file is auto-generated. Do not edit.
 An aggregated representation of a transmission interchange between two regions.
 
 # Arguments
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `start_region::RegionTopology`: Start region for transport technology
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line. (USD/MW)
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
@@ -35,10 +37,12 @@ An aggregated representation of a transmission interchange between two regions.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
-- `line_loss::Float64`: (default: `1.0`) Transmission loss for each transport technology (%)
+- `line_loss::Float64`: (default: `0.0`) Transmission loss for each transport technology (%)
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Allowable capacity for a transmission line (MW)
 """
 mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Start region for transport technology"
     start_region::RegionTopology
     "Cost of adding new capacity to the nodal transmission line. (USD/MW)"
@@ -68,10 +72,12 @@ mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTech
 end
 
 
-function AggregateTransportTechnology{T}(; start_region, capital_costs=LinearCurve(0.0), available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), unit_size=1, line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
-    AggregateTransportTechnology{T}(start_region, capital_costs, available, name, id, end_region, financial_data, power_systems_type, internal, ext, unit_size, line_loss, capacity_limits, )
+function AggregateTransportTechnology{T}(; requirements=Vector(), start_region, capital_costs=LinearCurve(0.0), available, name, id, end_region, financial_data, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), unit_size=1, line_loss=0.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+    AggregateTransportTechnology{T}(requirements, start_region, capital_costs, available, name, id, end_region, financial_data, power_systems_type, internal, ext, unit_size, line_loss, capacity_limits, )
 end
 
+"""Get [`AggregateTransportTechnology`](@ref) `requirements`."""
+get_requirements(value::AggregateTransportTechnology) = value.requirements
 """Get [`AggregateTransportTechnology`](@ref) `start_region`."""
 get_start_region(value::AggregateTransportTechnology) = value.start_region
 """Get [`AggregateTransportTechnology`](@ref) `capital_costs`."""
@@ -99,6 +105,8 @@ get_line_loss(value::AggregateTransportTechnology) = value.line_loss
 """Get [`AggregateTransportTechnology`](@ref) `capacity_limits`."""
 get_capacity_limits(value::AggregateTransportTechnology) = value.capacity_limits
 
+"""Set [`AggregateTransportTechnology`](@ref) `requirements`."""
+set_requirements!(value::AggregateTransportTechnology, val) = value.requirements = val
 """Set [`AggregateTransportTechnology`](@ref) `start_region`."""
 set_start_region!(value::AggregateTransportTechnology, val) = value.start_region = val
 """Set [`AggregateTransportTechnology`](@ref) `capital_costs`."""
