@@ -505,3 +505,36 @@ _unit_category(::Val{:usd}) = COST
 _unit_category(::Val{:mmbtu}) = FUEL
 _unit_category(::Val{:mmbtu_per_mwh}) = FUEL_CONSUMPTION
 _unit_category(::Val{:fuel_curve}) = FUEL_CURVE
+supports_requirements(::Technology) = true
+
+"""
+Return true if a specific requirement is attached to the Technology.
+"""
+function has_requirement(technology::Technology, requirement::Requirement)
+    if !supports_requirements(technology)
+        return false
+    end
+    for _requirement in get_requirements(technology)
+        if IS.get_uuid(_requirement) == IS.get_uuid(requirement)
+            return true
+        end
+    end
+
+    return false
+end
+
+"""
+Return true if a technology has any requirements of type T attached to it.
+"""
+function has_requirement(technology::Technology, ::Type{T}) where {T <: Requirement}
+    if !supports_requirements(technology)
+        return false
+    end
+    for _requirement in get_requirements(technology)
+        if isa(_requirement, T)
+            return true
+        end
+    end
+
+    return false
+end

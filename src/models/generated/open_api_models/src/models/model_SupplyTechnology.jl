@@ -4,39 +4,36 @@
 @doc raw"""SupplyTechnology
 
     SupplyTechnology(;
+        id=nothing,
         name=nothing,
+        available=nothing,
         power_systems_type=nothing,
         region=nothing,
-        id=nothing,
-        available=nothing,
         prime_mover_type="OT",
         fuel=nothing,
         co2=nothing,
-        cofire_start_limits=nothing,
         cofire_level_limits=nothing,
-        capital_costs=nothing,
-        operation_costs=nothing,
-        unit_size=0.0,
-        capacity_limits=nothing,
-        outage_factor=1.0,
-        min_generation_fraction=0.0,
-        ramp_limits=nothing,
-        time_limits=nothing,
-        start_fuel_mmbtu_per_mw=0.0,
-        lifetime=100,
+        cofire_start_limits=nothing,
         financial_data=nothing,
+        lifetime=100,
+        min_generation_fraction=0.0,
+        operation_costs=nothing,
+        outage_factor=1.0,
+        ramp_limits=nothing,
+        start_fuel_mmbtu_per_mw=0.0,
+        requirements=nothing,
     )
 
+    - id::Int64
     - name::String
+    - available::Bool
     - power_systems_type::String
     - region::Vector{Int64}
-    - id::Int64
-    - available::Bool
     - prime_mover_type::String
     - fuel::Vector{String}
     - co2::Dict{String, Float64}
-    - cofire_start_limits::Dict{String, MinMax}
     - cofire_level_limits::Dict{String, MinMax}
+    - cofire_start_limits::Dict{String, MinMax}
     - capital_costs::ValueCurve
     - operation_costs::ThermalRenewableGenerationCost
     - unit_size::Float64
@@ -44,22 +41,22 @@
     - outage_factor::Float64
     - min_generation_fraction::Float64
     - ramp_limits::UpDown
-    - time_limits::UpDown
     - start_fuel_mmbtu_per_mw::Float64
     - lifetime::Int64
+    - requirements::Vector{Int64}
     - financial_data::TechnologyFinancialData
 """
 Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
+    id::Union{Nothing, Int64} = nothing
     name::Union{Nothing, String} = nothing
+    available::Union{Nothing, Bool} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     region::Union{Nothing, Vector{Int64}} = nothing
-    id::Union{Nothing, Int64} = nothing
-    available::Union{Nothing, Bool} = nothing
     prime_mover_type::Union{Nothing, String} = "OT"
     fuel::Union{Nothing, Vector{String}} = nothing
     co2::Union{Nothing, Dict{String, Float64}} = nothing
-    cofire_start_limits::Union{Nothing, Dict} = nothing # spec type: Union{ Nothing, Dict{String, MinMax} }
     cofire_level_limits::Union{Nothing, Dict} = nothing # spec type: Union{ Nothing, Dict{String, MinMax} }
+    cofire_start_limits::Union{Nothing, Dict} = nothing # spec type: Union{ Nothing, Dict{String, MinMax} }
     capital_costs = nothing # spec type: Union{ Nothing, ValueCurve }
     operation_costs = nothing # spec type: Union{ Nothing, ThermalRenewableGenerationCost }
     unit_size::Union{Nothing, Float64} = 0.0
@@ -67,55 +64,44 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     outage_factor::Union{Nothing, Float64} = 1.0
     min_generation_fraction::Union{Nothing, Float64} = 0.0
     ramp_limits = nothing # spec type: Union{ Nothing, UpDown }
-    time_limits = nothing # spec type: Union{ Nothing, UpDown }
     start_fuel_mmbtu_per_mw::Union{Nothing, Float64} = 0.0
+    time_limits = nothing # spec type: Union{ Nothing, UpDown }
     lifetime::Union{Nothing, Int64} = 100
+    requirements::Union{Nothing, Vector{Int64}} = nothing
     financial_data = nothing # spec type: Union{ Nothing, TechnologyFinancialData }
 
     function SupplyTechnology(
+        id,
         name,
+        available,
         power_systems_type,
         region,
-        id,
-        available,
         prime_mover_type,
         fuel,
         co2,
-        cofire_start_limits,
         cofire_level_limits,
-        capital_costs,
-        operation_costs,
-        unit_size,
-        capacity_limits,
-        outage_factor,
-        min_generation_fraction,
-        ramp_limits,
-        time_limits,
-        start_fuel_mmbtu_per_mw,
-        lifetime,
+        cofire_start_limits,
         financial_data,
+        lifetime,
+        min_generation_fraction,
+        operation_costs,
+        outage_factor,
+        ramp_limits,
+        start_fuel_mmbtu_per_mw,
+        requirements,
     )
         o = new(
+            id,
             name,
+            available,
             power_systems_type,
             region,
-            id,
-            available,
             prime_mover_type,
-            fuel,
-            co2,
-            cofire_start_limits,
-            cofire_level_limits,
-            capital_costs,
-            operation_costs,
-            unit_size,
-            capacity_limits,
-            outage_factor,
-            min_generation_fraction,
             ramp_limits,
-            time_limits,
+            region,
             start_fuel_mmbtu_per_mw,
             lifetime,
+            requirements,
             financial_data,
         )
         OpenAPI.validate_properties(o)
@@ -124,16 +110,16 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
 end # type SupplyTechnology
 
 const _property_types_SupplyTechnology = Dict{Symbol, String}(
+    Symbol("id") => "Int64",
     Symbol("name") => "String",
+    Symbol("available") => "Bool",
     Symbol("power_systems_type") => "String",
     Symbol("region") => "Vector{Int64}",
-    Symbol("id") => "Int64",
-    Symbol("available") => "Bool",
     Symbol("prime_mover_type") => "String",
     Symbol("fuel") => "Vector{String}",
     Symbol("co2") => "Dict{String, Float64}",
-    Symbol("cofire_start_limits") => "Dict{String, MinMax}",
     Symbol("cofire_level_limits") => "Dict{String, MinMax}",
+    Symbol("cofire_start_limits") => "Dict{String, MinMax}",
     Symbol("capital_costs") => "ValueCurve",
     Symbol("operation_costs") => "ThermalRenewableGenerationCost",
     Symbol("unit_size") => "Float64",
@@ -141,31 +127,43 @@ const _property_types_SupplyTechnology = Dict{Symbol, String}(
     Symbol("outage_factor") => "Float64",
     Symbol("min_generation_fraction") => "Float64",
     Symbol("ramp_limits") => "UpDown",
-    Symbol("time_limits") => "UpDown",
     Symbol("start_fuel_mmbtu_per_mw") => "Float64",
     Symbol("lifetime") => "Int64",
+    Symbol("requirements") => "Vector{Int64}",
     Symbol("financial_data") => "TechnologyFinancialData",
 )
 OpenAPI.property_type(::Type{SupplyTechnology}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_SupplyTechnology[name]))}
 
 function OpenAPI.check_required(o::SupplyTechnology)
+    o.id === nothing && (return false)
     o.name === nothing && (return false)
-    o.power_systems_type === nothing && (return false)
     o.available === nothing && (return false)
+    o.power_systems_type === nothing && (return false)
+    o.region === nothing && (return false)
+    o.fuel === nothing && (return false)
+    o.co2 === nothing && (return false)
+    o.cofire_start_limits === nothing && (return false)
+    o.cofire_level_limits === nothing && (return false)
+    o.capital_costs === nothing && (return false)
+    o.operation_costs === nothing && (return false)
+    o.capacity_limits === nothing && (return false)
+    o.ramp_limits === nothing && (return false)
+    o.time_limits === nothing && (return false)
+    o.financial_data === nothing && (return false)
     true
 end
 
 function OpenAPI.validate_properties(o::SupplyTechnology)
+    OpenAPI.validate_property(SupplyTechnology, Symbol("id"), o.id)
     OpenAPI.validate_property(SupplyTechnology, Symbol("name"), o.name)
+    OpenAPI.validate_property(SupplyTechnology, Symbol("available"), o.available)
     OpenAPI.validate_property(
         SupplyTechnology,
         Symbol("power_systems_type"),
         o.power_systems_type,
     )
     OpenAPI.validate_property(SupplyTechnology, Symbol("region"), o.region)
-    OpenAPI.validate_property(SupplyTechnology, Symbol("id"), o.id)
-    OpenAPI.validate_property(SupplyTechnology, Symbol("available"), o.available)
     OpenAPI.validate_property(
         SupplyTechnology,
         Symbol("prime_mover_type"),
@@ -209,10 +207,56 @@ function OpenAPI.validate_properties(o::SupplyTechnology)
         o.start_fuel_mmbtu_per_mw,
     )
     OpenAPI.validate_property(SupplyTechnology, Symbol("lifetime"), o.lifetime)
+    OpenAPI.validate_property(SupplyTechnology, Symbol("requirements"), o.requirements)
     OpenAPI.validate_property(SupplyTechnology, Symbol("financial_data"), o.financial_data)
 end
 
 function OpenAPI.validate_property(::Type{SupplyTechnology}, name::Symbol, val)
+    if name === Symbol("fuel")
+        OpenAPI.validate_param(
+            name,
+            "SupplyTechnology",
+            :enum,
+            val,
+            [
+                "ANTHRACITE_COAL",
+                "BITUMINOUS_COAL",
+                "LIGNITE_COAL",
+                "SUBBITUMINOUS_COAL",
+                "WASTE_COAL",
+                "REFINED_COAL",
+                "SYNTHESIS_GAS_COAL",
+                "DISTILLATE_FUEL_OIL",
+                "JET_FUEL",
+                "KEROSENE",
+                "PETROLEUM_COKE",
+                "RESIDUAL_FUEL_OIL",
+                "PROPANE",
+                "SYNTHESIS_GAS_PETROLEUM_COKE",
+                "WASTE_OIL",
+                "BLASTE_FURNACE_GAS",
+                "NATURAL_GAS",
+                "OTHER_GAS",
+                "AG_BYPRODUCT",
+                "MUNICIPAL_WASTE",
+                "OTHER_BIOMASS_SOLIDS",
+                "WOOD_WASTE_SOLIDS",
+                "OTHER_BIOMASS_LIQUIDS",
+                "SLUDGE_WASTE",
+                "BLACK_LIQUOR",
+                "WOOD_WASTE_LIQUIDS",
+                "LANDFILL_GAS",
+                "OTHEHR_BIOMASS_GAS",
+                "NUCLEAR",
+                "WASTE_HEAT",
+                "TIREDERIVED_FUEL",
+                "COAL",
+                "GEOTHERMAL",
+                "OTHER",
+            ],
+        )
+    end
+
     if name === Symbol("prime_mover_type")
         OpenAPI.validate_param(
             name,

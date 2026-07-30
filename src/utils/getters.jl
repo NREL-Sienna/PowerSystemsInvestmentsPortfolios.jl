@@ -79,7 +79,11 @@ function get_existing_capacity_mw(
             @error "Not all names in ExistingDevices matched generators in the base system"
         end
 
-        return sum(PSY.get_rating(t) * PSY.get_base_power(p.base_system) for t in comp)
+        existing_capacity = with_units_base(get_base_system(p), "NATURAL_UNITS") do
+            sum(PSY.get_rating(t) for t in comp)
+        end
+
+        return existing_capacity
     else
         return 0.0
     end
@@ -112,9 +116,11 @@ function get_existing_capacity_mwh(p::Portfolio, t::StorageTechnology)
             @error "Not all names in ExistingDevices matched generators in the base system"
         end
 
-        return sum(
-            PSY.get_storage_capacity(t) * PSY.get_base_power(p.base_system) for t in comp
-        )
+        existing_capacity = with_units_base(get_base_system(p), "NATURAL_UNITS") do
+            sum(PSY.get_storage_capacity(t) for t in comp)
+        end
+
+        return existing_capacity
     else
         return 0.0
     end
@@ -152,7 +158,11 @@ function get_peak_demand_mw(p::Portfolio, t::DemandTechnology)
             @error "Not all names in ExistingDevices matched generators in the base system"
         end
 
-        return sum(PSY.get_max_active_power(t) for t in comp)
+        existing_capacity = with_units_base(get_base_system(p), "NATURAL_UNITS") do
+            sum(PSY.get_max_active_power(t) for t in comp)
+        end
+
+        return existing_capacity
     else
         @warn "Demand technology has no existing loads attached, returning a peak demand of 0.0. If this technology is meant to represent existing demand, please attach an ExistingDevices supplemental attribute with the names of the corresponding loads in the base system."
         return 0.0

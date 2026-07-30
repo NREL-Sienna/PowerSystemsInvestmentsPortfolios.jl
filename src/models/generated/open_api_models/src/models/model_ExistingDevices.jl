@@ -4,31 +4,39 @@
 @doc raw"""ExistingDevices
 
     ExistingDevices(;
+        id=nothing,
         existing_devices=nothing,
     )
 
+    - id::Int64
     - existing_devices::Vector{String}
 """
 Base.@kwdef mutable struct ExistingDevices <: OpenAPI.APIModel
+    id::Union{Nothing, Int64} = nothing
     existing_devices::Union{Nothing, Vector{String}} = nothing
 
-    function ExistingDevices(existing_devices)
-        o = new(existing_devices)
+    function ExistingDevices(id, existing_devices)
+        o = new(id, existing_devices)
         OpenAPI.validate_properties(o)
         return o
     end
 end # type ExistingDevices
 
-const _property_types_ExistingDevices =
-    Dict{Symbol, String}(Symbol("existing_devices") => "Vector{String}")
+const _property_types_ExistingDevices = Dict{Symbol, String}(
+    Symbol("id") => "Int64",
+    Symbol("existing_devices") => "Vector{String}",
+)
 OpenAPI.property_type(::Type{ExistingDevices}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_ExistingDevices[name]))}
 
 function OpenAPI.check_required(o::ExistingDevices)
+    o.id === nothing && (return false)
+    o.existing_devices === nothing && (return false)
     true
 end
 
 function OpenAPI.validate_properties(o::ExistingDevices)
+    OpenAPI.validate_property(ExistingDevices, Symbol("id"), o.id)
     OpenAPI.validate_property(
         ExistingDevices,
         Symbol("existing_devices"),

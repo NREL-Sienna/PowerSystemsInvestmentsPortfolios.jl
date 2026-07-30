@@ -242,7 +242,7 @@
       "name": "RetirementPotential",
       "type": "object",
       "required": [
-        "retirement_potential"
+        "eligible_generators"
       ],
       "docstring": "Supplemental attribute used to define what existing generators are eligible for retirement for a SupplyTechnology",
       "properties": [
@@ -1090,7 +1090,8 @@
         {
           "name": "value_of_lost_load",
           "type": "Float64",
-          "description": "Value of unserved load (USD/MWh)"
+          "description": "Value of unserved load (USD/MWh)",
+          "default": "1e8"
         },
         {
           "name": "unserved_demand_curve",
@@ -1143,12 +1144,6 @@
           "name": "id",
           "type": "Int64",
           "description": "ID for individual policy"
-        },
-        {
-          "name": "eligible_regions",
-          "type": "Vector{RegionTopology}",
-          "description": "List of regions that contribute to the carbon cap constraint.",
-          "default": "Vector{RegionTopology}()"
         },
         {
           "name": "max_tons_mwh",
@@ -1214,12 +1209,6 @@
           "default": "2050"
         },
         {
-          "name": "eligible_regions",
-          "type": "Vector{RegionTopology}",
-          "description": "List of regions that contribute to the carbon cap constraint.",
-          "default": "Vector{RegionTopology}()"
-        },
-        {
           "name": "tax_dollars_per_ton",
           "type": "Float64",
           "description": "Cost penalty per ton of CO2 emitted by technologies in the eligible regions during the target year (USD/tCO2)",
@@ -1263,18 +1252,6 @@
           "name": "id",
           "type": "Int64",
           "description": "ID for individual policy"
-        },
-        {
-          "name": "eligible_regions",
-          "type": "Vector{RegionTopology}",
-          "description": "List of regions where this reserve margin is enforced",
-          "default": "Vector{RegionTopology}()"
-        },
-        {
-          "name": "eligible_technologies",
-          "type": "Vector{Technology}",
-          "description": "List of technologies that can contribute to the capacity reserve margin requirement",
-          "default": "Vector{Technology}()"
         },
         {
           "name": "target_year",
@@ -1326,12 +1303,6 @@
           "name": "id",
           "type": "Int64",
           "description": "ID for individual policy"
-        },
-        {
-          "name": "eligible_resources",
-          "type": "Vector{ResourceTechnology}",
-          "description": "List of resources that contribute to the capacity requirement.",
-          "default": "Vector{ResourceTechnology}()"
         },
         {
           "name": "min_capacity_mw",
@@ -1391,18 +1362,6 @@
           "default": "2050"
         },
         {
-          "name": "eligible_regions",
-          "type": "Vector{RegionTopology}",
-          "description": "List of regions where the EnergyShareRequirement will be applied.",
-          "default": "Vector{RegionTopology}()"
-        },
-        {
-          "name": "eligible_resources",
-          "type": "Vector{ResourceTechnology}",
-          "description": "List of ResourceTechnologies that are eligible to meet the energy share requirement.",
-          "default": "Vector{ResourceTechnology}()"
-        },
-        {
           "name": "generation_fraction_requirement",
           "type": "Float64",
           "description": "Fraction of total annual demand across all eligible zones that needs to be met by eligible resources.",
@@ -1448,18 +1407,6 @@
           "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
         },
         {
-          "name": "eligible_resources",
-          "type": "Vector{ResourceTechnology}",
-          "description": "List of technologies eligible to provide hourly generation for demand side technologies.",
-          "default": "Vector{ResourceTechnology}()"
-        },
-        {
-          "name": "eligible_demand",
-          "type": "Vector{DemandTechnology}",
-          "description": "List of demand side technologies that need to be met with hourly matching.",
-          "default": "Vector{DemandTechnology}()"
-        },
-        {
           "name": "ext",
           "type": "Dict",
           "default": "Dict()",
@@ -1497,12 +1444,6 @@
           "name": "id",
           "type": "Int64",
           "description": "ID for individual policy"
-        },
-        {
-          "name": "eligible_resources",
-          "type": "Vector{ResourceTechnology}",
-          "description": "List of technologies that contribute to the carbon cap constraint.",
-          "default": "Vector{ResourceTechnology}()"
         },
         {
           "name": "max_capacity_mw",

@@ -4,8 +4,8 @@
 @doc raw"""NodalACTransportTechnology
 
     NodalACTransportTechnology(;
-        name=nothing,
         id=nothing,
+        name=nothing,
         available=nothing,
         power_systems_type=nothing,
         start_node=nothing,
@@ -16,11 +16,12 @@
         voltage=0.0,
         unit_size=0.0,
         reactance=0.0,
+        requirements=nothing,
         financial_data=nothing,
     )
 
-    - name::String
     - id::Int64
+    - name::String
     - available::Bool
     - power_systems_type::String
     - start_node::Int64
@@ -34,8 +35,8 @@
     - financial_data::TechnologyFinancialData
 """
 Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
-    name::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
+    name::Union{Nothing, String} = nothing
     available::Union{Nothing, Bool} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     start_node::Union{Nothing, Int64} = nothing
@@ -49,8 +50,8 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
     financial_data = nothing # spec type: Union{ Nothing, TechnologyFinancialData }
 
     function NodalACTransportTechnology(
-        name,
         id,
+        name,
         available,
         power_systems_type,
         start_node,
@@ -61,11 +62,12 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
         voltage,
         unit_size,
         reactance,
+        requirements,
         financial_data,
     )
         o = new(
-            name,
             id,
+            name,
             available,
             power_systems_type,
             start_node,
@@ -76,16 +78,19 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
             voltage,
             unit_size,
             reactance,
+            requirements,
             financial_data,
         )
+        OpenAPI.validate_properties(o)
+        return o
         OpenAPI.validate_properties(o)
         return o
     end
 end # type NodalACTransportTechnology
 
 const _property_types_NodalACTransportTechnology = Dict{Symbol, String}(
-    Symbol("name") => "String",
     Symbol("id") => "Int64",
+    Symbol("name") => "String",
     Symbol("available") => "Bool",
     Symbol("power_systems_type") => "String",
     Symbol("start_node") => "Int64",
@@ -104,6 +109,12 @@ OpenAPI.property_type(::Type{NodalACTransportTechnology}, name::Symbol) =
 function OpenAPI.check_required(o::NodalACTransportTechnology)
     o.name === nothing && (return false)
     o.available === nothing && (return false)
+    o.power_systems_type === nothing && (return false)
+    o.start_node === nothing && (return false)
+    o.end_node === nothing && (return false)
+    o.capacity_limits === nothing && (return false)
+    o.capital_costs === nothing && (return false)
+    o.financial_data === nothing && (return false)
     true
 end
 

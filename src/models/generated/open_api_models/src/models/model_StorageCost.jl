@@ -8,41 +8,41 @@ Cost representation for storage units
         cost_type="STORAGE",
         charge_variable_cost=nothing,
         discharge_variable_cost=nothing,
+        energy_shortage_cost=0.0,
+        energy_surplus_cost=0.0,
         fixed=0.0,
         shut_down=0.0,
         start_up=nothing,
-        energy_shortage_cost=0.0,
-        energy_surplus_cost=0.0,
     )
 
     - cost_type::String
     - charge_variable_cost::CostCurve
     - discharge_variable_cost::CostCurve
+    - energy_shortage_cost::Float64
+    - energy_surplus_cost::Float64
     - fixed::Float64
     - shut_down::Float64
     - start_up::StorageCostStartUp
-    - energy_shortage_cost::Float64
-    - energy_surplus_cost::Float64
 """
 Base.@kwdef mutable struct StorageCost <: OpenAPI.APIModel
     cost_type::Union{Nothing, String} = "STORAGE"
     charge_variable_cost = nothing # spec type: Union{ Nothing, CostCurve }
     discharge_variable_cost = nothing # spec type: Union{ Nothing, CostCurve }
+    energy_shortage_cost::Union{Nothing, Float64} = 0.0
+    energy_surplus_cost::Union{Nothing, Float64} = 0.0
     fixed::Union{Nothing, Float64} = 0.0
     shut_down::Union{Nothing, Float64} = 0.0
     start_up = nothing # spec type: Union{ Nothing, StorageCostStartUp }
-    energy_shortage_cost::Union{Nothing, Float64} = 0.0
-    energy_surplus_cost::Union{Nothing, Float64} = 0.0
 
     function StorageCost(
         cost_type,
         charge_variable_cost,
         discharge_variable_cost,
+        energy_shortage_cost,
+        energy_surplus_cost,
         fixed,
         shut_down,
         start_up,
-        energy_shortage_cost,
-        energy_surplus_cost,
     )
         o = new(
             cost_type,
@@ -51,8 +51,6 @@ Base.@kwdef mutable struct StorageCost <: OpenAPI.APIModel
             fixed,
             shut_down,
             start_up,
-            energy_shortage_cost,
-            energy_surplus_cost,
         )
         OpenAPI.validate_properties(o)
         return o
@@ -63,11 +61,11 @@ const _property_types_StorageCost = Dict{Symbol, String}(
     Symbol("cost_type") => "String",
     Symbol("charge_variable_cost") => "CostCurve",
     Symbol("discharge_variable_cost") => "CostCurve",
+    Symbol("energy_shortage_cost") => "Float64",
+    Symbol("energy_surplus_cost") => "Float64",
     Symbol("fixed") => "Float64",
     Symbol("shut_down") => "Float64",
     Symbol("start_up") => "StorageCostStartUp",
-    Symbol("energy_shortage_cost") => "Float64",
-    Symbol("energy_surplus_cost") => "Float64",
 )
 OpenAPI.property_type(::Type{StorageCost}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_StorageCost[name]))}

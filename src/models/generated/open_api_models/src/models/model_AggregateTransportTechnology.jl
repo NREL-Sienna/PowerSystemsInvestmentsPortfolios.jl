@@ -4,8 +4,8 @@
 @doc raw"""AggregateTransportTechnology
 
     AggregateTransportTechnology(;
-        name=nothing,
         id=nothing,
+        name=nothing,
         available=nothing,
         power_systems_type=nothing,
         start_region=nothing,
@@ -14,11 +14,12 @@
         capital_costs=nothing,
         line_loss=nothing,
         unit_size=nothing,
+        requirements=nothing,
         financial_data=nothing,
     )
 
-    - name::String
     - id::Int64
+    - name::String
     - available::Bool
     - power_systems_type::String
     - start_region::Int64
@@ -27,11 +28,12 @@
     - capital_costs::ValueCurve
     - line_loss::Float64
     - unit_size::Float64
+    - requirements::Vector{Int64}
     - financial_data::TechnologyFinancialData
 """
 Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
-    name::Union{Nothing, String} = nothing
     id::Union{Nothing, Int64} = nothing
+    name::Union{Nothing, String} = nothing
     available::Union{Nothing, Bool} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     start_region::Union{Nothing, Int64} = nothing
@@ -40,11 +42,12 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
     capital_costs = nothing # spec type: Union{ Nothing, ValueCurve }
     line_loss::Union{Nothing, Float64} = nothing
     unit_size::Union{Nothing, Float64} = nothing
+    requirements::Union{Nothing, Vector{Int64}} = nothing
     financial_data = nothing # spec type: Union{ Nothing, TechnologyFinancialData }
 
     function AggregateTransportTechnology(
-        name,
         id,
+        name,
         available,
         power_systems_type,
         start_region,
@@ -53,11 +56,12 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
         capital_costs,
         line_loss,
         unit_size,
+        requirements,
         financial_data,
     )
         o = new(
-            name,
             id,
+            name,
             available,
             power_systems_type,
             start_region,
@@ -66,6 +70,7 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
             capital_costs,
             line_loss,
             unit_size,
+            requirements,
             financial_data,
         )
         OpenAPI.validate_properties(o)
@@ -74,8 +79,8 @@ Base.@kwdef mutable struct AggregateTransportTechnology <: OpenAPI.APIModel
 end # type AggregateTransportTechnology
 
 const _property_types_AggregateTransportTechnology = Dict{Symbol, String}(
-    Symbol("name") => "String",
     Symbol("id") => "Int64",
+    Symbol("name") => "String",
     Symbol("available") => "Bool",
     Symbol("power_systems_type") => "String",
     Symbol("start_region") => "Int64",
@@ -84,6 +89,7 @@ const _property_types_AggregateTransportTechnology = Dict{Symbol, String}(
     Symbol("capital_costs") => "ValueCurve",
     Symbol("line_loss") => "Float64",
     Symbol("unit_size") => "Float64",
+    Symbol("requirements") => "Vector{Int64}",
     Symbol("financial_data") => "TechnologyFinancialData",
 )
 OpenAPI.property_type(::Type{AggregateTransportTechnology}, name::Symbol) = Union{
@@ -92,14 +98,23 @@ OpenAPI.property_type(::Type{AggregateTransportTechnology}, name::Symbol) = Unio
 }
 
 function OpenAPI.check_required(o::AggregateTransportTechnology)
+    o.id === nothing && (return false)
     o.name === nothing && (return false)
     o.available === nothing && (return false)
+    o.power_systems_type === nothing && (return false)
+    o.start_region === nothing && (return false)
+    o.end_region === nothing && (return false)
+    o.capacity_limits === nothing && (return false)
+    o.capital_costs === nothing && (return false)
+    o.line_loss === nothing && (return false)
+    o.unit_size === nothing && (return false)
+    o.financial_data === nothing && (return false)
     true
 end
 
 function OpenAPI.validate_properties(o::AggregateTransportTechnology)
-    OpenAPI.validate_property(AggregateTransportTechnology, Symbol("name"), o.name)
     OpenAPI.validate_property(AggregateTransportTechnology, Symbol("id"), o.id)
+    OpenAPI.validate_property(AggregateTransportTechnology, Symbol("name"), o.name)
     OpenAPI.validate_property(
         AggregateTransportTechnology,
         Symbol("available"),
@@ -139,6 +154,11 @@ function OpenAPI.validate_properties(o::AggregateTransportTechnology)
         AggregateTransportTechnology,
         Symbol("unit_size"),
         o.unit_size,
+    )
+    OpenAPI.validate_property(
+        AggregateTransportTechnology,
+        Symbol("requirements"),
+        o.requirements,
     )
     OpenAPI.validate_property(
         AggregateTransportTechnology,

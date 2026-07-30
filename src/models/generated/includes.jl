@@ -1,5 +1,6 @@
-include("Zone.jl")
 include("Node.jl")
+include("Zone.jl")
+include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
 include("RetirementPotential.jl")
 include("AggregateRetirementPotential.jl")
@@ -16,7 +17,6 @@ include("DemandRequirement.jl")
 include("CarbonCaps.jl")
 include("CarbonTax.jl")
 include("CapacityReserveMargin.jl")
-include("MinimumCapacityRequirements.jl")
 include("EnergyShareRequirements.jl")
 include("HourlyMatching.jl")
 include("MaximumCapacityRequirements.jl")
@@ -47,23 +47,22 @@ export get_co2
 export get_cofire_level_limits
 export get_cofire_start_limits
 export get_conformity
+export get_conformity
 export get_curtailment_cost
 export get_demand_energy_efficiency
 export get_duration_limits
 export get_efficiency
 export get_efficiency_storage
-export get_eligible_demand
 export get_eligible_generators
-export get_eligible_regions
-export get_eligible_resources
-export get_eligible_technologies
 export get_end_node
 export get_end_region
+export get_existing_devices
 export get_existing_devices
 export get_ext
 export get_financial_data
 export get_fuel
 export get_generation_fraction_requirement
+export get_growth_rate
 export get_growth_rate
 export get_id
 export get_inverter_efficiency
@@ -90,6 +89,8 @@ export get_min_power
 export get_name
 export get_new_construction_year
 export get_new_demand_mw
+export get_new_construction_year
+export get_new_demand_mw
 export get_operation_costs
 export get_operation_costs_energy
 export get_operation_costs_inverter
@@ -105,6 +106,7 @@ export get_prime_mover_type
 export get_ramp_limits
 export get_reactance
 export get_region
+export get_requirements
 export get_resistance
 export get_retirement_potential
 export get_retrofit_fraction
@@ -151,23 +153,22 @@ export set_co2!
 export set_cofire_level_limits!
 export set_cofire_start_limits!
 export set_conformity!
+export set_conformity!
 export set_curtailment_cost!
 export set_demand_energy_efficiency!
 export set_duration_limits!
 export set_efficiency!
 export set_efficiency_storage!
-export set_eligible_demand!
 export set_eligible_generators!
-export set_eligible_regions!
-export set_eligible_resources!
-export set_eligible_technologies!
 export set_end_node!
 export set_end_region!
+export set_existing_devices!
 export set_existing_devices!
 export set_ext!
 export set_financial_data!
 export set_fuel!
 export set_generation_fraction_requirement!
+export set_growth_rate!
 export set_growth_rate!
 export set_id!
 export set_inverter_efficiency!
@@ -194,6 +195,8 @@ export set_min_power!
 export set_name!
 export set_new_construction_year!
 export set_new_demand_mw!
+export set_new_construction_year!
+export set_new_demand_mw!
 export set_operation_costs!
 export set_operation_costs_energy!
 export set_operation_costs_inverter!
@@ -209,6 +212,7 @@ export set_prime_mover_type!
 export set_ramp_limits!
 export set_reactance!
 export set_region!
+export set_requirements!
 export set_resistance!
 export set_retirement_potential!
 export set_retrofit_fraction!

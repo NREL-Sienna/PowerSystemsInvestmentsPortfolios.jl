@@ -7,7 +7,7 @@
 
         @test occursin("Portfolio", out)
         @test occursin("Technologies", out)
-        @test occursin("Topology", out)       # requires show_region_topology_table (not yet implemented)
+        @test occursin("Topology", out)
         @test occursin("Zone", out)           # row content from topology table
         @test occursin("Node", out)           # row content from topology table
         @test occursin("Time Series", out)
@@ -21,8 +21,8 @@
 
         @test occursin("Portfolio", out)
         @test occursin("Technologies", out)
-        @test occursin("Topology", out)       # requires show_region_topology_table (not yet implemented)
-        @test occursin("Time Series", out)    # HTML show path currently missing time-series table
+        @test occursin("Topology", out)
+        @test occursin("Time Series", out)
         @test occursin("<table", out)
     end
 
@@ -43,7 +43,6 @@
 
     @testset "show_region_topology_table empty portfolio" begin
         # Build an empty portfolio (no regions added) and verify no output is produced.
-        # This testset will fail with MethodError until show_region_topology_table is implemented.
         sys = build_system(PSITestSystems, "c_sys5_re")
         empty_port = Portfolio(sys)
 

@@ -22,7 +22,8 @@ import InfrastructureSystems:
     CostCurve,
     LinearCurve,
     InfrastructureSystemsComponent,
-    InfrastructureSystemsType
+    InfrastructureSystemsType,
+    get_available
 
 # Using PowerSystems in order to support deserializing with PSY parametric typing
 using PowerSystems
@@ -45,11 +46,11 @@ import Unitful
 using Unitful: @dimension, @u_str, @refunit, @unit, Quantity, Units, uconvert, ustrip
 
 export Portfolio
+export Requirement
 export Technology
 export ResourceTechnology
 export DemandTechnology
 export TransmissionTechnology
-export Requirement
 export FinancialData
 export RegionTopology
 export SupplyTechnology
@@ -93,6 +94,8 @@ export get_available_technologies
 export get_technologies_by_name
 export get_requirement
 export get_requirements
+export get_contributing_technologies
+export has_requirement
 export get_ext
 export get_description
 export get_financial_data
@@ -130,6 +133,9 @@ export from_json
 export MinMax
 export InOut
 export UpDown
+export set_units_base_system!
+
+export show_region_topology_table
 
 export show_region_topology_table
 
@@ -169,11 +175,11 @@ include("definitions.jl")
 include("units/types.jl")
 include("units/conversions.jl")
 
+include("models/requirements.jl")
 include("models/technologies.jl")
 include("models/regions.jl")
 include("models/financial_data/financial_data.jl")
 include("models/financial_data/TechnologyFinancialData.jl")
-include("models/requirements.jl")
 include("models/generated/includes.jl")
 include("investment_schedule.jl")
 
