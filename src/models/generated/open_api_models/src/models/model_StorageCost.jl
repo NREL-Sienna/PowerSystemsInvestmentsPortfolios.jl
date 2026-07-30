@@ -7,7 +7,6 @@ Cost representation for storage units
     StorageCost(;
         cost_type="STORAGE",
         charge_variable_cost=nothing,
-        cost_type="STORAGE",
         discharge_variable_cost=nothing,
         energy_shortage_cost=0.0,
         energy_surplus_cost=0.0,
@@ -18,7 +17,6 @@ Cost representation for storage units
 
     - cost_type::String
     - charge_variable_cost::CostCurve
-    - cost_type::String
     - discharge_variable_cost::CostCurve
     - energy_shortage_cost::Float64
     - energy_surplus_cost::Float64
@@ -29,7 +27,6 @@ Cost representation for storage units
 Base.@kwdef mutable struct StorageCost <: OpenAPI.APIModel
     cost_type::Union{Nothing, String} = "STORAGE"
     charge_variable_cost = nothing # spec type: Union{ Nothing, CostCurve }
-    cost_type::Union{Nothing, String} = "STORAGE"
     discharge_variable_cost = nothing # spec type: Union{ Nothing, CostCurve }
     energy_shortage_cost::Union{Nothing, Float64} = 0.0
     energy_surplus_cost::Union{Nothing, Float64} = 0.0
@@ -40,7 +37,6 @@ Base.@kwdef mutable struct StorageCost <: OpenAPI.APIModel
     function StorageCost(
         cost_type,
         charge_variable_cost,
-        cost_type,
         discharge_variable_cost,
         energy_shortage_cost,
         energy_surplus_cost,
@@ -64,7 +60,6 @@ end # type StorageCost
 const _property_types_StorageCost = Dict{Symbol, String}(
     Symbol("cost_type") => "String",
     Symbol("charge_variable_cost") => "CostCurve",
-    Symbol("cost_type") => "String",
     Symbol("discharge_variable_cost") => "CostCurve",
     Symbol("energy_shortage_cost") => "Float64",
     Symbol("energy_surplus_cost") => "Float64",

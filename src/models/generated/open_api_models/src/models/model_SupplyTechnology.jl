@@ -15,21 +15,13 @@
         cofire_level_limits=nothing,
         cofire_start_limits=nothing,
         financial_data=nothing,
-        fuel=nothing,
-        id=nothing,
         lifetime=100,
         min_generation_fraction=0.0,
-        name=nothing,
         operation_costs=nothing,
         outage_factor=1.0,
-        power_systems_type=nothing,
-        prime_mover_type="OT",
         ramp_limits=nothing,
-        region=nothing,
         start_fuel_mmbtu_per_mw=0.0,
-        lifetime=100,
         requirements=nothing,
-        financial_data=nothing,
     )
 
     - id::Int64
@@ -42,20 +34,13 @@
     - co2::Dict{String, Float64}
     - cofire_level_limits::Dict{String, MinMax}
     - cofire_start_limits::Dict{String, MinMax}
-    - cofire_level_limits::Dict{String, MinMax}
     - capital_costs::ValueCurve
     - operation_costs::ThermalRenewableGenerationCost
     - unit_size::Float64
     - capacity_limits::MinMax
     - outage_factor::Float64
     - min_generation_fraction::Float64
-    - name::String
-    - operation_costs::ThermalRenewableGenerationCost
-    - outage_factor::Float64
-    - power_systems_type::String
-    - prime_mover_type::String
     - ramp_limits::UpDown
-    - region::Vector{Int64}
     - start_fuel_mmbtu_per_mw::Float64
     - lifetime::Int64
     - requirements::Vector{Int64}
@@ -72,23 +57,15 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
     co2::Union{Nothing, Dict{String, Float64}} = nothing
     cofire_level_limits::Union{Nothing, Dict} = nothing # spec type: Union{ Nothing, Dict{String, MinMax} }
     cofire_start_limits::Union{Nothing, Dict} = nothing # spec type: Union{ Nothing, Dict{String, MinMax} }
-    cofire_level_limits::Union{Nothing, Dict} = nothing # spec type: Union{ Nothing, Dict{String, MinMax} }
     capital_costs = nothing # spec type: Union{ Nothing, ValueCurve }
     operation_costs = nothing # spec type: Union{ Nothing, ThermalRenewableGenerationCost }
     unit_size::Union{Nothing, Float64} = 0.0
     capacity_limits = nothing # spec type: Union{ Nothing, MinMax }
     outage_factor::Union{Nothing, Float64} = 1.0
     min_generation_fraction::Union{Nothing, Float64} = 0.0
-    name::Union{Nothing, String} = nothing
-    operation_costs = nothing # spec type: Union{ Nothing, ThermalRenewableGenerationCost }
-    outage_factor::Union{Nothing, Float64} = 1.0
-    power_systems_type::Union{Nothing, String} = nothing
-    prime_mover_type::Union{Nothing, String} = "OT"
     ramp_limits = nothing # spec type: Union{ Nothing, UpDown }
-    region::Union{Nothing, Vector{Int64}} = nothing
     start_fuel_mmbtu_per_mw::Union{Nothing, Float64} = 0.0
     time_limits = nothing # spec type: Union{ Nothing, UpDown }
-    start_fuel_mmbtu_per_mw::Union{Nothing, Float64} = 0.0
     lifetime::Union{Nothing, Int64} = 100
     requirements::Union{Nothing, Vector{Int64}} = nothing
     financial_data = nothing # spec type: Union{ Nothing, TechnologyFinancialData }
@@ -105,21 +82,13 @@ Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
         cofire_level_limits,
         cofire_start_limits,
         financial_data,
-        fuel,
-        id,
         lifetime,
         min_generation_fraction,
-        name,
         operation_costs,
         outage_factor,
-        power_systems_type,
-        prime_mover_type,
         ramp_limits,
-        region,
         start_fuel_mmbtu_per_mw,
-        lifetime,
         requirements,
-        financial_data,
     )
         o = new(
             id,
@@ -151,20 +120,13 @@ const _property_types_SupplyTechnology = Dict{Symbol, String}(
     Symbol("co2") => "Dict{String, Float64}",
     Symbol("cofire_level_limits") => "Dict{String, MinMax}",
     Symbol("cofire_start_limits") => "Dict{String, MinMax}",
-    Symbol("cofire_level_limits") => "Dict{String, MinMax}",
     Symbol("capital_costs") => "ValueCurve",
     Symbol("operation_costs") => "ThermalRenewableGenerationCost",
     Symbol("unit_size") => "Float64",
     Symbol("capacity_limits") => "MinMax",
     Symbol("outage_factor") => "Float64",
     Symbol("min_generation_fraction") => "Float64",
-    Symbol("name") => "String",
-    Symbol("operation_costs") => "ThermalRenewableGenerationCost",
-    Symbol("outage_factor") => "Float64",
-    Symbol("power_systems_type") => "String",
-    Symbol("prime_mover_type") => "String",
     Symbol("ramp_limits") => "UpDown",
-    Symbol("region") => "Vector{Int64}",
     Symbol("start_fuel_mmbtu_per_mw") => "Float64",
     Symbol("lifetime") => "Int64",
     Symbol("requirements") => "Vector{Int64}",

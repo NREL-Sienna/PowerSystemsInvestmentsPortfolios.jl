@@ -7,7 +7,6 @@
         startup_stages_type="STAGES",
         cold=nothing,
         hot=nothing,
-        startup_stages_type="STAGES",
         warm=nothing,
     )
 
@@ -21,7 +20,6 @@ Base.@kwdef mutable struct StartUpStages <: OpenAPI.APIModel
     startup_stages_type::Union{Nothing, String} = "STAGES"
     cold::Union{Nothing, Float64} = nothing
     hot::Union{Nothing, Float64} = nothing
-    startup_stages_type::Union{Nothing, String} = "STAGES"
     warm::Union{Nothing, Float64} = nothing
 
     function StartUpStages(startup_stages_type, cold, hot, warm)
@@ -35,7 +33,6 @@ const _property_types_StartUpStages = Dict{Symbol, String}(
     Symbol("startup_stages_type") => "String",
     Symbol("cold") => "Float64",
     Symbol("hot") => "Float64",
-    Symbol("startup_stages_type") => "String",
     Symbol("warm") => "Float64",
 )
 OpenAPI.property_type(::Type{StartUpStages}, name::Symbol) =
