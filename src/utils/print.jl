@@ -16,7 +16,7 @@ function Base.show(io::IO, ::MIME"text/plain", ist::Technology)
             if ismissing(arg)
                 val = getter_func(ist)
             else
-                val = getter_func(ist, NU)
+                val = getter_func(ist, InfrastructureSystems.NU)
             end
         else
             val = getproperty(ist, name)
