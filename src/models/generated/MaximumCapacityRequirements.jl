@@ -9,7 +9,6 @@ This file is auto-generated. Do not edit.
         name::String
         available::Bool
         id::Int64
-        eligible_resources::Vector{ResourceTechnology}
         max_capacity_mw::Float64
         target_year::Int64
         ext::Dict
@@ -22,7 +21,6 @@ Policy requirement that the total capacity of all technologies in `eligible_reso
 - `name::String`: The technology name
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `id::Int64`: ID for individual policy
-- `eligible_resources::Vector{ResourceTechnology}`: (default: `Vector{ResourceTechnology}()`) List of technologies that contribute to the carbon cap constraint.
 - `max_capacity_mw::Float64`: (default: `0.0`) Maximum total capacity across all eligible resources (MW)
 - `target_year::Int64`: (default: `2050`) Year in which the capacity requirement will be applied
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
@@ -35,8 +33,6 @@ mutable struct MaximumCapacityRequirements <: Requirement
     available::Bool
     "ID for individual policy"
     id::Int64
-    "List of technologies that contribute to the carbon cap constraint."
-    eligible_resources::Vector{ResourceTechnology}
     "Maximum total capacity across all eligible resources (MW)"
     max_capacity_mw::Float64
     "Year in which the capacity requirement will be applied"
@@ -48,8 +44,8 @@ mutable struct MaximumCapacityRequirements <: Requirement
 end
 
 
-function MaximumCapacityRequirements(; name, available, id, eligible_resources=Vector{ResourceTechnology}(), max_capacity_mw=0.0, target_year=2050, ext=Dict(), internal=InfrastructureSystemsInternal(), )
-    MaximumCapacityRequirements(name, available, id, eligible_resources, max_capacity_mw, target_year, ext, internal, )
+function MaximumCapacityRequirements(; name, available, id, max_capacity_mw=0.0, target_year=2050, ext=Dict(), internal=InfrastructureSystemsInternal(), )
+    MaximumCapacityRequirements(name, available, id, max_capacity_mw, target_year, ext, internal, )
 end
 
 """Get [`MaximumCapacityRequirements`](@ref) `name`."""
@@ -58,8 +54,6 @@ get_name(value::MaximumCapacityRequirements) = value.name
 get_available(value::MaximumCapacityRequirements) = value.available
 """Get [`MaximumCapacityRequirements`](@ref) `id`."""
 get_id(value::MaximumCapacityRequirements) = value.id
-"""Get [`MaximumCapacityRequirements`](@ref) `eligible_resources`."""
-get_eligible_resources(value::MaximumCapacityRequirements) = value.eligible_resources
 """Get [`MaximumCapacityRequirements`](@ref) `max_capacity_mw`."""
 get_max_capacity_mw(value::MaximumCapacityRequirements) = value.max_capacity_mw
 """Get [`MaximumCapacityRequirements`](@ref) `target_year`."""
@@ -75,8 +69,6 @@ set_name!(value::MaximumCapacityRequirements, val) = value.name = val
 set_available!(value::MaximumCapacityRequirements, val) = value.available = val
 """Set [`MaximumCapacityRequirements`](@ref) `id`."""
 set_id!(value::MaximumCapacityRequirements, val) = value.id = val
-"""Set [`MaximumCapacityRequirements`](@ref) `eligible_resources`."""
-set_eligible_resources!(value::MaximumCapacityRequirements, val) = value.eligible_resources = val
 """Set [`MaximumCapacityRequirements`](@ref) `max_capacity_mw`."""
 set_max_capacity_mw!(value::MaximumCapacityRequirements, val) = value.max_capacity_mw = val
 """Set [`MaximumCapacityRequirements`](@ref) `target_year`."""

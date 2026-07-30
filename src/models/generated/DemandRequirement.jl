@@ -17,6 +17,7 @@ This file is auto-generated. Do not edit.
         value_of_lost_load::Float64
         unserved_demand_curve::PSY.ValueCurve
         region::Vector{RegionTopology}
+        requirements::Vector{Requirement}
         ext::Dict
         internal::InfrastructureSystemsInternal
     end
@@ -32,9 +33,10 @@ Demand requirements for a region.
 - `new_construction_year::Int64`: (default: `2020`) The year in which the new demand requirement will be installed. Should only be used for new demand requirements.
 - `growth_rate::Float64`: (default: `0.0`) The annual growth rate of the demand requirement, used to scale present-day loads into future projections. Should only be used for conforming loads
 - `conformity::PSY.LoadConformity`: (default: `PSY.LoadConformity.UNDEFINED`) Indicator of how the demand requirement should conform to the load profile of existing technologies in the system. Should only be used for new demand requirements.
-- `value_of_lost_load::Float64`: Value of unserved load (USD/MWh)
+- `value_of_lost_load::Float64`: (default: `1e8`) Value of unserved load (USD/MWh)
 - `unserved_demand_curve::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Piecewise curve to scale the cost of unserved load based on the value of lost load
 - `region::Vector{RegionTopology}`: (default: `Vector()`) Zone or node where the demand requirement is located
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 """
@@ -61,6 +63,8 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
     unserved_demand_curve::PSY.ValueCurve
     "Zone or node where the demand requirement is located"
     region::Vector{RegionTopology}
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Optional dictionary to provide additional data"
     ext::Dict
     "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
@@ -68,8 +72,8 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
 end
 
 
-function DemandRequirement{T}(; name, available=true, id, power_systems_type, new_demand_mw=0.0, new_construction_year=2020, growth_rate=0.0, conformity=PSY.LoadConformity.UNDEFINED, value_of_lost_load, unserved_demand_curve=LinearCurve(0.0), region=Vector(), ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.StaticInjection
-    DemandRequirement{T}(name, available, id, power_systems_type, new_demand_mw, new_construction_year, growth_rate, conformity, value_of_lost_load, unserved_demand_curve, region, ext, internal, )
+function DemandRequirement{T}(; name, available=true, id, power_systems_type, new_demand_mw=0.0, new_construction_year=2020, growth_rate=0.0, conformity=PSY.LoadConformity.UNDEFINED, value_of_lost_load=1e8, unserved_demand_curve=LinearCurve(0.0), region=Vector(), requirements=Vector(), ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.StaticInjection
+    DemandRequirement{T}(name, available, id, power_systems_type, new_demand_mw, new_construction_year, growth_rate, conformity, value_of_lost_load, unserved_demand_curve, region, requirements, ext, internal, )
 end
 
 """Get [`DemandRequirement`](@ref) `name`."""
@@ -98,6 +102,8 @@ get_value_of_lost_load(value::DemandRequirement) = value.value_of_lost_load
 get_unserved_demand_curve(value::DemandRequirement) = value.unserved_demand_curve
 """Get [`DemandRequirement`](@ref) `region`."""
 get_region(value::DemandRequirement) = value.region
+"""Get [`DemandRequirement`](@ref) `requirements`."""
+get_requirements(value::DemandRequirement) = value.requirements
 """Get [`DemandRequirement`](@ref) `ext`."""
 get_ext(value::DemandRequirement) = value.ext
 """Get [`DemandRequirement`](@ref) `internal`."""
@@ -125,6 +131,8 @@ set_value_of_lost_load!(value::DemandRequirement, val) = value.value_of_lost_loa
 set_unserved_demand_curve!(value::DemandRequirement, val) = value.unserved_demand_curve = val
 """Set [`DemandRequirement`](@ref) `region`."""
 set_region!(value::DemandRequirement, val) = value.region = val
+"""Set [`DemandRequirement`](@ref) `requirements`."""
+set_requirements!(value::DemandRequirement, val) = value.requirements = val
 """Set [`DemandRequirement`](@ref) `ext`."""
 set_ext!(value::DemandRequirement, val) = value.ext = val
 """Set [`DemandRequirement`](@ref) `internal`."""

@@ -9,7 +9,6 @@ This file is auto-generated. Do not edit.
         name::String
         available::Bool
         id::Int64
-        eligible_resources::Vector{ResourceTechnology}
         min_capacity_mw::Float64
         target_year::Int64
         ext::Dict
@@ -22,7 +21,6 @@ Policy requirement that the total capacity of all technologies in `eligible_tech
 - `name::String`: The requirement name
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `id::Int64`: ID for individual policy
-- `eligible_resources::Vector{ResourceTechnology}`: (default: `Vector{ResourceTechnology}()`) List of resources that contribute to the capacity requirement.
 - `min_capacity_mw::Float64`: (default: `0.0`) Minimum total capacity across all eligible resources (MW)
 - `target_year::Int64`: (default: `2050`) Year in which the capacity requirement will be applied
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
@@ -35,8 +33,6 @@ mutable struct MinimumCapacityRequirements <: Requirement
     available::Bool
     "ID for individual policy"
     id::Int64
-    "List of resources that contribute to the capacity requirement."
-    eligible_resources::Vector{ResourceTechnology}
     "Minimum total capacity across all eligible resources (MW)"
     min_capacity_mw::Float64
     "Year in which the capacity requirement will be applied"
@@ -48,8 +44,8 @@ mutable struct MinimumCapacityRequirements <: Requirement
 end
 
 
-function MinimumCapacityRequirements(; name, available, id, eligible_resources=Vector{ResourceTechnology}(), min_capacity_mw=0.0, target_year=2050, ext=Dict(), internal=InfrastructureSystemsInternal(), )
-    MinimumCapacityRequirements(name, available, id, eligible_resources, min_capacity_mw, target_year, ext, internal, )
+function MinimumCapacityRequirements(; name, available, id, min_capacity_mw=0.0, target_year=2050, ext=Dict(), internal=InfrastructureSystemsInternal(), )
+    MinimumCapacityRequirements(name, available, id, min_capacity_mw, target_year, ext, internal, )
 end
 
 """Get [`MinimumCapacityRequirements`](@ref) `name`."""
@@ -58,8 +54,6 @@ get_name(value::MinimumCapacityRequirements) = value.name
 get_available(value::MinimumCapacityRequirements) = value.available
 """Get [`MinimumCapacityRequirements`](@ref) `id`."""
 get_id(value::MinimumCapacityRequirements) = value.id
-"""Get [`MinimumCapacityRequirements`](@ref) `eligible_resources`."""
-get_eligible_resources(value::MinimumCapacityRequirements) = value.eligible_resources
 """Get [`MinimumCapacityRequirements`](@ref) `min_capacity_mw`."""
 get_min_capacity_mw(value::MinimumCapacityRequirements) = value.min_capacity_mw
 """Get [`MinimumCapacityRequirements`](@ref) `target_year`."""
@@ -75,8 +69,6 @@ set_name!(value::MinimumCapacityRequirements, val) = value.name = val
 set_available!(value::MinimumCapacityRequirements, val) = value.available = val
 """Set [`MinimumCapacityRequirements`](@ref) `id`."""
 set_id!(value::MinimumCapacityRequirements, val) = value.id = val
-"""Set [`MinimumCapacityRequirements`](@ref) `eligible_resources`."""
-set_eligible_resources!(value::MinimumCapacityRequirements, val) = value.eligible_resources = val
 """Set [`MinimumCapacityRequirements`](@ref) `min_capacity_mw`."""
 set_min_capacity_mw!(value::MinimumCapacityRequirements, val) = value.min_capacity_mw = val
 """Set [`MinimumCapacityRequirements`](@ref) `target_year`."""

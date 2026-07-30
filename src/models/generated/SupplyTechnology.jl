@@ -26,6 +26,7 @@ This file is auto-generated. Do not edit.
         time_limits::UpDown
         start_fuel_mmbtu_per_mw::Float64
         lifetime::Int
+        requirements::Vector{Requirement}
         financial_data::TechnologyFinancialData
         ext::Dict
         internal::InfrastructureSystemsInternal
@@ -54,6 +55,7 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `time_limits::UpDown`: (default: `(up=1.0, down=1.0)`) Minimum amount of time a resource has to stay in the committed or shutdown state (hours).
 - `start_fuel_mmbtu_per_mw::Float64`: (default: `0.0`) Startup fuel use per MW of nameplate capacity of each generator (MMBTU/MW per start)
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
@@ -99,6 +101,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
     start_fuel_mmbtu_per_mw::Float64
     "Maximum number of years a technology can be active once installed (years)"
     lifetime::Int
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Struct containing relevant financial information for a technology"
     financial_data::TechnologyFinancialData
     "Optional dictionary to provide additional data"
@@ -108,8 +112,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
 end
 
 
-function SupplyTechnology{T}(; name, power_systems_type, region=Vector(), id, available=True, prime_mover_type=PrimeMovers.OT, fuel=[ThermalFuels.OTHER], co2=Dict(), cofire_start_limits=Dict(), cofire_level_limits=Dict(), capital_costs=LinearCurve(0.0), operation_costs=ThermalGenerationCost(), unit_size=0.0, capacity_limits=(min=0, max=1e8), outage_factor=1.0, min_generation_fraction=0.0, ramp_limits=(up=1.0, down=1.0), time_limits=(up=1.0, down=1.0), start_fuel_mmbtu_per_mw=0.0, lifetime=100, financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
-    SupplyTechnology{T}(name, power_systems_type, region, id, available, prime_mover_type, fuel, co2, cofire_start_limits, cofire_level_limits, capital_costs, operation_costs, unit_size, capacity_limits, outage_factor, min_generation_fraction, ramp_limits, time_limits, start_fuel_mmbtu_per_mw, lifetime, financial_data, ext, internal, )
+function SupplyTechnology{T}(; name, power_systems_type, region=Vector(), id, available=True, prime_mover_type=PrimeMovers.OT, fuel=[ThermalFuels.OTHER], co2=Dict(), cofire_start_limits=Dict(), cofire_level_limits=Dict(), capital_costs=LinearCurve(0.0), operation_costs=ThermalGenerationCost(), unit_size=0.0, capacity_limits=(min=0, max=1e8), outage_factor=1.0, min_generation_fraction=0.0, ramp_limits=(up=1.0, down=1.0), time_limits=(up=1.0, down=1.0), start_fuel_mmbtu_per_mw=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
+    SupplyTechnology{T}(name, power_systems_type, region, id, available, prime_mover_type, fuel, co2, cofire_start_limits, cofire_level_limits, capital_costs, operation_costs, unit_size, capacity_limits, outage_factor, min_generation_fraction, ramp_limits, time_limits, start_fuel_mmbtu_per_mw, lifetime, requirements, financial_data, ext, internal, )
 end
 
 """Get [`SupplyTechnology`](@ref) `name`."""
@@ -176,6 +180,8 @@ get_lifetime(value::SupplyTechnology, units) = InfrastructureSystems._strip_unit
 get_lifetime_unitful(value::SupplyTechnology, units) = get_value(value, Val(:lifetime), Val(:yr), units)
 InfrastructureSystems.display_units_arg(::typeof(get_lifetime), ::Type{SupplyTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_lifetime_unitful), ::Type{SupplyTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`SupplyTechnology`](@ref) `requirements`."""
+get_requirements(value::SupplyTechnology) = value.requirements
 """Get [`SupplyTechnology`](@ref) `financial_data`."""
 get_financial_data(value::SupplyTechnology) = value.financial_data
 """Get [`SupplyTechnology`](@ref) `ext`."""
@@ -223,6 +229,8 @@ set_time_limits!(value::SupplyTechnology, val) = value.time_limits = set_value(v
 set_start_fuel_mmbtu_per_mw!(value::SupplyTechnology, val) = value.start_fuel_mmbtu_per_mw = set_value(value, Val(:start_fuel_mmbtu_per_mw), val, Val(:mmbtu_per_mw))
 """Set [`SupplyTechnology`](@ref) `lifetime`."""
 set_lifetime!(value::SupplyTechnology, val) = value.lifetime = set_value(value, Val(:lifetime), val, Val(:yr))
+"""Set [`SupplyTechnology`](@ref) `requirements`."""
+set_requirements!(value::SupplyTechnology, val) = value.requirements = val
 """Set [`SupplyTechnology`](@ref) `financial_data`."""
 set_financial_data!(value::SupplyTechnology, val) = value.financial_data = val
 """Set [`SupplyTechnology`](@ref) `ext`."""

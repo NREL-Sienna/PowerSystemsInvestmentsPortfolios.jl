@@ -28,6 +28,7 @@ This file is auto-generated. Do not edit.
         efficiency::InOut
         losses::Float64
         lifetime::Int
+        requirements::Vector{Requirement}
         financial_data::TechnologyFinancialData
         ext::Dict
         internal::InfrastructureSystemsInternal
@@ -58,6 +59,7 @@ Candidate storage technology in a region.
 - `efficiency::InOut`: (default: `(in=1, out=1)`) Efficiency of charging storage, fraction of total charge (in) and discharge (out) capacity
 - `losses::Float64`: (default: `0.00`) Self-discharge of storage (fraction of energy stored per hour)
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
@@ -107,6 +109,8 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
     losses::Float64
     "Maximum number of years a technology can be active once installed (years)"
     lifetime::Int
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Struct containing relevant financial information for a technology"
     financial_data::TechnologyFinancialData
     "Optional dictionary to provide additional data"
@@ -116,8 +120,8 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
 end
 
 
-function StorageTechnology{T}(; name, region=Vector(), id, available, power_systems_type, prime_mover_type=PrimeMovers.OT, storage_tech=StorageTech.OTHER_CHEM, capital_costs_energy=LinearCurve(0.0), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), operation_costs=StorageCost(), min_discharge_fraction=0.0, unit_size_charge=nothing, unit_size_discharge=0.0, unit_size_energy=0.0, capacity_limits_charge=nothing, capacity_limits_discharge=(min=0,max=1e8), capacity_limits_energy=(min=0,max=1e8), duration_limits=(min=0,max=1000.0), efficiency=(in=1, out=1), losses=0.00, lifetime=100, financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Storage
-    StorageTechnology{T}(name, region, id, available, power_systems_type, prime_mover_type, storage_tech, capital_costs_energy, capital_costs_charge, capital_costs_discharge, operation_costs, min_discharge_fraction, unit_size_charge, unit_size_discharge, unit_size_energy, capacity_limits_charge, capacity_limits_discharge, capacity_limits_energy, duration_limits, efficiency, losses, lifetime, financial_data, ext, internal, )
+function StorageTechnology{T}(; name, region=Vector(), id, available, power_systems_type, prime_mover_type=PrimeMovers.OT, storage_tech=StorageTech.OTHER_CHEM, capital_costs_energy=LinearCurve(0.0), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), operation_costs=StorageCost(), min_discharge_fraction=0.0, unit_size_charge=nothing, unit_size_discharge=0.0, unit_size_energy=0.0, capacity_limits_charge=nothing, capacity_limits_discharge=(min=0,max=1e8), capacity_limits_energy=(min=0,max=1e8), duration_limits=(min=0,max=1000.0), efficiency=(in=1, out=1), losses=0.00, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Storage
+    StorageTechnology{T}(name, region, id, available, power_systems_type, prime_mover_type, storage_tech, capital_costs_energy, capital_costs_charge, capital_costs_discharge, operation_costs, min_discharge_fraction, unit_size_charge, unit_size_discharge, unit_size_energy, capacity_limits_charge, capacity_limits_discharge, capacity_limits_energy, duration_limits, efficiency, losses, lifetime, requirements, financial_data, ext, internal, )
 end
 
 """Get [`StorageTechnology`](@ref) `name`."""
@@ -200,6 +204,8 @@ get_lifetime(value::StorageTechnology, units) = InfrastructureSystems._strip_uni
 get_lifetime_unitful(value::StorageTechnology, units) = get_value(value, Val(:lifetime), Val(:yr), units)
 InfrastructureSystems.display_units_arg(::typeof(get_lifetime), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_lifetime_unitful), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
+"""Get [`StorageTechnology`](@ref) `requirements`."""
+get_requirements(value::StorageTechnology) = value.requirements
 """Get [`StorageTechnology`](@ref) `financial_data`."""
 get_financial_data(value::StorageTechnology) = value.financial_data
 """Get [`StorageTechnology`](@ref) `ext`."""
@@ -251,6 +257,8 @@ set_efficiency!(value::StorageTechnology, val) = value.efficiency = val
 set_losses!(value::StorageTechnology, val) = value.losses = val
 """Set [`StorageTechnology`](@ref) `lifetime`."""
 set_lifetime!(value::StorageTechnology, val) = value.lifetime = set_value(value, Val(:lifetime), val, Val(:yr))
+"""Set [`StorageTechnology`](@ref) `requirements`."""
+set_requirements!(value::StorageTechnology, val) = value.requirements = val
 """Set [`StorageTechnology`](@ref) `financial_data`."""
 set_financial_data!(value::StorageTechnology, val) = value.financial_data = val
 """Set [`StorageTechnology`](@ref) `ext`."""

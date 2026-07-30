@@ -9,7 +9,6 @@ This file is auto-generated. Do not edit.
         name::String
         available::Bool
         id::Int64
-        eligible_regions::Vector{RegionTopology}
         max_tons_mwh::Float64
         target_year::Int64
         max_mtons::Float64
@@ -23,7 +22,6 @@ Defines limits to the amount of carbon produced. Can be defined either by the to
 - `name::String`: The requirement name
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `id::Int64`: ID for individual policy
-- `eligible_regions::Vector{RegionTopology}`: (default: `Vector{RegionTopology}()`) List of regions that contribute to the carbon cap constraint.
 - `max_tons_mwh::Float64`: (default: `1.0`) Emission limit in terms of rate (tCO2/MWh)
 - `target_year::Int64`: (default: `2050`) Year in which carbon cap will be applied
 - `max_mtons::Float64`: (default: `1e8`) Emission limit in absolute values (million tCO2)
@@ -37,8 +35,6 @@ mutable struct CarbonCaps <: Requirement
     available::Bool
     "ID for individual policy"
     id::Int64
-    "List of regions that contribute to the carbon cap constraint."
-    eligible_regions::Vector{RegionTopology}
     "Emission limit in terms of rate (tCO2/MWh)"
     max_tons_mwh::Float64
     "Year in which carbon cap will be applied"
@@ -52,8 +48,8 @@ mutable struct CarbonCaps <: Requirement
 end
 
 
-function CarbonCaps(; name, available, id, eligible_regions=Vector{RegionTopology}(), max_tons_mwh=1.0, target_year=2050, max_mtons=1e8, ext=Dict(), internal=InfrastructureSystemsInternal(), )
-    CarbonCaps(name, available, id, eligible_regions, max_tons_mwh, target_year, max_mtons, ext, internal, )
+function CarbonCaps(; name, available, id, max_tons_mwh=1.0, target_year=2050, max_mtons=1e8, ext=Dict(), internal=InfrastructureSystemsInternal(), )
+    CarbonCaps(name, available, id, max_tons_mwh, target_year, max_mtons, ext, internal, )
 end
 
 """Get [`CarbonCaps`](@ref) `name`."""
@@ -62,8 +58,6 @@ get_name(value::CarbonCaps) = value.name
 get_available(value::CarbonCaps) = value.available
 """Get [`CarbonCaps`](@ref) `id`."""
 get_id(value::CarbonCaps) = value.id
-"""Get [`CarbonCaps`](@ref) `eligible_regions`."""
-get_eligible_regions(value::CarbonCaps) = value.eligible_regions
 """Get [`CarbonCaps`](@ref) `max_tons_mwh`."""
 get_max_tons_mwh(value::CarbonCaps) = value.max_tons_mwh
 """Get [`CarbonCaps`](@ref) `target_year`."""
@@ -81,8 +75,6 @@ set_name!(value::CarbonCaps, val) = value.name = val
 set_available!(value::CarbonCaps, val) = value.available = val
 """Set [`CarbonCaps`](@ref) `id`."""
 set_id!(value::CarbonCaps, val) = value.id = val
-"""Set [`CarbonCaps`](@ref) `eligible_regions`."""
-set_eligible_regions!(value::CarbonCaps, val) = value.eligible_regions = val
 """Set [`CarbonCaps`](@ref) `max_tons_mwh`."""
 set_max_tons_mwh!(value::CarbonCaps, val) = value.max_tons_mwh = val
 """Set [`CarbonCaps`](@ref) `target_year`."""

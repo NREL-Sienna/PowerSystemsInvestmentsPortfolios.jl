@@ -21,6 +21,7 @@ This file is auto-generated. Do not edit.
         max_demand_advance::Float64
         demand_energy_efficiency::Float64
         shift_variable_cost::PSY.ValueCurve
+        requirements::Vector{Requirement}
         ext::Dict
         internal::InfrastructureSystemsInternal
     end
@@ -43,6 +44,7 @@ Represents demand side technologies such as electric vehicles or hydrogen electr
 - `max_demand_advance::Float64`: (default: `0.0`) Maximum number of hours that demand can be scheduled in advance of the original schedule (hours).
 - `demand_energy_efficiency::Float64`: (default: `0.0`) Energy efficiency associated with time shifting demand. Represents energy losses due to time shifting
 - `shift_variable_cost::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Variable operation and maintenance costs associated with flexible demand deferral/advancement
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 """
@@ -77,6 +79,8 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnolog
     demand_energy_efficiency::Float64
     "Variable operation and maintenance costs associated with flexible demand deferral/advancement"
     shift_variable_cost::PSY.ValueCurve
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Optional dictionary to provide additional data"
     ext::Dict
     "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
@@ -84,8 +88,8 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnolog
 end
 
 
-function DemandSideTechnology{T}(; name, id, available, power_systems_type, region=Vector(), technology_efficiency=0.0, price_per_unit=LinearCurve(0.0), min_power=0.0, peak_demand_mw=0.0, curtailment_cost=LinearCurve(0.0), max_demand_curtailment=0.0, max_demand_delay=0.0, max_demand_advance=0.0, demand_energy_efficiency=0.0, shift_variable_cost=LinearCurve(0.0), ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.StaticInjection
-    DemandSideTechnology{T}(name, id, available, power_systems_type, region, technology_efficiency, price_per_unit, min_power, peak_demand_mw, curtailment_cost, max_demand_curtailment, max_demand_delay, max_demand_advance, demand_energy_efficiency, shift_variable_cost, ext, internal, )
+function DemandSideTechnology{T}(; name, id, available, power_systems_type, region=Vector(), technology_efficiency=0.0, price_per_unit=LinearCurve(0.0), min_power=0.0, peak_demand_mw=0.0, curtailment_cost=LinearCurve(0.0), max_demand_curtailment=0.0, max_demand_delay=0.0, max_demand_advance=0.0, demand_energy_efficiency=0.0, shift_variable_cost=LinearCurve(0.0), requirements=Vector(), ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.StaticInjection
+    DemandSideTechnology{T}(name, id, available, power_systems_type, region, technology_efficiency, price_per_unit, min_power, peak_demand_mw, curtailment_cost, max_demand_curtailment, max_demand_delay, max_demand_advance, demand_energy_efficiency, shift_variable_cost, requirements, ext, internal, )
 end
 
 """Get [`DemandSideTechnology`](@ref) `name`."""
@@ -130,6 +134,8 @@ InfrastructureSystems.display_units_arg(::typeof(get_max_demand_advance_unitful)
 get_demand_energy_efficiency(value::DemandSideTechnology) = value.demand_energy_efficiency
 """Get [`DemandSideTechnology`](@ref) `shift_variable_cost`."""
 get_shift_variable_cost(value::DemandSideTechnology) = value.shift_variable_cost
+"""Get [`DemandSideTechnology`](@ref) `requirements`."""
+get_requirements(value::DemandSideTechnology) = value.requirements
 """Get [`DemandSideTechnology`](@ref) `ext`."""
 get_ext(value::DemandSideTechnology) = value.ext
 """Get [`DemandSideTechnology`](@ref) `internal`."""
@@ -165,6 +171,8 @@ set_max_demand_advance!(value::DemandSideTechnology, val) = value.max_demand_adv
 set_demand_energy_efficiency!(value::DemandSideTechnology, val) = value.demand_energy_efficiency = val
 """Set [`DemandSideTechnology`](@ref) `shift_variable_cost`."""
 set_shift_variable_cost!(value::DemandSideTechnology, val) = value.shift_variable_cost = val
+"""Set [`DemandSideTechnology`](@ref) `requirements`."""
+set_requirements!(value::DemandSideTechnology, val) = value.requirements = val
 """Set [`DemandSideTechnology`](@ref) `ext`."""
 set_ext!(value::DemandSideTechnology, val) = value.ext = val
 """Set [`DemandSideTechnology`](@ref) `internal`."""

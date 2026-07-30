@@ -16,6 +16,7 @@ This file is auto-generated. Do not edit.
         unit_size::Float64
         capital_costs::PSY.ValueCurve
         line_loss::Float64
+        requirements::Vector{Requirement}
         financial_data::TechnologyFinancialData
         ext::Dict
         internal::InfrastructureSystemsInternal
@@ -34,6 +35,7 @@ An aggregated representation of a transmission interchange between two regions.
 - `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line. (USD/MW)
 - `line_loss::Float64`: (default: `0.0`) Transmission loss for each transport technology (%)
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
@@ -59,6 +61,8 @@ mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTech
     capital_costs::PSY.ValueCurve
     "Transmission loss for each transport technology (%)"
     line_loss::Float64
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Struct containing relevant financial information for a technology"
     financial_data::TechnologyFinancialData
     "Optional dictionary to provide additional data"
@@ -68,8 +72,8 @@ mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTech
 end
 
 
-function AggregateTransportTechnology{T}(; name, id, available, power_systems_type, start_region, end_region, capacity_limits=(min=0, max=1e8), unit_size=1, capital_costs=LinearCurve(0.0), line_loss=0.0, financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Device
-    AggregateTransportTechnology{T}(name, id, available, power_systems_type, start_region, end_region, capacity_limits, unit_size, capital_costs, line_loss, financial_data, ext, internal, )
+function AggregateTransportTechnology{T}(; name, id, available, power_systems_type, start_region, end_region, capacity_limits=(min=0, max=1e8), unit_size=1, capital_costs=LinearCurve(0.0), line_loss=0.0, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Device
+    AggregateTransportTechnology{T}(name, id, available, power_systems_type, start_region, end_region, capacity_limits, unit_size, capital_costs, line_loss, requirements, financial_data, ext, internal, )
 end
 
 """Get [`AggregateTransportTechnology`](@ref) `name`."""
@@ -100,6 +104,8 @@ InfrastructureSystems.display_units_arg(::typeof(get_unit_size_unitful), ::Type{
 get_capital_costs(value::AggregateTransportTechnology) = value.capital_costs
 """Get [`AggregateTransportTechnology`](@ref) `line_loss`."""
 get_line_loss(value::AggregateTransportTechnology) = value.line_loss
+"""Get [`AggregateTransportTechnology`](@ref) `requirements`."""
+get_requirements(value::AggregateTransportTechnology) = value.requirements
 """Get [`AggregateTransportTechnology`](@ref) `financial_data`."""
 get_financial_data(value::AggregateTransportTechnology) = value.financial_data
 """Get [`AggregateTransportTechnology`](@ref) `ext`."""
@@ -127,6 +133,8 @@ set_unit_size!(value::AggregateTransportTechnology, val) = value.unit_size = set
 set_capital_costs!(value::AggregateTransportTechnology, val) = value.capital_costs = val
 """Set [`AggregateTransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::AggregateTransportTechnology, val) = value.line_loss = val
+"""Set [`AggregateTransportTechnology`](@ref) `requirements`."""
+set_requirements!(value::AggregateTransportTechnology, val) = value.requirements = val
 """Set [`AggregateTransportTechnology`](@ref) `financial_data`."""
 set_financial_data!(value::AggregateTransportTechnology, val) = value.financial_data = val
 """Set [`AggregateTransportTechnology`](@ref) `ext`."""

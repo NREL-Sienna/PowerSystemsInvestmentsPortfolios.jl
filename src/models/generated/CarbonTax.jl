@@ -10,7 +10,6 @@ This file is auto-generated. Do not edit.
         available::Bool
         id::Int64
         target_year::Int64
-        eligible_regions::Vector{RegionTopology}
         tax_dollars_per_ton::Float64
         ext::Dict
         internal::InfrastructureSystemsInternal
@@ -23,7 +22,6 @@ Policy requirement that defines an additional cost penalty per ton of CO2 produc
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `id::Int64`: ID for individual policy
 - `target_year::Int64`: (default: `2050`) Year in which carbon tax will be applied
-- `eligible_regions::Vector{RegionTopology}`: (default: `Vector{RegionTopology}()`) List of regions that contribute to the carbon cap constraint.
 - `tax_dollars_per_ton::Float64`: (default: `0.0`) Cost penalty per ton of CO2 emitted by technologies in the eligible regions during the target year (USD/tCO2)
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
@@ -37,8 +35,6 @@ mutable struct CarbonTax <: Requirement
     id::Int64
     "Year in which carbon tax will be applied"
     target_year::Int64
-    "List of regions that contribute to the carbon cap constraint."
-    eligible_regions::Vector{RegionTopology}
     "Cost penalty per ton of CO2 emitted by technologies in the eligible regions during the target year (USD/tCO2)"
     tax_dollars_per_ton::Float64
     "Optional dictionary to provide additional data"
@@ -48,8 +44,8 @@ mutable struct CarbonTax <: Requirement
 end
 
 
-function CarbonTax(; name, available, id, target_year=2050, eligible_regions=Vector{RegionTopology}(), tax_dollars_per_ton=0.0, ext=Dict(), internal=InfrastructureSystemsInternal(), )
-    CarbonTax(name, available, id, target_year, eligible_regions, tax_dollars_per_ton, ext, internal, )
+function CarbonTax(; name, available, id, target_year=2050, tax_dollars_per_ton=0.0, ext=Dict(), internal=InfrastructureSystemsInternal(), )
+    CarbonTax(name, available, id, target_year, tax_dollars_per_ton, ext, internal, )
 end
 
 """Get [`CarbonTax`](@ref) `name`."""
@@ -60,8 +56,6 @@ get_available(value::CarbonTax) = value.available
 get_id(value::CarbonTax) = value.id
 """Get [`CarbonTax`](@ref) `target_year`."""
 get_target_year(value::CarbonTax) = value.target_year
-"""Get [`CarbonTax`](@ref) `eligible_regions`."""
-get_eligible_regions(value::CarbonTax) = value.eligible_regions
 """Get [`CarbonTax`](@ref) `tax_dollars_per_ton`."""
 get_tax_dollars_per_ton(value::CarbonTax) = value.tax_dollars_per_ton
 """Get [`CarbonTax`](@ref) `ext`."""
@@ -77,8 +71,6 @@ set_available!(value::CarbonTax, val) = value.available = val
 set_id!(value::CarbonTax, val) = value.id = val
 """Set [`CarbonTax`](@ref) `target_year`."""
 set_target_year!(value::CarbonTax, val) = value.target_year = val
-"""Set [`CarbonTax`](@ref) `eligible_regions`."""
-set_eligible_regions!(value::CarbonTax, val) = value.eligible_regions = val
 """Set [`CarbonTax`](@ref) `tax_dollars_per_ton`."""
 set_tax_dollars_per_ton!(value::CarbonTax, val) = value.tax_dollars_per_ton = val
 """Set [`CarbonTax`](@ref) `ext`."""

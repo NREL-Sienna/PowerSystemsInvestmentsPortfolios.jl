@@ -218,6 +218,12 @@
           "conversion_unit": ":yr"
         },
         {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+          "default": "Vector()"
+        },
+        {
           "name": "financial_data",
           "type": "TechnologyFinancialData",
           "description": "Struct containing relevant financial information for a technology"
@@ -614,6 +620,12 @@
           "conversion_unit": ":yr"
         },
         {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+          "default": "Vector()"
+        },
+        {
           "name": "financial_data",
           "type": "TechnologyFinancialData",
           "description": "Struct containing relevant financial information for a technology"
@@ -737,6 +749,12 @@
           "default": "LinearCurve(0.0)"
         },
         {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+          "default": "Vector()"
+        },
+        {
           "name": "ext",
           "type": "Dict",
           "default": "Dict()",
@@ -818,6 +836,12 @@
           "type": "Union{IS.LinearCurve, IS.PiecewiseIncrementalCurve}",
           "description": "Loss model coefficients. It accepts a linear model with a constant loss and a proportional loss rate. All terms are defined as fraction of installed nameplate capacity It also accepts a Piecewise loss, with N segments to specify different proportional losses for different segments.",
           "default": "LinearCurve(0.0)"
+        },
+        {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+          "default": "Vector()"
         },
         {
           "name": "financial_data",
@@ -906,6 +930,12 @@
           "type": "Float64",
           "description": "Transmission loss for each transport technology (%)",
           "default": "0.0"
+        },
+        {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+          "default": "Vector()"
         },
         {
           "name": "financial_data",
@@ -1010,6 +1040,12 @@
           "conversion_unit": ":ohm"
         },
         {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+          "default": "Vector()"
+        },
+        {
           "name": "financial_data",
           "type": "TechnologyFinancialData",
           "description": "Struct containing relevant financial information for a technology"
@@ -1103,6 +1139,12 @@
           "name": "region",
           "type": "Vector{RegionTopology}",
           "description": "Zone or node where the demand requirement is located",
+          "default": "Vector()"
+        },
+        {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
           "default": "Vector()"
         },
         {

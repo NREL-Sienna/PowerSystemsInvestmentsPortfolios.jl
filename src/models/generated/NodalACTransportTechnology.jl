@@ -18,6 +18,7 @@ This file is auto-generated. Do not edit.
         resistance::Float64
         voltage::Float64
         reactance::Float64
+        requirements::Vector{Requirement}
         financial_data::TechnologyFinancialData
         ext::Dict
         internal::InfrastructureSystemsInternal
@@ -38,6 +39,7 @@ Nodal representation of candidate AC transmission lines between two regions.
 - `resistance::Float64`: (default: `1.0`) Technology resistance in Ohms
 - `voltage::Float64`: (default: `230.0`) Voltage rating of transmission line (kV)
 - `reactance::Float64`: (default: `1.0`) Series reactance for a line (ohms)
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
@@ -67,6 +69,8 @@ mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechno
     voltage::Float64
     "Series reactance for a line (ohms)"
     reactance::Float64
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Struct containing relevant financial information for a technology"
     financial_data::TechnologyFinancialData
     "Optional dictionary to provide additional data"
@@ -76,8 +80,8 @@ mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechno
 end
 
 
-function NodalACTransportTechnology{T}(; name, id, available, power_systems_type, start_node, end_node, capacity_limits=(min=0, max=1e8), unit_size=1.0, capital_costs=LinearCurve(0.0), resistance=1.0, voltage=230.0, reactance=1.0, financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Device
-    NodalACTransportTechnology{T}(name, id, available, power_systems_type, start_node, end_node, capacity_limits, unit_size, capital_costs, resistance, voltage, reactance, financial_data, ext, internal, )
+function NodalACTransportTechnology{T}(; name, id, available, power_systems_type, start_node, end_node, capacity_limits=(min=0, max=1e8), unit_size=1.0, capital_costs=LinearCurve(0.0), resistance=1.0, voltage=230.0, reactance=1.0, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Device
+    NodalACTransportTechnology{T}(name, id, available, power_systems_type, start_node, end_node, capacity_limits, unit_size, capital_costs, resistance, voltage, reactance, requirements, financial_data, ext, internal, )
 end
 
 """Get [`NodalACTransportTechnology`](@ref) `name`."""
@@ -116,6 +120,8 @@ get_reactance(value::NodalACTransportTechnology, units) = InfrastructureSystems.
 get_reactance_unitful(value::NodalACTransportTechnology, units) = get_value(value, Val(:reactance), Val(:ohm), units)
 InfrastructureSystems.display_units_arg(::typeof(get_reactance), ::Type{NodalACTransportTechnology{T}}) where {T <: PSY.Device} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_reactance_unitful), ::Type{NodalACTransportTechnology{T}}) where {T <: PSY.Device} = InfrastructureSystems.NU
+"""Get [`NodalACTransportTechnology`](@ref) `requirements`."""
+get_requirements(value::NodalACTransportTechnology) = value.requirements
 """Get [`NodalACTransportTechnology`](@ref) `financial_data`."""
 get_financial_data(value::NodalACTransportTechnology) = value.financial_data
 """Get [`NodalACTransportTechnology`](@ref) `ext`."""
@@ -147,6 +153,8 @@ set_resistance!(value::NodalACTransportTechnology, val) = value.resistance = set
 set_voltage!(value::NodalACTransportTechnology, val) = value.voltage = set_value(value, Val(:voltage), val, Val(:kv))
 """Set [`NodalACTransportTechnology`](@ref) `reactance`."""
 set_reactance!(value::NodalACTransportTechnology, val) = value.reactance = set_value(value, Val(:reactance), val, Val(:ohm))
+"""Set [`NodalACTransportTechnology`](@ref) `requirements`."""
+set_requirements!(value::NodalACTransportTechnology, val) = value.requirements = val
 """Set [`NodalACTransportTechnology`](@ref) `financial_data`."""
 set_financial_data!(value::NodalACTransportTechnology, val) = value.financial_data = val
 """Set [`NodalACTransportTechnology`](@ref) `ext`."""

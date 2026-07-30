@@ -10,8 +10,6 @@ This file is auto-generated. Do not edit.
         id::Int64
         available::Bool
         target_year::Int64
-        eligible_regions::Vector{RegionTopology}
-        eligible_resources::Vector{ResourceTechnology}
         generation_fraction_requirement::Float64
         ext::Dict
         internal::InfrastructureSystemsInternal
@@ -24,8 +22,6 @@ Policy requirement that the total generation of `eligible_technologies` must be 
 - `id::Int64`: ID for individual policy
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `target_year::Int64`: (default: `2050`) Year in which the energy share requirement will be applied
-- `eligible_regions::Vector{RegionTopology}`: (default: `Vector{RegionTopology}()`) List of regions where the EnergyShareRequirement will be applied.
-- `eligible_resources::Vector{ResourceTechnology}`: (default: `Vector{ResourceTechnology}()`) List of ResourceTechnologies that are eligible to meet the energy share requirement.
 - `generation_fraction_requirement::Float64`: (default: `0.0`) Fraction of total annual demand across all eligible zones that needs to be met by eligible resources.
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
@@ -39,10 +35,6 @@ mutable struct EnergyShareRequirements <: Requirement
     available::Bool
     "Year in which the energy share requirement will be applied"
     target_year::Int64
-    "List of regions where the EnergyShareRequirement will be applied."
-    eligible_regions::Vector{RegionTopology}
-    "List of ResourceTechnologies that are eligible to meet the energy share requirement."
-    eligible_resources::Vector{ResourceTechnology}
     "Fraction of total annual demand across all eligible zones that needs to be met by eligible resources."
     generation_fraction_requirement::Float64
     "Optional dictionary to provide additional data"
@@ -52,8 +44,8 @@ mutable struct EnergyShareRequirements <: Requirement
 end
 
 
-function EnergyShareRequirements(; name, id, available, target_year=2050, eligible_regions=Vector{RegionTopology}(), eligible_resources=Vector{ResourceTechnology}(), generation_fraction_requirement=0.0, ext=Dict(), internal=InfrastructureSystemsInternal(), )
-    EnergyShareRequirements(name, id, available, target_year, eligible_regions, eligible_resources, generation_fraction_requirement, ext, internal, )
+function EnergyShareRequirements(; name, id, available, target_year=2050, generation_fraction_requirement=0.0, ext=Dict(), internal=InfrastructureSystemsInternal(), )
+    EnergyShareRequirements(name, id, available, target_year, generation_fraction_requirement, ext, internal, )
 end
 
 """Get [`EnergyShareRequirements`](@ref) `name`."""
@@ -64,10 +56,6 @@ get_id(value::EnergyShareRequirements) = value.id
 get_available(value::EnergyShareRequirements) = value.available
 """Get [`EnergyShareRequirements`](@ref) `target_year`."""
 get_target_year(value::EnergyShareRequirements) = value.target_year
-"""Get [`EnergyShareRequirements`](@ref) `eligible_regions`."""
-get_eligible_regions(value::EnergyShareRequirements) = value.eligible_regions
-"""Get [`EnergyShareRequirements`](@ref) `eligible_resources`."""
-get_eligible_resources(value::EnergyShareRequirements) = value.eligible_resources
 """Get [`EnergyShareRequirements`](@ref) `generation_fraction_requirement`."""
 get_generation_fraction_requirement(value::EnergyShareRequirements) = value.generation_fraction_requirement
 """Get [`EnergyShareRequirements`](@ref) `ext`."""
@@ -83,10 +71,6 @@ set_id!(value::EnergyShareRequirements, val) = value.id = val
 set_available!(value::EnergyShareRequirements, val) = value.available = val
 """Set [`EnergyShareRequirements`](@ref) `target_year`."""
 set_target_year!(value::EnergyShareRequirements, val) = value.target_year = val
-"""Set [`EnergyShareRequirements`](@ref) `eligible_regions`."""
-set_eligible_regions!(value::EnergyShareRequirements, val) = value.eligible_regions = val
-"""Set [`EnergyShareRequirements`](@ref) `eligible_resources`."""
-set_eligible_resources!(value::EnergyShareRequirements, val) = value.eligible_resources = val
 """Set [`EnergyShareRequirements`](@ref) `generation_fraction_requirement`."""
 set_generation_fraction_requirement!(value::EnergyShareRequirements, val) = value.generation_fraction_requirement = val
 """Set [`EnergyShareRequirements`](@ref) `ext`."""
