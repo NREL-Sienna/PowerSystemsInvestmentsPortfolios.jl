@@ -13,7 +13,7 @@ docs/CostCurve.md
 docs/DemandRequirement.md
 docs/DemandSideTechnology.md
 docs/EnergyShareRequirements.md
-docs/ExistingCapacity.md
+docs/ExistingDevices.md
 docs/FuelCurve.md
 docs/FuelCurveFuelCost.md
 docs/HourlyMatching.md
@@ -33,6 +33,7 @@ docs/NodalHVDCTransportTechnology.md
 docs/Node.md
 docs/PiecewiseLinearData.md
 docs/PiecewiseStepData.md
+docs/PortfolioFinancialData.md
 docs/ProductionVariableCostCurve.md
 docs/QuadraticFunctionData.md
 docs/RenewableGenerationCost.md
@@ -68,7 +69,7 @@ src/models/model_CostCurve.jl
 src/models/model_DemandRequirement.jl
 src/models/model_DemandSideTechnology.jl
 src/models/model_EnergyShareRequirements.jl
-src/models/model_ExistingCapacity.jl
+src/models/model_ExistingDevices.jl
 src/models/model_FuelCurve.jl
 src/models/model_FuelCurveFuelCost.jl
 src/models/model_HourlyMatching.jl
@@ -88,6 +89,7 @@ src/models/model_NodalHVDCTransportTechnology.jl
 src/models/model_Node.jl
 src/models/model_PiecewiseLinearData.jl
 src/models/model_PiecewiseStepData.jl
+src/models/model_PortfolioFinancialData.jl
 src/models/model_ProductionVariableCostCurve.jl
 src/models/model_QuadraticFunctionData.jl
 src/models/model_RenewableGenerationCost.jl

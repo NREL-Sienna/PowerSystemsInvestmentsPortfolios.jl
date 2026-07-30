@@ -889,7 +889,7 @@ function add_generation_units!(
                 co2=Dict(fuel => 0.0),
             )
             add_technology!(portfolio, technology)
-            existing = ExistingCapacity(; existing_technologies=[rec.name])
+            existing = ExistingDevices(; existing_devices=[rec.name])
             add_supplemental_attribute!(portfolio, technology, existing)
 
             set_capacity_limits!(
@@ -1012,7 +1012,7 @@ function add_storage_units!(
             capacity_limits_energy=(min=0, max=component_attr["storage_capacity"]),
         )
         add_technology!(portfolio, storage)
-        existing = ExistingCapacity(; existing_technologies=[rec.name])
+        existing = ExistingDevices(; existing_devices=[rec.name])
         add_supplemental_attribute!(portfolio, storage, existing)
     end
 end
@@ -1049,7 +1049,7 @@ function add_demand_requirements!(
         demand = DemandRequirement{component_type}(;
             name=rec.name,
             id=rec.id,
-            peak_demand_mw=component_attr["active_power"], #TODO: Change to "max_active_power" later when DB is fixed
+            new_demand_mw=component_attr["active_power"], #TODO: Change to "max_active_power" later when DB is fixed
             region=collect(
                 IS.get_components(x -> get_id(x) == area, RegionTopology, portfolio.data),
             ),
@@ -1310,7 +1310,7 @@ function add_system_lines!(
                 capital_costs=LinearCurve(1e5),
             )
             add_technology!(portfolio, transport)
-            existing = ExistingCapacity(; existing_technologies=[rec.name])
+            existing = ExistingDevices(; existing_devices=[rec.name])
             add_supplemental_attribute!(portfolio, transport, existing)
             set_capacity_limits!(
                 transport,
@@ -1356,7 +1356,7 @@ function add_system_lines!(
             )
             id += 1
             add_technology!(portfolio, transport)
-            existing = ExistingCapacity(; existing_technologies=lines)
+            existing = ExistingDevices(; existing_devices=lines)
             add_supplemental_attribute!(portfolio, transport, existing)
         end
     end
@@ -1470,8 +1470,8 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
             if has_supplemental_attributes(tech)
                 #If there are existing capacity associated with a technology
                 #Use an existing unit to extract timeseries
-                existing_names = get_existing_technologies(
-                    only(get_supplemental_attributes(ExistingCapacity, tech)),
+                existing_names = get_existing_devices(
+                    only(get_supplemental_attributes(ExistingDevices, tech)),
                 )
                 unit = first(
                     IS.get_components(

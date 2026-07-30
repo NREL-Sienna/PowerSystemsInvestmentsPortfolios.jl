@@ -41,11 +41,11 @@ import HDF5
 import Tables
 
 export Portfolio
+export Requirement
 export Technology
 export ResourceTechnology
 export DemandTechnology
 export TransmissionTechnology
-export Requirement
 export FinancialData
 export RegionTopology
 export SupplyTechnology
@@ -60,7 +60,7 @@ export RetirementPotential
 export AggregateRetirementPotential
 export RetrofitPotential
 export AggregateRetrofitPotential
-export ExistingCapacity
+export ExistingDevices
 export TopologyMapping
 export CarbonCaps
 export CapacityReserveMargin
@@ -76,6 +76,8 @@ export PortfolioFinancialData
 export InvestmentScheduleResults
 export TechnologyFinancialData
 export TimeMapping
+export InvestmentIntervals
+export OperationalPeriods
 
 export get_name
 export get_description
@@ -87,6 +89,8 @@ export get_available_technologies
 export get_technologies_by_name
 export get_requirement
 export get_requirements
+export get_contributing_technologies
+export has_requirement
 export get_ext
 export get_description
 export get_financial_data
@@ -106,6 +110,7 @@ export set_investment_schedule!
 export set_base_system!
 export add_technology!
 export add_technologies!
+export remove_technology!
 export add_region!
 export add_requirement!
 export add_time_series!
@@ -123,6 +128,9 @@ export from_json
 export MinMax
 export InOut
 export UpDown
+export set_units_base_system!
+
+export show_region_topology_table
 
 export get_existing_capacity_mw
 export get_existing_capacity_mwh
@@ -159,11 +167,11 @@ using .APIServer
 
 include("definitions.jl")
 
+include("models/requirements.jl")
 include("models/technologies.jl")
 include("models/regions.jl")
 include("models/financial_data/financial_data.jl")
 include("models/financial_data/TechnologyFinancialData.jl")
-include("models/requirements.jl")
 include("models/generated/includes.jl")
 include("investment_schedule.jl")
 
@@ -173,6 +181,11 @@ include("serialization.jl")
 include("generate_structs.jl")
 include("db_parser.jl")
 include("utils/print.jl")
+@static if pkgversion(PrettyTables).major == 2
+    include("utils/print_pt_v2.jl")
+else
+    include("utils/print_pt_v3.jl")
+end
 include("utils/getters.jl")
 include("update_system.jl")
 

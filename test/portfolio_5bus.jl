@@ -282,9 +282,8 @@ function build_portfolio()
     retire2 =
         RetirementPotential(eligible_generators=[PSY.get_name(t) for t in thermal[4:5]])
 
-    existing =
-        ExistingCapacity(existing_technologies=[PSY.get_name(t) for t in thermal[1:3]])
-    existing2 = ExistingCapacity(existing_technologies=["Solitude", "dummy name", "Alta"])
+    existing = ExistingDevices(existing_devices=[PSY.get_name(t) for t in thermal[1:3]])
+    existing2 = ExistingDevices(existing_devices=["Solitude", "dummy name", "Alta"])
 
     ########################
     ######## Storage #######
@@ -462,58 +461,30 @@ function build_portfolio()
     ##### Requirements #####
     ########################
 
-    carbon_tax = CarbonTax(
-        name="test_tax",
-        id=14,
-        available=true,
-        target_year=2030,
-        eligible_regions=[z1, z2],
-    )
-    carbon_cap = CarbonCaps(
-        name="test_cap",
-        id=15,
-        available=true,
-        target_year=2030,
-        eligible_regions=[z1, z2],
-    )
+    carbon_tax = CarbonTax(; name="test_tax", id=14, available=true, target_year=2030)
+    carbon_cap = CarbonCaps(; name="test_cap", id=15, available=true, target_year=2030)
 
-    crm = CapacityReserveMargin(
-        name="test_crm",
-        id=16,
-        available=true,
-        target_year=2030,
-        eligible_regions=[z1, z2],
-        eligible_technologies=[t_th],
-    )
+    crm = CapacityReserveMargin(; name="test_crm", id=16, available=true, target_year=2030)
 
-    matching = HourlyMatching(
-        name="hourly_matching",
-        id=17,
-        available=true,
-        eligible_demand=[t_demand_c, t_demand_b],
-        eligible_resources=[t_wind, t_pv1, t_pv2],
-    )
-    max_req = MaximumCapacityRequirements(
+    matching = HourlyMatching(; name="hourly_matching", id=17, available=true)
+    max_req = MaximumCapacityRequirements(;
         name="test_max",
         id=18,
         available=true,
         target_year=2030,
-        eligible_resources=[t_th, t_th_exp],
     )
-    min_req = MinimumCapacityRequirements(
+    min_req = MinimumCapacityRequirements(;
         name="test_min",
         id=19,
         available=true,
         target_year=2030,
-        eligible_resources=[t_wind, t_pv1],
     )
 
-    esr = EnergyShareRequirements(
+    esr = EnergyShareRequirements(;
         name="test_esr",
         id=20,
         available=true,
-        eligible_regions=[z1, z2],
-        eligible_resources=[t_wind, t_pv1, t_pv2],
+        generation_fraction_requirement=0.5,
     )
 
     #####################

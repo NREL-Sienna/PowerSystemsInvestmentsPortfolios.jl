@@ -6,6 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct NodalHVDCTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
+        requirements::Vector{Requirement}
         capital_costs::PSY.ValueCurve
         available::Bool
         name::String
@@ -24,6 +25,7 @@ This file is auto-generated. Do not edit.
 A nodal representation of candidate HVDC transmission lines between two regions.
 
 # Arguments
+- `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Cost of adding new capacity to the nodal transmission line. (USD/MW)
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `name::String`: Name
@@ -35,10 +37,12 @@ A nodal representation of candidate HVDC transmission lines between two regions.
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
 - `unit_size::Float64`: (default: `1`) Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)
-- `line_loss::Union{IS.LinearCurve, IS.PiecewiseIncrementalCurve}`: (default: `1.0`) Loss model coefficients. It accepts a linear model with a constant loss and a proportional loss rate. All terms are defined as fraction of installed nameplate capacity It also accepts a Piecewise loss, with N segments to specify different proportional losses for different segments.
+- `line_loss::Union{IS.LinearCurve, IS.PiecewiseIncrementalCurve}`: (default: `LinearCurve(0.0)`) Loss model coefficients. It accepts a linear model with a constant loss and a proportional loss rate. All terms are defined as fraction of installed nameplate capacity It also accepts a Piecewise loss, with N segments to specify different proportional losses for different segments.
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Allowable capacity for a transmission line (MW)
 """
 mutable struct NodalHVDCTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
+    "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology"
+    requirements::Vector{Requirement}
     "Cost of adding new capacity to the nodal transmission line. (USD/MW)"
     capital_costs::PSY.ValueCurve
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
@@ -68,10 +72,12 @@ mutable struct NodalHVDCTransportTechnology{T <: PSY.Device} <: TransmissionTech
 end
 
 
-function NodalHVDCTransportTechnology{T}(; capital_costs=LinearCurve(0.0), available, name, end_node, id, financial_data, start_node, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), unit_size=1, line_loss=1.0, capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
-    NodalHVDCTransportTechnology{T}(capital_costs, available, name, end_node, id, financial_data, start_node, power_systems_type, internal, ext, unit_size, line_loss, capacity_limits, )
+function NodalHVDCTransportTechnology{T}(; requirements=Vector(), capital_costs=LinearCurve(0.0), available, name, end_node, id, financial_data, start_node, power_systems_type, internal=InfrastructureSystemsInternal(), ext=Dict(), unit_size=1, line_loss=LinearCurve(0.0), capacity_limits=(min=0, max=1e8), ) where T <: PSY.Device
+    NodalHVDCTransportTechnology{T}(requirements, capital_costs, available, name, end_node, id, financial_data, start_node, power_systems_type, internal, ext, unit_size, line_loss, capacity_limits, )
 end
 
+"""Get [`NodalHVDCTransportTechnology`](@ref) `requirements`."""
+get_requirements(value::NodalHVDCTransportTechnology) = value.requirements
 """Get [`NodalHVDCTransportTechnology`](@ref) `capital_costs`."""
 get_capital_costs(value::NodalHVDCTransportTechnology) = value.capital_costs
 """Get [`NodalHVDCTransportTechnology`](@ref) `available`."""
@@ -99,6 +105,8 @@ get_line_loss(value::NodalHVDCTransportTechnology) = value.line_loss
 """Get [`NodalHVDCTransportTechnology`](@ref) `capacity_limits`."""
 get_capacity_limits(value::NodalHVDCTransportTechnology) = value.capacity_limits
 
+"""Set [`NodalHVDCTransportTechnology`](@ref) `requirements`."""
+set_requirements!(value::NodalHVDCTransportTechnology, val) = value.requirements = val
 """Set [`NodalHVDCTransportTechnology`](@ref) `capital_costs`."""
 set_capital_costs!(value::NodalHVDCTransportTechnology, val) = value.capital_costs = val
 """Set [`NodalHVDCTransportTechnology`](@ref) `available`."""

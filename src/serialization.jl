@@ -5,14 +5,8 @@ const MODULE_KEY = "module"
 const PARAMETERS_KEY = "parameters"
 const CONSTRUCT_WITH_PARAMETERS_KEY = "construct_with_parameters"
 const FUNCTION_KEY = "function"
-const _CONTAINS_SHOULD_ENCODE = Union{
-    ResourceTechnology,
-    DemandTechnology,
-    TransmissionTechnology,
-    Requirement,
-    ExistingCapacity,
-    RegionTopology,
-}
+const _CONTAINS_SHOULD_ENCODE =
+    Union{ResourceTechnology, DemandTechnology, TransmissionTechnology, RegionTopology}
 const SYSTEM_KWARGS = Set((
     :internal,
     :runchecks,
@@ -52,6 +46,8 @@ const ENCODED_FIELDS = Set((
     :eligible_demand,
     :eligible_technologies,
     :uuid,
+    :conformity,
+    :requirements,
 ))
 
 """
@@ -99,7 +95,7 @@ function IS.serialize(portfolio::T) where {T <: Portfolio}
     for field in fieldnames(T)
         # Exclude time_series_directory because the portfolio may get deserialized on a
         # different portfolio.
-        if field != :time_series_directory
+        if !(field in [:time_series_directory, :base_system])
             data[string(field)] = serialize(getfield(portfolio, field))
         end
     end
@@ -177,7 +173,6 @@ function IS.serialize(technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
         else
             value = getfield(technology, field)
         end
-
         setfield!(api_struct, field, value)
     end
 
@@ -595,6 +590,9 @@ function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{St
 
     struct_type_string = metadata["type"]
     struct_type = getproperty(PowerSystemsInvestmentsPortfolios, Symbol(struct_type_string))
+    if !hasfield(struct_type, :id)
+        delete!(vals, :id)
+    end
     if haskey(metadata, "parameters")
         parameter_string = metadata["parameters"][1]
         #TODO: Generalize this later. Will all future parameterizing be with PSY structs?
@@ -652,6 +650,8 @@ function serialize_custom_types(field, technology::T) where {T <: _CONTAINS_SHOU
     ]
         comps = getfield(technology, field)
         val = [get_id(c) for c in comps]
+    elseif field == :requirements
+        val = Int64[get_id(r) for r in get_requirements(technology)]
     elseif field in [:start_region, :end_region, :start_node, :end_node]
         val = get_id(getfield(technology, field))
     elseif field in [:prime_mover_type, :storage_tech, :bus_type]
@@ -672,6 +672,8 @@ function serialize_custom_types(field, technology::T) where {T <: _CONTAINS_SHOU
         end
     elseif field == :uuid
         val = string(IS.get_uuid(technology))
+    elseif field == :conformity
+        val = string(get_conformity(technology))
     else
         val = getfield(technology, field)
     end
@@ -684,6 +686,14 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
             IS.get_components(
                 x -> get_id(x) in getfield(base_struct, name),
                 RegionTopology,
+                portfolio.data,
+            ),
+        )
+    elseif name == :requirements
+        val = collect(
+            IS.get_components(
+                x -> get_id(x) in getfield(base_struct, name),
+                Requirement,
                 portfolio.data,
             ),
         )
@@ -775,6 +785,8 @@ function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio
         val = StorageTech(getfield(base_struct, name))
     elseif name == :uuid
         val = Base.UUID(getfield(base_struct, name))
+    elseif name == :conformity
+        val = LoadConformity(getfield(base_struct, name))
     end
 
     return val

@@ -4,10 +4,10 @@
 @doc raw"""StorageTechnology
 
     StorageTechnology(;
-        name=nothing,
-        region=nothing,
         id=nothing,
+        name=nothing,
         available=nothing,
+        region=nothing,
         power_systems_type=nothing,
         min_discharge_fraction=0.0,
         prime_mover_type="OT",
@@ -26,13 +26,14 @@
         efficiency=nothing,
         losses=1.0,
         lifetime=100,
+        requirements=nothing,
         financial_data=nothing,
     )
 
-    - name::String
-    - region::Vector{Int64}
     - id::Int64
+    - name::String
     - available::Bool
+    - region::Vector{Int64}
     - power_systems_type::String
     - min_discharge_fraction::Float64
     - prime_mover_type::String
@@ -51,13 +52,14 @@
     - efficiency::InOut
     - losses::Float64
     - lifetime::Int64
+    - requirements::Vector{Int64}
     - financial_data::TechnologyFinancialData
 """
 Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
-    name::Union{Nothing, String} = nothing
-    region::Union{Nothing, Vector{Int64}} = nothing
     id::Union{Nothing, Int64} = nothing
+    name::Union{Nothing, String} = nothing
     available::Union{Nothing, Bool} = nothing
+    region::Union{Nothing, Vector{Int64}} = nothing
     power_systems_type::Union{Nothing, String} = nothing
     min_discharge_fraction::Union{Nothing, Float64} = 0.0
     prime_mover_type::Union{Nothing, String} = "OT"
@@ -76,13 +78,14 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
     efficiency = nothing # spec type: Union{ Nothing, InOut }
     losses::Union{Nothing, Float64} = 1.0
     lifetime::Union{Nothing, Int64} = 100
+    requirements::Union{Nothing, Vector{Int64}} = nothing
     financial_data = nothing # spec type: Union{ Nothing, TechnologyFinancialData }
 
     function StorageTechnology(
-        name,
-        region,
         id,
+        name,
         available,
+        region,
         power_systems_type,
         min_discharge_fraction,
         prime_mover_type,
@@ -101,13 +104,14 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
         efficiency,
         losses,
         lifetime,
+        requirements,
         financial_data,
     )
         o = new(
-            name,
-            region,
             id,
+            name,
             available,
+            region,
             power_systems_type,
             min_discharge_fraction,
             prime_mover_type,
@@ -126,6 +130,7 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
             efficiency,
             losses,
             lifetime,
+            requirements,
             financial_data,
         )
         OpenAPI.validate_properties(o)
@@ -134,10 +139,10 @@ Base.@kwdef mutable struct StorageTechnology <: OpenAPI.APIModel
 end # type StorageTechnology
 
 const _property_types_StorageTechnology = Dict{Symbol, String}(
-    Symbol("name") => "String",
-    Symbol("region") => "Vector{Int64}",
     Symbol("id") => "Int64",
+    Symbol("name") => "String",
     Symbol("available") => "Bool",
+    Symbol("region") => "Vector{Int64}",
     Symbol("power_systems_type") => "String",
     Symbol("min_discharge_fraction") => "Float64",
     Symbol("prime_mover_type") => "String",
@@ -156,23 +161,37 @@ const _property_types_StorageTechnology = Dict{Symbol, String}(
     Symbol("efficiency") => "InOut",
     Symbol("losses") => "Float64",
     Symbol("lifetime") => "Int64",
+    Symbol("requirements") => "Vector{Int64}",
     Symbol("financial_data") => "TechnologyFinancialData",
 )
 OpenAPI.property_type(::Type{StorageTechnology}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_StorageTechnology[name]))}
 
 function OpenAPI.check_required(o::StorageTechnology)
+    o.id === nothing && (return false)
     o.name === nothing && (return false)
     o.available === nothing && (return false)
+    o.region === nothing && (return false)
     o.power_systems_type === nothing && (return false)
+    o.storage_tech === nothing && (return false)
+    o.capital_costs_energy === nothing && (return false)
+    o.capital_costs_charge === nothing && (return false)
+    o.capital_costs_discharge === nothing && (return false)
+    o.operation_costs === nothing && (return false)
+    o.capacity_limits_charge === nothing && (return false)
+    o.capacity_limits_discharge === nothing && (return false)
+    o.capacity_limits_energy === nothing && (return false)
+    o.duration_limits === nothing && (return false)
+    o.efficiency === nothing && (return false)
+    o.financial_data === nothing && (return false)
     true
 end
 
 function OpenAPI.validate_properties(o::StorageTechnology)
-    OpenAPI.validate_property(StorageTechnology, Symbol("name"), o.name)
-    OpenAPI.validate_property(StorageTechnology, Symbol("region"), o.region)
     OpenAPI.validate_property(StorageTechnology, Symbol("id"), o.id)
+    OpenAPI.validate_property(StorageTechnology, Symbol("name"), o.name)
     OpenAPI.validate_property(StorageTechnology, Symbol("available"), o.available)
+    OpenAPI.validate_property(StorageTechnology, Symbol("region"), o.region)
     OpenAPI.validate_property(
         StorageTechnology,
         Symbol("power_systems_type"),
@@ -247,6 +266,7 @@ function OpenAPI.validate_properties(o::StorageTechnology)
     OpenAPI.validate_property(StorageTechnology, Symbol("efficiency"), o.efficiency)
     OpenAPI.validate_property(StorageTechnology, Symbol("losses"), o.losses)
     OpenAPI.validate_property(StorageTechnology, Symbol("lifetime"), o.lifetime)
+    OpenAPI.validate_property(StorageTechnology, Symbol("requirements"), o.requirements)
     OpenAPI.validate_property(StorageTechnology, Symbol("financial_data"), o.financial_data)
 end
 

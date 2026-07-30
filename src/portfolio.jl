@@ -716,7 +716,7 @@ Remove the time series data for a component and time series type.
 function remove_time_series!(
     portfolio::Portfolio,
     ::Type{T},
-    component::PSY.Component,
+    component::Technology,
     name::String,
 ) where {T <: PSY.TimeSeriesData}
     return IS.remove_time_series!(portfolio.data, T, component, name)
@@ -731,22 +731,6 @@ function remove_time_series!(
 ) where {T <: PSY.TimeSeriesData}
     return IS.remove_time_series!(portfolio.data, T)
 end
-
-#=
-
-"""
-Check system consistency and validity.
-"""
-function check(sys::System)
-    buses = get_components(ACBus, sys)
-    slack_bus_check(buses)
-    buscheck(buses)
-    critical_components_check(sys)
-    adequacy_check(sys)
-    return
-end
-
-=#
 
 """
 Remove a technology from the portfolio by its value.
@@ -828,7 +812,6 @@ add_region!(portfolio, zone)
 foreach(x -> add_region!(portfolio, x), Iterators.flatten((buses, generators)))
 ```
 """
-
 function add_region!(
     portfolio::Portfolio,
     zone::T;
@@ -908,6 +891,10 @@ function get_requirements(::Type{T}, portfolio::Portfolio;) where {T <: Requirem
     return IS.get_components(T, portfolio.data)
 end
 
+function get_requirements(portfolio::Portfolio)
+    return get_requirements(Requirement, portfolio)
+end
+
 """
 Get the requirement of type T with name. Returns nothing if no requirement matches. If T is an abstract
 type then the names of requirements across all subtypes of T must be unique.
@@ -921,6 +908,20 @@ function get_requirement(
     name::AbstractString,
 ) where {T <: Requirement}
     return IS.get_component(T, portfolio.data, name)
+end
+
+"""
+Return a vector of devices contributing to the requirement.
+"""
+function get_contributing_technologies(
+    port::Portfolio,
+    requirement::T,
+) where {T <: Requirement}
+    #throw_if_not_attached(requirement, port)
+    return [
+        x for x in get_technologies(supports_requirements, Technology, port) if
+        has_requirement(x, requirement)
+    ]
 end
 
 ###########################################
@@ -952,20 +953,13 @@ function remove_supplemental_attribute!(
 end
 
 """
-Remove the supplemental attribute from the system and all attached components.
-"""
-function remove_supplemental_attribute!(p::Portfolio, attribute::IS.SupplementalAttribute)
-    return IS.remove_supplemental_attribute!(p.data, attribute)
-end
-
-"""
 Remove all supplemental attributes with the given type from the system.
 """
 function remove_supplemental_attributes!(
     ::Type{T},
     p::Portfolio,
 ) where {T <: IS.SupplementalAttribute}
-    return IS.remove_supplemental_attributes!(T, p.data)
+    return IS.remove_supplemental_attributes!(p.data, T)
 end
 
 """
