@@ -7,20 +7,20 @@ Cost representation for renewable generation units
     RenewableGenerationCost(;
         cost_type="RENEWABLE",
         curtailment_cost=nothing,
-        fixed=0.0,
         variable=nothing,
+        fixed=0.0,
     )
 
     - cost_type::String
     - curtailment_cost::CostCurve
-    - fixed::Float64
     - variable::CostCurve
+    - fixed::Float64
 """
 Base.@kwdef mutable struct RenewableGenerationCost <: OpenAPI.APIModel
     cost_type::Union{Nothing, String} = "RENEWABLE"
     curtailment_cost = nothing # spec type: Union{ Nothing, CostCurve }
-    fixed::Union{Nothing, Float64} = 0.0
     variable = nothing # spec type: Union{ Nothing, CostCurve }
+    fixed::Union{Nothing, Float64} = 0.0
 
     function RenewableGenerationCost(cost_type, curtailment_cost, variable, fixed)
         o = new(cost_type, curtailment_cost, variable, fixed)
@@ -32,8 +32,8 @@ end # type RenewableGenerationCost
 const _property_types_RenewableGenerationCost = Dict{Symbol, String}(
     Symbol("cost_type") => "String",
     Symbol("curtailment_cost") => "CostCurve",
-    Symbol("fixed") => "Float64",
     Symbol("variable") => "CostCurve",
+    Symbol("fixed") => "Float64",
 )
 OpenAPI.property_type(::Type{RenewableGenerationCost}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_RenewableGenerationCost[name]))}

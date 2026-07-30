@@ -32,6 +32,7 @@
     - voltage::Float64
     - unit_size::Float64
     - reactance::Float64
+    - requirements::Vector{Int64}
     - financial_data::TechnologyFinancialData
 """
 Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
@@ -47,6 +48,7 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
     voltage::Union{Nothing, Float64} = 0.0
     unit_size::Union{Nothing, Float64} = 0.0
     reactance::Union{Nothing, Float64} = 0.0
+    requirements::Union{Nothing, Vector{Int64}} = nothing
     financial_data = nothing # spec type: Union{ Nothing, TechnologyFinancialData }
 
     function NodalACTransportTechnology(
@@ -83,8 +85,6 @@ Base.@kwdef mutable struct NodalACTransportTechnology <: OpenAPI.APIModel
         )
         OpenAPI.validate_properties(o)
         return o
-        OpenAPI.validate_properties(o)
-        return o
     end
 end # type NodalACTransportTechnology
 
@@ -101,12 +101,14 @@ const _property_types_NodalACTransportTechnology = Dict{Symbol, String}(
     Symbol("voltage") => "Float64",
     Symbol("unit_size") => "Float64",
     Symbol("reactance") => "Float64",
+    Symbol("requirements") => "Vector{Int64}",
     Symbol("financial_data") => "TechnologyFinancialData",
 )
 OpenAPI.property_type(::Type{NodalACTransportTechnology}, name::Symbol) =
     Union{Nothing, eval(Base.Meta.parse(_property_types_NodalACTransportTechnology[name]))}
 
 function OpenAPI.check_required(o::NodalACTransportTechnology)
+    o.id === nothing && (return false)
     o.name === nothing && (return false)
     o.available === nothing && (return false)
     o.power_systems_type === nothing && (return false)
@@ -119,8 +121,8 @@ function OpenAPI.check_required(o::NodalACTransportTechnology)
 end
 
 function OpenAPI.validate_properties(o::NodalACTransportTechnology)
-    OpenAPI.validate_property(NodalACTransportTechnology, Symbol("name"), o.name)
     OpenAPI.validate_property(NodalACTransportTechnology, Symbol("id"), o.id)
+    OpenAPI.validate_property(NodalACTransportTechnology, Symbol("name"), o.name)
     OpenAPI.validate_property(NodalACTransportTechnology, Symbol("available"), o.available)
     OpenAPI.validate_property(
         NodalACTransportTechnology,
@@ -151,6 +153,11 @@ function OpenAPI.validate_properties(o::NodalACTransportTechnology)
     OpenAPI.validate_property(NodalACTransportTechnology, Symbol("voltage"), o.voltage)
     OpenAPI.validate_property(NodalACTransportTechnology, Symbol("unit_size"), o.unit_size)
     OpenAPI.validate_property(NodalACTransportTechnology, Symbol("reactance"), o.reactance)
+    OpenAPI.validate_property(
+        NodalACTransportTechnology,
+        Symbol("requirements"),
+        o.requirements,
+    )
     OpenAPI.validate_property(
         NodalACTransportTechnology,
         Symbol("financial_data"),
