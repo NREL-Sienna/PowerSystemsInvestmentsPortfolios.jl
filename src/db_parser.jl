@@ -1358,6 +1358,7 @@ function add_system_lines!(
             add_technology!(portfolio, transport)
             existing = ExistingDevices(id=id, existing_devices=lines)
             add_supplemental_attribute!(portfolio, transport, existing)
+            id += 1
         end
     end
 end
