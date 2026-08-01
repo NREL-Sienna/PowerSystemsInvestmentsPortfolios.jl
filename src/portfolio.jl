@@ -354,7 +354,7 @@ function add_technology!(
     #    check_for_services_on_addition(portfolio, technology)
     #end
 
-    skip_validation = true #_validate_or_skip!(portfolio, technology, skip_validation)
+    skip_validation = _validate_or_skip!(portfolio, technology, skip_validation)
     _kwargs = Dict(k => v for (k, v) in kwargs if k !== :static_injector)
 
     IS.add_component!(

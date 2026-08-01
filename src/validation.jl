@@ -222,16 +222,28 @@ function validate_technology_with_portfolio(
     return is_valid
 end
 
+function _validate_or_skip!(
+    portfolio::Portfolio,
+    technology::Technology,
+    skip_validation::Bool,
+)
+    if !skip_validation &&
+       !validate_technology_with_portfolio(technology, portfolio)
+        throw(IS.InvalidValue("Invalid value for $(summary(technology))"))
+    end
+    return skip_validation
+end
+
 """
 Check one technology using technology-only and portfolio-aware validation.
 
 Throw [`IS.InvalidValue`](@ref) if the technology is invalid.
 """
 function check_technology(portfolio::Portfolio, technology::Technology)
-    if !validate_technology(technology) ||
-       !validate_technology_with_portfolio(technology, portfolio)
+    if !validate_technology_with_portfolio(technology, portfolio)
         throw(IS.InvalidValue("Invalid value for $(summary(technology))"))
     end
+    IS.check_component(portfolio.data, technology)
     return
 end
 

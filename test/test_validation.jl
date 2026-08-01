@@ -1,4 +1,8 @@
-function make_storage_for_validation(name, duration_limits)
+@testset "Storage technology insertion validation" begin
+    portfolio = Portfolio()
+    attached_region = Zone(; name="attached_region", id=1)
+    add_region!(portfolio, attached_region)
+
     financial_data = TechnologyFinancialData(;
         capital_recovery_period=20,
         technology_base_year=2030,
@@ -7,58 +11,63 @@ function make_storage_for_validation(name, duration_limits)
         return_on_equity=0.12,
         tax_rate=0.21,
     )
-    return StorageTechnology{PSY.EnergyReservoirStorage}(;
-        name,
-        id=1,
+    storage_defaults = (;
         available=true,
-        region=RegionTopology[],
         power_systems_type="EnergyReservoirStorage",
         storage_tech=StorageTech.LIB,
-        duration_limits,
         financial_data,
     )
-end
 
-@testset "Technology validation" begin
-    portfolio = Portfolio()
-    ranged_duration = make_storage_for_validation(
-        "ranged_duration",
-        (min=2.0, max=4.0),
+    valid_storage = StorageTechnology{PSY.EnergyReservoirStorage}(;
+        storage_defaults...,
+        name="valid_storage",
+        id=1,
+        region=RegionTopology[attached_region],
     )
-    fixed_duration = make_storage_for_validation(
-        "fixed_duration",
-        (min=4.0, max=4.0),
-    )
-    reversed_duration = make_storage_for_validation(
-        "reversed_duration",
-        (min=4.0, max=2.0),
-    )
+    add_technology!(portfolio, valid_storage)
+    @test get_technology(typeof(valid_storage), portfolio, "valid_storage") ===
+          valid_storage
 
-    @test validate_technology(ranged_duration)
-    @test validate_technology(fixed_duration)
-    @test validate_technology_with_portfolio(ranged_duration, portfolio)
-    @test IS.validate_struct(ranged_duration)
-
-    @test_logs(
-        (:error, r"Storage duration limits must be in ascending order"),
-        @test !validate_technology(reversed_duration)
+    invalid_duration = StorageTechnology{PSY.EnergyReservoirStorage}(;
+        storage_defaults...,
+        name="invalid_duration",
+        id=2,
+        region=RegionTopology[attached_region],
+        duration_limits=(min=4.0, max=2.0),
     )
     @test_logs(
         (:error, r"Storage duration limits must be in ascending order"),
-        @test !IS.validate_struct(reversed_duration)
+        min_level=Logging.Error,
+        @test_throws(IS.InvalidValue, add_technology!(portfolio, invalid_duration)),
+    )
+    @test isnothing(
+        get_technology(typeof(invalid_duration), portfolio, "invalid_duration"),
     )
 
-    @test isnothing(check_technology(portfolio, ranged_duration))
-    @test isnothing(check_technologies(portfolio, [ranged_duration, fixed_duration]))
-    @test_logs(
-        (:error, r"Storage duration limits must be in ascending order"),
-        @test_throws IS.InvalidValue check_technology(portfolio, reversed_duration)
+    detached_region = Zone(; name="detached_region", id=2)
+    invalid_region = StorageTechnology{PSY.EnergyReservoirStorage}(;
+        storage_defaults...,
+        name="invalid_region",
+        id=3,
+        region=RegionTopology[detached_region],
     )
     @test_logs(
-        (:error, r"Storage duration limits must be in ascending order"),
-        @test_throws IS.InvalidValue check_technologies(
-            portfolio,
-            [ranged_duration, reversed_duration],
-        )
+        (:error, r"region that is not attached to the portfolio"),
+        min_level=Logging.Error,
+        @test_throws(IS.InvalidValue, add_technology!(portfolio, invalid_region)),
     )
+    @test isnothing(
+        get_technology(typeof(invalid_region), portfolio, "invalid_region"),
+    )
+
+    skipped_invalid = StorageTechnology{PSY.EnergyReservoirStorage}(;
+        storage_defaults...,
+        name="skipped_invalid",
+        id=4,
+        region=RegionTopology[attached_region],
+        duration_limits=(min=4.0, max=2.0),
+    )
+    add_technology!(portfolio, skipped_invalid; skip_validation=true)
+    @test get_technology(typeof(skipped_invalid), portfolio, "skipped_invalid") ===
+          skipped_invalid
 end
