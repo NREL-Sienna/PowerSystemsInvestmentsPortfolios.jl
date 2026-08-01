@@ -318,14 +318,6 @@ Set the base system of the portfolio.
 set_base_system!(val::Portfolio, system::PSY.System) = val.base_system = system
 
 """
-Validate a component against System data. Return true if the instance is valid.
-
-Refer to [`validate_technology`](@ref) if the validation logic only requires data contained
-within the instance.
-"""
-validate_component_with_system(technology::Technology, port::Portfolio) = true
-
-"""
 Add a technology to the portfolio.
 
 Throws ArgumentError if the technology's name is already stored for its concrete type.

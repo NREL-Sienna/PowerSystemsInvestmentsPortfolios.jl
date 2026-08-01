@@ -36,6 +36,7 @@ end
 
     @test validate_technology(ranged_duration)
     @test validate_technology(fixed_duration)
+    @test validate_technology_with_portfolio(ranged_duration, portfolio)
     @test IS.validate_struct(ranged_duration)
 
     @test_logs(
