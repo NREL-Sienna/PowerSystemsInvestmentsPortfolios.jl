@@ -72,10 +72,29 @@
           skipped_invalid
 end
 
+@testset "Technology checking" begin
+    port = build_portfolio()
+    supply = first(get_technologies(SupplyTechnology, port))
+    PSIP.set_lifetime!(supply, 0)
+
+    @test_logs(
+        (:error, r"Technology lifetime must be positive"),
+        min_level=Logging.Error,
+        @test_throws(IS.InvalidValue, check_technology(port, supply)),
+    )
+    @test_logs(
+        (:error, r"Technology lifetime must be positive"),
+        min_level=Logging.Error,
+        @test_throws(IS.InvalidValue, check_technologies(port, [supply])),
+    )
+end
+
 @testset "Demand region validation" begin
     port = Portfolio()
     attached_region = Zone(; name="demand_region", id=10)
+    second_region = Zone(; name="second_demand_region", id=11)
     add_region!(port, attached_region)
+    add_region!(port, second_region)
 
     valid_demand = DemandRequirement{PSY.PowerLoad}(;
         available=true,
@@ -83,15 +102,39 @@ end
         id=10,
         power_systems_type="PowerLoad",
         value_of_lost_load=1000.0,
-        region=RegionTopology[attached_region],
+        region=RegionTopology[attached_region, second_region],
     )
     add_technology!(port, valid_demand)
     @test get_technology(typeof(valid_demand), port, "valid_demand") === valid_demand
 
+    duplicate_region_demand = DemandRequirement{PSY.PowerLoad}(;
+        available=true,
+        name="duplicate_region_demand",
+        id=11,
+        power_systems_type="PowerLoad",
+        value_of_lost_load=1000.0,
+        region=RegionTopology[attached_region, attached_region],
+    )
+    @test_logs(
+        (:error, r"Technology contains duplicate region references"),
+        min_level=Logging.Error,
+        @test_throws(
+            IS.InvalidValue,
+            add_technology!(port, duplicate_region_demand),
+        ),
+    )
+    @test isnothing(
+        get_technology(
+            typeof(duplicate_region_demand),
+            port,
+            "duplicate_region_demand",
+        ),
+    )
+
     invalid_demand = DemandRequirement{PSY.PowerLoad}(;
         available=true,
         name="invalid_demand",
-        id=11,
+        id=12,
         power_systems_type="PowerLoad",
         value_of_lost_load=1000.0,
         region=RegionTopology[],
