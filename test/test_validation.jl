@@ -1,7 +1,7 @@
-@testset "Storage technology insertion validation" begin
-    portfolio = Portfolio()
+@testset "Storage validation" begin
+    port = Portfolio()
     attached_region = Zone(; name="attached_region", id=1)
-    add_region!(portfolio, attached_region)
+    add_region!(port, attached_region)
 
     financial_data = TechnologyFinancialData(;
         capital_recovery_period=20,
@@ -24,8 +24,8 @@
         id=1,
         region=RegionTopology[attached_region],
     )
-    add_technology!(portfolio, valid_storage)
-    @test get_technology(typeof(valid_storage), portfolio, "valid_storage") ===
+    add_technology!(port, valid_storage)
+    @test get_technology(typeof(valid_storage), port, "valid_storage") ===
           valid_storage
 
     invalid_duration = StorageTechnology{PSY.EnergyReservoirStorage}(;
@@ -38,10 +38,10 @@
     @test_logs(
         (:error, r"Storage duration limits must be in ascending order"),
         min_level=Logging.Error,
-        @test_throws(IS.InvalidValue, add_technology!(portfolio, invalid_duration)),
+        @test_throws(IS.InvalidValue, add_technology!(port, invalid_duration)),
     )
     @test isnothing(
-        get_technology(typeof(invalid_duration), portfolio, "invalid_duration"),
+        get_technology(typeof(invalid_duration), port, "invalid_duration"),
     )
 
     detached_region = Zone(; name="detached_region", id=2)
@@ -54,10 +54,10 @@
     @test_logs(
         (:error, r"region that is not attached to the portfolio"),
         min_level=Logging.Error,
-        @test_throws(IS.InvalidValue, add_technology!(portfolio, invalid_region)),
+        @test_throws(IS.InvalidValue, add_technology!(port, invalid_region)),
     )
     @test isnothing(
-        get_technology(typeof(invalid_region), portfolio, "invalid_region"),
+        get_technology(typeof(invalid_region), port, "invalid_region"),
     )
 
     skipped_invalid = StorageTechnology{PSY.EnergyReservoirStorage}(;
@@ -67,7 +67,149 @@
         region=RegionTopology[attached_region],
         duration_limits=(min=4.0, max=2.0),
     )
-    add_technology!(portfolio, skipped_invalid; skip_validation=true)
-    @test get_technology(typeof(skipped_invalid), portfolio, "skipped_invalid") ===
+    add_technology!(port, skipped_invalid; skip_validation=true)
+    @test get_technology(typeof(skipped_invalid), port, "skipped_invalid") ===
           skipped_invalid
+end
+
+@testset "Demand region validation" begin
+    port = Portfolio()
+    attached_region = Zone(; name="demand_region", id=10)
+    add_region!(port, attached_region)
+
+    valid_demand = DemandRequirement{PSY.PowerLoad}(;
+        available=true,
+        name="valid_demand",
+        id=10,
+        power_systems_type="PowerLoad",
+        value_of_lost_load=1000.0,
+        region=RegionTopology[attached_region],
+    )
+    add_technology!(port, valid_demand)
+    @test get_technology(typeof(valid_demand), port, "valid_demand") === valid_demand
+
+    invalid_demand = DemandRequirement{PSY.PowerLoad}(;
+        available=true,
+        name="invalid_demand",
+        id=11,
+        power_systems_type="PowerLoad",
+        value_of_lost_load=1000.0,
+        region=RegionTopology[],
+    )
+    @test_logs(
+        (:error, r"Technology must reference at least one region"),
+        min_level=Logging.Error,
+        @test_throws(IS.InvalidValue, add_technology!(port, invalid_demand)),
+    )
+    @test isnothing(get_technology(typeof(invalid_demand), port, "invalid_demand"))
+end
+
+@testset "Region ID uniqueness" begin
+    port = Portfolio()
+    attached_region = Zone(; name="attached_region", id=101)
+    add_region!(port, attached_region)
+
+    duplicate_region_id = Node(; name="duplicate_region_id", id=101)
+    @test_logs(
+        (:error, r"Region ID is already attached to the portfolio"),
+        min_level=Logging.Error,
+        @test_throws(IS.InvalidValue, add_region!(port, duplicate_region_id)),
+    )
+    @test isnothing(get_region(Node, port, "duplicate_region_id"))
+end
+
+@testset "Transport validation" begin
+    port = Portfolio()
+    start_zone = Zone(; name="start_zone", id=101)
+    end_zone = Zone(; name="end_zone", id=102)
+    start_node = Node(; name="start_node", id=201)
+    end_node = Node(; name="end_node", id=202)
+    foreach(
+        region -> add_region!(port, region),
+        (start_zone, end_zone, start_node, end_node),
+    )
+
+    financial_data = TechnologyFinancialData(;
+        capital_recovery_period=20,
+        technology_base_year=2030,
+        debt_fraction=0.4,
+        debt_rate=0.05,
+        return_on_equity=0.12,
+        tax_rate=0.21,
+    )
+    transport_defaults = (;
+        available=true,
+        power_systems_type="ACBranch",
+        financial_data,
+    )
+
+    valid_transport = AggregateTransportTechnology{PSY.ACBranch}(;
+        transport_defaults...,
+        name="valid_transport",
+        id=301,
+        start_region=start_zone,
+        end_region=end_zone,
+        capacity_limits=(min=0.0, max=100.0),
+        unit_size=1.0,
+        line_loss=0.05,
+    )
+    add_technology!(port, valid_transport)
+    @test get_technology(typeof(valid_transport), port, "valid_transport") ===
+          valid_transport
+
+    invalid_capacity = AggregateTransportTechnology{PSY.ACBranch}(;
+        transport_defaults...,
+        name="invalid_capacity",
+        id=302,
+        start_region=start_zone,
+        end_region=end_zone,
+        capacity_limits=(min=100.0, max=50.0),
+    )
+    @test_logs(
+        (:error, r"Transport capacity limits must be in ascending order"),
+        min_level=Logging.Error,
+        @test_throws(IS.InvalidValue, add_technology!(port, invalid_capacity)),
+    )
+
+    invalid_unit_size = NodalACTransportTechnology{PSY.ACBranch}(;
+        transport_defaults...,
+        name="invalid_unit_size",
+        id=303,
+        start_node,
+        end_node,
+        unit_size=0.0,
+    )
+    @test_logs(
+        (:error, r"Transport unit size must be finite and positive"),
+        min_level=Logging.Error,
+        @test_throws(IS.InvalidValue, add_technology!(port, invalid_unit_size)),
+    )
+
+    invalid_line_loss = AggregateTransportTechnology{PSY.ACBranch}(;
+        transport_defaults...,
+        name="invalid_line_loss",
+        id=304,
+        start_region=start_zone,
+        end_region=end_zone,
+        line_loss=1.1,
+    )
+    @test_logs(
+        (:error, r"Aggregate transport line loss must be in \[0, 1\]"),
+        min_level=Logging.Error,
+        @test_throws(IS.InvalidValue, add_technology!(port, invalid_line_loss)),
+    )
+
+    detached_node = Node(; name="detached_node", id=203)
+    invalid_endpoint = NodalHVDCTransportTechnology{PSY.ACBranch}(;
+        transport_defaults...,
+        name="invalid_endpoint",
+        id=305,
+        start_node,
+        end_node=detached_node,
+    )
+    @test_logs(
+        (:error, r"Transport endpoint is not attached to the portfolio"),
+        min_level=Logging.Error,
+        @test_throws(IS.InvalidValue, add_technology!(port, invalid_endpoint)),
+    )
 end

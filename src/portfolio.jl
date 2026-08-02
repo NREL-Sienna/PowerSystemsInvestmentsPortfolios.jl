@@ -811,6 +811,7 @@ function add_region!(
     kwargs...,
 ) where {T <: RegionTopology}
     deserialization_in_progress = _is_deserialization_in_progress(portfolio)
+    skip_validation = _validate_or_skip!(portfolio, zone, skip_validation)
     IS.add_component!(
         portfolio.data,
         zone;

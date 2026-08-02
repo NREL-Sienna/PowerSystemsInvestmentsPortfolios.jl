@@ -49,6 +49,18 @@ function _validate_nonnegative_value(technology, value, field_name)
     return true
 end
 
+function _validate_positive_value(technology, value, field_name)
+    if !isfinite(value) || value <= 0.0
+        @error(
+            "$field_name must be finite and positive",
+            technology=get_name(technology),
+            value,
+        )
+        return false
+    end
+    return true
+end
+
 function _validate_fraction(technology, value, field_name; strictly_positive=false)
     lower_bound_is_valid = strictly_positive ? value > 0.0 : value >= 0.0
     if !isfinite(value) || !lower_bound_is_valid || value > 1.0
@@ -63,7 +75,21 @@ function _validate_fraction(technology, value, field_name; strictly_positive=fal
     return true
 end
 
-function validate_technology(technology::StorageTechnology)
+function _validate_lifetime(
+    technology::Union{SupplyTechnology, StorageTechnology},
+)
+    if get_lifetime(technology) <= 0
+        @error(
+            "Technology lifetime must be positive",
+            technology=get_name(technology),
+            lifetime=get_lifetime(technology),
+        )
+        return false
+    end
+    return true
+end
+
+function _validate_storage_fields(technology::StorageTechnology)
     is_valid = true
 
     is_valid &= _validate_nonnegative_limits(
@@ -136,15 +162,42 @@ function validate_technology(technology::StorageTechnology)
         strictly_positive=true,
     )
 
-    if get_lifetime(technology) <= 0
-        @error(
-            "Storage lifetime must be positive",
-            technology=get_name(technology),
-            lifetime=get_lifetime(technology),
-        )
-        is_valid = false
-    end
+    return is_valid
+end
 
+validate_technology(technology::SupplyTechnology) =
+    _validate_lifetime(technology)
+
+function validate_technology(technology::StorageTechnology)
+    is_valid = _validate_lifetime(technology)
+    is_valid &= _validate_storage_fields(technology)
+    return is_valid
+end
+
+function _validate_transmission_fields(technology::TransmissionTechnology)
+    is_valid = _validate_nonnegative_limits(
+        technology,
+        get_capacity_limits(technology),
+        "Transport capacity limits",
+    )
+    is_valid &= _validate_positive_value(
+        technology,
+        get_unit_size(technology),
+        "Transport unit size",
+    )
+    return is_valid
+end
+
+validate_technology(technology::TransmissionTechnology) =
+    _validate_transmission_fields(technology)
+
+function validate_technology(technology::AggregateTransportTechnology)
+    is_valid = _validate_transmission_fields(technology)
+    is_valid &= _validate_fraction(
+        technology,
+        get_line_loss(technology),
+        "Aggregate transport line loss",
+    )
     return is_valid
 end
 
@@ -160,11 +213,34 @@ Return `true` if the technology is valid.
 """
 validate_technology_with_portfolio(::Technology, ::Portfolio) = true
 
-function _validate_unique_references(technology, references, reference_type)
+function _validate_unique_region_id(
+    region::RegionTopology,
+    portfolio::Portfolio,
+)
+    region_id = get_id(region)
+    for stored_region in get_regions(RegionTopology, portfolio)
+        if get_id(stored_region) == region_id
+            @error(
+                "Region ID is already attached to the portfolio",
+                region=summary(region),
+                id=region_id,
+                stored_region=summary(stored_region),
+            )
+            return false
+        end
+    end
+    return true
+end
+
+function _validate_unique_references(
+    technology::Technology,
+    references,
+    reference_type::AbstractString,
+)
     uuids = IS.get_uuid.(references)
     if !allunique(uuids)
         @error(
-            "Storage technology contains duplicate $reference_type references",
+            "Technology contains duplicate $reference_type references",
             technology=get_name(technology),
         )
         return false
@@ -173,16 +249,16 @@ function _validate_unique_references(technology, references, reference_type)
 end
 
 function _validate_attached_references(
-    technology,
+    technology::Technology,
     references,
-    portfolio,
-    reference_type,
+    portfolio::Portfolio,
+    reference_type::AbstractString,
 )
     is_valid = true
     for reference in references
         if !IS.has_component(portfolio.data, reference)
             @error(
-                "Storage technology references a $reference_type that is not attached to the portfolio",
+                "Technology references a $reference_type that is not attached to the portfolio",
                 technology=get_name(technology),
                 reference=summary(reference),
             )
@@ -192,34 +268,71 @@ function _validate_attached_references(
     return is_valid
 end
 
-function validate_technology_with_portfolio(
-    technology::StorageTechnology,
+function _validate_region_references(
+    technology::Union{ResourceTechnology, DemandTechnology},
     portfolio::Portfolio,
 )
-    is_valid = true
     regions = get_region(technology)
     if isempty(regions)
         @error(
-            "Storage technology must reference at least one region",
+            "Technology must reference at least one region",
             technology=get_name(technology),
         )
-        is_valid = false
-    else
-        is_valid &= _validate_unique_references(technology, regions, "region")
-        is_valid &=
-            _validate_attached_references(technology, regions, portfolio, "region")
+        return false
     end
 
-    requirements = get_requirements(technology)
-    is_valid &= _validate_unique_references(technology, requirements, "requirement")
-    is_valid &= _validate_attached_references(
-        technology,
-        requirements,
-        portfolio,
-        "requirement",
-    )
-
+    is_valid = _validate_unique_references(technology, regions, "region")
+    is_valid &=
+        _validate_attached_references(technology, regions, portfolio, "region")
     return is_valid
+end
+
+_get_transport_endpoints(technology::AggregateTransportTechnology) = (
+    get_start_region(technology),
+    get_end_region(technology),
+)
+
+_get_transport_endpoints(technology::NodalACTransportTechnology) = (
+    get_start_node(technology),
+    get_end_node(technology),
+)
+
+_get_transport_endpoints(technology::NodalHVDCTransportTechnology) = (
+    get_start_node(technology),
+    get_end_node(technology),
+)
+
+function _validate_transport_endpoints(
+    technology::TransmissionTechnology,
+    portfolio::Portfolio,
+)
+    start_endpoint, end_endpoint = _get_transport_endpoints(technology)
+    is_valid = true
+    for (endpoint_name, endpoint) in
+        (("start", start_endpoint), ("end", end_endpoint))
+        if !IS.has_component(portfolio.data, endpoint)
+            @error(
+                "Transport endpoint is not attached to the portfolio",
+                technology=get_name(technology),
+                endpoint=endpoint_name,
+                reference=summary(endpoint),
+            )
+            is_valid = false
+        end
+    end
+    return is_valid
+end
+
+validate_technology_with_portfolio(
+    technology::TransmissionTechnology,
+    portfolio::Portfolio,
+) = _validate_transport_endpoints(technology, portfolio)
+
+function validate_technology_with_portfolio(
+    technology::Union{ResourceTechnology, DemandTechnology},
+    portfolio::Portfolio,
+)
+    return _validate_region_references(technology, portfolio)
 end
 
 function _validate_or_skip!(
@@ -230,6 +343,17 @@ function _validate_or_skip!(
     if !skip_validation &&
        !validate_technology_with_portfolio(technology, portfolio)
         throw(IS.InvalidValue("Invalid value for $(summary(technology))"))
+    end
+    return skip_validation
+end
+
+function _validate_or_skip!(
+    portfolio::Portfolio,
+    region::RegionTopology,
+    skip_validation::Bool,
+)
+    if !skip_validation && !_validate_unique_region_id(region, portfolio)
+        throw(IS.InvalidValue("Invalid value for $(summary(region))"))
     end
     return skip_validation
 end
