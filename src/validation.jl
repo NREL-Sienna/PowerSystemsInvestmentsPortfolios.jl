@@ -75,18 +75,6 @@ function _validate_fraction(technology, value, field_name; strictly_positive=fal
     return true
 end
 
-function _validate_lifetime(technology::Union{SupplyTechnology, StorageTechnology})
-    if get_lifetime(technology) <= 0
-        @error(
-            "Technology lifetime must be positive",
-            technology = get_name(technology),
-            lifetime = get_lifetime(technology),
-        )
-        return false
-    end
-    return true
-end
-
 function _validate_storage_fields(technology::StorageTechnology)
     is_valid = true
 
@@ -159,10 +147,15 @@ function _validate_storage_fields(technology::StorageTechnology)
     return is_valid
 end
 
-validate_technology(technology::SupplyTechnology) = _validate_lifetime(technology)
+validate_technology(technology::SupplyTechnology) =
+    _validate_positive_value(technology, get_lifetime(technology), "Technology lifetime")
 
 function validate_technology(technology::StorageTechnology)
-    is_valid = _validate_lifetime(technology)
+    is_valid = _validate_positive_value(
+        technology,
+        get_lifetime(technology),
+        "Technology lifetime",
+    )
     is_valid &= _validate_storage_fields(technology)
     return is_valid
 end

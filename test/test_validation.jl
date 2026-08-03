@@ -73,12 +73,12 @@ end
     PSIP.set_lifetime!(supply, 0)
 
     @test_logs(
-        (:error, r"Technology lifetime must be positive"),
+        (:error, r"Technology lifetime must be finite and positive"),
         min_level = Logging.Error,
         @test_throws(IS.InvalidValue, check_technology(port, supply)),
     )
     @test_logs(
-        (:error, r"Technology lifetime must be positive"),
+        (:error, r"Technology lifetime must be finite and positive"),
         min_level = Logging.Error,
         @test_throws(IS.InvalidValue, check_technologies(port, [supply])),
     )
