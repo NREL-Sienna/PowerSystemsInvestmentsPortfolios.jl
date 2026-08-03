@@ -159,22 +159,13 @@ end
         data = open(path, "r") do io
             JSON3.read(io, Dict)
         end
-        component_type_order = [
-            "StorageTechnology",
-            "EnergyShareRequirements",
-            "Zone",
-        ]
-        type_rank = Dict(
-            type => rank for (rank, type) in enumerate(component_type_order)
-        )
+        component_type_order = ["StorageTechnology", "EnergyShareRequirements", "Zone"]
+        type_rank = Dict(type => rank for (rank, type) in enumerate(component_type_order))
         components = data["data"]["components"]
         sort!(
             components;
-            by=x -> get(
-                type_rank,
-                x["__metadata__"]["type"],
-                length(component_type_order) + 1,
-            ),
+            by=x ->
+                get(type_rank, x["__metadata__"]["type"], length(component_type_order) + 1),
         )
         open(path, "w") do io
             JSON3.pretty(io, data)
