@@ -25,8 +25,7 @@
         region=RegionTopology[attached_region],
     )
     add_technology!(port, valid_storage)
-    @test get_technology(typeof(valid_storage), port, "valid_storage") ===
-          valid_storage
+    @test get_technology(typeof(valid_storage), port, "valid_storage") === valid_storage
 
     invalid_duration = StorageTechnology{PSY.EnergyReservoirStorage}(;
         storage_defaults...,
@@ -37,12 +36,10 @@
     )
     @test_logs(
         (:error, r"Storage duration limits must be in ascending order"),
-        min_level=Logging.Error,
+        min_level = Logging.Error,
         @test_throws(IS.InvalidValue, add_technology!(port, invalid_duration)),
     )
-    @test isnothing(
-        get_technology(typeof(invalid_duration), port, "invalid_duration"),
-    )
+    @test isnothing(get_technology(typeof(invalid_duration), port, "invalid_duration"))
 
     detached_region = Zone(; name="detached_region", id=2)
     invalid_region = StorageTechnology{PSY.EnergyReservoirStorage}(;
@@ -53,12 +50,10 @@
     )
     @test_logs(
         (:error, r"region that is not attached to the portfolio"),
-        min_level=Logging.Error,
+        min_level = Logging.Error,
         @test_throws(IS.InvalidValue, add_technology!(port, invalid_region)),
     )
-    @test isnothing(
-        get_technology(typeof(invalid_region), port, "invalid_region"),
-    )
+    @test isnothing(get_technology(typeof(invalid_region), port, "invalid_region"))
 
     skipped_invalid = StorageTechnology{PSY.EnergyReservoirStorage}(;
         storage_defaults...,
@@ -79,12 +74,12 @@ end
 
     @test_logs(
         (:error, r"Technology lifetime must be positive"),
-        min_level=Logging.Error,
+        min_level = Logging.Error,
         @test_throws(IS.InvalidValue, check_technology(port, supply)),
     )
     @test_logs(
         (:error, r"Technology lifetime must be positive"),
-        min_level=Logging.Error,
+        min_level = Logging.Error,
         @test_throws(IS.InvalidValue, check_technologies(port, [supply])),
     )
 end
@@ -117,18 +112,11 @@ end
     )
     @test_logs(
         (:error, r"Technology contains duplicate region references"),
-        min_level=Logging.Error,
-        @test_throws(
-            IS.InvalidValue,
-            add_technology!(port, duplicate_region_demand),
-        ),
+        min_level = Logging.Error,
+        @test_throws(IS.InvalidValue, add_technology!(port, duplicate_region_demand),),
     )
     @test isnothing(
-        get_technology(
-            typeof(duplicate_region_demand),
-            port,
-            "duplicate_region_demand",
-        ),
+        get_technology(typeof(duplicate_region_demand), port, "duplicate_region_demand"),
     )
 
     invalid_demand = DemandRequirement{PSY.PowerLoad}(;
@@ -141,7 +129,7 @@ end
     )
     @test_logs(
         (:error, r"Technology must reference at least one region"),
-        min_level=Logging.Error,
+        min_level = Logging.Error,
         @test_throws(IS.InvalidValue, add_technology!(port, invalid_demand)),
     )
     @test isnothing(get_technology(typeof(invalid_demand), port, "invalid_demand"))
@@ -155,7 +143,7 @@ end
     duplicate_region_id = Node(; name="duplicate_region_id", id=101)
     @test_logs(
         (:error, r"Region ID is already attached to the portfolio"),
-        min_level=Logging.Error,
+        min_level = Logging.Error,
         @test_throws(IS.InvalidValue, add_region!(port, duplicate_region_id)),
     )
     @test isnothing(get_region(Node, port, "duplicate_region_id"))
@@ -180,11 +168,7 @@ end
         return_on_equity=0.12,
         tax_rate=0.21,
     )
-    transport_defaults = (;
-        available=true,
-        power_systems_type="ACBranch",
-        financial_data,
-    )
+    transport_defaults = (; available=true, power_systems_type="ACBranch", financial_data)
 
     valid_transport = AggregateTransportTechnology{PSY.ACBranch}(;
         transport_defaults...,
@@ -210,7 +194,7 @@ end
     )
     @test_logs(
         (:error, r"Transport capacity limits must be in ascending order"),
-        min_level=Logging.Error,
+        min_level = Logging.Error,
         @test_throws(IS.InvalidValue, add_technology!(port, invalid_capacity)),
     )
 
@@ -224,7 +208,7 @@ end
     )
     @test_logs(
         (:error, r"Transport unit size must be finite and positive"),
-        min_level=Logging.Error,
+        min_level = Logging.Error,
         @test_throws(IS.InvalidValue, add_technology!(port, invalid_unit_size)),
     )
 
@@ -238,7 +222,7 @@ end
     )
     @test_logs(
         (:error, r"Aggregate transport line loss must be in \[0, 1\]"),
-        min_level=Logging.Error,
+        min_level = Logging.Error,
         @test_throws(IS.InvalidValue, add_technology!(port, invalid_line_loss)),
     )
 
@@ -252,7 +236,7 @@ end
     )
     @test_logs(
         (:error, r"Transport endpoint is not attached to the portfolio"),
-        min_level=Logging.Error,
+        min_level = Logging.Error,
         @test_throws(IS.InvalidValue, add_technology!(port, invalid_endpoint)),
     )
 end
