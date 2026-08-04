@@ -137,8 +137,6 @@ export set_units_base_system!
 
 export show_region_topology_table
 
-export show_region_topology_table
-
 export get_existing_capacity_mw
 export get_existing_capacity_mwh
 export is_new
@@ -159,7 +157,7 @@ const IS = InfrastructureSystems
 const MU = IS.Mustache
 
 export USD, MMBtu, ustrip, uconvert, @u_str
-export POWER, IMPEDANCE, ADMITTANCE, VOLTAGE, CURRENT, TIME, ENERGY
+export POWER, IMPEDANCE, ADMITTANCE, VOLTAGE, CURRENT, INV_TIME, OPS_TIME, ENERGY
 export natural_unit, ConversionUnits, FuelCurveUnits
 
 export ThermalFuels
