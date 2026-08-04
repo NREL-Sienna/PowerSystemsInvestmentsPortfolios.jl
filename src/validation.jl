@@ -147,8 +147,29 @@ function _validate_storage_fields(technology::StorageTechnology)
     return is_valid
 end
 
-validate_technology(technology::SupplyTechnology) =
-    _validate_positive_value(technology, get_lifetime(technology), "Technology lifetime")
+function validate_technology(technology::SupplyTechnology)
+    is_valid = _validate_positive_value(
+        technology,
+        get_lifetime(technology),
+        "Technology lifetime",
+    )
+    is_valid &= _validate_nonnegative_limits(
+        technology,
+        get_capacity_limits(technology),
+        "Supply capacity limits",
+    )
+    is_valid &= _validate_nonnegative_value(
+        technology,
+        get_unit_size(technology),
+        "Supply unit size",
+    )
+    is_valid &= _validate_fraction(
+        technology,
+        get_min_generation_fraction(technology),
+        "Supply minimum generation fraction",
+    )
+    return is_valid
+end
 
 function validate_technology(technology::StorageTechnology)
     is_valid = _validate_positive_value(
@@ -157,6 +178,90 @@ function validate_technology(technology::StorageTechnology)
         "Technology lifetime",
     )
     is_valid &= _validate_storage_fields(technology)
+    return is_valid
+end
+
+function _validate_colocated_supply_storage_fields(
+    technology::ColocatedSupplyStorageTechnology,
+)
+    is_valid = _validate_nonnegative_limits(
+        technology,
+        get_capacity_limits_wind(technology),
+        "Colocated wind capacity limits",
+    )
+    is_valid &= _validate_nonnegative_limits(
+        technology,
+        get_capacity_limits_solar(technology),
+        "Colocated solar capacity limits",
+    )
+    is_valid &= _validate_nonnegative_limits(
+        technology,
+        get_capacity_power_limits(technology),
+        "Colocated storage power capacity limits",
+    )
+    is_valid &= _validate_nonnegative_limits(
+        technology,
+        get_capacity_energy_limits(technology),
+        "Colocated storage energy capacity limits",
+    )
+    is_valid &= _validate_nonnegative_limits(
+        technology,
+        get_duration_limits(technology),
+        "Colocated storage duration limits",
+    )
+    is_valid &= _validate_nonnegative_limits(
+        technology,
+        (
+            min=get_min_inverter_capacity(technology),
+            max=get_max_inverter_capacity(technology),
+        ),
+        "Colocated inverter capacity limits",
+    )
+
+    efficiency = get_efficiency_storage(technology)
+    is_valid &= _validate_fraction(
+        technology,
+        efficiency.in,
+        "Colocated storage charging efficiency";
+        strictly_positive=true,
+    )
+    is_valid &= _validate_fraction(
+        technology,
+        efficiency.out,
+        "Colocated storage discharging efficiency";
+        strictly_positive=true,
+    )
+    is_valid &= _validate_fraction(
+        technology,
+        get_inverter_efficiency(technology),
+        "Colocated inverter efficiency";
+        strictly_positive=true,
+    )
+    is_valid &= _validate_fraction(
+        technology,
+        get_losses_storage(technology),
+        "Colocated storage losses",
+    )
+    return is_valid
+end
+
+function validate_technology(technology::ColocatedSupplyStorageTechnology)
+    is_valid = _validate_positive_value(
+        technology,
+        get_lifetime_storage(technology),
+        "Colocated storage lifetime",
+    )
+    is_valid &= _validate_positive_value(
+        technology,
+        get_lifetime_wind(technology),
+        "Colocated wind lifetime",
+    )
+    is_valid &= _validate_positive_value(
+        technology,
+        get_lifetime_solar(technology),
+        "Colocated solar lifetime",
+    )
+    is_valid &= _validate_colocated_supply_storage_fields(technology)
     return is_valid
 end
 

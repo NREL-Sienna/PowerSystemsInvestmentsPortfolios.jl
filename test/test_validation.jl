@@ -70,7 +70,7 @@ end
 @testset "Technology checking" begin
     port = build_portfolio()
     supply = first(get_technologies(SupplyTechnology, port))
-    PSIP.set_lifetime!(supply, 0)
+    set_lifetime!(supply, 0)
 
     @test_logs(
         (:error, r"Technology lifetime must be finite and positive"),
@@ -81,6 +81,83 @@ end
         (:error, r"Technology lifetime must be finite and positive"),
         min_level = Logging.Error,
         @test_throws(IS.InvalidValue, check_technologies(port, [supply])),
+    )
+end
+
+@testset "Supply validation" begin
+    supply = first(get_technologies(SupplyTechnology, build_portfolio()))
+
+    capacity_limits = get_capacity_limits(supply)
+    set_capacity_limits!(supply, (min=-1.0, max=capacity_limits.max))
+    @test_logs(
+        (:error, r"Supply capacity limits must be nonnegative"),
+        min_level = Logging.Error,
+        @test(!validate_technology(supply)),
+    )
+    set_capacity_limits!(supply, capacity_limits)
+
+    unit_size = get_unit_size(supply)
+    set_unit_size!(supply, -1.0)
+    @test_logs(
+        (:error, r"Supply unit size must be finite and nonnegative"),
+        min_level = Logging.Error,
+        @test(!validate_technology(supply)),
+    )
+    set_unit_size!(supply, unit_size)
+
+    min_generation_fraction = get_min_generation_fraction(supply)
+    set_min_generation_fraction!(supply, 1.1)
+    @test_logs(
+        (:error, r"Supply minimum generation fraction must be in \[0, 1\]"),
+        min_level = Logging.Error,
+        @test(!validate_technology(supply)),
+    )
+    set_min_generation_fraction!(supply, min_generation_fraction)
+end
+
+@testset "Colocated supply-storage validation" begin
+    port = Portfolio()
+    attached_region = Zone(; name="colocated_region", id=20)
+    add_region!(port, attached_region)
+
+    financial_data = TechnologyFinancialData(;
+        capital_recovery_period=20,
+        technology_base_year=2030,
+        debt_fraction=0.4,
+        debt_rate=0.05,
+        return_on_equity=0.12,
+        tax_rate=0.21,
+    )
+    colocated = ColocatedSupplyStorageTechnology{PSY.RenewableDispatch}(;
+        name="valid_colocated",
+        id=20,
+        operation_costs_inverter=StorageCost(),
+        financial_data,
+        inverter_efficiency=0.96,
+        power_systems_type="RenewableDispatch",
+        inverter_supply_ratio=1.0,
+        capital_costs_inverter=LinearCurve(0.0),
+        available=true,
+        region=RegionTopology[attached_region],
+    )
+    add_technology!(port, colocated)
+    @test get_technology(typeof(colocated), port, "valid_colocated") === colocated
+
+    duration_limits = get_duration_limits(colocated)
+    set_duration_limits!(colocated, (min=4.0, max=2.0))
+    @test_logs(
+        (:error, r"Colocated storage duration limits must be in ascending order"),
+        min_level = Logging.Error,
+        @test(!validate_technology(colocated)),
+    )
+    set_duration_limits!(colocated, duration_limits)
+
+    set_min_inverter_capacity!(colocated, 2.0)
+    set_max_inverter_capacity!(colocated, 1.0)
+    @test_logs(
+        (:error, r"Colocated inverter capacity limits must be in ascending order"),
+        min_level = Logging.Error,
+        @test(!validate_technology(colocated)),
     )
 end
 
