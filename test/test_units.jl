@@ -108,7 +108,7 @@ demand_req() = DemandRequirement{PSY.PowerLoad}(;
     available=true,
     power_systems_type=string(PSY.PowerLoad),
     new_demand_mw=300.0,
-    value_of_lost_load=1e5,
+    value_of_lost_load=LinearCurve(1e5),
     unserved_demand_curve=LinearCurve(50.0),
 )
 
@@ -129,6 +129,66 @@ retro() = AggregateRetrofitPotential(;
     retrofit_id=1,
     retrofit_potential=150.0,
     retrofit_fraction=0.5,
+)
+
+carbon_caps() = CarbonCaps(;
+    name="ut_carbon_caps",
+    available=true,
+    id=8,
+    max_tons_mwh=2.0,
+    max_mtons=50.0,
+)
+
+carbon_tax() =
+    CarbonTax(; name="ut_carbon_tax", available=true, id=9, tax_dollars_per_ton=50.0)
+
+max_capacity_req() = MaximumCapacityRequirements(;
+    name="ut_max_cap",
+    available=true,
+    id=10,
+    max_capacity_mw=400.0,
+)
+
+min_capacity_req() = MinimumCapacityRequirements(;
+    name="ut_min_cap",
+    available=true,
+    id=11,
+    min_capacity_mw=100.0,
+)
+
+colocated() = ColocatedSupplyStorageTechnology{PSY.ThermalStandard}(;
+    name="ut_colocated",
+    power_systems_type=string(PSY.ThermalStandard),
+    id=12,
+    available=true,
+    financial_data=tech_financials(),
+    capital_costs_solar=LinearCurve(1000.0),
+    capital_costs_wind=LinearCurve(1100.0),
+    capital_costs_energy=LinearCurve(3000.0),
+    capital_costs_power=LinearCurve(1200.0),
+    capital_costs_inverter=LinearCurve(1300.0),
+    operation_costs_solar=ThermalGenerationCost(
+        CostCurve(LinearCurve(5.0)),
+        10.0,
+        0.0,
+        0.0,
+    ),
+    operation_costs_wind=ThermalGenerationCost(CostCurve(LinearCurve(6.0)), 11.0, 0.0, 0.0),
+    operation_costs_energy=StorageCost(; fixed=4.0),
+    operation_costs_power=StorageCost(; fixed=5.0),
+    operation_costs_inverter=StorageCost(; fixed=6.0),
+    capacity_limits_solar=(min=0.0, max=300.0),
+    capacity_limits_wind=(min=0.0, max=400.0),
+    capacity_power_limits=(min=0.0, max=500.0),
+    capacity_energy_limits=(min=0.0, max=2000.0),
+    duration_limits=(min=1.0, max=8.0),
+    max_inverter_capacity=600.0,
+    min_inverter_capacity=50.0,
+    lifetime_solar=25,
+    lifetime_wind=20,
+    lifetime_storage=15,
+    inverter_efficiency=0.95,
+    inverter_supply_ratio=1.2,
 )
 
 # ---------------------------------------------------------------------------
@@ -173,6 +233,29 @@ function check_valuecurve(get, set, nat, alt; prop, ratio)
     @test get_proportional(get(nat)) ≈ prop
 end
 
+# ThermalGenerationCost field: variable (CostCurve) proportional term and the
+# scalar `fixed` term both scale by `ratio`.
+function check_thermal_cost(get, set, nat, alt; var_prop, fixed, ratio)
+    o = get(nat)
+    @test o.variable.value_curve.function_data.proportional_term ≈ var_prop
+    @test o.fixed ≈ fixed
+    o2 = get(alt)
+    @test o2.variable.value_curve.function_data.proportional_term ≈ var_prop * ratio
+    @test o2.fixed ≈ fixed * ratio
+    set(get(alt), alt)              # round trip: feed the alt-unit cost back
+    o3 = get(nat)
+    @test o3.variable.value_curve.function_data.proportional_term ≈ var_prop
+    @test o3.fixed ≈ fixed
+end
+
+# StorageCost field: the scalar `fixed` term scales by `ratio`.
+function check_storage_cost(get, set, nat, alt; fixed, ratio)
+    @test get(nat).fixed ≈ fixed
+    @test get(alt).fixed ≈ fixed * ratio
+    set(get(alt), alt)
+    @test get(nat).fixed ≈ fixed
+end
+
 # ===========================================================================
 # PART 1 — internal conversion engine
 # ===========================================================================
@@ -187,7 +270,10 @@ end
     @test PSIP.natural_unit(PSIP.COST) == USD
     @test PSIP.natural_unit(PSIP.FUEL) == MMBtu
     # Custom composite units added on this branch.
-    @test PSIP.natural_unit(PSIP.EMISSIONS) == tonne / MMBtu
+    @test PSIP.natural_unit(PSIP.EMISSIONS_MASS) == tonne
+    @test PSIP.natural_unit(PSIP.EMISSIONS_COST) == USD / tonne
+    @test PSIP.natural_unit(PSIP.EMISSIONS_FUEL) == tonne / MMBtu
+    @test PSIP.natural_unit(PSIP.EMISSIONS_ENERGY) == tonne / (u"MW" * u"hr")
     @test PSIP.natural_unit(PSIP.RAMPING) == u"MW" / u"minute"
     @test PSIP.natural_unit(PSIP.FUEL_CONSUMPTION_POWER) == MMBtu / u"MW"
 
@@ -210,6 +296,10 @@ end
     @test PSIP._unit_category(Val(:usd_per_mw)) === PSIP.POWER_COST
     @test PSIP._unit_category(Val(:usd_per_mwh)) === PSIP.ENERGY_COST
     @test PSIP._unit_category(Val(:usd_per_mmbtu)) === PSIP.FUEL_COST
+    @test PSIP._unit_category(Val(:t)) === PSIP.EMISSIONS_MASS
+    @test PSIP._unit_category(Val(:usd_per_t)) === PSIP.EMISSIONS_COST
+    @test PSIP._unit_category(Val(:t_per_mmbtu)) === PSIP.EMISSIONS_FUEL
+    @test PSIP._unit_category(Val(:t_per_mwh)) === PSIP.EMISSIONS_ENERGY
 end
 
 @testset "scalar conversions" begin
@@ -661,10 +751,15 @@ end
         ratio=1e-3,
     )
 
-    # KNOWN BUG: value_of_lost_load is a scalar Float64 carrying the `usd_per_mwh`
-    # token, but natural_unit(ENERGY_COST) is a (x_unit,y_unit) NamedTuple, so no
-    # convert_units(::Number, ::NamedTuple, ...) method matches.
-    @test_broken PSIP.get_value_of_lost_load(t, USD / u"MW" * u"hr") ≈ 1e5
+    # value_of_lost_load is now a ValueCurve (usd_per_mwh); bug fixed on this branch.
+    check_valuecurve(
+        u -> PSIP.get_value_of_lost_load(t, u),
+        (v, u) -> PSIP.set_value_of_lost_load!(t, v, u),
+        conversion_unit(u"MW" * u"hr", USD),
+        conversion_unit(u"kW" * u"hr", USD);
+        prop=1e5,
+        ratio=1e-3,
+    )
 end
 
 @testset "DemandSideTechnology getters/setters" begin
@@ -721,9 +816,237 @@ end
 
 @testset "AggregateRetrofitPotential getters/setters" begin
     t = retro()
-    @test_broken PSIP.get_retrofit_potential(t, u"MW") ≈ 150.0
-    @test_broken (PSIP.set_retrofit_potential!(t, 5000.0, u"kW");
-    PSIP.get_retrofit_potential(t, u"MW")) ≈ 5.0
+    # AggregateRetrofitPotential <: SupplementalAttribute; unit-aware dispatch now
+    # covers it via the `_UNIT_AWARE` union (bug fixed on this branch).
+    check_scalar(
+        u -> PSIP.get_retrofit_potential(t, u),
+        (v, u) -> PSIP.set_retrofit_potential!(t, v, u),
+        u"MW",
+        u"kW";
+        base=150.0,
+        ratio=1000.0,
+    )
+end
+
+@testset "CarbonCaps getters/setters" begin
+    t = carbon_caps()
+    # max_mtons (t) — emissions mass
+    check_scalar(
+        u -> PSIP.get_max_mtons(t, u),
+        (v, u) -> PSIP.set_max_mtons!(t, v, u),
+        tonne,
+        u"kg";
+        base=50.0,
+        ratio=1000.0,
+    )
+    # max_tons_mwh (t_per_mwh) — emissions rate per energy
+    check_scalar(
+        u -> PSIP.get_max_tons_mwh(t, u),
+        (v, u) -> PSIP.set_max_tons_mwh!(t, v, u),
+        tonne / (u"MW" * u"hr"),
+        tonne / (u"kW" * u"hr");
+        base=2.0,
+        ratio=1e-3,
+    )
+end
+
+@testset "CarbonTax getters/setters" begin
+    t = carbon_tax()
+    # tax_dollars_per_ton (usd_per_t) — emissions cost
+    check_scalar(
+        u -> PSIP.get_tax_dollars_per_ton(t, u),
+        (v, u) -> PSIP.set_tax_dollars_per_ton!(t, v, u),
+        USD / tonne,
+        USD / u"kg";
+        base=50.0,
+        ratio=1e-3,
+    )
+end
+
+@testset "MaximumCapacityRequirements getters/setters" begin
+    t = max_capacity_req()
+    check_scalar(
+        u -> PSIP.get_max_capacity_mw(t, u),
+        (v, u) -> PSIP.set_max_capacity_mw!(t, v, u),
+        u"MW",
+        u"kW";
+        base=400.0,
+        ratio=1000.0,
+    )
+end
+
+@testset "MinimumCapacityRequirements getters/setters" begin
+    t = min_capacity_req()
+    check_scalar(
+        u -> PSIP.get_min_capacity_mw(t, u),
+        (v, u) -> PSIP.set_min_capacity_mw!(t, v, u),
+        u"MW",
+        u"kW";
+        base=100.0,
+        ratio=1000.0,
+    )
+end
+
+@testset "ColocatedSupplyStorageTechnology getters/setters" begin
+    t = colocated()
+    # --- MinMax power/energy limits ---
+    check_minmax(
+        u -> PSIP.get_capacity_limits_solar(t, u),
+        (v, u) -> PSIP.set_capacity_limits_solar!(t, v, u),
+        u"MW",
+        u"kW";
+        mn=0.0,
+        mx=300.0,
+        ratio=1000.0,
+    )
+    check_minmax(
+        u -> PSIP.get_capacity_limits_wind(t, u),
+        (v, u) -> PSIP.set_capacity_limits_wind!(t, v, u),
+        u"MW",
+        u"kW";
+        mn=0.0,
+        mx=400.0,
+        ratio=1000.0,
+    )
+    check_minmax(
+        u -> PSIP.get_capacity_power_limits(t, u),
+        (v, u) -> PSIP.set_capacity_power_limits!(t, v, u),
+        u"MW",
+        u"kW";
+        mn=0.0,
+        mx=500.0,
+        ratio=1000.0,
+    )
+    check_minmax(
+        u -> PSIP.get_capacity_energy_limits(t, u),
+        (v, u) -> PSIP.set_capacity_energy_limits!(t, v, u),
+        u"MW" * u"hr",
+        u"kW" * u"hr";
+        mn=0.0,
+        mx=2000.0,
+        ratio=1000.0,
+    )
+    check_minmax(
+        u -> PSIP.get_duration_limits(t, u),
+        (v, u) -> PSIP.set_duration_limits!(t, v, u),
+        u"hr",
+        u"minute";
+        mn=1.0,
+        mx=8.0,
+        ratio=60.0,
+    )
+    # --- scalar power (inverter) ---
+    check_scalar(
+        u -> PSIP.get_max_inverter_capacity(t, u),
+        (v, u) -> PSIP.set_max_inverter_capacity!(t, v, u),
+        u"MW",
+        u"kW";
+        base=600.0,
+        ratio=1000.0,
+    )
+    check_scalar(
+        u -> PSIP.get_min_inverter_capacity(t, u),
+        (v, u) -> PSIP.set_min_inverter_capacity!(t, v, u),
+        u"MW",
+        u"kW";
+        base=50.0,
+        ratio=1000.0,
+    )
+    # --- ValueCurve capital costs ---
+    check_valuecurve(
+        u -> PSIP.get_capital_costs_solar(t, u),
+        (v, u) -> PSIP.set_capital_costs_solar!(t, v, u),
+        conversion_unit(u"MW", USD),
+        conversion_unit(u"kW", USD);
+        prop=1000.0,
+        ratio=1e-3,
+    )
+    check_valuecurve(
+        u -> PSIP.get_capital_costs_wind(t, u),
+        (v, u) -> PSIP.set_capital_costs_wind!(t, v, u),
+        conversion_unit(u"MW", USD),
+        conversion_unit(u"kW", USD);
+        prop=1100.0,
+        ratio=1e-3,
+    )
+    check_valuecurve(
+        u -> PSIP.get_capital_costs_power(t, u),
+        (v, u) -> PSIP.set_capital_costs_power!(t, v, u),
+        conversion_unit(u"MW", USD),
+        conversion_unit(u"kW", USD);
+        prop=1200.0,
+        ratio=1e-3,
+    )
+    check_valuecurve(
+        u -> PSIP.get_capital_costs_inverter(t, u),
+        (v, u) -> PSIP.set_capital_costs_inverter!(t, v, u),
+        conversion_unit(u"MW", USD),
+        conversion_unit(u"kW", USD);
+        prop=1300.0,
+        ratio=1e-3,
+    )
+    check_valuecurve(
+        u -> PSIP.get_capital_costs_energy(t, u),
+        (v, u) -> PSIP.set_capital_costs_energy!(t, v, u),
+        conversion_unit(u"MW" * u"hr", USD),
+        conversion_unit(u"kW" * u"hr", USD);
+        prop=3000.0,
+        ratio=1e-3,
+    )
+    # --- OperationalCost: ThermalGenerationCost (solar/wind, usd_per_mwh) ---
+    check_thermal_cost(
+        u -> PSIP.get_operation_costs_solar(t, u),
+        (v, u) -> PSIP.set_operation_costs_solar!(t, v, u),
+        conversion_unit(u"MW" * u"hr", USD),
+        conversion_unit(u"kW" * u"hr", USD);
+        var_prop=5.0,
+        fixed=10.0,
+        ratio=1e-3,
+    )
+    check_thermal_cost(
+        u -> PSIP.get_operation_costs_wind(t, u),
+        (v, u) -> PSIP.set_operation_costs_wind!(t, v, u),
+        conversion_unit(u"MW" * u"hr", USD),
+        conversion_unit(u"kW" * u"hr", USD);
+        var_prop=6.0,
+        fixed=11.0,
+        ratio=1e-3,
+    )
+    # --- OperationalCost: StorageCost (energy/inverter usd_per_mwh, power usd_per_mw) ---
+    check_storage_cost(
+        u -> PSIP.get_operation_costs_energy(t, u),
+        (v, u) -> PSIP.set_operation_costs_energy!(t, v, u),
+        conversion_unit(u"MW" * u"hr", USD),
+        conversion_unit(u"kW" * u"hr", USD);
+        fixed=4.0,
+        ratio=1e-3,
+    )
+    check_storage_cost(
+        u -> PSIP.get_operation_costs_power(t, u),
+        (v, u) -> PSIP.set_operation_costs_power!(t, v, u),
+        conversion_unit(u"MW", USD),
+        conversion_unit(u"kW", USD);
+        fixed=5.0,
+        ratio=1e-3,
+    )
+    check_storage_cost(
+        u -> PSIP.get_operation_costs_inverter(t, u),
+        (v, u) -> PSIP.set_operation_costs_inverter!(t, v, u),
+        conversion_unit(u"MW" * u"hr", USD),
+        conversion_unit(u"kW" * u"hr", USD);
+        fixed=6.0,
+        ratio=1e-3,
+    )
+    # --- lifetimes (yr, Int) ---
+    for (get, set, base) in (
+        (PSIP.get_lifetime_solar, PSIP.set_lifetime_solar!, 25),
+        (PSIP.get_lifetime_wind, PSIP.set_lifetime_wind!, 20),
+        (PSIP.get_lifetime_storage, PSIP.set_lifetime_storage!, 15),
+    )
+        @test get(t, u"yr") == base
+        set(t, base + 5, u"yr")
+        @test get(t, u"yr") == base + 5
+    end
 end
 
 # ===========================================================================

@@ -56,8 +56,12 @@ get_available(value::CarbonTax) = value.available
 get_id(value::CarbonTax) = value.id
 """Get [`CarbonTax`](@ref) `target_year`."""
 get_target_year(value::CarbonTax) = value.target_year
-"""Get [`CarbonTax`](@ref) `tax_dollars_per_ton`."""
-get_tax_dollars_per_ton(value::CarbonTax) = value.tax_dollars_per_ton
+"""Get [`CarbonTax`](@ref) `tax_dollars_per_ton` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_tax_dollars_per_ton_unitful`](@ref)."""
+get_tax_dollars_per_ton(value::CarbonTax, units) = InfrastructureSystems._strip_units(get_value(value, Val(:tax_dollars_per_ton), Val(:usd_per_t), units))
+"""Get [`CarbonTax`](@ref) `tax_dollars_per_ton` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_tax_dollars_per_ton`](@ref)."""
+get_tax_dollars_per_ton_unitful(value::CarbonTax, units) = get_value(value, Val(:tax_dollars_per_ton), Val(:usd_per_t), units)
+InfrastructureSystems.display_units_arg(::typeof(get_tax_dollars_per_ton), ::Type{CarbonTax}) = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_tax_dollars_per_ton_unitful), ::Type{CarbonTax}) = InfrastructureSystems.NU
 """Get [`CarbonTax`](@ref) `ext`."""
 get_ext(value::CarbonTax) = value.ext
 """Get [`CarbonTax`](@ref) `internal`."""
@@ -72,7 +76,7 @@ set_id!(value::CarbonTax, val) = value.id = val
 """Set [`CarbonTax`](@ref) `target_year`."""
 set_target_year!(value::CarbonTax, val) = value.target_year = val
 """Set [`CarbonTax`](@ref) `tax_dollars_per_ton`."""
-set_tax_dollars_per_ton!(value::CarbonTax, val) = value.tax_dollars_per_ton = val
+set_tax_dollars_per_ton!(value::CarbonTax, val, unit) = value.tax_dollars_per_ton = set_value(value, Val(:tax_dollars_per_ton), val, unit, Val(:usd_per_t))
 """Set [`CarbonTax`](@ref) `ext`."""
 set_ext!(value::CarbonTax, val) = value.ext = val
 """Set [`CarbonTax`](@ref) `internal`."""

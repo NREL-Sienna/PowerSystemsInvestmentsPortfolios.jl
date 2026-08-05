@@ -26,7 +26,10 @@ struct CostCategory <: UnitCategory end
 struct FuelCategory <: UnitCategory end
 struct FuelConsumptionEnergyCategory <: UnitCategory end
 struct FuelConsumptionPowerCategory <: UnitCategory end
-struct EmissionsCategory <: UnitCategory end
+struct EmissionsMassCategory <: UnitCategory end
+struct EmissionsCostCategory <: UnitCategory end
+struct EmissionsFuelCategory <: UnitCategory end
+struct EmissionsEnergyCategory <: UnitCategory end
 struct FuelCurveCategory <: UnitCategory end
 struct PowerCostCategory <: UnitCategory end
 struct EnergyCostCategory <: UnitCategory end
@@ -45,7 +48,10 @@ const COST = CostCategory()
 const FUEL = FuelCategory()
 const FUEL_CONSUMPTION_ENERGY = FuelConsumptionEnergyCategory()
 const FUEL_CONSUMPTION_POWER = FuelConsumptionPowerCategory()
-const EMISSIONS = EmissionsCategory()
+const EMISSIONS_MASS = EmissionsMassCategory()
+const EMISSIONS_COST = EmissionsCostCategory()
+const EMISSIONS_FUEL = EmissionsFuelCategory()
+const EMISSIONS_ENERGY = EmissionsEnergyCategory()
 const FUEL_CURVE = FuelCurveCategory()
 const POWER_COST = PowerCostCategory()
 const ENERGY_COST = EnergyCostCategory()
@@ -84,7 +90,10 @@ natural_unit(::EnergyCostCategory) = (x_unit=u"MW" * u"hr", y_unit=USD)
 natural_unit(::FuelCategory) = MMBtu
 natural_unit(::FuelConsumptionEnergyCategory) = (x_unit=u"MW" * u"hr", y_unit=MMBtu)
 natural_unit(::FuelConsumptionPowerCategory) = MMBtu / u"MW"
-natural_unit(::EmissionsCategory) = tonne / MMBtu
+natural_unit(::EmissionsMassCategory) = tonne
+natural_unit(::EmissionsCostCategory) = USD / tonne
+natural_unit(::EmissionsFuelCategory) = tonne / MMBtu
+natural_unit(::EmissionsEnergyCategory) = tonne / (u"MW" * u"hr")
 natural_unit(::FuelCostCategory) = (x_unit=MMBtu, y_unit=USD)
 natural_unit(::FuelCurveCategory) =
     (energy_unit=u"MW" * u"hr", fuel_unit=MMBtu, currency_unit=USD)
@@ -232,6 +241,8 @@ _unit_category(::Val{:mmbtu}) = FUEL
 _unit_category(::Val{:mmbtu_per_mwh}) = FUEL_CONSUMPTION_ENERGY
 _unit_category(::Val{:mmbtu_per_mw}) = FUEL_CONSUMPTION_POWER
 _unit_category(::Val{:fuel_curve}) = FUEL_CURVE
-_unit_category(::Val{:t_per_mmbtu}) = EMISSIONS
+_unit_category(::Val{:t}) = EMISSIONS_MASS
+_unit_category(::Val{:usd_per_t}) = EMISSIONS_COST
+_unit_category(::Val{:t_per_mmbtu}) = EMISSIONS_FUEL
+_unit_category(::Val{:t_per_mwh}) = EMISSIONS_ENERGY
 _unit_category(::Val{:mw_per_min}) = RAMPING
-supports_requirements(::Technology) = true

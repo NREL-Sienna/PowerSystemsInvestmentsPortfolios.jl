@@ -62,7 +62,7 @@ Supply Technology that supports a StorageTechnology co-located with wind and sol
 - `operation_costs_power::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a storage technology
 - `capacity_power_limits::MinMax`: (default: `(min=0,max=1e8)`) allowable installed power capacity for a storage technology (MW)
 - `capacity_energy_limits::MinMax`: (default: `(min=0,max=1e8)`) allowable installed energy capacity for a storage technology (MWh)
-- `duration_limits::MinMax`: (default: `(min=0,max=1000)`) Minimum required durattion for a storage technology (hours)
+- `duration_limits::MinMax`: (default: `(min=0,max=1000)`) Minimum required duration for a storage technology (hours)
 - `efficiency_storage::InOut`: (default: `(in=1, out=1)`) Efficiency of charging storage (fraction of total charge (in) and discharge (out) capacity
 - `losses_storage::Float64`: (default: `0.0`) Power loss (fraction of stored energy per hour)
 - `lifetime_storage::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
@@ -115,7 +115,7 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: ResourceT
     capacity_power_limits::MinMax
     "allowable installed energy capacity for a storage technology (MWh)"
     capacity_energy_limits::MinMax
-    "Minimum required durattion for a storage technology (hours)"
+    "Minimum required duration for a storage technology (hours)"
     duration_limits::MinMax
     "Efficiency of charging storage (fraction of total charge (in) and discharge (out) capacity"
     efficiency_storage::InOut
@@ -158,52 +158,132 @@ get_region(value::ColocatedSupplyStorageTechnology) = value.region
 get_id(value::ColocatedSupplyStorageTechnology) = value.id
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `available`."""
 get_available(value::ColocatedSupplyStorageTechnology) = value.available
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_solar`."""
-get_capital_costs_solar(value::ColocatedSupplyStorageTechnology) = value.capital_costs_solar
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_solar`."""
-get_operation_costs_solar(value::ColocatedSupplyStorageTechnology) = value.operation_costs_solar
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_limits_solar`."""
-get_capacity_limits_solar(value::ColocatedSupplyStorageTechnology) = value.capacity_limits_solar
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_solar`."""
-get_lifetime_solar(value::ColocatedSupplyStorageTechnology) = value.lifetime_solar
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_wind`."""
-get_capital_costs_wind(value::ColocatedSupplyStorageTechnology) = value.capital_costs_wind
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_wind`."""
-get_operation_costs_wind(value::ColocatedSupplyStorageTechnology) = value.operation_costs_wind
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_limits_wind`."""
-get_capacity_limits_wind(value::ColocatedSupplyStorageTechnology) = value.capacity_limits_wind
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_wind`."""
-get_lifetime_wind(value::ColocatedSupplyStorageTechnology) = value.lifetime_wind
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_energy`."""
-get_capital_costs_energy(value::ColocatedSupplyStorageTechnology) = value.capital_costs_energy
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_power`."""
-get_capital_costs_power(value::ColocatedSupplyStorageTechnology) = value.capital_costs_power
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_energy`."""
-get_operation_costs_energy(value::ColocatedSupplyStorageTechnology) = value.operation_costs_energy
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_power`."""
-get_operation_costs_power(value::ColocatedSupplyStorageTechnology) = value.operation_costs_power
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_power_limits`."""
-get_capacity_power_limits(value::ColocatedSupplyStorageTechnology) = value.capacity_power_limits
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_energy_limits`."""
-get_capacity_energy_limits(value::ColocatedSupplyStorageTechnology) = value.capacity_energy_limits
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `duration_limits`."""
-get_duration_limits(value::ColocatedSupplyStorageTechnology) = value.duration_limits
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_solar` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capital_costs_solar_unitful`](@ref)."""
+get_capital_costs_solar(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capital_costs_solar), Val(:usd_per_mw), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_solar` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capital_costs_solar`](@ref)."""
+get_capital_costs_solar_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:capital_costs_solar), Val(:usd_per_mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_solar), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_solar_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_solar` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_operation_costs_solar_unitful`](@ref)."""
+get_operation_costs_solar(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:operation_costs_solar), Val(:usd_per_mwh), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_solar` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_operation_costs_solar`](@ref)."""
+get_operation_costs_solar_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:operation_costs_solar), Val(:usd_per_mwh), units)
+InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_solar), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_solar_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_limits_solar` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capacity_limits_solar_unitful`](@ref)."""
+get_capacity_limits_solar(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capacity_limits_solar), Val(:mw), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_limits_solar` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capacity_limits_solar`](@ref)."""
+get_capacity_limits_solar_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:capacity_limits_solar), Val(:mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capacity_limits_solar), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capacity_limits_solar_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_solar` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_lifetime_solar_unitful`](@ref)."""
+get_lifetime_solar(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:lifetime_solar), Val(:yr), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_solar` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_lifetime_solar`](@ref)."""
+get_lifetime_solar_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:lifetime_solar), Val(:yr), units)
+InfrastructureSystems.display_units_arg(::typeof(get_lifetime_solar), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_lifetime_solar_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_wind` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capital_costs_wind_unitful`](@ref)."""
+get_capital_costs_wind(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capital_costs_wind), Val(:usd_per_mw), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_wind` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capital_costs_wind`](@ref)."""
+get_capital_costs_wind_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:capital_costs_wind), Val(:usd_per_mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_wind), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_wind_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_wind` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_operation_costs_wind_unitful`](@ref)."""
+get_operation_costs_wind(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:operation_costs_wind), Val(:usd_per_mwh), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_wind` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_operation_costs_wind`](@ref)."""
+get_operation_costs_wind_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:operation_costs_wind), Val(:usd_per_mwh), units)
+InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_wind), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_wind_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_limits_wind` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capacity_limits_wind_unitful`](@ref)."""
+get_capacity_limits_wind(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capacity_limits_wind), Val(:mw), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_limits_wind` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capacity_limits_wind`](@ref)."""
+get_capacity_limits_wind_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:capacity_limits_wind), Val(:mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capacity_limits_wind), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capacity_limits_wind_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_wind` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_lifetime_wind_unitful`](@ref)."""
+get_lifetime_wind(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:lifetime_wind), Val(:yr), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_wind` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_lifetime_wind`](@ref)."""
+get_lifetime_wind_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:lifetime_wind), Val(:yr), units)
+InfrastructureSystems.display_units_arg(::typeof(get_lifetime_wind), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_lifetime_wind_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_energy` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capital_costs_energy_unitful`](@ref)."""
+get_capital_costs_energy(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capital_costs_energy), Val(:usd_per_mwh), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_energy` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capital_costs_energy`](@ref)."""
+get_capital_costs_energy_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:capital_costs_energy), Val(:usd_per_mwh), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_energy), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_energy_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_power` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capital_costs_power_unitful`](@ref)."""
+get_capital_costs_power(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capital_costs_power), Val(:usd_per_mw), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_power` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capital_costs_power`](@ref)."""
+get_capital_costs_power_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:capital_costs_power), Val(:usd_per_mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_power), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_power_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_energy` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_operation_costs_energy_unitful`](@ref)."""
+get_operation_costs_energy(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:operation_costs_energy), Val(:usd_per_mwh), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_energy` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_operation_costs_energy`](@ref)."""
+get_operation_costs_energy_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:operation_costs_energy), Val(:usd_per_mwh), units)
+InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_energy), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_energy_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_power` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_operation_costs_power_unitful`](@ref)."""
+get_operation_costs_power(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:operation_costs_power), Val(:usd_per_mw), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_power` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_operation_costs_power`](@ref)."""
+get_operation_costs_power_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:operation_costs_power), Val(:usd_per_mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_power), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_power_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_power_limits` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capacity_power_limits_unitful`](@ref)."""
+get_capacity_power_limits(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capacity_power_limits), Val(:mw), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_power_limits` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capacity_power_limits`](@ref)."""
+get_capacity_power_limits_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:capacity_power_limits), Val(:mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capacity_power_limits), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capacity_power_limits_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_energy_limits` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capacity_energy_limits_unitful`](@ref)."""
+get_capacity_energy_limits(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capacity_energy_limits), Val(:mwh), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_energy_limits` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capacity_energy_limits`](@ref)."""
+get_capacity_energy_limits_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:capacity_energy_limits), Val(:mwh), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capacity_energy_limits), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capacity_energy_limits_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `duration_limits` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_duration_limits_unitful`](@ref)."""
+get_duration_limits(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:duration_limits), Val(:hr), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `duration_limits` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_duration_limits`](@ref)."""
+get_duration_limits_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:duration_limits), Val(:hr), units)
+InfrastructureSystems.display_units_arg(::typeof(get_duration_limits), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_duration_limits_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `efficiency_storage`."""
 get_efficiency_storage(value::ColocatedSupplyStorageTechnology) = value.efficiency_storage
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `losses_storage`."""
 get_losses_storage(value::ColocatedSupplyStorageTechnology) = value.losses_storage
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_storage`."""
-get_lifetime_storage(value::ColocatedSupplyStorageTechnology) = value.lifetime_storage
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_storage` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_lifetime_storage_unitful`](@ref)."""
+get_lifetime_storage(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:lifetime_storage), Val(:yr), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_storage` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_lifetime_storage`](@ref)."""
+get_lifetime_storage_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:lifetime_storage), Val(:yr), units)
+InfrastructureSystems.display_units_arg(::typeof(get_lifetime_storage), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_lifetime_storage_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `financial_data`."""
 get_financial_data(value::ColocatedSupplyStorageTechnology) = value.financial_data
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `max_inverter_capacity`."""
-get_max_inverter_capacity(value::ColocatedSupplyStorageTechnology) = value.max_inverter_capacity
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `min_inverter_capacity`."""
-get_min_inverter_capacity(value::ColocatedSupplyStorageTechnology) = value.min_inverter_capacity
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_inverter`."""
-get_capital_costs_inverter(value::ColocatedSupplyStorageTechnology) = value.capital_costs_inverter
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_inverter`."""
-get_operation_costs_inverter(value::ColocatedSupplyStorageTechnology) = value.operation_costs_inverter
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `max_inverter_capacity` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_max_inverter_capacity_unitful`](@ref)."""
+get_max_inverter_capacity(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:max_inverter_capacity), Val(:mw), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `max_inverter_capacity` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_max_inverter_capacity`](@ref)."""
+get_max_inverter_capacity_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:max_inverter_capacity), Val(:mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_max_inverter_capacity), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_max_inverter_capacity_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `min_inverter_capacity` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_min_inverter_capacity_unitful`](@ref)."""
+get_min_inverter_capacity(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:min_inverter_capacity), Val(:mw), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `min_inverter_capacity` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_min_inverter_capacity`](@ref)."""
+get_min_inverter_capacity_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:min_inverter_capacity), Val(:mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_min_inverter_capacity), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_min_inverter_capacity_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_inverter` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capital_costs_inverter_unitful`](@ref)."""
+get_capital_costs_inverter(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capital_costs_inverter), Val(:usd_per_mw), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_inverter` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capital_costs_inverter`](@ref)."""
+get_capital_costs_inverter_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:capital_costs_inverter), Val(:usd_per_mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_inverter), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_inverter_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_inverter` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_operation_costs_inverter_unitful`](@ref)."""
+get_operation_costs_inverter(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:operation_costs_inverter), Val(:usd_per_mwh), units))
+"""Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_inverter` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_operation_costs_inverter`](@ref)."""
+get_operation_costs_inverter_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:operation_costs_inverter), Val(:usd_per_mwh), units)
+InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_inverter), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_inverter_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `inverter_efficiency`."""
 get_inverter_efficiency(value::ColocatedSupplyStorageTechnology) = value.inverter_efficiency
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `inverter_supply_ratio`."""
@@ -224,51 +304,51 @@ set_id!(value::ColocatedSupplyStorageTechnology, val) = value.id = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `available`."""
 set_available!(value::ColocatedSupplyStorageTechnology, val) = value.available = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_solar`."""
-set_capital_costs_solar!(value::ColocatedSupplyStorageTechnology, val) = value.capital_costs_solar = val
+set_capital_costs_solar!(value::ColocatedSupplyStorageTechnology, val, unit) = value.capital_costs_solar = set_value(value, Val(:capital_costs_solar), val, unit, Val(:usd_per_mw))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_solar`."""
-set_operation_costs_solar!(value::ColocatedSupplyStorageTechnology, val) = value.operation_costs_solar = val
+set_operation_costs_solar!(value::ColocatedSupplyStorageTechnology, val, unit) = value.operation_costs_solar = set_value(value, Val(:operation_costs_solar), val, unit, Val(:usd_per_mwh))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capacity_limits_solar`."""
-set_capacity_limits_solar!(value::ColocatedSupplyStorageTechnology, val) = value.capacity_limits_solar = val
+set_capacity_limits_solar!(value::ColocatedSupplyStorageTechnology, val, unit) = value.capacity_limits_solar = set_value(value, Val(:capacity_limits_solar), val, unit, Val(:mw))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_solar`."""
-set_lifetime_solar!(value::ColocatedSupplyStorageTechnology, val) = value.lifetime_solar = val
+set_lifetime_solar!(value::ColocatedSupplyStorageTechnology, val, unit) = value.lifetime_solar = set_value(value, Val(:lifetime_solar), val, unit, Val(:yr))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_wind`."""
-set_capital_costs_wind!(value::ColocatedSupplyStorageTechnology, val) = value.capital_costs_wind = val
+set_capital_costs_wind!(value::ColocatedSupplyStorageTechnology, val, unit) = value.capital_costs_wind = set_value(value, Val(:capital_costs_wind), val, unit, Val(:usd_per_mw))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_wind`."""
-set_operation_costs_wind!(value::ColocatedSupplyStorageTechnology, val) = value.operation_costs_wind = val
+set_operation_costs_wind!(value::ColocatedSupplyStorageTechnology, val, unit) = value.operation_costs_wind = set_value(value, Val(:operation_costs_wind), val, unit, Val(:usd_per_mwh))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capacity_limits_wind`."""
-set_capacity_limits_wind!(value::ColocatedSupplyStorageTechnology, val) = value.capacity_limits_wind = val
+set_capacity_limits_wind!(value::ColocatedSupplyStorageTechnology, val, unit) = value.capacity_limits_wind = set_value(value, Val(:capacity_limits_wind), val, unit, Val(:mw))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_wind`."""
-set_lifetime_wind!(value::ColocatedSupplyStorageTechnology, val) = value.lifetime_wind = val
+set_lifetime_wind!(value::ColocatedSupplyStorageTechnology, val, unit) = value.lifetime_wind = set_value(value, Val(:lifetime_wind), val, unit, Val(:yr))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_energy`."""
-set_capital_costs_energy!(value::ColocatedSupplyStorageTechnology, val) = value.capital_costs_energy = val
+set_capital_costs_energy!(value::ColocatedSupplyStorageTechnology, val, unit) = value.capital_costs_energy = set_value(value, Val(:capital_costs_energy), val, unit, Val(:usd_per_mwh))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_power`."""
-set_capital_costs_power!(value::ColocatedSupplyStorageTechnology, val) = value.capital_costs_power = val
+set_capital_costs_power!(value::ColocatedSupplyStorageTechnology, val, unit) = value.capital_costs_power = set_value(value, Val(:capital_costs_power), val, unit, Val(:usd_per_mw))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_energy`."""
-set_operation_costs_energy!(value::ColocatedSupplyStorageTechnology, val) = value.operation_costs_energy = val
+set_operation_costs_energy!(value::ColocatedSupplyStorageTechnology, val, unit) = value.operation_costs_energy = set_value(value, Val(:operation_costs_energy), val, unit, Val(:usd_per_mwh))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_power`."""
-set_operation_costs_power!(value::ColocatedSupplyStorageTechnology, val) = value.operation_costs_power = val
+set_operation_costs_power!(value::ColocatedSupplyStorageTechnology, val, unit) = value.operation_costs_power = set_value(value, Val(:operation_costs_power), val, unit, Val(:usd_per_mw))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capacity_power_limits`."""
-set_capacity_power_limits!(value::ColocatedSupplyStorageTechnology, val) = value.capacity_power_limits = val
+set_capacity_power_limits!(value::ColocatedSupplyStorageTechnology, val, unit) = value.capacity_power_limits = set_value(value, Val(:capacity_power_limits), val, unit, Val(:mw))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capacity_energy_limits`."""
-set_capacity_energy_limits!(value::ColocatedSupplyStorageTechnology, val) = value.capacity_energy_limits = val
+set_capacity_energy_limits!(value::ColocatedSupplyStorageTechnology, val, unit) = value.capacity_energy_limits = set_value(value, Val(:capacity_energy_limits), val, unit, Val(:mwh))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `duration_limits`."""
-set_duration_limits!(value::ColocatedSupplyStorageTechnology, val) = value.duration_limits = val
+set_duration_limits!(value::ColocatedSupplyStorageTechnology, val, unit) = value.duration_limits = set_value(value, Val(:duration_limits), val, unit, Val(:hr))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `efficiency_storage`."""
 set_efficiency_storage!(value::ColocatedSupplyStorageTechnology, val) = value.efficiency_storage = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `losses_storage`."""
 set_losses_storage!(value::ColocatedSupplyStorageTechnology, val) = value.losses_storage = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `lifetime_storage`."""
-set_lifetime_storage!(value::ColocatedSupplyStorageTechnology, val) = value.lifetime_storage = val
+set_lifetime_storage!(value::ColocatedSupplyStorageTechnology, val, unit) = value.lifetime_storage = set_value(value, Val(:lifetime_storage), val, unit, Val(:yr))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `financial_data`."""
 set_financial_data!(value::ColocatedSupplyStorageTechnology, val) = value.financial_data = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `max_inverter_capacity`."""
-set_max_inverter_capacity!(value::ColocatedSupplyStorageTechnology, val) = value.max_inverter_capacity = val
+set_max_inverter_capacity!(value::ColocatedSupplyStorageTechnology, val, unit) = value.max_inverter_capacity = set_value(value, Val(:max_inverter_capacity), val, unit, Val(:mw))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `min_inverter_capacity`."""
-set_min_inverter_capacity!(value::ColocatedSupplyStorageTechnology, val) = value.min_inverter_capacity = val
+set_min_inverter_capacity!(value::ColocatedSupplyStorageTechnology, val, unit) = value.min_inverter_capacity = set_value(value, Val(:min_inverter_capacity), val, unit, Val(:mw))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_inverter`."""
-set_capital_costs_inverter!(value::ColocatedSupplyStorageTechnology, val) = value.capital_costs_inverter = val
+set_capital_costs_inverter!(value::ColocatedSupplyStorageTechnology, val, unit) = value.capital_costs_inverter = set_value(value, Val(:capital_costs_inverter), val, unit, Val(:usd_per_mw))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_inverter`."""
-set_operation_costs_inverter!(value::ColocatedSupplyStorageTechnology, val) = value.operation_costs_inverter = val
+set_operation_costs_inverter!(value::ColocatedSupplyStorageTechnology, val, unit) = value.operation_costs_inverter = set_value(value, Val(:operation_costs_inverter), val, unit, Val(:usd_per_mwh))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `inverter_efficiency`."""
 set_inverter_efficiency!(value::ColocatedSupplyStorageTechnology, val) = value.inverter_efficiency = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `inverter_supply_ratio`."""

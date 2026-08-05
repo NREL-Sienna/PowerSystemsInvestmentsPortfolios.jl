@@ -54,8 +54,12 @@ get_name(value::MinimumCapacityRequirements) = value.name
 get_available(value::MinimumCapacityRequirements) = value.available
 """Get [`MinimumCapacityRequirements`](@ref) `id`."""
 get_id(value::MinimumCapacityRequirements) = value.id
-"""Get [`MinimumCapacityRequirements`](@ref) `min_capacity_mw`."""
-get_min_capacity_mw(value::MinimumCapacityRequirements) = value.min_capacity_mw
+"""Get [`MinimumCapacityRequirements`](@ref) `min_capacity_mw` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_min_capacity_mw_unitful`](@ref)."""
+get_min_capacity_mw(value::MinimumCapacityRequirements, units) = InfrastructureSystems._strip_units(get_value(value, Val(:min_capacity_mw), Val(:mw), units))
+"""Get [`MinimumCapacityRequirements`](@ref) `min_capacity_mw` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_min_capacity_mw`](@ref)."""
+get_min_capacity_mw_unitful(value::MinimumCapacityRequirements, units) = get_value(value, Val(:min_capacity_mw), Val(:mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_min_capacity_mw), ::Type{MinimumCapacityRequirements}) = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_min_capacity_mw_unitful), ::Type{MinimumCapacityRequirements}) = InfrastructureSystems.NU
 """Get [`MinimumCapacityRequirements`](@ref) `target_year`."""
 get_target_year(value::MinimumCapacityRequirements) = value.target_year
 """Get [`MinimumCapacityRequirements`](@ref) `ext`."""
@@ -70,7 +74,7 @@ set_available!(value::MinimumCapacityRequirements, val) = value.available = val
 """Set [`MinimumCapacityRequirements`](@ref) `id`."""
 set_id!(value::MinimumCapacityRequirements, val) = value.id = val
 """Set [`MinimumCapacityRequirements`](@ref) `min_capacity_mw`."""
-set_min_capacity_mw!(value::MinimumCapacityRequirements, val) = value.min_capacity_mw = val
+set_min_capacity_mw!(value::MinimumCapacityRequirements, val, unit) = value.min_capacity_mw = set_value(value, Val(:min_capacity_mw), val, unit, Val(:mw))
 """Set [`MinimumCapacityRequirements`](@ref) `target_year`."""
 set_target_year!(value::MinimumCapacityRequirements, val) = value.target_year = val
 """Set [`MinimumCapacityRequirements`](@ref) `ext`."""

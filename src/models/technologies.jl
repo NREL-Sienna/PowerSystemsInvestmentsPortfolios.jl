@@ -25,6 +25,7 @@ get_time_series_container(val::Technology) = val.time_series_container
 get_supplemental_attributes_container(val::Technology) =
     val.supplemental_attributes_container
 supports_time_series(::Technology) = true
+supports_requirements(::Technology) = true
 
 """
 Return true if a specific requirement is attached to the Technology.

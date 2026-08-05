@@ -54,8 +54,12 @@ get_name(value::MaximumCapacityRequirements) = value.name
 get_available(value::MaximumCapacityRequirements) = value.available
 """Get [`MaximumCapacityRequirements`](@ref) `id`."""
 get_id(value::MaximumCapacityRequirements) = value.id
-"""Get [`MaximumCapacityRequirements`](@ref) `max_capacity_mw`."""
-get_max_capacity_mw(value::MaximumCapacityRequirements) = value.max_capacity_mw
+"""Get [`MaximumCapacityRequirements`](@ref) `max_capacity_mw` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_max_capacity_mw_unitful`](@ref)."""
+get_max_capacity_mw(value::MaximumCapacityRequirements, units) = InfrastructureSystems._strip_units(get_value(value, Val(:max_capacity_mw), Val(:mw), units))
+"""Get [`MaximumCapacityRequirements`](@ref) `max_capacity_mw` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_max_capacity_mw`](@ref)."""
+get_max_capacity_mw_unitful(value::MaximumCapacityRequirements, units) = get_value(value, Val(:max_capacity_mw), Val(:mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_max_capacity_mw), ::Type{MaximumCapacityRequirements}) = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_max_capacity_mw_unitful), ::Type{MaximumCapacityRequirements}) = InfrastructureSystems.NU
 """Get [`MaximumCapacityRequirements`](@ref) `target_year`."""
 get_target_year(value::MaximumCapacityRequirements) = value.target_year
 """Get [`MaximumCapacityRequirements`](@ref) `ext`."""
@@ -70,7 +74,7 @@ set_available!(value::MaximumCapacityRequirements, val) = value.available = val
 """Set [`MaximumCapacityRequirements`](@ref) `id`."""
 set_id!(value::MaximumCapacityRequirements, val) = value.id = val
 """Set [`MaximumCapacityRequirements`](@ref) `max_capacity_mw`."""
-set_max_capacity_mw!(value::MaximumCapacityRequirements, val) = value.max_capacity_mw = val
+set_max_capacity_mw!(value::MaximumCapacityRequirements, val, unit) = value.max_capacity_mw = set_value(value, Val(:max_capacity_mw), val, unit, Val(:mw))
 """Set [`MaximumCapacityRequirements`](@ref) `target_year`."""
 set_target_year!(value::MaximumCapacityRequirements, val) = value.target_year = val
 """Set [`MaximumCapacityRequirements`](@ref) `ext`."""
