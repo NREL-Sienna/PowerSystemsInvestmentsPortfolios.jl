@@ -150,6 +150,7 @@ When you call an accessor, the request passes through three layers:
 
  1. **Generated accessor** (`get_x` / `set_x!`) — knows the field's unit *token* and
     whether to strip units.
+
  2. **`get_value` / `set_value`** — look up the field's category with
     `_unit_category`, resolve its `natural_unit`, and hand off the actual conversion.
  3. **`_natural_unit_conversions`** — the recursive engine that converts the value.
