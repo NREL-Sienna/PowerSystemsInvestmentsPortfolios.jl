@@ -361,7 +361,7 @@ function _natural_unit_conversions(
 )
     return RenewableGenerationCost(
         _natural_unit_conversions(base, v.variable, from, to),
-        _natural_unit_conversions(base, v.curtailment, from, to),
+        _natural_unit_conversions(base, v.curtailment_cost, from, to),
         IS._strip_units(
             _natural_unit_conversions(
                 base,

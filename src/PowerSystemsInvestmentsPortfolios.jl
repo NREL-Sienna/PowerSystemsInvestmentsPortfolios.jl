@@ -170,10 +170,6 @@ using .APIServer
 
 include("definitions.jl")
 
-include("units/types.jl")
-include("units/conversions.jl")
-include("units/function_conversions.jl")
-
 include("models/requirements.jl")
 include("models/technologies.jl")
 include("models/regions.jl")
@@ -181,6 +177,10 @@ include("models/financial_data/financial_data.jl")
 include("models/financial_data/TechnologyFinancialData.jl")
 include("models/generated/includes.jl")
 include("investment_schedule.jl")
+
+include("units/types.jl")
+include("units/conversions.jl")
+include("units/function_conversions.jl")
 
 include("portfolio.jl")
 include("time_mapping.jl")
