@@ -1151,9 +1151,9 @@
         },
         {
           "name": "value_of_lost_load",
-          "type": "Float64",
+          "type": "PSY.ValueCurve",
           "description": "Value of unserved load (USD/MWh)",
-          "default": "1e8",
+          "default": "LinearCurve(1e8)",
           "needs_conversion": true,
           "conversion_unit": ":usd_per_mwh"
         },

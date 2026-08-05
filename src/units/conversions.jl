@@ -12,8 +12,7 @@ conversion between natural units and user-specified display units.
 # Unit categories
 # ============================================================
 
-const _UNIT_AWARE =
-    Union{Technology, Requirement, SupplementalAttribute}
+const _UNIT_AWARE = Union{Technology, Requirement, SupplementalAttribute}
 
 # Can import relevant units from PSY 
 abstract type UnitCategory end
@@ -154,7 +153,13 @@ function set_value(
     )
 end
 
-function set_value(t::T, field::Val{U}, value, from::Val, to::Val) where {T <: _UNIT_AWARE, U}
+function set_value(
+    t::T,
+    field::Val{U},
+    value,
+    from::Val,
+    to::Val,
+) where {T <: _UNIT_AWARE, U}
     return IS._strip_units(
         _natural_unit_conversions(
             t,
