@@ -241,18 +241,6 @@ function set_value(
     )
 end
 
-# ---- From Number or when a Unitful Quantity cannot be specified (assuming natural units) ----
-# function set_value(t::Technology, field, value, to::Val)
-#     units = natural_unit(_unit_category(to))
-#     @warn "Setting field $(val_to_string(field)) with a unitless number. Assuming units of $units."
-#     return value
-# end
-
-# _set_value(t::Technology, val::Quantity, cu::Val) =
-#     IS._strip_units(convert_units(t, val, cu, cu))
-
-# _set_value(t::Technology, val::Quantity, cu::Val)
-
 _natural_unit_conversions(base, value::Number, from, to) =
     convert_units(base, value, from, to)
 
