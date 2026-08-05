@@ -82,28 +82,23 @@ natural_unit(::FuelCurveCategory) =
     (energy_unit=u"MW" * u"hr", fuel_unit=MMBtu, currency_unit=USD)
 
 # --- Return value with its default natural units ---
-function convert_units(c, val::Number, cat::UnitCategory, to::IS.NaturalUnit)
-    return val * natural_unit(cat)
+function convert_units(c, val::Number, from::UnitCategory, to::IS.NaturalUnit)
+    return val * natural_unit(from)
 end
 
 # --- Convert from natural units to a target Unitful unit ---
-function convert_units(c, val::Number, cat::UnitCategory, to::Unitful.Units)
-    units = natural_unit(cat)
-    #TODO: make these separate functions for each category to avoid this check
-    if isa(units, Unitful.Units)
-        val = val * units
-    else
-        val = val * (units.y_unit / units.x_unit)
-    end
+function convert_units(c, val::Number, from::UnitCategory, to::Unitful.Units)
+    units = natural_unit(from)
+    val = val * units
     return uconvert(to, val)
 end
 
-function convert_units(c, val::Number, cat::Unitful.Units, to::Unitful.Units)
-    val = val * cat
+function convert_units(c, val::Number, from::Unitful.Units, to::Unitful.Units)
+    val = val * from
     return uconvert(to, val)
 end
 
 # --- Convert from a Unitful quantity to default natural units ---
-function convert_units(c, val::Quantity, cat::UnitCategory, to::UnitCategory)
+function convert_units(c, val::Quantity, from::UnitCategory, to::UnitCategory)
     return uconvert(natural_unit(to), val)
 end

@@ -172,6 +172,7 @@ include("definitions.jl")
 
 include("units/types.jl")
 include("units/conversions.jl")
+include("units/function_conversions.jl")
 
 include("models/requirements.jl")
 include("models/technologies.jl")
