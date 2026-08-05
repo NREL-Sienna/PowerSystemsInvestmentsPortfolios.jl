@@ -256,10 +256,6 @@ function check_storage_cost(get, set, nat, alt; fixed, ratio)
     @test get(nat).fixed ≈ fixed
 end
 
-# ===========================================================================
-# PART 1 — internal conversion engine
-# ===========================================================================
-
 @testset "natural_unit definitions" begin
     @test PSIP.natural_unit(PSIP.POWER) == u"MW"
     @test PSIP.natural_unit(PSIP.ENERGY) == u"MW" * u"hr"
@@ -452,10 +448,6 @@ end
     @test nrc.fixed ≈ 1000.0
     @test nrc.variable.value_curve.function_data.proportional_term ≈ 1000.0
 end
-
-# ===========================================================================
-# PART 2 — units-aware getters/setters, per technology
-# ===========================================================================
 
 @testset "SupplyTechnology getters/setters" begin
     t = supply()
@@ -1048,10 +1040,6 @@ end
         @test get(t, u"yr") == base + 5
     end
 end
-
-# ===========================================================================
-# PART 3 — display_units_arg dispatch (drives Base.show for unit fields)
-# ===========================================================================
 
 @testset "display_units_arg" begin
     t = supply()

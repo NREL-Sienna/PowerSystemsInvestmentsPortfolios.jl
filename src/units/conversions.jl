@@ -39,11 +39,61 @@ struct INVTimeCategory <: UnitCategory end
 struct EnergyCategory <: UnitCategory end
 struct RampingCategory <: UnitCategory end
 
+"""
+    POWER
+
+Unit category for real power. Natural unit: `u"MW"`.
+"""
 const POWER = PowerCategory()
+
+"""
+    IMPEDANCE
+
+Unit category for electrical impedance. Natural unit: `u"Ω"`.
+"""
 const IMPEDANCE = ImpedanceCategory()
+
+"""
+    ADMITTANCE
+
+Unit category for electrical admittance. Natural unit: `u"S"`.
+"""
 const ADMITTANCE = AdmittanceCategory()
+
+"""
+    VOLTAGE
+
+Unit category for voltage. Natural unit: `u"kV"`.
+"""
 const VOLTAGE = VoltageCategory()
+
+"""
+    CURRENT
+
+Unit category for electrical current. Natural unit: `u"kA"`.
+"""
 const CURRENT = CurrentCategory()
+
+"""
+    OPS_TIME
+
+Unit category for operational-timescale durations. Natural unit: `u"hr"`.
+"""
+const OPS_TIME = OPSTimeCategory()
+
+"""
+    INV_TIME
+
+Unit category for investment-timescale durations. Natural unit: `u"yr"`.
+"""
+const INV_TIME = INVTimeCategory()
+
+"""
+    ENERGY
+
+Unit category for energy. Natural unit: `u"MW" * u"hr"`.
+"""
+const ENERGY = EnergyCategory()
 const COST = CostCategory()
 const FUEL = FuelCategory()
 const FUEL_CONSUMPTION_ENERGY = FuelConsumptionEnergyCategory()
@@ -56,15 +106,27 @@ const FUEL_CURVE = FuelCurveCategory()
 const POWER_COST = PowerCostCategory()
 const ENERGY_COST = EnergyCostCategory()
 const FUEL_COST = FuelCostCategory()
-const OPS_TIME = OPSTimeCategory()
-const INV_TIME = INVTimeCategory()
-const ENERGY = EnergyCategory()
 const RAMPING = RampingCategory()
 
+"""
+    FuelCurveUnits
+
+A `NamedTuple` type `(energy_unit, fuel_unit, currency_unit)` of `Unitful.Units`
+used to describe the units of a `FuelCurve`. Its natural units are
+`(energy_unit=u"MW"*u"hr", fuel_unit=MMBtu, currency_unit=USD)`.
+"""
 const FuelCurveUnits = NamedTuple{
     (:energy_unit, :fuel_unit, :currency_unit),
     T,
 } where {T <: Tuple{<:Unitful.Units, <:Unitful.Units, <:Unitful.Units}}
+
+"""
+    ConversionUnits
+
+A `NamedTuple` type `(x_unit, y_unit)` of `Unitful.Units` used to describe the
+two axes of a cost curve or value curve — `x_unit` for the independent variable
+(e.g. power or energy) and `y_unit` for the dependent variable (e.g. cost).
+"""
 const ConversionUnits =
     NamedTuple{(:x_unit, :y_unit), T} where {T <: Tuple{<:Unitful.Units, <:Unitful.Units}}
 
