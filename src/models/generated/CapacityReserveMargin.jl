@@ -78,6 +78,8 @@ set_ext!(value::CapacityReserveMargin, val) = value.ext = val
 """Set [`CapacityReserveMargin`](@ref) `internal`."""
 set_internal!(value::CapacityReserveMargin, val) = value.internal = val
 
+
+
 function serialize_openapi_struct(technology::CapacityReserveMargin, vals...)
     base_struct = APIServer.CapacityReserveMargin(; vals...)
     return base_struct

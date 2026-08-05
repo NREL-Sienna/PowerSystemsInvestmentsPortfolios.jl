@@ -86,6 +86,8 @@ set_ext!(value::CarbonCaps, val) = value.ext = val
 """Set [`CarbonCaps`](@ref) `internal`."""
 set_internal!(value::CarbonCaps, val) = value.internal = val
 
+
+
 function serialize_openapi_struct(technology::CarbonCaps, vals...)
     base_struct = APIServer.CarbonCaps(; vals...)
     return base_struct

@@ -130,11 +130,11 @@ set_start_node!(value::NodalHVDCTransportTechnology, val) = value.start_node = v
 """Set [`NodalHVDCTransportTechnology`](@ref) `end_node`."""
 set_end_node!(value::NodalHVDCTransportTechnology, val) = value.end_node = val
 """Set [`NodalHVDCTransportTechnology`](@ref) `capacity_limits`."""
-set_capacity_limits!(value::NodalHVDCTransportTechnology, val) = value.capacity_limits = set_value(value, Val(:capacity_limits), val, Val(:mw))
+set_capacity_limits!(value::NodalHVDCTransportTechnology, val, unit) = value.capacity_limits = set_value(value, Val(:capacity_limits), val, unit, Val(:mw))
 """Set [`NodalHVDCTransportTechnology`](@ref) `unit_size`."""
-set_unit_size!(value::NodalHVDCTransportTechnology, val) = value.unit_size = set_value(value, Val(:unit_size), val, Val(:mw))
+set_unit_size!(value::NodalHVDCTransportTechnology, val, unit) = value.unit_size = set_value(value, Val(:unit_size), val, unit, Val(:mw))
 """Set [`NodalHVDCTransportTechnology`](@ref) `capital_costs`."""
-set_capital_costs!(value::NodalHVDCTransportTechnology, val) = value.capital_costs = set_value(value, Val(:capital_costs), val, Val(:usd_per_mw))
+set_capital_costs!(value::NodalHVDCTransportTechnology, val, unit) = value.capital_costs = set_value(value, Val(:capital_costs), val, unit, Val(:usd_per_mw))
 """Set [`NodalHVDCTransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::NodalHVDCTransportTechnology, val) = value.line_loss = val
 """Set [`NodalHVDCTransportTechnology`](@ref) `requirements`."""
@@ -145,6 +145,7 @@ set_financial_data!(value::NodalHVDCTransportTechnology, val) = value.financial_
 set_ext!(value::NodalHVDCTransportTechnology, val) = value.ext = val
 """Set [`NodalHVDCTransportTechnology`](@ref) `internal`."""
 set_internal!(value::NodalHVDCTransportTechnology, val) = value.internal = val
+
 
 function serialize_openapi_struct(technology::NodalHVDCTransportTechnology{T}, vals...) where T <: PSY.Device
     base_struct = APIServer.NodalHVDCTransportTechnology(; vals...)

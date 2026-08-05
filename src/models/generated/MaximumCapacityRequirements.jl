@@ -78,6 +78,8 @@ set_ext!(value::MaximumCapacityRequirements, val) = value.ext = val
 """Set [`MaximumCapacityRequirements`](@ref) `internal`."""
 set_internal!(value::MaximumCapacityRequirements, val) = value.internal = val
 
+
+
 function serialize_openapi_struct(technology::MaximumCapacityRequirements, vals...)
     base_struct = APIServer.MaximumCapacityRequirements(; vals...)
     return base_struct

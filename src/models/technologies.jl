@@ -56,23 +56,35 @@ Returns the value in natural units.
 """
 
 # ---- From Unitful.Quantity (natural units): inverse conversion ----
-function set_value(t::Technology, field, value::Quantity, to::Val)
+function set_value(
+    t::Technology,
+    field::Val{T},
+    value,
+    from::Union{Unitful.Units, ConversionUnits, FuelCurveUnits},
+    to::Val,
+) where {T}
+    return IS._strip_units(
+        _natural_unit_conversions(t, value, from, natural_unit(_unit_category(to))),
+    )
+end
+
+function set_value(t::Technology, field::Val{T}, value, from::Val, to::Val) where {T}
     return IS._strip_units(
         _natural_unit_conversions(
             t,
-            ustrip(value),
-            unit(value),
+            value,
+            natural_unit(_unit_category(from)),
             natural_unit(_unit_category(to)),
         ),
     )
 end
 
 # ---- From Number or when a Unitful Quantity cannot be specified (assuming natural units) ----
-function set_value(t::Technology, field, value, to::Val)
-    units = natural_unit(_unit_category(to))
-    @warn "Setting field $(val_to_string(field)) with a unitless number. Assuming units of $units."
-    return value
-end
+# function set_value(t::Technology, field, value, to::Val)
+#     units = natural_unit(_unit_category(to))
+#     @warn "Setting field $(val_to_string(field)) with a unitless number. Assuming units of $units."
+#     return value
+# end
 
 # _set_value(t::Technology, val::Quantity, cu::Val) =
 #     IS._strip_units(convert_units(t, val, cu, cu))

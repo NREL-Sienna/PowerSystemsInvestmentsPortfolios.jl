@@ -166,29 +166,30 @@ set_region!(value::DemandSideTechnology, val) = value.region = val
 """Set [`DemandSideTechnology`](@ref) `technology_efficiency`."""
 set_technology_efficiency!(value::DemandSideTechnology, val) = value.technology_efficiency = val
 """Set [`DemandSideTechnology`](@ref) `price_per_unit`."""
-set_price_per_unit!(value::DemandSideTechnology, val) = value.price_per_unit = set_value(value, Val(:price_per_unit), val, Val(:usd_per_mmbtu))
+set_price_per_unit!(value::DemandSideTechnology, val, unit) = value.price_per_unit = set_value(value, Val(:price_per_unit), val, unit, Val(:usd_per_mmbtu))
 """Set [`DemandSideTechnology`](@ref) `min_power`."""
 set_min_power!(value::DemandSideTechnology, val) = value.min_power = val
 """Set [`DemandSideTechnology`](@ref) `peak_demand_mw`."""
-set_peak_demand_mw!(value::DemandSideTechnology, val) = value.peak_demand_mw = set_value(value, Val(:peak_demand_mw), val, Val(:mw))
+set_peak_demand_mw!(value::DemandSideTechnology, val, unit) = value.peak_demand_mw = set_value(value, Val(:peak_demand_mw), val, unit, Val(:mw))
 """Set [`DemandSideTechnology`](@ref) `curtailment_cost`."""
-set_curtailment_cost!(value::DemandSideTechnology, val) = value.curtailment_cost = set_value(value, Val(:curtailment_cost), val, Val(:usd_per_mwh))
+set_curtailment_cost!(value::DemandSideTechnology, val, unit) = value.curtailment_cost = set_value(value, Val(:curtailment_cost), val, unit, Val(:usd_per_mwh))
 """Set [`DemandSideTechnology`](@ref) `max_demand_curtailment`."""
 set_max_demand_curtailment!(value::DemandSideTechnology, val) = value.max_demand_curtailment = val
 """Set [`DemandSideTechnology`](@ref) `max_demand_delay`."""
-set_max_demand_delay!(value::DemandSideTechnology, val) = value.max_demand_delay = set_value(value, Val(:max_demand_delay), val, Val(:hr))
+set_max_demand_delay!(value::DemandSideTechnology, val, unit) = value.max_demand_delay = set_value(value, Val(:max_demand_delay), val, unit, Val(:hr))
 """Set [`DemandSideTechnology`](@ref) `max_demand_advance`."""
-set_max_demand_advance!(value::DemandSideTechnology, val) = value.max_demand_advance = set_value(value, Val(:max_demand_advance), val, Val(:hr))
+set_max_demand_advance!(value::DemandSideTechnology, val, unit) = value.max_demand_advance = set_value(value, Val(:max_demand_advance), val, unit, Val(:hr))
 """Set [`DemandSideTechnology`](@ref) `demand_energy_efficiency`."""
 set_demand_energy_efficiency!(value::DemandSideTechnology, val) = value.demand_energy_efficiency = val
 """Set [`DemandSideTechnology`](@ref) `shift_variable_cost`."""
-set_shift_variable_cost!(value::DemandSideTechnology, val) = value.shift_variable_cost = set_value(value, Val(:shift_variable_cost), val, Val(:usd_per_mwh))
+set_shift_variable_cost!(value::DemandSideTechnology, val, unit) = value.shift_variable_cost = set_value(value, Val(:shift_variable_cost), val, unit, Val(:usd_per_mwh))
 """Set [`DemandSideTechnology`](@ref) `requirements`."""
 set_requirements!(value::DemandSideTechnology, val) = value.requirements = val
 """Set [`DemandSideTechnology`](@ref) `ext`."""
 set_ext!(value::DemandSideTechnology, val) = value.ext = val
 """Set [`DemandSideTechnology`](@ref) `internal`."""
 set_internal!(value::DemandSideTechnology, val) = value.internal = val
+
 
 function serialize_openapi_struct(technology::DemandSideTechnology{T}, vals...) where T <: PSY.StaticInjection
     base_struct = APIServer.DemandSideTechnology(; vals...)

@@ -130,11 +130,11 @@ set_start_region!(value::AggregateTransportTechnology, val) = value.start_region
 """Set [`AggregateTransportTechnology`](@ref) `end_region`."""
 set_end_region!(value::AggregateTransportTechnology, val) = value.end_region = val
 """Set [`AggregateTransportTechnology`](@ref) `capacity_limits`."""
-set_capacity_limits!(value::AggregateTransportTechnology, val) = value.capacity_limits = set_value(value, Val(:capacity_limits), val, Val(:mw))
+set_capacity_limits!(value::AggregateTransportTechnology, val, unit) = value.capacity_limits = set_value(value, Val(:capacity_limits), val, unit, Val(:mw))
 """Set [`AggregateTransportTechnology`](@ref) `unit_size`."""
-set_unit_size!(value::AggregateTransportTechnology, val) = value.unit_size = set_value(value, Val(:unit_size), val, Val(:mw))
+set_unit_size!(value::AggregateTransportTechnology, val, unit) = value.unit_size = set_value(value, Val(:unit_size), val, unit, Val(:mw))
 """Set [`AggregateTransportTechnology`](@ref) `capital_costs`."""
-set_capital_costs!(value::AggregateTransportTechnology, val) = value.capital_costs = set_value(value, Val(:capital_costs), val, Val(:usd_per_mw))
+set_capital_costs!(value::AggregateTransportTechnology, val, unit) = value.capital_costs = set_value(value, Val(:capital_costs), val, unit, Val(:usd_per_mw))
 """Set [`AggregateTransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::AggregateTransportTechnology, val) = value.line_loss = val
 """Set [`AggregateTransportTechnology`](@ref) `requirements`."""
@@ -145,6 +145,7 @@ set_financial_data!(value::AggregateTransportTechnology, val) = value.financial_
 set_ext!(value::AggregateTransportTechnology, val) = value.ext = val
 """Set [`AggregateTransportTechnology`](@ref) `internal`."""
 set_internal!(value::AggregateTransportTechnology, val) = value.internal = val
+
 
 function serialize_openapi_struct(technology::AggregateTransportTechnology{T}, vals...) where T <: PSY.Device
     base_struct = APIServer.AggregateTransportTechnology(; vals...)

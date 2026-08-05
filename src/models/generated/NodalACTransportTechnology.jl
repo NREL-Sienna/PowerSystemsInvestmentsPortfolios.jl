@@ -154,17 +154,17 @@ set_start_node!(value::NodalACTransportTechnology, val) = value.start_node = val
 """Set [`NodalACTransportTechnology`](@ref) `end_node`."""
 set_end_node!(value::NodalACTransportTechnology, val) = value.end_node = val
 """Set [`NodalACTransportTechnology`](@ref) `capacity_limits`."""
-set_capacity_limits!(value::NodalACTransportTechnology, val) = value.capacity_limits = set_value(value, Val(:capacity_limits), val, Val(:mw))
+set_capacity_limits!(value::NodalACTransportTechnology, val, unit) = value.capacity_limits = set_value(value, Val(:capacity_limits), val, unit, Val(:mw))
 """Set [`NodalACTransportTechnology`](@ref) `unit_size`."""
-set_unit_size!(value::NodalACTransportTechnology, val) = value.unit_size = set_value(value, Val(:unit_size), val, Val(:mw))
+set_unit_size!(value::NodalACTransportTechnology, val, unit) = value.unit_size = set_value(value, Val(:unit_size), val, unit, Val(:mw))
 """Set [`NodalACTransportTechnology`](@ref) `capital_costs`."""
-set_capital_costs!(value::NodalACTransportTechnology, val) = value.capital_costs = set_value(value, Val(:capital_costs), val, Val(:usd_per_mw))
+set_capital_costs!(value::NodalACTransportTechnology, val, unit) = value.capital_costs = set_value(value, Val(:capital_costs), val, unit, Val(:usd_per_mw))
 """Set [`NodalACTransportTechnology`](@ref) `resistance`."""
-set_resistance!(value::NodalACTransportTechnology, val) = value.resistance = set_value(value, Val(:resistance), val, Val(:ohm))
+set_resistance!(value::NodalACTransportTechnology, val, unit) = value.resistance = set_value(value, Val(:resistance), val, unit, Val(:ohm))
 """Set [`NodalACTransportTechnology`](@ref) `voltage`."""
-set_voltage!(value::NodalACTransportTechnology, val) = value.voltage = set_value(value, Val(:voltage), val, Val(:kv))
+set_voltage!(value::NodalACTransportTechnology, val, unit) = value.voltage = set_value(value, Val(:voltage), val, unit, Val(:kv))
 """Set [`NodalACTransportTechnology`](@ref) `reactance`."""
-set_reactance!(value::NodalACTransportTechnology, val) = value.reactance = set_value(value, Val(:reactance), val, Val(:ohm))
+set_reactance!(value::NodalACTransportTechnology, val, unit) = value.reactance = set_value(value, Val(:reactance), val, unit, Val(:ohm))
 """Set [`NodalACTransportTechnology`](@ref) `requirements`."""
 set_requirements!(value::NodalACTransportTechnology, val) = value.requirements = val
 """Set [`NodalACTransportTechnology`](@ref) `financial_data`."""
@@ -173,6 +173,7 @@ set_financial_data!(value::NodalACTransportTechnology, val) = value.financial_da
 set_ext!(value::NodalACTransportTechnology, val) = value.ext = val
 """Set [`NodalACTransportTechnology`](@ref) `internal`."""
 set_internal!(value::NodalACTransportTechnology, val) = value.internal = val
+
 
 function serialize_openapi_struct(technology::NodalACTransportTechnology{T}, vals...) where T <: PSY.Device
     base_struct = APIServer.NodalACTransportTechnology(; vals...)

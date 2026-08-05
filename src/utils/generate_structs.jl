@@ -1,6 +1,96 @@
 import Mustache
 
-const SERIALIZATION_TEMPLATE = """
+const STRUCT_TEMPLATE = """
+#=
+This file is auto-generated. Do not edit.
+=#
+
+#! format: off
+
+\"\"\"
+    mutable struct {{struct_name}}{{#parametric}}{T <: {{parametric}}}{{/parametric}} <: {{supertype}}
+        {{#parameters}}
+        {{name}}::{{{data_type}}}
+        {{/parameters}}
+    end
+
+{{#docstring}}{{{docstring}}}{{/docstring}}
+
+# Arguments
+{{#parameters}}
+- `{{name}}::{{{data_type}}}`:{{#default}} (default: `{{{default}}}`){{/default}}{{#comment}} {{{comment}}}{{/comment}}{{#valid_range}}, validation range: `{{{valid_range}}}`{{/valid_range}}
+{{/parameters}}
+\"\"\"
+mutable struct {{struct_name}}{{#parametric}}{T <: {{parametric}}}{{/parametric}} <: {{supertype}}
+    {{#parameters}}
+    {{#comment}}"{{{comment}}}"\n    {{/comment}}{{name}}::{{{data_type}}}
+    {{/parameters}}
+    {{#inner_constructor_check}}
+
+    function {{struct_name}}({{#parameters}}{{name}}, {{/parameters}})
+        ({{#parameters}}{{name}}, {{/parameters}}) = {{inner_constructor_check}}(
+            {{#parameters}}
+            {{name}},
+            {{/parameters}}
+        )
+        new({{#parameters}}{{name}}, {{/parameters}})
+    end
+    {{/inner_constructor_check}}
+end
+
+{{#needs_positional_constructor}}
+function {{constructor_func}}({{#parameters}}{{^internal_default}}{{name}}{{#default}}={{default}}{{/default}}, {{/internal_default}}{{/parameters}}){{{closing_constructor_text}}}
+    {{constructor_func}}({{#parameters}}{{^internal_default}}{{name}}, {{/internal_default}}{{/parameters}}{{#parameters}}{{#internal_default}}{{{internal_default}}}, {{/internal_default}}{{/parameters}})
+end
+{{/needs_positional_constructor}}
+
+function {{constructor_func}}(; {{#parameters}}{{name}}{{#kwarg_value}}{{{kwarg_value}}}{{/kwarg_value}}, {{/parameters}}){{{closing_constructor_text}}}
+    {{constructor_func}}({{#parameters}}{{name}}, {{/parameters}})
+end
+
+{{#has_null_values}}
+# Constructor for demo purposes; non-functional.
+function {{constructor_func}}(::Nothing){{{closing_constructor_text}}}
+    {{constructor_func}}(;
+        {{#parameters}}
+        {{^internal_default}}
+        {{name}}={{#quotes}}"{{null_value}}"{{/quotes}}{{^quotes}}{{null_value}}{{/quotes}},
+        {{/internal_default}}
+        {{/parameters}}
+    )
+end
+
+{{/has_null_values}}
+{{#accessors}}
+{{#needs_conversion}}
+{{#create_docstring}}\"\"\"Get [`{{struct_name}}`](@ref) `{{name}}` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`{{accessor}}_unitful`](@ref).\"\"\"{{/create_docstring}}
+{{accessor}}(value::{{struct_name}}, units) = InfrastructureSystems._strip_units(get_value(value, Val(:{{name}}), Val({{conversion_unit}}), units))
+{{#create_docstring}}\"\"\"Get [`{{struct_name}}`](@ref) `{{name}}` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`{{accessor}}`](@ref).\"\"\"{{/create_docstring}}
+{{accessor}}_unitful(value::{{struct_name}}, units) = get_value(value, Val(:{{name}}), Val({{conversion_unit}}), units)
+InfrastructureSystems.display_units_arg(::typeof({{accessor}}), ::{{units_type_sig}}){{#units_bound}} where {T <: {{units_bound}}}{{/units_bound}} = InfrastructureSystems.{{display_units}}
+InfrastructureSystems.display_units_arg(::typeof({{accessor}}_unitful), ::{{units_type_sig}}){{#units_bound}} where {T <: {{units_bound}}}{{/units_bound}} = InfrastructureSystems.{{display_units}}
+{{/needs_conversion}}
+{{^needs_conversion}}
+{{#create_docstring}}\"\"\"Get [`{{struct_name}}`](@ref) `{{name}}`.\"\"\"{{/create_docstring}}
+{{accessor}}(value::{{struct_name}}) = value.{{name}}
+{{/needs_conversion}}
+{{/accessors}}
+
+{{#setters}}
+{{#needs_conversion}}
+{{#create_docstring}}\"\"\"Set [`{{struct_name}}`](@ref) `{{name}}`.\"\"\"{{/create_docstring}}
+{{setter}}(value::{{struct_name}}, val, unit) = value.{{name}} = set_value(value, Val(:{{name}}), val, unit, Val({{conversion_unit}}))
+{{/needs_conversion}}
+{{^needs_conversion}}
+{{#create_docstring}}\"\"\"Set [`{{struct_name}}`](@ref) `{{name}}`.\"\"\"{{/create_docstring}}
+{{setter}}(value::{{struct_name}}, val) = value.{{name}} = val
+{{/needs_conversion}}
+{{/setters}}
+
+{{#custom_code}}
+{{{custom_code}}}
+{{/custom_code}}
+
 {{#has_parametric}}
 function serialize_openapi_struct(technology::{{struct_name}}{T}, vals...) where T <: {{parametric}}
     base_struct = APIServer.{{struct_name}}(; vals...)
@@ -189,11 +279,8 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
         filename = joinpath(directory, item["struct_name"] * ".jl")
 
         open(filename, "w") do io
-            write(io, strip(MU.render(IS.STRUCT_TEMPLATE, item)))
+            write(io, strip(MU.render(STRUCT_TEMPLATE, item)))
             write(io, "\n\n")
-
-            write(io, strip(MU.render(SERIALIZATION_TEMPLATE, item)))
-            write(io, "\n")
 
             push!(struct_names, item["struct_name"])
         end

@@ -62,6 +62,8 @@ set_ext!(value::Node, val) = value.ext = val
 """Set [`Node`](@ref) `internal`."""
 set_internal!(value::Node, val) = value.internal = val
 
+
+
 function serialize_openapi_struct(technology::Node, vals...)
     base_struct = APIServer.Node(; vals...)
     return base_struct

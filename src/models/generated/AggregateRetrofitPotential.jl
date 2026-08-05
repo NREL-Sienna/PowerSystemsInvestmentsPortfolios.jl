@@ -69,13 +69,15 @@ get_internal(value::AggregateRetrofitPotential) = value.internal
 """Set [`AggregateRetrofitPotential`](@ref) `retrofit_id`."""
 set_retrofit_id!(value::AggregateRetrofitPotential, val) = value.retrofit_id = val
 """Set [`AggregateRetrofitPotential`](@ref) `retrofit_potential`."""
-set_retrofit_potential!(value::AggregateRetrofitPotential, val) = value.retrofit_potential = set_value(value, Val(:retrofit_potential), val, Val(:mw))
+set_retrofit_potential!(value::AggregateRetrofitPotential, val, unit) = value.retrofit_potential = set_value(value, Val(:retrofit_potential), val, unit, Val(:mw))
 """Set [`AggregateRetrofitPotential`](@ref) `retrofit_fraction`."""
 set_retrofit_fraction!(value::AggregateRetrofitPotential, val) = value.retrofit_fraction = val
 """Set [`AggregateRetrofitPotential`](@ref) `ext`."""
 set_ext!(value::AggregateRetrofitPotential, val) = value.ext = val
 """Set [`AggregateRetrofitPotential`](@ref) `internal`."""
 set_internal!(value::AggregateRetrofitPotential, val) = value.internal = val
+
+
 
 function serialize_openapi_struct(technology::AggregateRetrofitPotential, vals...)
     base_struct = APIServer.AggregateRetrofitPotential(; vals...)

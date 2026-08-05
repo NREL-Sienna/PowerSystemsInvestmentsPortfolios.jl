@@ -62,6 +62,8 @@ set_ext!(value::HourlyMatching, val) = value.ext = val
 """Set [`HourlyMatching`](@ref) `internal`."""
 set_internal!(value::HourlyMatching, val) = value.internal = val
 
+
+
 function serialize_openapi_struct(technology::HourlyMatching, vals...)
     base_struct = APIServer.HourlyMatching(; vals...)
     return base_struct

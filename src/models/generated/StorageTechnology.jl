@@ -240,35 +240,35 @@ set_prime_mover_type!(value::StorageTechnology, val) = value.prime_mover_type = 
 """Set [`StorageTechnology`](@ref) `storage_tech`."""
 set_storage_tech!(value::StorageTechnology, val) = value.storage_tech = val
 """Set [`StorageTechnology`](@ref) `capital_costs_energy`."""
-set_capital_costs_energy!(value::StorageTechnology, val) = value.capital_costs_energy = set_value(value, Val(:capital_costs_energy), val, Val(:usd_per_mwh))
+set_capital_costs_energy!(value::StorageTechnology, val, unit) = value.capital_costs_energy = set_value(value, Val(:capital_costs_energy), val, unit, Val(:usd_per_mwh))
 """Set [`StorageTechnology`](@ref) `capital_costs_charge`."""
-set_capital_costs_charge!(value::StorageTechnology, val) = value.capital_costs_charge = set_value(value, Val(:capital_costs_charge), val, Val(:usd_per_mw))
+set_capital_costs_charge!(value::StorageTechnology, val, unit) = value.capital_costs_charge = set_value(value, Val(:capital_costs_charge), val, unit, Val(:usd_per_mw))
 """Set [`StorageTechnology`](@ref) `capital_costs_discharge`."""
-set_capital_costs_discharge!(value::StorageTechnology, val) = value.capital_costs_discharge = set_value(value, Val(:capital_costs_discharge), val, Val(:usd_per_mw))
+set_capital_costs_discharge!(value::StorageTechnology, val, unit) = value.capital_costs_discharge = set_value(value, Val(:capital_costs_discharge), val, unit, Val(:usd_per_mw))
 """Set [`StorageTechnology`](@ref) `operation_costs`."""
-set_operation_costs!(value::StorageTechnology, val) = value.operation_costs = set_value(value, Val(:operation_costs), val, Val(:usd_per_mwh))
+set_operation_costs!(value::StorageTechnology, val, unit) = value.operation_costs = set_value(value, Val(:operation_costs), val, unit, Val(:usd_per_mwh))
 """Set [`StorageTechnology`](@ref) `min_discharge_fraction`."""
 set_min_discharge_fraction!(value::StorageTechnology, val) = value.min_discharge_fraction = val
 """Set [`StorageTechnology`](@ref) `unit_size_charge`."""
-set_unit_size_charge!(value::StorageTechnology, val) = value.unit_size_charge = set_value(value, Val(:unit_size_charge), val, Val(:mw))
+set_unit_size_charge!(value::StorageTechnology, val, unit) = value.unit_size_charge = set_value(value, Val(:unit_size_charge), val, unit, Val(:mw))
 """Set [`StorageTechnology`](@ref) `unit_size_discharge`."""
-set_unit_size_discharge!(value::StorageTechnology, val) = value.unit_size_discharge = set_value(value, Val(:unit_size_discharge), val, Val(:mw))
+set_unit_size_discharge!(value::StorageTechnology, val, unit) = value.unit_size_discharge = set_value(value, Val(:unit_size_discharge), val, unit, Val(:mw))
 """Set [`StorageTechnology`](@ref) `unit_size_energy`."""
-set_unit_size_energy!(value::StorageTechnology, val) = value.unit_size_energy = set_value(value, Val(:unit_size_energy), val, Val(:mwh))
+set_unit_size_energy!(value::StorageTechnology, val, unit) = value.unit_size_energy = set_value(value, Val(:unit_size_energy), val, unit, Val(:mwh))
 """Set [`StorageTechnology`](@ref) `capacity_limits_charge`."""
-set_capacity_limits_charge!(value::StorageTechnology, val) = value.capacity_limits_charge = set_value(value, Val(:capacity_limits_charge), val, Val(:mw))
+set_capacity_limits_charge!(value::StorageTechnology, val, unit) = value.capacity_limits_charge = set_value(value, Val(:capacity_limits_charge), val, unit, Val(:mw))
 """Set [`StorageTechnology`](@ref) `capacity_limits_discharge`."""
-set_capacity_limits_discharge!(value::StorageTechnology, val) = value.capacity_limits_discharge = set_value(value, Val(:capacity_limits_discharge), val, Val(:mw))
+set_capacity_limits_discharge!(value::StorageTechnology, val, unit) = value.capacity_limits_discharge = set_value(value, Val(:capacity_limits_discharge), val, unit, Val(:mw))
 """Set [`StorageTechnology`](@ref) `capacity_limits_energy`."""
-set_capacity_limits_energy!(value::StorageTechnology, val) = value.capacity_limits_energy = set_value(value, Val(:capacity_limits_energy), val, Val(:mwh))
+set_capacity_limits_energy!(value::StorageTechnology, val, unit) = value.capacity_limits_energy = set_value(value, Val(:capacity_limits_energy), val, unit, Val(:mwh))
 """Set [`StorageTechnology`](@ref) `duration_limits`."""
-set_duration_limits!(value::StorageTechnology, val) = value.duration_limits = set_value(value, Val(:duration_limits), val, Val(:hr))
+set_duration_limits!(value::StorageTechnology, val, unit) = value.duration_limits = set_value(value, Val(:duration_limits), val, unit, Val(:hr))
 """Set [`StorageTechnology`](@ref) `efficiency`."""
 set_efficiency!(value::StorageTechnology, val) = value.efficiency = val
 """Set [`StorageTechnology`](@ref) `losses`."""
 set_losses!(value::StorageTechnology, val) = value.losses = val
 """Set [`StorageTechnology`](@ref) `lifetime`."""
-set_lifetime!(value::StorageTechnology, val) = value.lifetime = set_value(value, Val(:lifetime), val, Val(:yr))
+set_lifetime!(value::StorageTechnology, val, unit) = value.lifetime = set_value(value, Val(:lifetime), val, unit, Val(:yr))
 """Set [`StorageTechnology`](@ref) `requirements`."""
 set_requirements!(value::StorageTechnology, val) = value.requirements = val
 """Set [`StorageTechnology`](@ref) `financial_data`."""
@@ -277,6 +277,7 @@ set_financial_data!(value::StorageTechnology, val) = value.financial_data = val
 set_ext!(value::StorageTechnology, val) = value.ext = val
 """Set [`StorageTechnology`](@ref) `internal`."""
 set_internal!(value::StorageTechnology, val) = value.internal = val
+
 
 function serialize_openapi_struct(technology::StorageTechnology{T}, vals...) where T <: PSY.Storage
     base_struct = APIServer.StorageTechnology(; vals...)

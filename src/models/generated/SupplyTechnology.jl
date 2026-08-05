@@ -218,25 +218,25 @@ set_cofire_start_limits!(value::SupplyTechnology, val) = value.cofire_start_limi
 """Set [`SupplyTechnology`](@ref) `cofire_level_limits`."""
 set_cofire_level_limits!(value::SupplyTechnology, val) = value.cofire_level_limits = val
 """Set [`SupplyTechnology`](@ref) `capital_costs`."""
-set_capital_costs!(value::SupplyTechnology, val) = value.capital_costs = set_value(value, Val(:capital_costs), val, Val(:usd_per_mw))
+set_capital_costs!(value::SupplyTechnology, val, unit) = value.capital_costs = set_value(value, Val(:capital_costs), val, unit, Val(:usd_per_mw))
 """Set [`SupplyTechnology`](@ref) `operation_costs`."""
-set_operation_costs!(value::SupplyTechnology, val) = value.operation_costs = set_value(value, Val(:operation_costs), val, Val(:usd_per_mwh))
+set_operation_costs!(value::SupplyTechnology, val, unit) = value.operation_costs = set_value(value, Val(:operation_costs), val, unit, Val(:usd_per_mwh))
 """Set [`SupplyTechnology`](@ref) `unit_size`."""
-set_unit_size!(value::SupplyTechnology, val) = value.unit_size = set_value(value, Val(:unit_size), val, Val(:mw))
+set_unit_size!(value::SupplyTechnology, val, unit) = value.unit_size = set_value(value, Val(:unit_size), val, unit, Val(:mw))
 """Set [`SupplyTechnology`](@ref) `capacity_limits`."""
-set_capacity_limits!(value::SupplyTechnology, val) = value.capacity_limits = set_value(value, Val(:capacity_limits), val, Val(:mw))
+set_capacity_limits!(value::SupplyTechnology, val, unit) = value.capacity_limits = set_value(value, Val(:capacity_limits), val, unit, Val(:mw))
 """Set [`SupplyTechnology`](@ref) `outage_factor`."""
 set_outage_factor!(value::SupplyTechnology, val) = value.outage_factor = val
 """Set [`SupplyTechnology`](@ref) `min_generation_fraction`."""
 set_min_generation_fraction!(value::SupplyTechnology, val) = value.min_generation_fraction = val
 """Set [`SupplyTechnology`](@ref) `ramp_limits`."""
-set_ramp_limits!(value::SupplyTechnology, val) = value.ramp_limits = set_value(value, Val(:ramp_limits), val, Val(:mw_per_min))
+set_ramp_limits!(value::SupplyTechnology, val, unit) = value.ramp_limits = set_value(value, Val(:ramp_limits), val, unit, Val(:mw_per_min))
 """Set [`SupplyTechnology`](@ref) `time_limits`."""
-set_time_limits!(value::SupplyTechnology, val) = value.time_limits = set_value(value, Val(:time_limits), val, Val(:hr))
+set_time_limits!(value::SupplyTechnology, val, unit) = value.time_limits = set_value(value, Val(:time_limits), val, unit, Val(:hr))
 """Set [`SupplyTechnology`](@ref) `start_fuel_mmbtu_per_mw`."""
-set_start_fuel_mmbtu_per_mw!(value::SupplyTechnology, val) = value.start_fuel_mmbtu_per_mw = set_value(value, Val(:start_fuel_mmbtu_per_mw), val, Val(:mmbtu_per_mw))
+set_start_fuel_mmbtu_per_mw!(value::SupplyTechnology, val, unit) = value.start_fuel_mmbtu_per_mw = set_value(value, Val(:start_fuel_mmbtu_per_mw), val, unit, Val(:mmbtu_per_mw))
 """Set [`SupplyTechnology`](@ref) `lifetime`."""
-set_lifetime!(value::SupplyTechnology, val) = value.lifetime = set_value(value, Val(:lifetime), val, Val(:yr))
+set_lifetime!(value::SupplyTechnology, val, unit) = value.lifetime = set_value(value, Val(:lifetime), val, unit, Val(:yr))
 """Set [`SupplyTechnology`](@ref) `requirements`."""
 set_requirements!(value::SupplyTechnology, val) = value.requirements = val
 """Set [`SupplyTechnology`](@ref) `financial_data`."""
@@ -245,6 +245,7 @@ set_financial_data!(value::SupplyTechnology, val) = value.financial_data = val
 set_ext!(value::SupplyTechnology, val) = value.ext = val
 """Set [`SupplyTechnology`](@ref) `internal`."""
 set_internal!(value::SupplyTechnology, val) = value.internal = val
+
 
 function serialize_openapi_struct(technology::SupplyTechnology{T}, vals...) where T <: PSY.Generator
     base_struct = APIServer.SupplyTechnology(; vals...)

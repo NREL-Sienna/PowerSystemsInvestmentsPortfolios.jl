@@ -55,6 +55,8 @@ set_ext!(value::TopologyMapping, val) = value.ext = val
 """Set [`TopologyMapping`](@ref) `internal`."""
 set_internal!(value::TopologyMapping, val) = value.internal = val
 
+
+
 function serialize_openapi_struct(technology::TopologyMapping, vals...)
     base_struct = APIServer.TopologyMapping(; vals...)
     return base_struct

@@ -78,6 +78,8 @@ set_ext!(value::CarbonTax, val) = value.ext = val
 """Set [`CarbonTax`](@ref) `internal`."""
 set_internal!(value::CarbonTax, val) = value.internal = val
 
+
+
 function serialize_openapi_struct(technology::CarbonTax, vals...)
     base_struct = APIServer.CarbonTax(; vals...)
     return base_struct

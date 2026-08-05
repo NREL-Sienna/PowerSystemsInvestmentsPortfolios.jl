@@ -278,6 +278,7 @@ set_ext!(value::ColocatedSupplyStorageTechnology, val) = value.ext = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `internal`."""
 set_internal!(value::ColocatedSupplyStorageTechnology, val) = value.internal = val
 
+
 function serialize_openapi_struct(technology::ColocatedSupplyStorageTechnology{T}, vals...) where T <: PSY.Generator
     base_struct = APIServer.ColocatedSupplyStorageTechnology(; vals...)
     return base_struct

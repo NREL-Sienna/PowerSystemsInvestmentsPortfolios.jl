@@ -73,6 +73,8 @@ set_ext!(value::RetirementPotential, val) = value.ext = val
 """Set [`RetirementPotential`](@ref) `internal`."""
 set_internal!(value::RetirementPotential, val) = value.internal = val
 
+
+
 function serialize_openapi_struct(technology::RetirementPotential, vals...)
     base_struct = APIServer.RetirementPotential(; vals...)
     return base_struct

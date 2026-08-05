@@ -78,6 +78,8 @@ set_ext!(value::EnergyShareRequirements, val) = value.ext = val
 """Set [`EnergyShareRequirements`](@ref) `internal`."""
 set_internal!(value::EnergyShareRequirements, val) = value.internal = val
 
+
+
 function serialize_openapi_struct(technology::EnergyShareRequirements, vals...)
     base_struct = APIServer.EnergyShareRequirements(; vals...)
     return base_struct

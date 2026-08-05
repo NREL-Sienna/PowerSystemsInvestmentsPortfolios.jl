@@ -78,6 +78,8 @@ set_ext!(value::MinimumCapacityRequirements, val) = value.ext = val
 """Set [`MinimumCapacityRequirements`](@ref) `internal`."""
 set_internal!(value::MinimumCapacityRequirements, val) = value.internal = val
 
+
+
 function serialize_openapi_struct(technology::MinimumCapacityRequirements, vals...)
     base_struct = APIServer.MinimumCapacityRequirements(; vals...)
     return base_struct

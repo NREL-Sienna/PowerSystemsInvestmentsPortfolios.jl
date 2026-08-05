@@ -126,7 +126,7 @@ set_id!(value::DemandRequirement, val) = value.id = val
 """Set [`DemandRequirement`](@ref) `power_systems_type`."""
 set_power_systems_type!(value::DemandRequirement, val) = value.power_systems_type = val
 """Set [`DemandRequirement`](@ref) `new_demand_mw`."""
-set_new_demand_mw!(value::DemandRequirement, val) = value.new_demand_mw = set_value(value, Val(:new_demand_mw), val, Val(:mw))
+set_new_demand_mw!(value::DemandRequirement, val, unit) = value.new_demand_mw = set_value(value, Val(:new_demand_mw), val, unit, Val(:mw))
 """Set [`DemandRequirement`](@ref) `new_construction_year`."""
 set_new_construction_year!(value::DemandRequirement, val) = value.new_construction_year = val
 """Set [`DemandRequirement`](@ref) `growth_rate`."""
@@ -134,9 +134,9 @@ set_growth_rate!(value::DemandRequirement, val) = value.growth_rate = val
 """Set [`DemandRequirement`](@ref) `conformity`."""
 set_conformity!(value::DemandRequirement, val) = value.conformity = val
 """Set [`DemandRequirement`](@ref) `value_of_lost_load`."""
-set_value_of_lost_load!(value::DemandRequirement, val) = value.value_of_lost_load = set_value(value, Val(:value_of_lost_load), val, Val(:usd_per_mwh))
+set_value_of_lost_load!(value::DemandRequirement, val, unit) = value.value_of_lost_load = set_value(value, Val(:value_of_lost_load), val, unit, Val(:usd_per_mwh))
 """Set [`DemandRequirement`](@ref) `unserved_demand_curve`."""
-set_unserved_demand_curve!(value::DemandRequirement, val) = value.unserved_demand_curve = set_value(value, Val(:unserved_demand_curve), val, Val(:usd_per_mwh))
+set_unserved_demand_curve!(value::DemandRequirement, val, unit) = value.unserved_demand_curve = set_value(value, Val(:unserved_demand_curve), val, unit, Val(:usd_per_mwh))
 """Set [`DemandRequirement`](@ref) `region`."""
 set_region!(value::DemandRequirement, val) = value.region = val
 """Set [`DemandRequirement`](@ref) `requirements`."""
@@ -145,6 +145,7 @@ set_requirements!(value::DemandRequirement, val) = value.requirements = val
 set_ext!(value::DemandRequirement, val) = value.ext = val
 """Set [`DemandRequirement`](@ref) `internal`."""
 set_internal!(value::DemandRequirement, val) = value.internal = val
+
 
 function serialize_openapi_struct(technology::DemandRequirement{T}, vals...) where T <: PSY.StaticInjection
     base_struct = APIServer.DemandRequirement(; vals...)
