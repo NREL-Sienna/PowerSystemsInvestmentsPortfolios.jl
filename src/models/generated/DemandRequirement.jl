@@ -96,10 +96,18 @@ get_new_construction_year(value::DemandRequirement) = value.new_construction_yea
 get_growth_rate(value::DemandRequirement) = value.growth_rate
 """Get [`DemandRequirement`](@ref) `conformity`."""
 get_conformity(value::DemandRequirement) = value.conformity
-"""Get [`DemandRequirement`](@ref) `value_of_lost_load`."""
-get_value_of_lost_load(value::DemandRequirement) = value.value_of_lost_load
-"""Get [`DemandRequirement`](@ref) `unserved_demand_curve`."""
-get_unserved_demand_curve(value::DemandRequirement) = value.unserved_demand_curve
+"""Get [`DemandRequirement`](@ref) `value_of_lost_load` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_value_of_lost_load_unitful`](@ref)."""
+get_value_of_lost_load(value::DemandRequirement, units) = InfrastructureSystems._strip_units(get_value(value, Val(:value_of_lost_load), Val(:usd_per_mwh), units))
+"""Get [`DemandRequirement`](@ref) `value_of_lost_load` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_value_of_lost_load`](@ref)."""
+get_value_of_lost_load_unitful(value::DemandRequirement, units) = get_value(value, Val(:value_of_lost_load), Val(:usd_per_mwh), units)
+InfrastructureSystems.display_units_arg(::typeof(get_value_of_lost_load), ::Type{DemandRequirement{T}}) where {T <: PSY.StaticInjection} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_value_of_lost_load_unitful), ::Type{DemandRequirement{T}}) where {T <: PSY.StaticInjection} = InfrastructureSystems.NU
+"""Get [`DemandRequirement`](@ref) `unserved_demand_curve` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_unserved_demand_curve_unitful`](@ref)."""
+get_unserved_demand_curve(value::DemandRequirement, units) = InfrastructureSystems._strip_units(get_value(value, Val(:unserved_demand_curve), Val(:usd_per_mwh), units))
+"""Get [`DemandRequirement`](@ref) `unserved_demand_curve` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_unserved_demand_curve`](@ref)."""
+get_unserved_demand_curve_unitful(value::DemandRequirement, units) = get_value(value, Val(:unserved_demand_curve), Val(:usd_per_mwh), units)
+InfrastructureSystems.display_units_arg(::typeof(get_unserved_demand_curve), ::Type{DemandRequirement{T}}) where {T <: PSY.StaticInjection} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_unserved_demand_curve_unitful), ::Type{DemandRequirement{T}}) where {T <: PSY.StaticInjection} = InfrastructureSystems.NU
 """Get [`DemandRequirement`](@ref) `region`."""
 get_region(value::DemandRequirement) = value.region
 """Get [`DemandRequirement`](@ref) `requirements`."""
@@ -126,9 +134,9 @@ set_growth_rate!(value::DemandRequirement, val) = value.growth_rate = val
 """Set [`DemandRequirement`](@ref) `conformity`."""
 set_conformity!(value::DemandRequirement, val) = value.conformity = val
 """Set [`DemandRequirement`](@ref) `value_of_lost_load`."""
-set_value_of_lost_load!(value::DemandRequirement, val) = value.value_of_lost_load = val
+set_value_of_lost_load!(value::DemandRequirement, val) = value.value_of_lost_load = set_value(value, Val(:value_of_lost_load), val, Val(:usd_per_mwh))
 """Set [`DemandRequirement`](@ref) `unserved_demand_curve`."""
-set_unserved_demand_curve!(value::DemandRequirement, val) = value.unserved_demand_curve = val
+set_unserved_demand_curve!(value::DemandRequirement, val) = value.unserved_demand_curve = set_value(value, Val(:unserved_demand_curve), val, Val(:usd_per_mwh))
 """Set [`DemandRequirement`](@ref) `region`."""
 set_region!(value::DemandRequirement, val) = value.region = val
 """Set [`DemandRequirement`](@ref) `requirements`."""

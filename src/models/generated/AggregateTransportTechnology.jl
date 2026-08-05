@@ -100,8 +100,12 @@ get_unit_size(value::AggregateTransportTechnology, units) = InfrastructureSystem
 get_unit_size_unitful(value::AggregateTransportTechnology, units) = get_value(value, Val(:unit_size), Val(:mw), units)
 InfrastructureSystems.display_units_arg(::typeof(get_unit_size), ::Type{AggregateTransportTechnology{T}}) where {T <: PSY.Device} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_unit_size_unitful), ::Type{AggregateTransportTechnology{T}}) where {T <: PSY.Device} = InfrastructureSystems.NU
-"""Get [`AggregateTransportTechnology`](@ref) `capital_costs`."""
-get_capital_costs(value::AggregateTransportTechnology) = value.capital_costs
+"""Get [`AggregateTransportTechnology`](@ref) `capital_costs` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capital_costs_unitful`](@ref)."""
+get_capital_costs(value::AggregateTransportTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capital_costs), Val(:usd_per_mw), units))
+"""Get [`AggregateTransportTechnology`](@ref) `capital_costs` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capital_costs`](@ref)."""
+get_capital_costs_unitful(value::AggregateTransportTechnology, units) = get_value(value, Val(:capital_costs), Val(:usd_per_mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs), ::Type{AggregateTransportTechnology{T}}) where {T <: PSY.Device} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_unitful), ::Type{AggregateTransportTechnology{T}}) where {T <: PSY.Device} = InfrastructureSystems.NU
 """Get [`AggregateTransportTechnology`](@ref) `line_loss`."""
 get_line_loss(value::AggregateTransportTechnology) = value.line_loss
 """Get [`AggregateTransportTechnology`](@ref) `requirements`."""
@@ -130,7 +134,7 @@ set_capacity_limits!(value::AggregateTransportTechnology, val) = value.capacity_
 """Set [`AggregateTransportTechnology`](@ref) `unit_size`."""
 set_unit_size!(value::AggregateTransportTechnology, val) = value.unit_size = set_value(value, Val(:unit_size), val, Val(:mw))
 """Set [`AggregateTransportTechnology`](@ref) `capital_costs`."""
-set_capital_costs!(value::AggregateTransportTechnology, val) = value.capital_costs = val
+set_capital_costs!(value::AggregateTransportTechnology, val) = value.capital_costs = set_value(value, Val(:capital_costs), val, Val(:usd_per_mw))
 """Set [`AggregateTransportTechnology`](@ref) `line_loss`."""
 set_line_loss!(value::AggregateTransportTechnology, val) = value.line_loss = val
 """Set [`AggregateTransportTechnology`](@ref) `requirements`."""

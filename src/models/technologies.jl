@@ -30,10 +30,11 @@ supports_time_series(::Technology) = true
 # Units-aware get_value / set_value
 #
 # Fields are stored internally in a pre-defined set of natural units (NU). The 4-arg `get_value`
-# converts from NU to a requested target (e.g., MW, SU). The 3-arg form
-# delegates to the 4-arg with DEFAULT_UNITS (= SU, a RelativeQuantity
-# carrying its unit in its type).
+# converts from the default units to a requested target unit.
 #######################################################
+
+val_to_symbol(::Val{s}) where {s} = s
+val_to_string(v::Val) = String(val_to_symbol(v))
 
 """
     get_value(t::Technology, field::Val, conversion_unit::Val, units) -> value
@@ -53,6 +54,7 @@ end
 Set `t`'s field value, converting from `val`'s units to our default natural units.
 Returns the value in natural units.
 """
+
 # ---- From Unitful.Quantity (natural units): inverse conversion ----
 function set_value(t::Technology, field, value::Quantity, to::Val)
     return IS._strip_units(
@@ -65,10 +67,10 @@ function set_value(t::Technology, field, value::Quantity, to::Val)
     )
 end
 
-# ---- From Number (assuming natural units) ----
+# ---- From Number or when a Unitful Quantity cannot be specified (assuming natural units) ----
 function set_value(t::Technology, field, value, to::Val)
     units = natural_unit(_unit_category(to))
-    @warn "Setting a field with a bare number. Assuming units of $units."
+    @warn "Setting field $(val_to_string(field)) with a unitless number. Assuming units of $units."
     return value
 end
 
@@ -127,6 +129,8 @@ _unit_category(::Val{:mmbtu}) = FUEL
 _unit_category(::Val{:mmbtu_per_mwh}) = FUEL_CONSUMPTION_ENERGY
 _unit_category(::Val{:mmbtu_per_mw}) = FUEL_CONSUMPTION_POWER
 _unit_category(::Val{:fuel_curve}) = FUEL_CURVE
+_unit_category(::Val{:t_per_mmbtu}) = EMISSIONS
+_unit_category(::Val{:mw_per_min}) = RAMPING
 supports_requirements(::Technology) = true
 
 """

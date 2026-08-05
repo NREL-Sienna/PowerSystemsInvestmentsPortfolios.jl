@@ -157,7 +157,9 @@
           "name": "operation_costs",
           "type": "PSY.OperationalCost",
           "description": "Fixed and variable O&M costs for a technology",
-          "default": "ThermalGenerationCost()"
+          "default": "ThermalGenerationCost()",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
         },
         {
           "name": "unit_size",
@@ -184,14 +186,16 @@
         {
           "name": "min_generation_fraction",
           "type": "Float64",
-          "description": "Minimum generation as a fraction of total capacity (MW)",
+          "description": "Minimum generation as a fraction of total capacity",
           "default": "0.0"
         },
         {
           "name": "ramp_limits",
           "type": "UpDown",
           "description": "Maximum decrease and increase in output between operation periods. Fraction of nameplate capacity per hour",
-          "default": "(up=1.0, down=1.0)"
+          "default": "(up=1.0, down=1.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":mw_per_min"
         },
         {
           "name": "time_limits",
@@ -515,33 +519,39 @@
           "name": "capital_costs_energy",
           "type": "PSY.ValueCurve",
           "description": "Capital costs for investing in a technology. (USD/MWh)",
-          "default": "LinearCurve(0.0)"
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
         },
         {
           "name": "capital_costs_charge",
           "type": "Union{Nothing, PSY.ValueCurve}",
           "description": "Capital costs for investing in a technology. (USD/MW)",
-          "default": "nothing"
+          "default": "nothing",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
         },
         {
           "name": "capital_costs_discharge",
           "type": "PSY.ValueCurve",
           "description": "Capital costs for investing in a technology. (USD/MW)",
-          "default": "LinearCurve(0.0)"
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
         },
         {
           "name": "operation_costs",
           "type": "PSY.OperationalCost",
           "description": "Fixed and variable O&M costs for a technology",
-          "default": "StorageCost()"
+          "default": "StorageCost()",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
         },
         {
           "name": "min_discharge_fraction",
           "type": "Float64",
           "description": "Minimum discharge as a fraction of total discharge capacity",
-          "default": "0.0",
-          "needs_conversion": true,
-          "conversion_unit": ":mw"
+          "default": "0.0"
         },
         {
           "name": "unit_size_charge",
@@ -609,7 +619,7 @@
           "name": "losses",
           "type": "Float64",
           "description": "Self-discharge of storage (fraction of energy stored per hour)",
-          "default": "0.00"
+          "default": "0.0"
         },
         {
           "name": "lifetime",
@@ -691,8 +701,10 @@
         {
           "name": "price_per_unit",
           "type": "PSY.ValueCurve",
-          "description": "Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers",
-          "default": "LinearCurve(0.0)"
+          "description": "Price or value per unit of energy output. Ex: USD per MMBtu of hydrogen for electrolyzers",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mmbtu"
         },
         {
           "name": "min_power",
@@ -712,7 +724,9 @@
           "name": "curtailment_cost",
           "type": "PSY.ValueCurve",
           "description": "Energy cost of curtailed demand, USD per Mwh",
-          "default": "LinearCurve(0.0)"
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
         },
         {
           "name": "max_demand_curtailment",
@@ -746,7 +760,9 @@
           "name": "shift_variable_cost",
           "type": "PSY.ValueCurve",
           "description": "Variable operation and maintenance costs associated with flexible demand deferral/advancement",
-          "default": "LinearCurve(0.0)"
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
         },
         {
           "name": "requirements",
@@ -829,7 +845,9 @@
           "name": "capital_costs",
           "type": "PSY.ValueCurve",
           "description": "Cost of adding new capacity to the nodal transmission line. (USD/MW)",
-          "default": "LinearCurve(0.0)"
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
         },
         {
           "name": "line_loss",
@@ -923,7 +941,9 @@
           "name": "capital_costs",
           "type": "PSY.ValueCurve",
           "description": "Cost of adding new capacity to the nodal transmission line. (USD/MW)",
-          "default": "LinearCurve(0.0)"
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
         },
         {
           "name": "line_loss",
@@ -1001,19 +1021,25 @@
           "name": "capacity_limits",
           "type": "MinMax",
           "description": "Allowable capacity for a transmission line (MW)",
-          "default": "(min=0, max=1e8)"
+          "default": "(min=0, max=1e8)",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
         },
         {
           "name": "unit_size",
           "type": "Float64",
           "description": "Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)",
-          "default": "1.0"
+          "default": "1.0",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
         },
         {
           "name": "capital_costs",
           "type": "PSY.ValueCurve",
           "description": "Cost of adding new capacity to the nodal transmission line (USD/MW).",
-          "default": "LinearCurve(0.0)"
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
         },
         {
           "name": "resistance",
@@ -1127,13 +1153,17 @@
           "name": "value_of_lost_load",
           "type": "Float64",
           "description": "Value of unserved load (USD/MWh)",
-          "default": "1e8"
+          "default": "1e8",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
         },
         {
           "name": "unserved_demand_curve",
           "type": "PSY.ValueCurve",
           "description": "Piecewise curve to scale the cost of unserved load based on the value of lost load",
-          "default": "LinearCurve(0.0)"
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
         },
         {
           "name": "region",

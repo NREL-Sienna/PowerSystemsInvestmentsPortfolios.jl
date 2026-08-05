@@ -96,12 +96,24 @@ get_power_systems_type(value::NodalACTransportTechnology) = value.power_systems_
 get_start_node(value::NodalACTransportTechnology) = value.start_node
 """Get [`NodalACTransportTechnology`](@ref) `end_node`."""
 get_end_node(value::NodalACTransportTechnology) = value.end_node
-"""Get [`NodalACTransportTechnology`](@ref) `capacity_limits`."""
-get_capacity_limits(value::NodalACTransportTechnology) = value.capacity_limits
-"""Get [`NodalACTransportTechnology`](@ref) `unit_size`."""
-get_unit_size(value::NodalACTransportTechnology) = value.unit_size
-"""Get [`NodalACTransportTechnology`](@ref) `capital_costs`."""
-get_capital_costs(value::NodalACTransportTechnology) = value.capital_costs
+"""Get [`NodalACTransportTechnology`](@ref) `capacity_limits` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capacity_limits_unitful`](@ref)."""
+get_capacity_limits(value::NodalACTransportTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capacity_limits), Val(:mw), units))
+"""Get [`NodalACTransportTechnology`](@ref) `capacity_limits` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capacity_limits`](@ref)."""
+get_capacity_limits_unitful(value::NodalACTransportTechnology, units) = get_value(value, Val(:capacity_limits), Val(:mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capacity_limits), ::Type{NodalACTransportTechnology{T}}) where {T <: PSY.Device} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capacity_limits_unitful), ::Type{NodalACTransportTechnology{T}}) where {T <: PSY.Device} = InfrastructureSystems.NU
+"""Get [`NodalACTransportTechnology`](@ref) `unit_size` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_unit_size_unitful`](@ref)."""
+get_unit_size(value::NodalACTransportTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:unit_size), Val(:mw), units))
+"""Get [`NodalACTransportTechnology`](@ref) `unit_size` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_unit_size`](@ref)."""
+get_unit_size_unitful(value::NodalACTransportTechnology, units) = get_value(value, Val(:unit_size), Val(:mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_unit_size), ::Type{NodalACTransportTechnology{T}}) where {T <: PSY.Device} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_unit_size_unitful), ::Type{NodalACTransportTechnology{T}}) where {T <: PSY.Device} = InfrastructureSystems.NU
+"""Get [`NodalACTransportTechnology`](@ref) `capital_costs` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capital_costs_unitful`](@ref)."""
+get_capital_costs(value::NodalACTransportTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capital_costs), Val(:usd_per_mw), units))
+"""Get [`NodalACTransportTechnology`](@ref) `capital_costs` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capital_costs`](@ref)."""
+get_capital_costs_unitful(value::NodalACTransportTechnology, units) = get_value(value, Val(:capital_costs), Val(:usd_per_mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs), ::Type{NodalACTransportTechnology{T}}) where {T <: PSY.Device} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_unitful), ::Type{NodalACTransportTechnology{T}}) where {T <: PSY.Device} = InfrastructureSystems.NU
 """Get [`NodalACTransportTechnology`](@ref) `resistance` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_resistance_unitful`](@ref)."""
 get_resistance(value::NodalACTransportTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:resistance), Val(:ohm), units))
 """Get [`NodalACTransportTechnology`](@ref) `resistance` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_resistance`](@ref)."""
@@ -142,11 +154,11 @@ set_start_node!(value::NodalACTransportTechnology, val) = value.start_node = val
 """Set [`NodalACTransportTechnology`](@ref) `end_node`."""
 set_end_node!(value::NodalACTransportTechnology, val) = value.end_node = val
 """Set [`NodalACTransportTechnology`](@ref) `capacity_limits`."""
-set_capacity_limits!(value::NodalACTransportTechnology, val) = value.capacity_limits = val
+set_capacity_limits!(value::NodalACTransportTechnology, val) = value.capacity_limits = set_value(value, Val(:capacity_limits), val, Val(:mw))
 """Set [`NodalACTransportTechnology`](@ref) `unit_size`."""
-set_unit_size!(value::NodalACTransportTechnology, val) = value.unit_size = val
+set_unit_size!(value::NodalACTransportTechnology, val) = value.unit_size = set_value(value, Val(:unit_size), val, Val(:mw))
 """Set [`NodalACTransportTechnology`](@ref) `capital_costs`."""
-set_capital_costs!(value::NodalACTransportTechnology, val) = value.capital_costs = val
+set_capital_costs!(value::NodalACTransportTechnology, val) = value.capital_costs = set_value(value, Val(:capital_costs), val, Val(:usd_per_mw))
 """Set [`NodalACTransportTechnology`](@ref) `resistance`."""
 set_resistance!(value::NodalACTransportTechnology, val) = value.resistance = set_value(value, Val(:resistance), val, Val(:ohm))
 """Set [`NodalACTransportTechnology`](@ref) `voltage`."""

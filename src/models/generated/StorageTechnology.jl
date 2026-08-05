@@ -57,7 +57,7 @@ Candidate storage technology in a region.
 - `capacity_limits_energy::MinMax`: (default: `(min=0,max=1e8)`) allowable installed energy capacity for a storage technology (MWh)
 - `duration_limits::MinMax`: (default: `(min=0,max=1000.0)`) Minimum and maximum duration limits (energy to discharge capacity ratio) for a storage technology (hours)
 - `efficiency::InOut`: (default: `(in=1, out=1)`) Efficiency of charging storage, fraction of total charge (in) and discharge (out) capacity
-- `losses::Float64`: (default: `0.00`) Self-discharge of storage (fraction of energy stored per hour)
+- `losses::Float64`: (default: `0.0`) Self-discharge of storage (fraction of energy stored per hour)
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
 - `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
 - `financial_data::TechnologyFinancialData`: Struct containing relevant financial information for a technology
@@ -120,7 +120,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
 end
 
 
-function StorageTechnology{T}(; name, region=Vector(), id, available, power_systems_type, prime_mover_type=PrimeMovers.OT, storage_tech=StorageTech.OTHER_CHEM, capital_costs_energy=LinearCurve(0.0), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), operation_costs=StorageCost(), min_discharge_fraction=0.0, unit_size_charge=nothing, unit_size_discharge=0.0, unit_size_energy=0.0, capacity_limits_charge=nothing, capacity_limits_discharge=(min=0,max=1e8), capacity_limits_energy=(min=0,max=1e8), duration_limits=(min=0,max=1000.0), efficiency=(in=1, out=1), losses=0.00, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Storage
+function StorageTechnology{T}(; name, region=Vector(), id, available, power_systems_type, prime_mover_type=PrimeMovers.OT, storage_tech=StorageTech.OTHER_CHEM, capital_costs_energy=LinearCurve(0.0), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), operation_costs=StorageCost(), min_discharge_fraction=0.0, unit_size_charge=nothing, unit_size_discharge=0.0, unit_size_energy=0.0, capacity_limits_charge=nothing, capacity_limits_discharge=(min=0,max=1e8), capacity_limits_energy=(min=0,max=1e8), duration_limits=(min=0,max=1000.0), efficiency=(in=1, out=1), losses=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Storage
     StorageTechnology{T}(name, region, id, available, power_systems_type, prime_mover_type, storage_tech, capital_costs_energy, capital_costs_charge, capital_costs_discharge, operation_costs, min_discharge_fraction, unit_size_charge, unit_size_discharge, unit_size_energy, capacity_limits_charge, capacity_limits_discharge, capacity_limits_energy, duration_limits, efficiency, losses, lifetime, requirements, financial_data, ext, internal, )
 end
 
@@ -138,20 +138,32 @@ get_power_systems_type(value::StorageTechnology) = value.power_systems_type
 get_prime_mover_type(value::StorageTechnology) = value.prime_mover_type
 """Get [`StorageTechnology`](@ref) `storage_tech`."""
 get_storage_tech(value::StorageTechnology) = value.storage_tech
-"""Get [`StorageTechnology`](@ref) `capital_costs_energy`."""
-get_capital_costs_energy(value::StorageTechnology) = value.capital_costs_energy
-"""Get [`StorageTechnology`](@ref) `capital_costs_charge`."""
-get_capital_costs_charge(value::StorageTechnology) = value.capital_costs_charge
-"""Get [`StorageTechnology`](@ref) `capital_costs_discharge`."""
-get_capital_costs_discharge(value::StorageTechnology) = value.capital_costs_discharge
-"""Get [`StorageTechnology`](@ref) `operation_costs`."""
-get_operation_costs(value::StorageTechnology) = value.operation_costs
-"""Get [`StorageTechnology`](@ref) `min_discharge_fraction` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_min_discharge_fraction_unitful`](@ref)."""
-get_min_discharge_fraction(value::StorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:min_discharge_fraction), Val(:mw), units))
-"""Get [`StorageTechnology`](@ref) `min_discharge_fraction` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_min_discharge_fraction`](@ref)."""
-get_min_discharge_fraction_unitful(value::StorageTechnology, units) = get_value(value, Val(:min_discharge_fraction), Val(:mw), units)
-InfrastructureSystems.display_units_arg(::typeof(get_min_discharge_fraction), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
-InfrastructureSystems.display_units_arg(::typeof(get_min_discharge_fraction_unitful), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
+"""Get [`StorageTechnology`](@ref) `capital_costs_energy` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capital_costs_energy_unitful`](@ref)."""
+get_capital_costs_energy(value::StorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capital_costs_energy), Val(:usd_per_mwh), units))
+"""Get [`StorageTechnology`](@ref) `capital_costs_energy` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capital_costs_energy`](@ref)."""
+get_capital_costs_energy_unitful(value::StorageTechnology, units) = get_value(value, Val(:capital_costs_energy), Val(:usd_per_mwh), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_energy), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_energy_unitful), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
+"""Get [`StorageTechnology`](@ref) `capital_costs_charge` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capital_costs_charge_unitful`](@ref)."""
+get_capital_costs_charge(value::StorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capital_costs_charge), Val(:usd_per_mw), units))
+"""Get [`StorageTechnology`](@ref) `capital_costs_charge` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capital_costs_charge`](@ref)."""
+get_capital_costs_charge_unitful(value::StorageTechnology, units) = get_value(value, Val(:capital_costs_charge), Val(:usd_per_mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_charge), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_charge_unitful), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
+"""Get [`StorageTechnology`](@ref) `capital_costs_discharge` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capital_costs_discharge_unitful`](@ref)."""
+get_capital_costs_discharge(value::StorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capital_costs_discharge), Val(:usd_per_mw), units))
+"""Get [`StorageTechnology`](@ref) `capital_costs_discharge` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capital_costs_discharge`](@ref)."""
+get_capital_costs_discharge_unitful(value::StorageTechnology, units) = get_value(value, Val(:capital_costs_discharge), Val(:usd_per_mw), units)
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_discharge), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_discharge_unitful), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
+"""Get [`StorageTechnology`](@ref) `operation_costs` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_operation_costs_unitful`](@ref)."""
+get_operation_costs(value::StorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:operation_costs), Val(:usd_per_mwh), units))
+"""Get [`StorageTechnology`](@ref) `operation_costs` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_operation_costs`](@ref)."""
+get_operation_costs_unitful(value::StorageTechnology, units) = get_value(value, Val(:operation_costs), Val(:usd_per_mwh), units)
+InfrastructureSystems.display_units_arg(::typeof(get_operation_costs), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
+InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_unitful), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
+"""Get [`StorageTechnology`](@ref) `min_discharge_fraction`."""
+get_min_discharge_fraction(value::StorageTechnology) = value.min_discharge_fraction
 """Get [`StorageTechnology`](@ref) `unit_size_charge` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_unit_size_charge_unitful`](@ref)."""
 get_unit_size_charge(value::StorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:unit_size_charge), Val(:mw), units))
 """Get [`StorageTechnology`](@ref) `unit_size_charge` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_unit_size_charge`](@ref)."""
@@ -228,15 +240,15 @@ set_prime_mover_type!(value::StorageTechnology, val) = value.prime_mover_type = 
 """Set [`StorageTechnology`](@ref) `storage_tech`."""
 set_storage_tech!(value::StorageTechnology, val) = value.storage_tech = val
 """Set [`StorageTechnology`](@ref) `capital_costs_energy`."""
-set_capital_costs_energy!(value::StorageTechnology, val) = value.capital_costs_energy = val
+set_capital_costs_energy!(value::StorageTechnology, val) = value.capital_costs_energy = set_value(value, Val(:capital_costs_energy), val, Val(:usd_per_mwh))
 """Set [`StorageTechnology`](@ref) `capital_costs_charge`."""
-set_capital_costs_charge!(value::StorageTechnology, val) = value.capital_costs_charge = val
+set_capital_costs_charge!(value::StorageTechnology, val) = value.capital_costs_charge = set_value(value, Val(:capital_costs_charge), val, Val(:usd_per_mw))
 """Set [`StorageTechnology`](@ref) `capital_costs_discharge`."""
-set_capital_costs_discharge!(value::StorageTechnology, val) = value.capital_costs_discharge = val
+set_capital_costs_discharge!(value::StorageTechnology, val) = value.capital_costs_discharge = set_value(value, Val(:capital_costs_discharge), val, Val(:usd_per_mw))
 """Set [`StorageTechnology`](@ref) `operation_costs`."""
-set_operation_costs!(value::StorageTechnology, val) = value.operation_costs = val
+set_operation_costs!(value::StorageTechnology, val) = value.operation_costs = set_value(value, Val(:operation_costs), val, Val(:usd_per_mwh))
 """Set [`StorageTechnology`](@ref) `min_discharge_fraction`."""
-set_min_discharge_fraction!(value::StorageTechnology, val) = value.min_discharge_fraction = set_value(value, Val(:min_discharge_fraction), val, Val(:mw))
+set_min_discharge_fraction!(value::StorageTechnology, val) = value.min_discharge_fraction = val
 """Set [`StorageTechnology`](@ref) `unit_size_charge`."""
 set_unit_size_charge!(value::StorageTechnology, val) = value.unit_size_charge = set_value(value, Val(:unit_size_charge), val, Val(:mw))
 """Set [`StorageTechnology`](@ref) `unit_size_discharge`."""

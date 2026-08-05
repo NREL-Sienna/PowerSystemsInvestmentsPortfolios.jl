@@ -24,6 +24,7 @@ struct CostCategory <: UnitCategory end
 struct FuelCategory <: UnitCategory end
 struct FuelConsumptionEnergyCategory <: UnitCategory end
 struct FuelConsumptionPowerCategory <: UnitCategory end
+struct EmissionsCategory <: UnitCategory end
 struct FuelCurveCategory <: UnitCategory end
 struct PowerCostCategory <: UnitCategory end
 struct EnergyCostCategory <: UnitCategory end
@@ -31,6 +32,7 @@ struct FuelCostCategory <: UnitCategory end
 struct OPSTimeCategory <: UnitCategory end
 struct INVTimeCategory <: UnitCategory end
 struct EnergyCategory <: UnitCategory end
+struct RampingCategory <: UnitCategory end
 
 const POWER = PowerCategory()
 const IMPEDANCE = ImpedanceCategory()
@@ -41,6 +43,7 @@ const COST = CostCategory()
 const FUEL = FuelCategory()
 const FUEL_CONSUMPTION_ENERGY = FuelConsumptionEnergyCategory()
 const FUEL_CONSUMPTION_POWER = FuelConsumptionPowerCategory()
+const EMISSIONS = EmissionsCategory()
 const FUEL_CURVE = FuelCurveCategory()
 const POWER_COST = PowerCostCategory()
 const ENERGY_COST = EnergyCostCategory()
@@ -48,6 +51,7 @@ const FUEL_COST = FuelCostCategory()
 const OPS_TIME = OPSTimeCategory()
 const INV_TIME = INVTimeCategory()
 const ENERGY = EnergyCategory()
+const RAMPING = RampingCategory()
 
 const FuelCurveUnits = NamedTuple{
     (:energy_unit, :fuel_unit, :currency_unit),
@@ -69,6 +73,7 @@ natural_unit(::CurrentCategory) = u"kA"
 natural_unit(::OPSTimeCategory) = u"hr"
 natural_unit(::INVTimeCategory) = u"yr"
 natural_unit(::EnergyCategory) = natural_unit(POWER) * natural_unit(OPS_TIME)
+natural_unit(::RampingCategory) = u"MW/minute"
 
 natural_unit(::CostCategory) = USD
 natural_unit(::PowerCostCategory) = (x_unit=u"MW", y_unit=USD)
@@ -77,6 +82,7 @@ natural_unit(::EnergyCostCategory) = (x_unit=u"MW" * u"hr", y_unit=USD)
 natural_unit(::FuelCategory) = MMBtu
 natural_unit(::FuelConsumptionEnergyCategory) = (x_unit=u"MW" * u"hr", y_unit=MMBtu)
 natural_unit(::FuelConsumptionPowerCategory) = (x_unit=u"MW", y_unit=MMBtu)
+natural_unit(::EmissionsCategory) = tonne / MMBtu
 natural_unit(::FuelCostCategory) = (x_unit=MMBtu, y_unit=USD)
 natural_unit(::FuelCurveCategory) =
     (energy_unit=u"MW" * u"hr", fuel_unit=MMBtu, currency_unit=USD)
