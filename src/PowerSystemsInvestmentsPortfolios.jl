@@ -43,7 +43,7 @@ import StringEncodings
 import HDF5
 import Tables
 import Unitful
-using Unitful: @dimension, @u_str, @refunit, @unit, Quantity, Units, uconvert, ustrip
+using Unitful: @dimension, @u_str, @refunit, @unit, Quantity, Units, uconvert, ustrip, unit
 
 export Portfolio
 export Requirement

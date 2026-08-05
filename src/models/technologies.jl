@@ -39,7 +39,7 @@ supports_time_series(::Technology) = true
     get_value(t::Technology, field::Val, conversion_unit::Val, units) -> value
 
 Get `t`'s field value, converting from our default natural units to `units`.
-Returns a `Unitful.Quantity`. Public getters can wrap this in `_strip_units` 
+Returns a `Unitful.Quantity`. Public getters can wrap this in `_strip_units`
 for the bare-number form, with `_unitful` companions returning the wrapped value.
 """
 function get_value(t::Technology, field::Val{T}, from, to) where {T}
@@ -54,16 +54,23 @@ Set `t`'s field value, converting from `val`'s units to our default natural unit
 Returns the value in natural units.
 """
 # ---- From Unitful.Quantity (natural units): inverse conversion ----
-function set_value(t::Technology, field, value::Quantity, to)
-    return _natural_unit_conversions(t, ustrip(value), unit(value), to)
+function set_value(t::Technology, field, value::Quantity, to::Val)
+    return IS._strip_units(
+        _natural_unit_conversions(
+            t,
+            ustrip(value),
+            unit(value),
+            natural_unit(_unit_category(to)),
+        ),
+    )
 end
 
 # ---- From Number (assuming natural units) ----
 function set_value(t::Technology, field, value, to::Val)
     units = natural_unit(_unit_category(to))
     @warn "Setting a field with a bare number. Assuming units of $units."
-    return _natural_unit_conversions(t, value, units, units)
-end 
+    return value
+end
 
 # _set_value(t::Technology, val::Quantity, cu::Val) =
 #     IS._strip_units(convert_units(t, val, cu, cu))

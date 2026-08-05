@@ -9,7 +9,12 @@
 #######################################################
 
 # ----Function Data----
-function _natural_unit_conversions(base, v::LinearFunctionData, from::ConversionUnits, to::ConversionUnits)
+function _natural_unit_conversions(
+    base,
+    v::LinearFunctionData,
+    from::ConversionUnits,
+    to::ConversionUnits,
+)
     from_proportional = from.y_unit / from.x_unit
     from_constant = from.y_unit
 
@@ -30,7 +35,12 @@ function _natural_unit_conversions(base, v::LinearFunctionData, from::Conversion
     )
 end
 
-function _natural_unit_conversions(base, v::QuadraticFunctionData, from::ConversionUnits, to::ConversionUnits)
+function _natural_unit_conversions(
+    base,
+    v::QuadraticFunctionData,
+    from::ConversionUnits,
+    to::ConversionUnits,
+)
     from_quadratic = from.y_unit / (from.x_unit^2)
     from_proportional = from.y_unit / from.x_unit
     from_constant = from.y_unit
@@ -56,7 +66,12 @@ function _natural_unit_conversions(base, v::QuadraticFunctionData, from::Convers
     )
 end
 
-function _natural_unit_conversions(base, v::PiecewiseLinearData, from::ConversionUnits, to::ConversionUnits)
+function _natural_unit_conversions(
+    base,
+    v::PiecewiseLinearData,
+    from::ConversionUnits,
+    to::ConversionUnits,
+)
     data = get_points(v)
     return PiecewiseLinearData([
         (
@@ -66,7 +81,12 @@ function _natural_unit_conversions(base, v::PiecewiseLinearData, from::Conversio
     ])
 end
 
-function _natural_unit_conversions(base, v::PiecewiseStepData, from::ConversionUnits, to::ConversionUnits)
+function _natural_unit_conversions(
+    base,
+    v::PiecewiseStepData,
+    from::ConversionUnits,
+    to::ConversionUnits,
+)
     return PiecewiseStepData(
         [
             IS._strip_units(_natural_unit_conversions(base, x, from.x_unit, to.x_unit)) for
@@ -86,7 +106,12 @@ function _natural_unit_conversions(base, v::PiecewiseStepData, from::ConversionU
 end
 
 # ---- ValueCurves ----
-function _natural_unit_conversions(base, v::InputOutputCurve, from::ConversionUnits, to::ConversionUnits)
+function _natural_unit_conversions(
+    base,
+    v::InputOutputCurve,
+    from::ConversionUnits,
+    to::ConversionUnits,
+)
     return InputOutputCurve(
         _natural_unit_conversions(base, v.function_data, from, to),
         isa(v.input_at_zero, Float64) ?
@@ -96,7 +121,12 @@ function _natural_unit_conversions(base, v::InputOutputCurve, from::ConversionUn
     )
 end
 
-function _natural_unit_conversions(base, v::IncrementalCurve, from::ConversionUnits, to::ConversionUnits)
+function _natural_unit_conversions(
+    base,
+    v::IncrementalCurve,
+    from::ConversionUnits,
+    to::ConversionUnits,
+)
     return IncrementalCurve(
         _natural_unit_conversions(base, v.function_data, from, to),
         IS._strip_units(
@@ -108,7 +138,12 @@ function _natural_unit_conversions(base, v::IncrementalCurve, from::ConversionUn
     )
 end
 
-function _natural_unit_conversions(base, v::AverageRateCurve, from::ConversionUnits, to::ConversionUnits)
+function _natural_unit_conversions(
+    base,
+    v::AverageRateCurve,
+    from::ConversionUnits,
+    to::ConversionUnits,
+)
     return AverageRateCurve(
         _natural_unit_conversions(base, v.function_data, from, to),
         IS._strip_units(
@@ -121,7 +156,12 @@ function _natural_unit_conversions(base, v::AverageRateCurve, from::ConversionUn
 end
 
 # ---- CostCurve ----
-function _natural_unit_conversions(base, v::CostCurve, from::ConversionUnits, to::ConversionUnits)
+function _natural_unit_conversions(
+    base,
+    v::CostCurve,
+    from::ConversionUnits,
+    to::ConversionUnits,
+)
     return CostCurve(
         _natural_unit_conversions(base, v.value_curve, from, to),
         _natural_unit_conversions(base, v.vom_cost, from, to),
@@ -129,7 +169,12 @@ function _natural_unit_conversions(base, v::CostCurve, from::ConversionUnits, to
 end
 
 # ---- FuelCurve ----
-function _natural_unit_conversions(base, v::FuelCurve, from::FuelCurveUnits, to::FuelCurveUnits)
+function _natural_unit_conversions(
+    base,
+    v::FuelCurve,
+    from::FuelCurveUnits,
+    to::FuelCurveUnits,
+)
     # Construct conversion units for fields of FuelCurve
     from_fuel_consumption = (x_unit=from.energy_unit, y_unit=from.fuel_unit)
     from_vom_cost = (x_unit=from.energy_unit, y_unit=from.currency_unit)
@@ -161,16 +206,21 @@ function _natural_unit_conversions(base, v::FuelCurve, from::FuelCurveUnits, to:
 end
 
 # ---- OperationalCost Structs ----
-function _natural_unit_conversions(base, v::ThermalGenerationCost, from::FuelCurveUnits, to::FuelCurveUnits)
+function _natural_unit_conversions(
+    base,
+    v::ThermalGenerationCost,
+    from::FuelCurveUnits,
+    to::FuelCurveUnits,
+)
     if isa(get_variable(v), CostCurve)
         @error "Variable Cost is a CostCurve. Use ConversionUnits for conversion."
     end
     start_up = _natural_unit_conversions(
-            base,
-            get_start_up(v),
-            from.currency_unit / from.energy_unit,
-            to.currency_unit / to.energy_unit,
-        )
+        base,
+        get_start_up(v),
+        from.currency_unit / from.energy_unit,
+        to.currency_unit / to.energy_unit,
+    )
     return ThermalGenerationCost(
         _natural_unit_conversions(base, v.variable, from, to),
         IS._strip_units(
@@ -193,17 +243,22 @@ function _natural_unit_conversions(base, v::ThermalGenerationCost, from::FuelCur
     )
 end
 
-function _natural_unit_conversions(base, v::ThermalGenerationCost, from::ConversionUnits, to::ConversionUnits)
+function _natural_unit_conversions(
+    base,
+    v::ThermalGenerationCost,
+    from::ConversionUnits,
+    to::ConversionUnits,
+)
     if isa(get_variable(v), FuelCurve)
         @error "Variable Cost is a FuelCurve. Use FuelCurveUnits for conversion."
     end
 
     start_up = _natural_unit_conversions(
-            base,
-            get_start_up(v),
-            from.y_unit / from.x_unit,
-            to.y_unit / to.x_unit,
-        )
+        base,
+        get_start_up(v),
+        from.y_unit / from.x_unit,
+        to.y_unit / to.x_unit,
+    )
     return ThermalGenerationCost(
         _natural_unit_conversions(base, v.variable, from, to),
         IS._strip_units(
@@ -226,7 +281,12 @@ function _natural_unit_conversions(base, v::ThermalGenerationCost, from::Convers
     )
 end
 
-function _natural_unit_conversions(base, v::HydroGenerationCost, from::ConversionUnits, to::ConversionUnits)
+function _natural_unit_conversions(
+    base,
+    v::HydroGenerationCost,
+    from::ConversionUnits,
+    to::ConversionUnits,
+)
     return HydroGenerationCost(
         _natural_unit_conversions(base, v.variable, from, to),
         IS._strip_units(
@@ -240,15 +300,20 @@ function _natural_unit_conversions(base, v::HydroGenerationCost, from::Conversio
     )
 end
 
-function _natural_unit_conversions(base, v::StorageCost, from::ConversionUnits, to::ConversionUnits)
+function _natural_unit_conversions(
+    base,
+    v::StorageCost,
+    from::ConversionUnits,
+    to::ConversionUnits,
+)
     start_up = IS._strip_units(
-            _natural_unit_conversions(
-                base,
-                get_start_up(v),
-                from.y_unit / from.x_unit,
-                to.y_unit / to.x_unit,
-            ),
-        )
+        _natural_unit_conversions(
+            base,
+            get_start_up(v),
+            from.y_unit / from.x_unit,
+            to.y_unit / to.x_unit,
+        ),
+    )
     return StorageCost(
         _natural_unit_conversions(base, v.charge_variable_cost, from, to),
         _natural_unit_conversions(base, v.discharge_variable_cost, from, to),
