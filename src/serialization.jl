@@ -495,9 +495,10 @@ end
 
 function deserialize_components!(portfolio::Portfolio, raw)
     # Convert the array of components into type-specific arrays to allow addition by type.
-    # Need to maintain an order here and deserialize regions first so they can
-    # be referenced when deserializing technologies
+    # Maintain dependency order so referenced components exist before technologies
+    # are constructed. Technologies may reference both regions and requirements.
     technologies = OrderedDict{Type, Vector{Dict}}()
+    requirements = OrderedDict{Type, Vector{Dict}}()
     regions = OrderedDict{Type, Vector{Dict}}()
     for component in raw["components"]
         type = IS.get_type_from_serialization_data(component)
@@ -506,6 +507,12 @@ function deserialize_components!(portfolio::Portfolio, raw)
             if components === nothing
                 components = Vector{Dict}()
                 regions[type] = components
+            end
+        elseif type <: Requirement
+            components = get(requirements, type, nothing)
+            if components === nothing
+                components = Vector{Dict}()
+                requirements[type] = components
             end
         else
             components = get(technologies, type, nothing)
@@ -516,7 +523,7 @@ function deserialize_components!(portfolio::Portfolio, raw)
         end
         push!(components, component)
     end
-    data = merge(regions, technologies)
+    data = merge(regions, requirements, technologies)
 
     # Add each type to this as we parse.
     parsed_types = Set()
