@@ -46,7 +46,7 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `cofire_start_limits::Dict{ThermalFuels, MinMax}`: (default: `Dict()`) Minimum and maximum blending level (%) of each fuel during start-up process for multi-fuel generator
 - `cofire_level_limits::Dict{ThermalFuels, MinMax}`: (default: `Dict()`) Minimum and maximum blending level (%) of each fuel during normal generation process for multi-fuel generator
 - `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
-- `operation_costs::PSY.OperationalCost`: (default: `ThermalGenerationCost()`) Fixed and variable O&M costs for a technology
+- `operation_costs::PSY.OperationalCost`: (default: `ThermalGenerationCost(nothing)`) Fixed and variable O&M costs for a technology
 - `unit_size::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
 - `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Minimum and maximum allowable installed capacity for a technology (MW)
 - `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology. Fraction of hours in a year where technology is unavailable.
@@ -112,7 +112,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
 end
 
 
-function SupplyTechnology{T}(; name, power_systems_type, region=Vector(), id, available=True, prime_mover_type=PrimeMovers.OT, fuel=[ThermalFuels.OTHER], co2=Dict(), cofire_start_limits=Dict(), cofire_level_limits=Dict(), capital_costs=LinearCurve(0.0), operation_costs=ThermalGenerationCost(), unit_size=0.0, capacity_limits=(min=0, max=1e8), outage_factor=1.0, min_generation_fraction=0.0, ramp_limits=(up=1.0, down=1.0), time_limits=(up=1.0, down=1.0), start_fuel_mmbtu_per_mw=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
+function SupplyTechnology{T}(; name, power_systems_type, region=Vector(), id, available=True, prime_mover_type=PrimeMovers.OT, fuel=[ThermalFuels.OTHER], co2=Dict(), cofire_start_limits=Dict(), cofire_level_limits=Dict(), capital_costs=LinearCurve(0.0), operation_costs=ThermalGenerationCost(nothing), unit_size=0.0, capacity_limits=(min=0, max=1e8), outage_factor=1.0, min_generation_fraction=0.0, ramp_limits=(up=1.0, down=1.0), time_limits=(up=1.0, down=1.0), start_fuel_mmbtu_per_mw=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
     SupplyTechnology{T}(name, power_systems_type, region, id, available, prime_mover_type, fuel, co2, cofire_start_limits, cofire_level_limits, capital_costs, operation_costs, unit_size, capacity_limits, outage_factor, min_generation_fraction, ramp_limits, time_limits, start_fuel_mmbtu_per_mw, lifetime, requirements, financial_data, ext, internal, )
 end
 

@@ -49,17 +49,17 @@ Supply Technology that supports a StorageTechnology co-located with wind and sol
 - `id::Int64`: ID for individual generator
 - `available::Bool`: (default: `True`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `capital_costs_solar::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
-- `operation_costs_solar::PSY.OperationalCost`: (default: `ThermalGenerationCost()`) Fixed and variable O&M costs for a technology
+- `operation_costs_solar::PSY.OperationalCost`: (default: `ThermalGenerationCost(nothing)`) Fixed and variable O&M costs for a technology
 - `capacity_limits_solar::MinMax`: (default: `(min=0, max=1e8)`) Maximum allowable installed capacity for a technology (MW)
 - `lifetime_solar::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
 - `capital_costs_wind::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
-- `operation_costs_wind::PSY.OperationalCost`: (default: `ThermalGenerationCost()`) Fixed and variable O&M costs for a technology
+- `operation_costs_wind::PSY.OperationalCost`: (default: `ThermalGenerationCost(nothing)`) Fixed and variable O&M costs for a technology
 - `capacity_limits_wind::MinMax`: (default: `(min=0, max=1e8)`) Maximum allowable installed capacity for a technology (MW)
 - `lifetime_wind::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
 - `capital_costs_energy::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a storage technology's energy capacity. (USD/MWh)
 - `capital_costs_power::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a storage technology's charge/discharge capacity. (USD/MW)
-- `operation_costs_energy::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a storage technology
-- `operation_costs_power::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a storage technology
+- `operation_costs_energy::PSY.OperationalCost`: (default: `StorageCost(nothing)`) Fixed and variable O&M costs for a storage technology
+- `operation_costs_power::PSY.OperationalCost`: (default: `StorageCost(nothing)`) Fixed and variable O&M costs for a storage technology
 - `capacity_power_limits::MinMax`: (default: `(min=0,max=1e8)`) allowable installed power capacity for a storage technology (MW)
 - `capacity_energy_limits::MinMax`: (default: `(min=0,max=1e8)`) allowable installed energy capacity for a storage technology (MWh)
 - `duration_limits::MinMax`: (default: `(min=0,max=1000)`) Minimum required duration for a storage technology (hours)
@@ -144,7 +144,7 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: ResourceT
 end
 
 
-function ColocatedSupplyStorageTechnology{T}(; name, power_systems_type, region=Vector(), id, available=True, capital_costs_solar=LinearCurve(0.0), operation_costs_solar=ThermalGenerationCost(), capacity_limits_solar=(min=0, max=1e8), lifetime_solar=100, capital_costs_wind=LinearCurve(0.0), operation_costs_wind=ThermalGenerationCost(), capacity_limits_wind=(min=0, max=1e8), lifetime_wind=100, capital_costs_energy=LinearCurve(0.0), capital_costs_power=LinearCurve(0.0), operation_costs_energy=StorageCost(), operation_costs_power=StorageCost(), capacity_power_limits=(min=0,max=1e8), capacity_energy_limits=(min=0,max=1e8), duration_limits=(min=0,max=1000), efficiency_storage=(in=1, out=1), losses_storage=0.0, lifetime_storage=100, financial_data, max_inverter_capacity=1e8, min_inverter_capacity=1e8, capital_costs_inverter, operation_costs_inverter, inverter_efficiency, inverter_supply_ratio, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
+function ColocatedSupplyStorageTechnology{T}(; name, power_systems_type, region=Vector(), id, available=True, capital_costs_solar=LinearCurve(0.0), operation_costs_solar=ThermalGenerationCost(nothing), capacity_limits_solar=(min=0, max=1e8), lifetime_solar=100, capital_costs_wind=LinearCurve(0.0), operation_costs_wind=ThermalGenerationCost(nothing), capacity_limits_wind=(min=0, max=1e8), lifetime_wind=100, capital_costs_energy=LinearCurve(0.0), capital_costs_power=LinearCurve(0.0), operation_costs_energy=StorageCost(nothing), operation_costs_power=StorageCost(nothing), capacity_power_limits=(min=0,max=1e8), capacity_energy_limits=(min=0,max=1e8), duration_limits=(min=0,max=1000), efficiency_storage=(in=1, out=1), losses_storage=0.0, lifetime_storage=100, financial_data, max_inverter_capacity=1e8, min_inverter_capacity=1e8, capital_costs_inverter, operation_costs_inverter, inverter_efficiency, inverter_supply_ratio, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
     ColocatedSupplyStorageTechnology{T}(name, power_systems_type, region, id, available, capital_costs_solar, operation_costs_solar, capacity_limits_solar, lifetime_solar, capital_costs_wind, operation_costs_wind, capacity_limits_wind, lifetime_wind, capital_costs_energy, capital_costs_power, operation_costs_energy, operation_costs_power, capacity_power_limits, capacity_energy_limits, duration_limits, efficiency_storage, losses_storage, lifetime_storage, financial_data, max_inverter_capacity, min_inverter_capacity, capital_costs_inverter, operation_costs_inverter, inverter_efficiency, inverter_supply_ratio, ext, internal, )
 end
 

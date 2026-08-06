@@ -47,7 +47,7 @@ Candidate storage technology in a region.
 - `capital_costs_energy::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MWh)
 - `capital_costs_charge::Union{Nothing, PSY.ValueCurve}`: (default: `nothing`) Capital costs for investing in a technology. (USD/MW)
 - `capital_costs_discharge::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
-- `operation_costs::PSY.OperationalCost`: (default: `StorageCost()`) Fixed and variable O&M costs for a technology
+- `operation_costs::PSY.OperationalCost`: (default: `StorageCost(nothing)`) Fixed and variable O&M costs for a technology
 - `min_discharge_fraction::Float64`: (default: `0.0`) Minimum discharge as a fraction of total discharge capacity
 - `unit_size_charge::Union{Nothing, Float64}`: (default: `nothing`) Used for discrete investment decisions. Unit size of charging capacity (MW)
 - `unit_size_discharge::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit of discharging capacity being built (MW)
@@ -120,7 +120,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
 end
 
 
-function StorageTechnology{T}(; name, region=Vector(), id, available, power_systems_type, prime_mover_type=PrimeMovers.OT, storage_tech=StorageTech.OTHER_CHEM, capital_costs_energy=LinearCurve(0.0), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), operation_costs=StorageCost(), min_discharge_fraction=0.0, unit_size_charge=nothing, unit_size_discharge=0.0, unit_size_energy=0.0, capacity_limits_charge=nothing, capacity_limits_discharge=(min=0,max=1e8), capacity_limits_energy=(min=0,max=1e8), duration_limits=(min=0,max=1000.0), efficiency=(in=1, out=1), losses=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Storage
+function StorageTechnology{T}(; name, region=Vector(), id, available, power_systems_type, prime_mover_type=PrimeMovers.OT, storage_tech=StorageTech.OTHER_CHEM, capital_costs_energy=LinearCurve(0.0), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), operation_costs=StorageCost(nothing), min_discharge_fraction=0.0, unit_size_charge=nothing, unit_size_discharge=0.0, unit_size_energy=0.0, capacity_limits_charge=nothing, capacity_limits_discharge=(min=0,max=1e8), capacity_limits_energy=(min=0,max=1e8), duration_limits=(min=0,max=1000.0), efficiency=(in=1, out=1), losses=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Storage
     StorageTechnology{T}(name, region, id, available, power_systems_type, prime_mover_type, storage_tech, capital_costs_energy, capital_costs_charge, capital_costs_discharge, operation_costs, min_discharge_fraction, unit_size_charge, unit_size_discharge, unit_size_energy, capacity_limits_charge, capacity_limits_discharge, capacity_limits_energy, duration_limits, efficiency, losses, lifetime, requirements, financial_data, ext, internal, )
 end
 

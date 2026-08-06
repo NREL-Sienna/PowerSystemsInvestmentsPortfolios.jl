@@ -83,41 +83,48 @@ end
 @testset "get_heat_rate / get_fuel_cost / get_variable_cost" begin
     p_5bus = build_portfolio()
     # cheap_thermal uses a FuelCurve — heat_rate and fuel_cost are defined
+    fc_units = (energy_unit=u"MW" * u"hr", fuel_unit=MMBtu, currency_unit=USD)
+    cost_units = (x_unit=u"MW" * u"hr", y_unit=USD)
     thermal = get_technology(SupplyTechnology{ThermalStandard}, p_5bus, "cheap_thermal")
-    @test PSIP.get_heat_rate(thermal) isa Float64
-    @test PSIP.get_heat_rate(thermal) > 0
-    @test PSIP.get_fuel_cost(thermal) isa Float64
-    @test PSIP.get_fuel_cost(thermal) == 1.12
+    @test PSIP.get_heat_rate(thermal, fc_units) isa Float64
+    @test PSIP.get_heat_rate(thermal, fc_units) > 0
+    @test PSIP.get_fuel_cost(thermal, fc_units) isa Float64
+    @test PSIP.get_fuel_cost(thermal, fc_units) == 1.12
 
     # both FuelCurve and CostCurve technologies expose get_variable_cost
     expensive =
         get_technology(SupplyTechnology{ThermalStandard}, p_5bus, "expensive_thermal")
-    @test PSIP.get_variable_cost(expensive) isa Float64
-    @test PSIP.get_variable_cost(thermal) isa Float64
+    @test PSIP.get_variable_cost(expensive, cost_units) isa Float64
+    @test PSIP.get_variable_cost(thermal, fc_units) isa Float64
 end
 
 @testset "get_variable_cost_charge / get_variable_cost_discharge" begin
     p_5bus = build_portfolio()
+
+    cost_units = (x_unit=u"MW" * u"hr", y_unit=USD)
     storage = get_technology(StorageTechnology, p_5bus, "test_storage")
-    @test get_variable_cost_charge(storage) isa Float64
-    @test get_variable_cost_discharge(storage) isa Float64
+    @test get_variable_cost_charge(storage, cost_units) isa Float64
+    @test get_variable_cost_discharge(storage, cost_units) isa Float64
     # storage in 5bus fixture has zero variable costs
-    @test get_variable_cost_charge(storage) == 0.0
-    @test get_variable_cost_discharge(storage) == 0.0
+    @test get_variable_cost_charge(storage, cost_units) == 0.0
+    @test get_variable_cost_discharge(storage, cost_units) == 0.0
 end
 
 @testset "get_fixed_cost / get_fixed_cost_charge / get_fixed_cost_discharge" begin
     p_5bus = build_portfolio()
+
+    fc_units = (energy_unit=u"MW" * u"hr", fuel_unit=MMBtu, currency_unit=USD)
+    cost_units = (x_unit=u"MW" * u"hr", y_unit=USD)
     thermal = get_technology(SupplyTechnology{ThermalStandard}, p_5bus, "cheap_thermal")
     wind = get_technology(SupplyTechnology{RenewableDispatch}, p_5bus, "wind")
     storage = get_technology(StorageTechnology, p_5bus, "test_storage")
 
-    @test get_fixed_cost(thermal) isa Float64
-    @test get_fixed_cost(wind) isa Float64
-    @test get_fixed_cost(storage) isa Float64
+    @test get_fixed_cost(thermal, fc_units) isa Float64
+    @test get_fixed_cost(wind, cost_units) isa Float64
+    @test get_fixed_cost(storage, cost_units) isa Float64
 
-    @test get_fixed_cost_charge(storage) isa Float64
-    @test get_fixed_cost_discharge(storage) isa Float64
+    @test get_fixed_cost_charge(storage, cost_units) isa Float64
+    @test get_fixed_cost_discharge(storage, cost_units) isa Float64
 end
 
 @testset "get_wacc" begin

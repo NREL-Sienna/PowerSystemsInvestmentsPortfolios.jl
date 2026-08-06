@@ -109,7 +109,7 @@ function update_or_create_new_generator!(
         set_rating!(gen, new_cap * MW)
         existing_min_power, existing_max_power = PSY.get_active_power_limits(gen, u"MW")
         new_max_power = existing_max_power + capacity
-        new_limits = (min=existing_min_power*MW, max=new_max_power*MW)
+        new_limits = (min=existing_min_power * MW, max=new_max_power * MW)
         PSY.set_active_power_limits!(gen, new_limits)
         return
     else

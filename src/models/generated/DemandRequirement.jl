@@ -14,7 +14,7 @@ This file is auto-generated. Do not edit.
         new_construction_year::Int64
         growth_rate::Float64
         conformity::PSY.LoadConformity
-        value_of_lost_load::PSY.ValueCurve
+        value_of_lost_load::Float64
         unserved_demand_curve::PSY.ValueCurve
         region::Vector{RegionTopology}
         requirements::Vector{Requirement}
@@ -33,7 +33,7 @@ Demand requirements for a region.
 - `new_construction_year::Int64`: (default: `2020`) The year in which the new demand requirement will be installed. Should only be used for new demand requirements.
 - `growth_rate::Float64`: (default: `0.0`) The annual growth rate of the demand requirement, used to scale present-day loads into future projections. Should only be used for conforming loads
 - `conformity::PSY.LoadConformity`: (default: `PSY.LoadConformity.UNDEFINED`) Indicator of how the demand requirement should conform to the load profile of existing technologies in the system. Should only be used for new demand requirements.
-- `value_of_lost_load::PSY.ValueCurve`: (default: `LinearCurve(1e8)`) Value of unserved load (USD/MWh)
+- `value_of_lost_load::Float64`: (default: `1e8`) Value of unserved load (USD/MWh)
 - `unserved_demand_curve::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Piecewise curve to scale the cost of unserved load based on the value of lost load
 - `region::Vector{RegionTopology}`: (default: `Vector()`) Zone or node where the demand requirement is located
 - `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
@@ -58,7 +58,7 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
     "Indicator of how the demand requirement should conform to the load profile of existing technologies in the system. Should only be used for new demand requirements."
     conformity::PSY.LoadConformity
     "Value of unserved load (USD/MWh)"
-    value_of_lost_load::PSY.ValueCurve
+    value_of_lost_load::Float64
     "Piecewise curve to scale the cost of unserved load based on the value of lost load"
     unserved_demand_curve::PSY.ValueCurve
     "Zone or node where the demand requirement is located"
@@ -72,7 +72,7 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
 end
 
 
-function DemandRequirement{T}(; name, available=true, id, power_systems_type, new_demand_mw=0.0, new_construction_year=2020, growth_rate=0.0, conformity=PSY.LoadConformity.UNDEFINED, value_of_lost_load=LinearCurve(1e8), unserved_demand_curve=LinearCurve(0.0), region=Vector(), requirements=Vector(), ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.StaticInjection
+function DemandRequirement{T}(; name, available=true, id, power_systems_type, new_demand_mw=0.0, new_construction_year=2020, growth_rate=0.0, conformity=PSY.LoadConformity.UNDEFINED, value_of_lost_load=1e8, unserved_demand_curve=LinearCurve(0.0), region=Vector(), requirements=Vector(), ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.StaticInjection
     DemandRequirement{T}(name, available, id, power_systems_type, new_demand_mw, new_construction_year, growth_rate, conformity, value_of_lost_load, unserved_demand_curve, region, requirements, ext, internal, )
 end
 
@@ -97,9 +97,9 @@ get_growth_rate(value::DemandRequirement) = value.growth_rate
 """Get [`DemandRequirement`](@ref) `conformity`."""
 get_conformity(value::DemandRequirement) = value.conformity
 """Get [`DemandRequirement`](@ref) `value_of_lost_load` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_value_of_lost_load_unitful`](@ref)."""
-get_value_of_lost_load(value::DemandRequirement, units) = InfrastructureSystems._strip_units(get_value(value, Val(:value_of_lost_load), Val(:usd_per_mwh), units))
+get_value_of_lost_load(value::DemandRequirement, units) = InfrastructureSystems._strip_units(get_value(value, Val(:value_of_lost_load), Val(:usd_per_mwh_scalar), units))
 """Get [`DemandRequirement`](@ref) `value_of_lost_load` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_value_of_lost_load`](@ref)."""
-get_value_of_lost_load_unitful(value::DemandRequirement, units) = get_value(value, Val(:value_of_lost_load), Val(:usd_per_mwh), units)
+get_value_of_lost_load_unitful(value::DemandRequirement, units) = get_value(value, Val(:value_of_lost_load), Val(:usd_per_mwh_scalar), units)
 InfrastructureSystems.display_units_arg(::typeof(get_value_of_lost_load), ::Type{DemandRequirement{T}}) where {T <: PSY.StaticInjection} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_value_of_lost_load_unitful), ::Type{DemandRequirement{T}}) where {T <: PSY.StaticInjection} = InfrastructureSystems.NU
 """Get [`DemandRequirement`](@ref) `unserved_demand_curve` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_unserved_demand_curve_unitful`](@ref)."""
@@ -134,7 +134,7 @@ set_growth_rate!(value::DemandRequirement, val) = value.growth_rate = val
 """Set [`DemandRequirement`](@ref) `conformity`."""
 set_conformity!(value::DemandRequirement, val) = value.conformity = val
 """Set [`DemandRequirement`](@ref) `value_of_lost_load`."""
-set_value_of_lost_load!(value::DemandRequirement, val, unit) = value.value_of_lost_load = set_value(value, Val(:value_of_lost_load), val, unit, Val(:usd_per_mwh))
+set_value_of_lost_load!(value::DemandRequirement, val, unit) = value.value_of_lost_load = set_value(value, Val(:value_of_lost_load), val, unit, Val(:usd_per_mwh_scalar))
 """Set [`DemandRequirement`](@ref) `unserved_demand_curve`."""
 set_unserved_demand_curve!(value::DemandRequirement, val, unit) = value.unserved_demand_curve = set_value(value, Val(:unserved_demand_curve), val, unit, Val(:usd_per_mwh))
 """Set [`DemandRequirement`](@ref) `region`."""

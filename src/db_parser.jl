@@ -127,9 +127,7 @@ const DEFAULT_FINANCIAL_DATA = TechnologyFinancialData(;
 # such as Transformer2W to TwoWindingTransformer. The current parser will be deprecated
 # and replaced with the OpenAPI parsing so using this dictionary to temporarily resolve
 # type discrepancies.
-const PSY6_MAPPING = Dict(
-    "Transformer2W" => "TwoWindingTransformer",
-)
+const PSY6_MAPPING = Dict("Transformer2W" => "TwoWindingTransformer")
 
 """
 The following function imports from the database and generates the structs for a portfolio.
@@ -901,7 +899,8 @@ function add_generation_units!(
 
             set_capacity_limits!(
                 technology,
-                (min=0, max=get_existing_capacity_mw(portfolio, technology)),
+                (min=0.0, max=get_existing_capacity_mw(portfolio, technology)),
+                u"MW",
             )
         end
     end
@@ -1173,16 +1172,14 @@ function add_system_lines!(
 
     tx_dict = Dict()
     for rec in IS.execute(stmts[:transmission_lines], nothing, IS.LOG_GROUP_SERIALIZATION)
-        comp_string = first(
-            IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
-        ).entity_type
+        comp_string =
+            first(
+                IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
+            ).entity_type
         if haskey(PSY6_MAPPING, comp_string)
             comp_string = PSY6_MAPPING[comp_string]
         end
-        component_type = getproperty(
-            PowerSystems,
-            Symbol(comp_string),
-        )
+        component_type = getproperty(PowerSystems, Symbol(comp_string))
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         # Determine area based on balancing topology if zonal
@@ -1231,7 +1228,6 @@ function add_system_lines!(
             )
 
         elseif component_type == PSY.TwoWindingTransformer
-
             circuit = PSY.TransformerCircuit(;
                 arc=arc_dict[arc],
                 rating=rec.continuous_rating / get_base_power(portfolio.base_system),
@@ -1261,7 +1257,6 @@ function add_system_lines!(
                     arc_dict[arc],
                     portfolio.base_system,
                 ),
-                
             )
         end
         if haskey(component_attr, "uuid")
@@ -1329,7 +1324,8 @@ function add_system_lines!(
             add_supplemental_attribute!(portfolio, transport, existing)
             set_capacity_limits!(
                 transport,
-                (min=0, max=get_existing_capacity_mw(portfolio, transport)),
+                (min=0.0, max=get_existing_capacity_mw(portfolio, transport)),
+                u"MW",
             )
 
             new_transport = NodalACTransportTechnology{component_type}(;
@@ -1445,22 +1441,27 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                     start_up=0.0,
                     shut_down=0.0,
                 )
-                set_operation_costs!(tech, opex)
-                set_capital_costs!(tech, capex)
+                set_operation_costs!(
+                    tech,
+                    opex,
+                    (energy_unit=u"MW" * u"hr", fuel_unit=MMBtu, currency_unit=USD),
+                )
+                set_capital_costs!(tech, capex, (x_unit=u"MW", y_unit=USD))
             else
                 capex = LinearCurve(cost_data["capcost"] * 1000.0)
                 opex = RenewableGenerationCost(
                     variable=CostCurve(LinearCurve(0.0), LinearCurve(cost_data["vom"])),
                 )
-                set_operation_costs!(tech, opex)
-                set_capital_costs!(tech, capex)
+                set_operation_costs!(tech, opex, (x_unit=u"MW" * u"hr", y_unit=USD))
+                set_capital_costs!(tech, capex, (x_unit=u"MW", y_unit=USD))
             end
         elseif !is_new(tech)
-            ops = get_operation_costs(tech)
             if haskey(cost_data, "fuel_price")
-                fixed = get_fixed_cost(tech)
-                vom = get_variable_cost(tech)
-                if get_variable_cost(tech) == 0.0
+                units = (energy_unit=u"MW" * u"hr", fuel_unit=MMBtu, currency_unit=USD)
+                ops = get_operation_costs(tech, units)
+                fixed = get_fixed_cost(tech, units)
+                vom = get_variable_cost(tech, units)
+                if vom == 0.0
                     vom = LinearCurve(cost_data["vom"])
                 end
                 if get_fixed(ops) == 0.0
@@ -1470,13 +1471,17 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                     ops,
                     FuelCurve(
                         get_value_curve(get_variable(ops)),
-                        get_fuel_cost(tech),
+                        get_fuel_cost(tech, units),
                         IS.get_startup_fuel_offtake(get_variable(ops)),
                         vom,
                     ),
                 )
                 set_fixed!(ops, fixed)
-                set_operation_costs!(tech, ops)
+                set_operation_costs!(
+                    tech,
+                    ops,
+                    (energy_unit=u"MW" * u"hr", fuel_unit=MMBtu, currency_unit=USD),
+                )
             end
         end
 

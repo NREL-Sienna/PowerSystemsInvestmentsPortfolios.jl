@@ -157,7 +157,7 @@
           "name": "operation_costs",
           "type": "PSY.OperationalCost",
           "description": "Fixed and variable O&M costs for a technology",
-          "default": "ThermalGenerationCost()",
+          "default": "ThermalGenerationCost(nothing)",
           "needs_conversion": true,
           "conversion_unit": ":usd_per_mwh"
         },
@@ -543,7 +543,7 @@
           "name": "operation_costs",
           "type": "PSY.OperationalCost",
           "description": "Fixed and variable O&M costs for a technology",
-          "default": "StorageCost()",
+          "default": "StorageCost(nothing)",
           "needs_conversion": true,
           "conversion_unit": ":usd_per_mwh"
         },
@@ -1151,11 +1151,11 @@
         },
         {
           "name": "value_of_lost_load",
-          "type": "PSY.ValueCurve",
+          "type": "Float64",
           "description": "Value of unserved load (USD/MWh)",
-          "default": "LinearCurve(1e8)",
+          "default": "1e8",
           "needs_conversion": true,
-          "conversion_unit": ":usd_per_mwh"
+          "conversion_unit": ":usd_per_mwh_scalar"
         },
         {
           "name": "unserved_demand_curve",
@@ -1603,7 +1603,7 @@
           "name": "operation_costs_solar",
           "type": "PSY.OperationalCost",
           "description": "Fixed and variable O&M costs for a technology",
-          "default": "ThermalGenerationCost()",
+          "default": "ThermalGenerationCost(nothing)",
           "needs_conversion": true,
           "conversion_unit": ":usd_per_mwh"
         },
@@ -1635,7 +1635,7 @@
           "name": "operation_costs_wind",
           "type": "PSY.OperationalCost",
           "description": "Fixed and variable O&M costs for a technology",
-          "default": "ThermalGenerationCost()",
+          "default": "ThermalGenerationCost(nothing)",
           "needs_conversion": true,
           "conversion_unit": ":usd_per_mwh"
         },
@@ -1675,7 +1675,7 @@
           "name": "operation_costs_energy",
           "type": "PSY.OperationalCost",
           "description": "Fixed and variable O&M costs for a storage technology",
-          "default": "StorageCost()",
+          "default": "StorageCost(nothing)",
           "needs_conversion": true,
           "conversion_unit": ":usd_per_mwh"
         },
@@ -1683,7 +1683,7 @@
           "name": "operation_costs_power",
           "type": "PSY.OperationalCost",
           "description": "Fixed and variable O&M costs for a storage technology",
-          "default": "StorageCost()",
+          "default": "StorageCost(nothing)",
           "needs_conversion": true,
           "conversion_unit": ":usd_per_mw"
         },

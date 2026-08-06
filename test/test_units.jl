@@ -91,7 +91,7 @@ demand_req() = DemandRequirement{PSY.PowerLoad}(;
     available=true,
     power_systems_type=string(PSY.PowerLoad),
     new_demand_mw=300.0,
-    value_of_lost_load=LinearCurve(1e5),
+    value_of_lost_load=1e5,
     unserved_demand_curve=LinearCurve(50.0),
 )
 
@@ -114,13 +114,8 @@ retro() = AggregateRetrofitPotential(;
     retrofit_fraction=0.5,
 )
 
-carbon_caps() = CarbonCaps(;
-    name="carbon_caps",
-    available=true,
-    id=8,
-    max_tons_mwh=2.0,
-    max_mtons=50.0,
-)
+carbon_caps() =
+    CarbonCaps(; name="carbon_caps", available=true, id=8, max_tons_mwh=2.0, max_mtons=50.0)
 
 carbon_tax() =
     CarbonTax(; name="carbon_tax", available=true, id=9, tax_dollars_per_ton=50.0)
@@ -724,12 +719,12 @@ end
     )
 
     # value_of_lost_load is now a ValueCurve (usd_per_mwh); bug fixed on this branch.
-    check_valuecurve(
+    check_scalar(
         u -> PSIP.get_value_of_lost_load(t, u),
         (v, u) -> PSIP.set_value_of_lost_load!(t, v, u),
-        conversion_unit(u"MW" * u"hr", USD),
-        conversion_unit(u"kW" * u"hr", USD);
-        prop=1e5,
+        USD / (u"MW" * u"hr"),
+        USD / (u"kW" * u"hr");
+        base=1e5,
         ratio=1e-3,
     )
 end
