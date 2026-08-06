@@ -16,6 +16,7 @@ pages = OrderedDict(
         ],
         "...add requirements" => "how_to/add_requirements.md",
         "...configure financial data" => "how_to/configure_financial_data.md",
+        "...work with units" => "how_to/work_with_units.md",
         "...save and load a Portfolio" => "how_to/serialize_portfolio.md",
     ],
     "Explanation" => Any[
@@ -25,6 +26,7 @@ pages = OrderedDict(
         "Regions and Topology" => "explanation/regions_and_topology.md",
         "Requirements and Policy Constraints" => "explanation/requirements.md",
         "Financial Data" => "explanation/financial_data.md",
+        "Units and Unit Conversions" => "explanation/units_and_conversions.md",
         "Database Integration" => "explanation/database_integration.md",
         "The Sienna Stack" => "explanation/sienna_stack.md",
     ],

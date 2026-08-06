@@ -12,7 +12,12 @@ function Base.show(io::IO, ::MIME"text/plain", ist::Technology)
             val = summary(getproperty(ist, name))
         elseif PSY.hasproperty(PowerSystemsInvestmentsPortfolios, getter_name)
             getter_func = PSY.getproperty(PowerSystemsInvestmentsPortfolios, getter_name)
-            val = getter_func(ist)
+            arg = IS.display_units_arg(getter_func, typeof(ist))
+            if ismissing(arg)
+                val = getter_func(ist)
+            else
+                val = getter_func(ist, InfrastructureSystems.NU)
+            end
         else
             val = getproperty(ist, name)
         end
@@ -23,8 +28,8 @@ function Base.show(io::IO, ::MIME"text/plain", ist::Technology)
         "\n   ",
         "has_supplemental_attributes",
         ": ",
-        string(PSY.has_supplemental_attributes(ist)),
+        string(has_supplemental_attributes(ist)),
     )
-    print(io, "\n   ", "has_time_series", ": ", string(PSY.has_time_series(ist)))
+    print(io, "\n   ", "has_time_series", ": ", string(has_time_series(ist)))
     return
 end

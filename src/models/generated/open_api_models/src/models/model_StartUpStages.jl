@@ -13,7 +13,6 @@
     - startup_stages_type::String
     - cold::Float64
     - hot::Float64
-    - startup_stages_type::String
     - warm::Float64
 """
 Base.@kwdef mutable struct StartUpStages <: OpenAPI.APIModel
