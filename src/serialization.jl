@@ -147,17 +147,11 @@ function serialize(schedule::InvestmentScheduleResults)
         end
         push!(capacity_data, installation_list)
     end
-    openapi_schedule = APIServer.InvestmentScheduleResults(
-        start_dates=start_dates,
-        end_dates=end_dates,
-        results=capacity_data,
+    return Dict{String, Any}(
+        "start_dates" => start_dates,
+        "end_dates" => end_dates,
+        "results" => capacity_data,
     )
-    data = Dict{String, Any}(
-        string(name) => serialize(getproperty(openapi_schedule, name)) for
-        name in fieldnames(typeof(openapi_schedule))
-    )
-
-    return data
 end
 
 function serialize(technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
@@ -431,15 +425,13 @@ function deserialize(
 end
 
 function deserialize(::Type{InvestmentScheduleResults}, raw::Dict)
-    openapi_schedule = IS.deserialize_struct(APIServer.InvestmentScheduleResults, raw)
-
     schedule = Dict()
-    for (i, start_date) in enumerate(openapi_schedule.start_dates)
-        end_date = openapi_schedule.end_dates[i]
+    for (i, start_date) in enumerate(raw["start_dates"])
+        end_date = raw["end_dates"][i]
         period_tuple = (Dates.Date(start_date), Dates.Date(end_date))
 
         schedule[period_tuple] = Dict()
-        for capacity in openapi_schedule.results[i]
+        for capacity in raw["results"][i]
             technology_type = getproperty(
                 PowerSystemsInvestmentsPortfolios,
                 Symbol(capacity["technology"]),
