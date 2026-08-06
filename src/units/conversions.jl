@@ -39,60 +39,13 @@ struct INVTimeCategory <: UnitCategory end
 struct EnergyCategory <: UnitCategory end
 struct RampingCategory <: UnitCategory end
 
-"""
-    POWER
-
-Unit category for real power. Natural unit: `u"MW"`.
-"""
 const POWER = PowerCategory()
-
-"""
-    IMPEDANCE
-
-Unit category for electrical impedance. Natural unit: `u"Ω"`.
-"""
 const IMPEDANCE = ImpedanceCategory()
-
-"""
-    ADMITTANCE
-
-Unit category for electrical admittance. Natural unit: `u"S"`.
-"""
 const ADMITTANCE = AdmittanceCategory()
-
-"""
-    VOLTAGE
-
-Unit category for voltage. Natural unit: `u"kV"`.
-"""
 const VOLTAGE = VoltageCategory()
-
-"""
-    CURRENT
-
-Unit category for electrical current. Natural unit: `u"kA"`.
-"""
 const CURRENT = CurrentCategory()
-
-"""
-    OPS_TIME
-
-Unit category for operational-timescale durations. Natural unit: `u"hr"`.
-"""
 const OPS_TIME = OPSTimeCategory()
-
-"""
-    INV_TIME
-
-Unit category for investment-timescale durations. Natural unit: `u"yr"`.
-"""
 const INV_TIME = INVTimeCategory()
-
-"""
-    ENERGY
-
-Unit category for energy. Natural unit: `u"MW" * u"hr"`.
-"""
 const ENERGY = EnergyCategory()
 const COST = CostCategory()
 const FUEL = FuelCategory()
