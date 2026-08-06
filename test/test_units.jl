@@ -1,20 +1,3 @@
-# Tests for the unit-conversion system introduced on this branch.
-#
-# Two layers are covered:
-#   1. The internal converter `PSIP._natural_unit_conversions` (and the
-#      `convert_units` / `natural_unit` primitives it builds on).
-#   2. The generated, units-aware public getters/setters (`get_*(x, units)`,
-#      `get_*_unitful`, `set_*!(x, val, unit)`) for every unit-aware field on
-#      every technology.
-#
-# Getters/setters are qualified with `PSIP.` because several names
-# (e.g. `get_voltage`, `set_time_limits!`, `get_name`, `natural_unit`) are also
-# exported by PowerSystems and are therefore ambiguous when unqualified inside
-# the test module.
-
-# ---------------------------------------------------------------------------
-# Builders (fresh instances so setter mutations stay isolated per testset)
-# ---------------------------------------------------------------------------
 tech_financials() = TechnologyFinancialData(;
     capital_recovery_period=30,
     technology_base_year=2025,
@@ -25,7 +8,7 @@ tech_financials() = TechnologyFinancialData(;
 )
 
 supply() = SupplyTechnology{PSY.ThermalStandard}(;
-    name="ut_supply",
+    name="supply",
     id=1,
     available=true,
     power_systems_type=string(PSY.ThermalStandard),
@@ -41,7 +24,7 @@ supply() = SupplyTechnology{PSY.ThermalStandard}(;
 )
 
 storage() = StorageTechnology{PSY.EnergyReservoirStorage}(;
-    name="ut_storage",
+    name="storage",
     id=2,
     available=true,
     power_systems_type=string(PSY.EnergyReservoirStorage),
@@ -61,12 +44,12 @@ storage() = StorageTechnology{PSY.EnergyReservoirStorage}(;
 )
 
 agg_transport() = AggregateTransportTechnology{PSY.ACBranch}(;
-    name="ut_agg",
+    name="agg",
     id=3,
     available=true,
     power_systems_type=string(PSY.Line),
-    start_region=Zone(; name="ut_z1", id=201),
-    end_region=Zone(; name="ut_z2", id=202),
+    start_region=Zone(; name="z1", id=201),
+    end_region=Zone(; name="z2", id=202),
     financial_data=tech_financials(),
     capacity_limits=(min=0.0, max=800.0),
     unit_size=40.0,
@@ -74,12 +57,12 @@ agg_transport() = AggregateTransportTechnology{PSY.ACBranch}(;
 )
 
 acline() = NodalACTransportTechnology{PSY.ACBranch}(;
-    name="ut_ac",
+    name="ac",
     id=4,
     available=true,
     power_systems_type=string(PSY.Line),
-    start_node=Node(; name="ut_n1", id=101),
-    end_node=Node(; name="ut_n2", id=102),
+    start_node=Node(; name="n1", id=101),
+    end_node=Node(; name="n2", id=102),
     financial_data=tech_financials(),
     capacity_limits=(min=0.0, max=600.0),
     unit_size=50.0,
@@ -90,12 +73,12 @@ acline() = NodalACTransportTechnology{PSY.ACBranch}(;
 )
 
 hvdc() = NodalHVDCTransportTechnology{PSY.ACBranch}(;
-    name="ut_hvdc",
+    name="hvdc",
     id=5,
     available=true,
     power_systems_type=string(PSY.Line),
-    start_node=Node(; name="ut_n3", id=103),
-    end_node=Node(; name="ut_n4", id=104),
+    start_node=Node(; name="n3", id=103),
+    end_node=Node(; name="n4", id=104),
     financial_data=tech_financials(),
     capacity_limits=(min=0.0, max=700.0),
     unit_size=60.0,
@@ -103,7 +86,7 @@ hvdc() = NodalHVDCTransportTechnology{PSY.ACBranch}(;
 )
 
 demand_req() = DemandRequirement{PSY.PowerLoad}(;
-    name="ut_dreq",
+    name="dreq",
     id=6,
     available=true,
     power_systems_type=string(PSY.PowerLoad),
@@ -113,7 +96,7 @@ demand_req() = DemandRequirement{PSY.PowerLoad}(;
 )
 
 demand_side() = DemandSideTechnology{PSY.PowerLoad}(;
-    name="ut_demand_side",
+    name="demand_side",
     id=7,
     available=true,
     power_systems_type=string(PSY.PowerLoad),
@@ -132,7 +115,7 @@ retro() = AggregateRetrofitPotential(;
 )
 
 carbon_caps() = CarbonCaps(;
-    name="ut_carbon_caps",
+    name="carbon_caps",
     available=true,
     id=8,
     max_tons_mwh=2.0,
@@ -140,24 +123,24 @@ carbon_caps() = CarbonCaps(;
 )
 
 carbon_tax() =
-    CarbonTax(; name="ut_carbon_tax", available=true, id=9, tax_dollars_per_ton=50.0)
+    CarbonTax(; name="carbon_tax", available=true, id=9, tax_dollars_per_ton=50.0)
 
 max_capacity_req() = MaximumCapacityRequirements(;
-    name="ut_max_cap",
+    name="max_cap",
     available=true,
     id=10,
     max_capacity_mw=400.0,
 )
 
 min_capacity_req() = MinimumCapacityRequirements(;
-    name="ut_min_cap",
+    name="min_cap",
     available=true,
     id=11,
     min_capacity_mw=100.0,
 )
 
 colocated() = ColocatedSupplyStorageTechnology{PSY.ThermalStandard}(;
-    name="ut_colocated",
+    name="colocated",
     power_systems_type=string(PSY.ThermalStandard),
     id=12,
     available=true,
@@ -225,7 +208,6 @@ function check_updown(get, set, nat, alt; up, down, ratio)
     @test r3.up ≈ up && r3.down ≈ down
 end
 
-# ValueCurve field: proportional term scales by `ratio` from `nat` to `alt`.
 function check_valuecurve(get, set, nat, alt; prop, ratio)
     @test get_proportional(get(nat)) ≈ prop
     @test get_proportional(get(alt)) ≈ prop * ratio
@@ -233,8 +215,6 @@ function check_valuecurve(get, set, nat, alt; prop, ratio)
     @test get_proportional(get(nat)) ≈ prop
 end
 
-# ThermalGenerationCost field: variable (CostCurve) proportional term and the
-# scalar `fixed` term both scale by `ratio`.
 function check_thermal_cost(get, set, nat, alt; var_prop, fixed, ratio)
     o = get(nat)
     @test o.variable.value_curve.function_data.proportional_term ≈ var_prop
