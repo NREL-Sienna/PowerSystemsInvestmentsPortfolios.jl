@@ -1,3 +1,5 @@
+isdefined(Base, :__precompile__) && __precompile__()
+
 module PowerSystemsInvestmentsPortfolios
 
 import InfrastructureSystems
@@ -25,6 +27,7 @@ import InfrastructureSystems:
 
 # Using PowerSystems in order to support deserializing with PSY parametric typing
 using PowerSystems
+import PowerSystems: ThermalFuels, PrimeMovers, StorageTech, ACBusTypes
 
 import JSONSchema
 import JSON3
@@ -39,6 +42,8 @@ import OpenAPI
 import StringEncodings
 import HDF5
 import Tables
+import Unitful
+using Unitful: @dimension, @u_str, @refunit, @unit, Quantity, Units, uconvert, ustrip, unit
 
 export Portfolio
 export Requirement
@@ -151,11 +156,9 @@ const PSY = PowerSystems
 const IS = InfrastructureSystems
 const MU = IS.Mustache
 
-##### Imports #####
-
-import PowerSystems: ThermalFuels, PrimeMovers, StorageTech, ACBusTypes
-
-##### Exports #####
+export USD, MMBtu, tonne, ustrip, uconvert, @u_str
+export POWER, IMPEDANCE, ADMITTANCE, VOLTAGE, CURRENT, INV_TIME, OPS_TIME, ENERGY
+export natural_unit, ConversionUnits, FuelCurveUnits
 
 export ThermalFuels
 export PrimeMovers
@@ -175,11 +178,15 @@ include("models/financial_data/TechnologyFinancialData.jl")
 include("models/generated/includes.jl")
 include("investment_schedule.jl")
 
+include("units/types.jl")
+include("units/conversions.jl")
+include("units/function_conversions.jl")
+
 include("portfolio.jl")
 include("time_mapping.jl")
 include("serialization.jl")
-include("generate_structs.jl")
 include("db_parser.jl")
+include("utils/generate_structs.jl")
 include("utils/print.jl")
 @static if pkgversion(PrettyTables).major == 2
     include("utils/print_pt_v2.jl")
@@ -190,6 +197,14 @@ include("utils/getters.jl")
 include("update_system.jl")
 
 using DocStringExtensions
+
+const localunits = Unitful.basefactors
+const localpromotion = copy(Unitful.promotion)
+function __init__()
+    merge!(Unitful.basefactors, localunits)
+    merge!(Unitful.promotion, localpromotion)
+    Unitful.register(PowerSystemsInvestmentsPortfolios)
+end
 
 @template (FUNCTIONS, METHODS) = """
                                  $(TYPEDSIGNATURES)
