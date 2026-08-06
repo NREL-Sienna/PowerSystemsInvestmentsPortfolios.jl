@@ -1,6 +1,5 @@
 function build_portfolio()
     sys = build_system(PSITestSystems, "c_sys5_re")
-    set_units_base_system!(sys, "NATURAL_UNITS")
 
     ###################
     ###### Zones ######
@@ -271,7 +270,7 @@ function build_portfolio()
     ######## Retirement, Retrofits, and Existing Capacity #######
     #############################################################
 
-    thermal = collect(IS.get_components(ThermalStandard, sys))
+    thermal = collect(get_components(ThermalStandard, sys))
 
     retro1 = AggregateRetrofitPotential(retrofit_id=1, retrofit_fraction=0.5)
 

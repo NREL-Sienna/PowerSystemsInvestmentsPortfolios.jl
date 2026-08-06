@@ -123,6 +123,14 @@ const DEFAULT_FINANCIAL_DATA = TechnologyFinancialData(;
     tax_rate=0.257,
 )
 
+# RTS database was written in PSY5 and so some definitions have changed in PSY6,
+# such as Transformer2W to TwoWindingTransformer. The current parser will be deprecated
+# and replaced with the OpenAPI parsing so using this dictionary to temporarily resolve
+# type discrepancies.
+const PSY6_MAPPING = Dict(
+    "Transformer2W" => "TwoWindingTransformer",
+)
+
 """
 The following function imports from the database and generates the structs for a portfolio.
 Portfolio-level financial data is not stored in the database and must be provided separately.
@@ -521,7 +529,6 @@ function add_nodal_lines!(
                     IS.LOG_GROUP_SERIALIZATION,
                 ),
             ).name
-        @show rec.id
         transport = NodalACTransportTechnology{ACBranch}(;
             name=string(rec.arc_id) * "_newline",
             id=rec.id,
@@ -816,7 +823,7 @@ function add_generation_units!(
                 outflow=reservoir_attr["outflow"],
                 level_targets=get(reservoir_attr, "level_targets", nothing),
                 intake_elevation=reservoir_attr["intake_elevation"],
-                head_to_volume_factor=head_to_volume_factor,
+                head_to_volume_factor=head_to_volume_factor.function_data,
                 operation_cost=parse_operational_cost(reservoir_attr["operation_cost"]),
                 level_data_type=PSY.get_enum_value(
                     PSY.ReservoirDataType,
@@ -1166,13 +1173,15 @@ function add_system_lines!(
 
     tx_dict = Dict()
     for rec in IS.execute(stmts[:transmission_lines], nothing, IS.LOG_GROUP_SERIALIZATION)
+        comp_string = first(
+            IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
+        ).entity_type
+        if haskey(PSY6_MAPPING, comp_string)
+            comp_string = PSY6_MAPPING[comp_string]
+        end
         component_type = getproperty(
             PowerSystems,
-            Symbol(
-                first(
-                    IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
-                ).entity_type,
-            ),
+            Symbol(comp_string),
         )
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
@@ -1221,21 +1230,12 @@ function add_system_lines!(
                 g=g,
             )
 
-        elseif component_type == PSY.Transformer2W
-            line = component_type(;
-                name=rec.name,
+        elseif component_type == PSY.TwoWindingTransformer
+
+            circuit = PSY.TransformerCircuit(;
+                arc=arc_dict[arc],
                 rating=rec.continuous_rating / get_base_power(portfolio.base_system),
                 base_power=component_attr["base_power"],
-                arc=arc_dict[arc],
-                primary_shunt=transform_natural_impedance_to_device_base(
-                    component_attr["primary_shunt"]["real"],
-                    arc_dict[arc],
-                    portfolio.base_system,
-                ),
-                reactive_power_flow=component_attr["reactive_power_flow"] /
-                                    get_base_power(portfolio.base_system),
-                active_power_flow=component_attr["active_power_flow"] /
-                                  get_base_power(portfolio.base_system),
                 available=component_attr["available"],
                 x=transform_natural_impedance_to_device_base(
                     component_attr["x"],
@@ -1247,6 +1247,21 @@ function add_system_lines!(
                     arc_dict[arc],
                     portfolio.base_system,
                 ),
+                reactive_power_flow=component_attr["reactive_power_flow"] /
+                                    get_base_power(portfolio.base_system),
+                active_power_flow=component_attr["active_power_flow"] /
+                                  get_base_power(portfolio.base_system),
+            )
+
+            line = component_type(;
+                name=rec.name,
+                circuit=circuit,
+                magnetizing_shunt=transform_natural_impedance_to_device_base(
+                    component_attr["primary_shunt"]["real"],
+                    arc_dict[arc],
+                    portfolio.base_system,
+                ),
+                
             )
         end
         if haskey(component_attr, "uuid")
@@ -1482,7 +1497,7 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                 )
                 ts_array =
                     get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
-                    get_rating(unit)
+                    get_rating(unit, u"MW")
             else
                 #If technology does not have existing capacity associated with it,
                 #select a similar technology from the base system to get required timeseries
@@ -1497,7 +1512,7 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                 )
                 ts_array =
                     get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
-                    get_rating(unit)
+                    get_rating(unit, u"MW")
             end
             ts = SingleTimeSeries("capacity_factor", ts_array)
             add_time_series!(portfolio, tech, ts)
@@ -1514,10 +1529,10 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                 portfolio.base_system,
             ),
         )
-        if get_max_active_power(unit) != 0
+        if get_max_active_power(unit, u"MW") != 0
             ts_array =
                 get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
-                get_max_active_power(unit)
+                get_max_active_power(unit, u"MW")
         else
             ts_array = get_time_series_array(SingleTimeSeries, unit, "max_active_power")
         end

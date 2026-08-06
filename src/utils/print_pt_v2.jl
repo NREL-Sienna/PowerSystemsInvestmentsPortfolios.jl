@@ -92,7 +92,7 @@ function Base.show(io::IO, ::MIME"text/html", p::Portfolio)
         p;
         backend=Val(:html),
         tf=PrettyTables.tf_html_simple,
-        standalone=false,
+        stand_alone=false,
     )
     println(io)
     show_region_topology_table(
@@ -100,14 +100,14 @@ function Base.show(io::IO, ::MIME"text/html", p::Portfolio)
         p;
         backend=Val(:html),
         tf=PrettyTables.tf_html_simple,
-        standalone=false,
+        stand_alone=false,
     )
     show_technologies_table(
         io,
         p;
         backend=Val(:html),
         tf=PrettyTables.tf_html_simple,
-        standalone=false,
+        stand_alone=false,
     )
     println(io)
     println(io, "Time Series")
@@ -116,7 +116,7 @@ function Base.show(io::IO, ::MIME"text/html", p::Portfolio)
         p.data;
         backend=Val(:html),
         tf=PrettyTables.tf_html_simple,
-        standalone=false,
+        stand_alone=false,
     )
     return
 end

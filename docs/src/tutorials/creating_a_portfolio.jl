@@ -44,9 +44,6 @@ import PowerSystems: get_name
 
 sys = build_system(PSITestSystems, "c_sys5_re")
 
-# Switch to natural units (MW) so capacity values are in megawatts.
-set_units_base_system!(sys, "NATURAL_UNITS")
-
 # ## Create the Portfolio
 #
 # [`Portfolio`](@ref) is PSIP's central container — analogous to `System` in PSY. The

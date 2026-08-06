@@ -39,6 +39,8 @@ import OpenAPI
 import StringEncodings
 import HDF5
 import Tables
+import Unitful
+using Unitful: @u_str
 
 export Portfolio
 export Requirement
@@ -128,7 +130,6 @@ export from_json
 export MinMax
 export InOut
 export UpDown
-export set_units_base_system!
 
 export show_region_topology_table
 

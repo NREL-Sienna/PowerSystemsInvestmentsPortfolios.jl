@@ -5,7 +5,7 @@ function Base.show(io::IO, ::MIME"text/plain", ist::Technology)
         getter_name = Symbol("get_$name")
         if (obj isa InfrastructureSystemsInternal)
             print(io, "\n   ")
-            show(io, MIME"text/plain"(), obj.units_info)
+            show(io, MIME"text/plain"(), obj.base_value)
             continue
         elseif obj isa IS.InfrastructureSystemsType ||
                obj isa Vector{<:IS.InfrastructureSystemsComponent}

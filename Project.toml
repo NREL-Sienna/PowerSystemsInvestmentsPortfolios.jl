@@ -1,7 +1,7 @@
 name = "PowerSystemsInvestmentsPortfolios"
 uuid = "bed98974-b02a-5e2f-9fe0-a103f8c450dd"
-authors = ["Sienna Team"]
 version = "0.1.0"
+authors = ["Sienna Team"]
 
 [deps]
 DBInterface = "a10d1c49-ce27-4219-8d33-6db1a4562965"
@@ -24,10 +24,11 @@ Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 TimeSeries = "9e3dc215-6440-5c97-bce1-76c03772f85e"
 TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 URIs = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [sources]
-InfrastructureSystems = {url = "https://github.com/Sienna-Platform/InfrastructureSystems.jl.git", rev = "IS4"}
-PowerSystems = {url = "https://github.com/Sienna-Platform/PowerSystems.jl.git", rev = "psy6"}
+InfrastructureSystems = {rev = "IS4", url = "https://github.com/Sienna-Platform/InfrastructureSystems.jl.git"}
+PowerSystems = {rev = "psy6", url = "https://github.com/Sienna-Platform/PowerSystems.jl.git"}
 
 [compat]
 DBInterface = "2.6"
@@ -50,4 +51,5 @@ Tables = "1.12"
 TimeSeries = "^0.25"
 TimeZones = "1.20"
 URIs = "1.5"
+Unitful = "1.28.0"
 julia = "^1.10"

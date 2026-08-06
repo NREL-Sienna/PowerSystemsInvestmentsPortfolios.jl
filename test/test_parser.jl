@@ -12,7 +12,7 @@
     @test length(collect(get_components(ACBus, base_system))) == 73
     @test length(collect(get_components(Arc, base_system))) == 109
     @test length(collect(get_components(Line, base_system))) == 105
-    @test length(collect(get_components(Transformer2W, base_system))) == 15
+    @test length(collect(get_components(TwoWindingTransformer, base_system))) == 15
     @test length(collect(get_components(PowerLoad, base_system))) == 73
     @test length(collect(get_components(ThermalStandard, base_system))) == 73
     @test length(collect(get_components(RenewableDispatch, base_system))) == 30
