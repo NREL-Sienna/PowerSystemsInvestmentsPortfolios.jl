@@ -34,6 +34,8 @@ import PowerSystems:
     ThermalFuels,
     PrimeMovers,
     StorageTech,
+    RenewableDispatch,
+    RenewableNonDispatch,
     ACBusTypes,
     add_component!,
     get_arc,
@@ -46,6 +48,8 @@ import PowerSystems:
     get_from,
     get_max_active_power,
     get_rating,
+    get_time_series_array,
+    get_time_series_values,
     get_to,
     get_value_curve,
     get_variable,
@@ -103,7 +107,11 @@ import ..PowerSystemsInvestmentsPortfolios:
     get_supplemental_attributes,
     get_technologies,
     is_new,
-    get_aggregation
+    get_aggregation,
+    get_fuel_cost,
+    DEFAULT_AGGREGATION,
+    MMBtu,
+    USD
 
 """
 Set of queries to extract relevant data from the database. Need to be maintained to be consistent with the most recent version of the database
