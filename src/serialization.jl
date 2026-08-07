@@ -2,11 +2,6 @@
 const METADATA_KEY = "__metadata__"
 const TYPE_KEY = "type"
 const MODULE_KEY = "module"
-const PARAMETERS_KEY = "parameters"
-const CONSTRUCT_WITH_PARAMETERS_KEY = "construct_with_parameters"
-const FUNCTION_KEY = "function"
-const _CONTAINS_SHOULD_ENCODE =
-    Union{ResourceTechnology, DemandTechnology, TransmissionTechnology, RegionTopology}
 const SYSTEM_KWARGS = Set((
     :internal,
     :runchecks,
@@ -17,38 +12,46 @@ const SYSTEM_KWARGS = Set((
     :name,
     :description,
 ))
-const ENCODED_FIELDS = Set((
-    :duration_limits,
-    :capacity_limits,
-    :capacity_limits_energy,
-    :capacity_limits_discharge,
-    :capacity_limits_charge,
-    :angle_limits,
-    :co2,
-    :fuel,
-    :prime_mover_type,
-    :heat_rate_mmbtu_per_mwh,
-    :storage_tech,
-    :cofire_level_limits,
-    :cofire_start_limits,
-    :bus_type,
-    :node,
-    :region,
-    :start_region,
-    :end_region,
-    :start_node,
-    :end_node,
-    :efficiency,
-    :ramp_limits,
-    :time_limits,
-    :eligible_regions,
-    :eligible_resources,
-    :eligible_demand,
-    :eligible_technologies,
-    :uuid,
-    :conformity,
-    :requirements,
-))
+
+# `PI.<Name>` transport struct for each type the document can carry, keyed by the PSIP type
+# that `__metadata__` resolves to. Parametric PSIP types key on their `UnionAll`, which is
+# what `IS.get_type_from_serialization_metadata` returns now that `__metadata__` no longer
+# carries `parameters`.
+const _OPENAPI_TRANSPORT_TYPES = Dict{Any, DataType}(
+    psip_type => getproperty(PI, Symbol(key)) for
+    (psip_type, key) in Iterators.flatten((DOCUMENT_PLAN, SUPPLEMENTAL_ATTRIBUTE_PLAN))
+)
+
+function _openapi_transport_type(psip_type)
+    if !haskey(_OPENAPI_TRANSPORT_TYPES, psip_type)
+        error(
+            "$psip_type has no OpenAPI transport type — every serialized PSIP type must " *
+            "be declared in DOCUMENT_PLAN or SUPPLEMENTAL_ATTRIBUTE_PLAN " *
+            "(src/openapi/document.jl)",
+        )
+    end
+    return _OPENAPI_TRANSPORT_TYPES[psip_type]
+end
+
+# `IS.serialize` reaches each component through `IS.serialize(::IS.SystemData)`, which hands
+# it no portfolio, but `to_openapi` needs the document's id registry. The registry for one
+# `IS.serialize(::Portfolio)` call therefore lives in task-local storage for its duration:
+# task-scoped so two portfolios serialized on different threads cannot see each other's
+# registry, re-entrant, and unwound on throw without an explicit `finally`.
+const _EXPORT_REFS_KEY = :psip_openapi_export_refs
+
+function _active_export_refs()
+    storage = task_local_storage()
+    if !haskey(storage, _EXPORT_REFS_KEY)
+        error(
+            "no active OpenAPI export registry: a PSIP component resolves its references " *
+            "by document id, which only a Portfolio can supply, so a component cannot be " *
+            "serialized on its own. Serialize the owning portfolio instead — " *
+            "`to_json(portfolio, filename)` or `to_json(portfolio)`.",
+        )
+    end
+    return storage[_EXPORT_REFS_KEY]
+end
 
 """
 Constructs a Portfolio from a file path ending with .json
@@ -90,16 +93,23 @@ function Portfolio(
 end
 
 function IS.serialize(portfolio::T) where {T <: Portfolio}
-    data = Dict{String, Any}()
-    data["data_format_version"] = DATA_FORMAT_VERSION
-    for field in fieldnames(T)
-        # Exclude time_series_directory because the portfolio may get deserialized on a
-        # different portfolio.
-        if !(field in [:time_series_directory, :base_system])
-            data[string(field)] = serialize(getfield(portfolio, field))
+    refs = _build_export_refs(portfolio)
+    # Written before the field loop so the ledger reaches `internal`'s ext in this document.
+    store_ledger!(portfolio, refs)
+    return task_local_storage(_EXPORT_REFS_KEY, refs) do
+        data = Dict{String, Any}()
+        data["data_format_version"] = DATA_FORMAT_VERSION
+        for field in fieldnames(T)
+            # Exclude time_series_directory because the portfolio may get deserialized on a
+            # different portfolio. `aggregation` is written below instead, in a form that
+            # does not depend on the writing session's module scope.
+            if !(field in [:time_series_directory, :base_system, :aggregation])
+                data[string(field)] = serialize(getfield(portfolio, field))
+            end
         end
+        data["aggregation"] = _serialize_type_name(get_aggregation(portfolio))
+        return data
     end
-    return data
 end
 
 function deserialize(
@@ -154,47 +164,45 @@ function IS.serialize(schedule::InvestmentScheduleResults)
     )
 end
 
-function IS.serialize(technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
-    api_struct = serialize_openapi_struct(technology)
-
-    struct_type = typeof(technology)
-    api_type = typeof(api_struct)
-
-    # Build OpenAPI struct from modeling struct
-    for field in fieldnames(api_type)
-        if field in ENCODED_FIELDS
-            value = serialize_custom_types(field, technology)
-        else
-            value = getfield(technology, field)
-        end
-        setfield!(api_struct, field, value)
-    end
-
-    data = Dict{String, Any}(
-        string(name) => serialize(getproperty(api_struct, name)) for
-        name in fieldnames(typeof(api_struct))
-    )
-
-    add_serialization_metadata!(data, struct_type)
-    if !isempty(struct_type.parameters)
-        data[IS.METADATA_KEY][IS.CONSTRUCT_WITH_PARAMETERS_KEY] = true
-    end
-
+"""
+Rendering goes through `OpenAPI.to_json` rather than `JSON3.write` because only the former
+unwraps the `oneOf` wrappers and stamps their discriminators.
+"""
+function _serialize_openapi(component)
+    # Rejected on write as well as on read: a type absent from the plans would otherwise
+    # be emitted happily and then refused by `deserialize_components!`, producing a
+    # document that cannot be read back. `Base.typename(...).wrapper` is the plan key for
+    # a parametric type, matching what `_group_by_serialized_type` resolves to.
+    _openapi_transport_type(Base.typename(typeof(component)).wrapper)
+    po = to_openapi(component, _active_export_refs())
+    data = JSON3.read(OpenAPI.to_json(po), Dict{String, Any})
+    add_serialization_metadata!(data, typeof(component))
     return data
+end
+
+IS.serialize(value::Technology) = _serialize_openapi(value)
+IS.serialize(value::RegionTopology) = _serialize_openapi(value)
+IS.serialize(value::Requirement) = _serialize_openapi(value)
+
+# PSIP's supplemental attributes subtype `IS.SupplementalAttribute` directly, with no PSIP
+# supertype of their own, so dispatching on the abstract type would pirate every other
+# package's attributes. One method per declared type instead, driven by the same plan the
+# deserialize side reads.
+for (attribute_type, _key) in SUPPLEMENTAL_ATTRIBUTE_PLAN
+    @eval IS.serialize(value::$attribute_type) = _serialize_openapi(value)
 end
 
 """
 Add type information to the dictionary that can be used to deserialize the value.
+
+A parametric component's type parameter is not recorded here: it travels in the payload's
+own `power_systems_type` field, which `from_openapi` reads.
 """
 function add_serialization_metadata!(data::Dict, ::Type{T}) where {T}
     data[METADATA_KEY] = Dict{String, Any}(
         TYPE_KEY => string(nameof(T)),
         MODULE_KEY => string(parentmodule(T)),
     )
-    if !isempty(T.parameters)
-        data[METADATA_KEY][PARAMETERS_KEY] = [string(nameof(x)) for x in T.parameters]
-    end
-
     return
 end
 
@@ -254,7 +262,7 @@ function from_dict(
     base_system = PSY.System(base_system_file)
 
     internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
-    aggregation = PSY.ACBus
+    aggregation = _deserialize_type_name(raw["aggregation"])
     investment_schedule = get(raw, "investment_schedule", nothing)
     if !isnothing(investment_schedule)
         investment_schedule = deserialize(InvestmentScheduleResults, investment_schedule)
@@ -282,6 +290,9 @@ function from_dict(
         description=description,
         parsed_kwargs...,
     )
+    # One registry for the whole document: attributes and components share an id space, so
+    # a collision between the two families is caught rather than silently overwritten.
+    refs = OpenAPIRefs()
     portfolio.data.supplemental_attribute_manager = deserialize_attributes(
         portfolio,
         IS.SupplementalAttributeManager,
@@ -291,6 +302,7 @@ function from_dict(
             Dict("attributes" => [], "associations" => []),
         ),
         portfolio.data.time_series_manager,
+        refs,
     )
     if raw["data_format_version"] != DATA_FORMAT_VERSION
         pre_deserialize_conversion!(raw, portfolio)
@@ -299,17 +311,46 @@ function from_dict(
     ext = get_ext(portfolio)
     ext["deserialization_in_progress"] = true
     try
-        deserialize_components!(portfolio, raw["data"])
+        deserialize_components!(portfolio, raw["data"], refs)
     finally
         pop!(ext, "deserialization_in_progress")
         isempty(ext) && clear_ext!(portfolio)
     end
+    store_ledger_after_load!(portfolio, refs)
 
     if raw["data_format_version"] != DATA_FORMAT_VERSION
         post_deserialize_conversion!(portfolio, raw)
     end
 
     return portfolio
+end
+
+"""
+Write a `Type`-valued field, such as `Portfolio.aggregation`, in the `"Module.Type"` form
+[`_deserialize_type_name`](@ref) requires.
+
+Emitted explicitly rather than left to the generic `serialize` path: `IS` has no
+`serialize(::Type)` method, so the raw `DataType` would reach JSON3, which stringifies it
+through `show` — and `show` resolves a type name against `Base.active_module()`. A writer
+with `using PowerSystems` in scope would then emit the bare `"ACBus"` and a writer with
+`import PowerSystems as PSY` the qualified `"PowerSystems.ACBus"`, making the document
+depend on the writing session's scope and unreadable in the first case.
+"""
+_serialize_type_name(T::Type) = string(parentmodule(T), '.', nameof(T))
+
+"""
+Resolve a `"Module.Type"` string — the form [`_serialize_type_name`](@ref) writes a
+`Type`-valued field in, such as `Portfolio.aggregation` — back to the type itself.
+"""
+function _deserialize_type_name(name::AbstractString)
+    parts = split(name, '.')
+    if length(parts) != 2
+        error(
+            "cannot resolve serialized type name \"$name\": expected the \"Module.Type\" " *
+            "form _serialize_type_name writes",
+        )
+    end
+    return getproperty(IS.get_module(String(parts[1])), Symbol(parts[2]))
 end
 
 # Function copied over from IS. This version of the function is modified to not use the internal field  and UUIDs for components,
@@ -453,342 +494,101 @@ function deserialize(::Type{InvestmentScheduleResults}, raw::Dict)
     return InvestmentScheduleResults(schedule)
 end
 
-# Function copied over from IS. This version of the function is modified to deserialize using openAPI structs for PSIP supplemental attributes
-# This is necessary since the openAPI structs do not have an internal field by default, so new UUIDs are given to supplemental attributes
-# when deserialized with the IS version and the associations with PSIP components are broken
+# Copied from IS and rewritten to build attributes through the OpenAPI converters, so that
+# supplemental attributes take the same route as components in both directions.
 function deserialize_attributes(
     portfolio::Portfolio,
     ::Type{IS.SupplementalAttributeManager},
     data::Dict,
     time_series_manager::IS.TimeSeriesManager,
+    refs::OpenAPIRefs,
 )
     mgr = IS.SupplementalAttributeManager(
         IS.SupplementalAttributesByType(IS.SupplementalAttributesByType()),
         IS.from_records(IS.SupplementalAttributeAssociations, data["associations"]),
     )
-    refs = IS.SharedSystemReferences(;
+    shared_references = IS.SharedSystemReferences(;
         supplemental_attribute_manager=mgr,
         time_series_manager=time_series_manager,
     )
-    for attr_dict in data["attributes"]
-        type = IS.get_type_from_serialization_metadata(
-            IS.get_serialization_metadata(attr_dict),
-        )
-        if !haskey(mgr.data, type)
-            mgr.data[type] = Dict{Base.UUID, SupplementalAttribute}()
+    by_type = _group_by_serialized_type(data["attributes"])
+    for (attribute_type, _key) in SUPPLEMENTAL_ATTRIBUTE_PLAN
+        haskey(by_type, attribute_type) || continue
+        for raw_attribute in pop!(by_type, attribute_type)
+            po = OpenAPI.from_json(_openapi_transport_type(attribute_type), raw_attribute)
+            attribute = from_openapi(attribute_type, po, refs)
+            if !haskey(mgr.data, attribute_type)
+                mgr.data[attribute_type] = Dict{Base.UUID, IS.SupplementalAttribute}()
+            end
+            uuid = IS.get_uuid(attribute)
+            if haskey(mgr.data[attribute_type], uuid)
+                error(
+                    "Bug: duplicate UUID in attributes container: " *
+                    "type=$attribute_type uuid=$uuid",
+                )
+            end
+            mgr.data[attribute_type][uuid] = attribute
+            IS.set_shared_system_references!(attribute, shared_references)
+            refs[Int(po.id)] = attribute
         end
-        #attr = deserialize(type, attr_dict)
-
-        api_attr = deserialize_openapi_struct(type, attr_dict)
-        attr = build_model_struct(api_attr, portfolio, attr_dict["__metadata__"])
-
-        uuid = IS.get_uuid(attr)
-        if haskey(mgr.data[type], uuid)
-            error("Bug: duplicate UUID in attributes container: type=$type uuid=$uuid")
-        end
-        mgr.data[type][uuid] = attr
-        IS.set_shared_system_references!(attr, refs)
     end
-
+    _reject_unplanned_types(
+        by_type,
+        "supplemental attribute",
+        "SUPPLEMENTAL_ATTRIBUTE_PLAN",
+    )
     return mgr
 end
 
-function deserialize_components!(portfolio::Portfolio, raw)
-    # Convert the array of components into type-specific arrays to allow addition by type.
-    # Maintain dependency order so referenced components exist before technologies
-    # are constructed. Technologies may reference both regions and requirements.
-    technologies = OrderedDict{Type, Vector{Dict}}()
-    requirements = OrderedDict{Type, Vector{Dict}}()
-    regions = OrderedDict{Type, Vector{Dict}}()
-    for component in raw["components"]
-        type = IS.get_type_from_serialization_data(component)
-        if type <: RegionTopology
-            components = get(regions, type, nothing)
-            if components === nothing
-                components = Vector{Dict}()
-                regions[type] = components
-            end
-        elseif type <: Requirement
-            components = get(requirements, type, nothing)
-            if components === nothing
-                components = Vector{Dict}()
-                requirements[type] = components
-            end
-        else
-            components = get(technologies, type, nothing)
-            if components === nothing
-                components = Vector{Dict}()
-                technologies[type] = components
-            end
-        end
-        push!(components, component)
-    end
-    data = merge(regions, requirements, technologies)
-
-    # Add each type to this as we parse.
-    parsed_types = Set()
-
-    function is_matching_type(type, types)
-        return any(x -> type <: x, types)
-    end
-
-    function deserialize_and_add!(;
-        skip_types=nothing,
-        include_types=nothing,
-        post_add_func=nothing,
-    )
-        for (type, components) in data
-            type in parsed_types && continue
-            if !isnothing(skip_types) && is_matching_type(type, skip_types)
-                continue
-            end
-            if !isnothing(include_types) && !is_matching_type(type, include_types)
-                continue
-            end
-            for component in components
-                handle_deserialization_special_cases!(component, type)
-                #TODO: See if component cache is needed
-                api_component = deserialize_openapi_struct(type, component)
-                model_component =
-                    build_model_struct(api_component, portfolio, component["__metadata__"])
-
-                #TODO: skip_validation currently set to true, review the IS validation
-                IS.add_component!(portfolio.data, model_component; skip_validation=true)
-
-                if !isnothing(post_add_func)
-                    post_add_func(model_component)
-                end
-            end
-            push!(parsed_types, type)
+function deserialize_components!(portfolio::Portfolio, raw, refs::OpenAPIRefs)
+    # DOCUMENT_PLAN order is dependency order: regions and requirements land in `refs`
+    # before the technologies whose references resolve against them.
+    by_type = _group_by_serialized_type(raw["components"])
+    for (psip_type, _key) in DOCUMENT_PLAN
+        haskey(by_type, psip_type) || continue
+        for raw_component in pop!(by_type, psip_type)
+            # `psip_type` is the `UnionAll` for a parametric component, so a future
+            # special-case method written for a concrete `Name{Param}` would never
+            # dispatch here; declare it on the `UnionAll`.
+            handle_deserialization_special_cases!(raw_component, psip_type)
+            po = OpenAPI.from_json(_openapi_transport_type(psip_type), raw_component)
+            component = from_openapi(psip_type, po, refs)
+            #TODO: skip_validation currently set to true, review the IS validation
+            IS.add_component!(portfolio.data, component; skip_validation=true)
+            # Registered after conversion, never before: a component cannot reference
+            # itself, and registering first would mask a DOCUMENT_PLAN ordering bug.
+            refs[Int(po.id)] = component
         end
     end
-
-    deserialize_and_add!()
+    _reject_unplanned_types(by_type, "component", "DOCUMENT_PLAN")
+    return
 end
 
-function build_model_struct(base_struct, portfolio::Portfolio, metadata::Dict{String, Any})
-    vals = Dict{Symbol, Any}()
-    struct_type = typeof(base_struct)
-
-    #TODO: Add get_component wrappers for IS functions
-    for (name, type) in zip(fieldnames(struct_type), fieldtypes(struct_type))
-        if name in ENCODED_FIELDS
-            vals[name] = deserialize_custom_types(name, base_struct, portfolio)
-        else
-            vals[name] = getfield(base_struct, name)
+"""
+Buckets by `__metadata__`'s type, which for a parametric component is its `UnionAll` —
+`__metadata__` no longer carries `parameters` — and that is the key both plans use.
+"""
+function _group_by_serialized_type(raw_values)
+    grouped = Dict{Any, Vector{Dict}}()
+    for raw_value in raw_values
+        type = IS.get_type_from_serialization_data(raw_value)
+        if !haskey(grouped, type)
+            grouped[type] = Vector{Dict}()
         end
+        push!(grouped[type], raw_value)
     end
-
-    #Build internal from uuid if it is present and remove uuid entry
-    if haskey(vals, :uuid)
-        vals[:internal] = IS.InfrastructureSystemsInternal(; uuid=vals[:uuid])
-        delete!(vals, :uuid)
-    else
-        vals[:internal] = IS.InfrastructureSystemsInternal()
-    end
-
-    struct_type_string = metadata["type"]
-    struct_type = getproperty(PowerSystemsInvestmentsPortfolios, Symbol(struct_type_string))
-    if !hasfield(struct_type, :id)
-        delete!(vals, :id)
-    end
-    if haskey(metadata, "parameters")
-        parameter_string = metadata["parameters"][1]
-        #TODO: Generalize this later. Will all future parameterizing be with PSY structs?
-        parameter = getproperty(PowerSystems, Symbol(parameter_string))
-        model_struct = struct_type{parameter}(; vals...)
-    else
-        model_struct = struct_type(; vals...)
-    end
-
-    return model_struct
+    return grouped
 end
 
-function IS.deserialize(
-    ::Type{T},
-    data::Dict,
-    component_cache::Dict,
-) where {T <: IS.InfrastructureSystemsComponent}
-    vals = Dict{Symbol, Any}()
-    for (name, type) in zip(fieldnames(T), fieldtypes(T))
-        field_name = string(name)
-        if haskey(data, field_name)
-            val = data[field_name]
-        else
-            continue
-        end
-        if val isa Dict && haskey(val, IS.METADATA_KEY)
-            vals[name] = deserialize_uuid_handling(
-                IS.get_type_from_serialization_metadata(IS.get_serialization_metadata(val)),
-                val,
-                component_cache,
-            )
-        else
-            vals[name] = deserialize_uuid_handling(type, val, component_cache)
-        end
+function _reject_unplanned_types(grouped, family::AbstractString, plan_name::AbstractString)
+    if !isempty(grouped)
+        names = join(sort!([string(type) for type in keys(grouped)]), ", ")
+        error(
+            "the portfolio document carries $family types absent from $plan_name " *
+            "(src/openapi/document.jl): $names",
+        )
     end
-
-    type = IS.get_type_from_serialization_metadata(data[IS.METADATA_KEY])
-
-    base_struct = deserialize_openapi_struct(type, vals...)
-
-    return base_struct
-end
-
-# Handle cases where the data types in the OpenAPI struct do not match the PSIP struct
-function serialize_custom_types(field, technology::T) where {T <: _CONTAINS_SHOULD_ENCODE}
-
-    #For fields with references to other structs, serialize with
-    #the id of that struct and convert enums to strings
-    if field in [
-        :region,
-        :eligible_regions,
-        :eligible_resources,
-        :eligible_technologies,
-        :eligible_demand,
-    ]
-        comps = getfield(technology, field)
-        val = [get_id(c) for c in comps]
-    elseif field == :requirements
-        val = Int64[get_id(r) for r in get_requirements(technology)]
-    elseif field in [:start_region, :end_region, :start_node, :end_node]
-        val = get_id(getfield(technology, field))
-    elseif field in [:prime_mover_type, :storage_tech, :bus_type]
-        val = string(getfield(technology, field))
-    elseif field == :fuel
-        val = [string(f) for f in getfield(technology, field)]
-    elseif field == :heat_rate_mmbtu_per_mwh
-        fuel_params = getfield(technology, field)
-        val = Dict{String, ValueCurve}()
-        for (k, v) in fuel_params
-            val[string(k)] = v
-        end
-    elseif field in [:co2, :cofire_start_limits, :cofire_level_limits]
-        fuel_params = getfield(technology, field)
-        val = Dict{String, Float64}()
-        for (k, v) in fuel_params
-            val[string(k)] = v
-        end
-    elseif field == :uuid
-        val = string(IS.get_uuid(technology))
-    elseif field == :conformity
-        val = string(get_conformity(technology))
-    else
-        val = getfield(technology, field)
-    end
-
-    return val
-end
-function deserialize_custom_types(name, base_struct::OpenAPI.APIModel, portfolio::Portfolio)
-    if name in [:region, :eligible_regions]
-        val = collect(
-            IS.get_components(
-                x -> get_id(x) in getfield(base_struct, name),
-                RegionTopology,
-                portfolio.data,
-            ),
-        )
-    elseif name == :requirements
-        val = collect(
-            IS.get_components(
-                x -> get_id(x) in getfield(base_struct, name),
-                Requirement,
-                portfolio.data,
-            ),
-        )
-    elseif name == :eligible_resources
-        val = collect(
-            IS.get_components(
-                x -> get_id(x) in getfield(base_struct, name),
-                ResourceTechnology,
-                portfolio.data,
-            ),
-        )
-    elseif name == :eligible_technologies
-        val = collect(
-            IS.get_components(
-                x -> get_id(x) in getfield(base_struct, name),
-                Technology,
-                portfolio.data,
-            ),
-        )
-    elseif name == :eligible_demand
-        val = collect(
-            IS.get_components(
-                x -> get_id(x) in getfield(base_struct, name),
-                DemandTechnology,
-                portfolio.data,
-            ),
-        )
-    elseif name in [
-        :capacity_limits,
-        :capacity_limits_discharge,
-        :capacity_limits_charge,
-        :capacity_limits_energy,
-        :duration_limits,
-        :angle_limits,
-    ]
-        data = getfield(base_struct, name)
-        if isnothing(data)
-            val = nothing
-        else
-            val = (min=data["min"], max=data["max"])
-        end
-    elseif name == :efficiency
-        data = getfield(base_struct, name)
-        val = (in=data["in"], out=data["out"])
-    elseif name in [:ramp_limits, :time_limits]
-        data = getfield(base_struct, name)
-        val = (up=data["up"], down=data["down"])
-    elseif name in [:start_region, :end_region]
-        val = first(
-            IS.get_components(
-                x -> get_id(x) in getfield(base_struct, name),
-                Zone,
-                portfolio.data,
-            ),
-        )
-    elseif name in [:start_node, :end_node]
-        val = first(
-            IS.get_components(
-                x -> get_id(x) in getfield(base_struct, name),
-                Node,
-                portfolio.data,
-            ),
-        )
-    elseif name == :prime_mover_type
-        val = PrimeMovers(getfield(base_struct, name))
-    elseif name == :fuel
-        val = [ThermalFuels(f) for f in getfield(base_struct, name)]
-    elseif name == :bus_type
-        val = ACBusTypes(getfield(base_struct, name))
-    elseif name == :co2
-        data = getfield(base_struct, name)
-        val = Dict{ThermalFuels, Float64}()
-        for (k, v) in data
-            val[ThermalFuels(k)] = v
-        end
-    elseif name == :heat_rate_mmbtu_per_mwh
-        data = getfield(base_struct, name)
-        val = Dict{ThermalFuels, ValueCurve}()
-        for (k, v) in data
-            val[ThermalFuels(k)] = v
-        end
-    elseif name in [:cofire_level_limits, :cofire_start_limits]
-        data = getfield(base_struct, name)
-        val = Dict{ThermalFuels, MinMax}()
-        for (k, v) in data
-            val[ThermalFuels(k)] = (min=v["min"], max=v["max"])
-        end
-    elseif name == :storage_tech
-        val = StorageTech(getfield(base_struct, name))
-    elseif name == :uuid
-        val = Base.UUID(getfield(base_struct, name))
-    elseif name == :conformity
-        val = LoadConformity(getfield(base_struct, name))
-    end
-
-    return val
+    return
 end
 
 """
@@ -922,6 +722,11 @@ end
 
 """
 Serializes a InfrastructureSystemsType to a JSON string.
+
+Component-level serialization is portfolio-scoped: a technology, region, requirement or
+supplemental attribute records its references as document ids, which only the owning
+`Portfolio` can assign, so passing one here on its own raises. Pass the `Portfolio` — or
+use [`to_json(portfolio, filename)`](@ref) to write the whole document to disk.
 """
 function to_json(obj::T; pretty=false, indent=2) where {T <: InfrastructureSystemsType}
     try

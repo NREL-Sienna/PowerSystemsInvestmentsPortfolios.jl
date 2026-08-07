@@ -39,6 +39,10 @@ import TimeSeries
 import Dates
 import DataStructures: OrderedDict, SortedDict
 import OpenAPI
+import PowerCoreOpenAPIModels
+import PowerInvestmentsOpenAPIModels
+const PC = PowerCoreOpenAPIModels
+const PI = PowerInvestmentsOpenAPIModels
 import StringEncodings
 import HDF5
 import Tables
@@ -132,6 +136,8 @@ export from_json
 export MinMax
 export InOut
 export UpDown
+export from_openapi
+export to_openapi
 
 export show_region_topology_table
 
@@ -162,10 +168,6 @@ export ThermalFuels
 export PrimeMovers
 export StorageTech
 
-#submodule for OpenAPI structs 
-include("models/generated/open_api_models/src/APIServer.jl")
-using .APIServer
-
 include("definitions.jl")
 
 include("models/requirements.jl")
@@ -173,6 +175,8 @@ include("models/technologies.jl")
 include("models/regions.jl")
 include("models/financial_data/financial_data.jl")
 include("models/financial_data/TechnologyFinancialData.jl")
+include("openapi/refs.jl")
+include("openapi/converters.jl")
 include("models/generated/includes.jl")
 include("investment_schedule.jl")
 
@@ -181,6 +185,8 @@ include("units/conversions.jl")
 include("units/function_conversions.jl")
 
 include("portfolio.jl")
+include("openapi/document.jl")
+include("openapi/ledger.jl")
 include("validation.jl")
 include("time_mapping.jl")
 include("serialization.jl")
