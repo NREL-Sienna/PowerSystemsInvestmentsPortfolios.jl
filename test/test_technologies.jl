@@ -10,6 +10,12 @@
         discharge_variable_cost=CostCurve(LinearCurve(0.0)),
         fixed=0.0,
     )
+    renewable_cost = RenewableGenerationCost(
+        variable=CostCurve(LinearCurve(0.0)),
+        curtailment_cost=CostCurve(LinearCurve(0.0)),
+        fixed=0.0,
+    )
+    inverter_cost = CostCurve(LinearCurve(0.0))
     tech_financial_data = TechnologyFinancialData(
         capital_recovery_period=20,
         technology_base_year=2020,
@@ -455,9 +461,9 @@
         power_systems_type="RenewableDispatch",
         operation_costs_power=storage_cost,
         operation_costs_energy=storage_cost,
-        operation_costs_inverter=storage_cost,
-        operation_costs_solar=thermal_cost,
-        operation_costs_wind=thermal_cost,
+        operation_costs_inverter=inverter_cost,
+        operation_costs_solar=renewable_cost,
+        operation_costs_wind=renewable_cost,
         inverter_efficiency=0.96,
         inverter_supply_ratio=1.0,
         capital_costs_inverter=LinearCurve(0.0),
@@ -474,22 +480,16 @@
         discharge_variable_cost=CostCurve(LinearCurve(2.5)),
         fixed=3.5,
     )
-    colocated_inverter_cost = StorageCost(
-        charge_variable_cost=CostCurve(LinearCurve(0.8)),
-        discharge_variable_cost=CostCurve(LinearCurve(1.8)),
-        fixed=2.2,
-    )
-    colocated_solar_cost = ThermalGenerationCost(
+    colocated_inverter_cost = CostCurve(LinearCurve(0.8))
+    colocated_solar_cost = RenewableGenerationCost(
         variable=CostCurve(LinearCurve(4.0)),
+        curtailment_cost=CostCurve(LinearCurve(0.1)),
         fixed=1.0,
-        start_up=0.5,
-        shut_down=0.1,
     )
-    colocated_wind_cost = ThermalGenerationCost(
+    colocated_wind_cost = RenewableGenerationCost(
         variable=CostCurve(LinearCurve(3.0)),
+        curtailment_cost=CostCurve(LinearCurve(0.2)),
         fixed=1.2,
-        start_up=0.4,
-        shut_down=0.2,
     )
     colocated_capital_power = LinearCurve(200.0)
     colocated_capital_energy = LinearCurve(90.0)

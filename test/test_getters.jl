@@ -216,11 +216,10 @@ end
         discharge_variable_cost=CostCurve(LinearCurve(0.0)),
         fixed=0.0,
     )
-    tc = ThermalGenerationCost(
+    rc = RenewableGenerationCost(
         variable=CostCurve(LinearCurve(0.0)),
+        curtailment_cost=CostCurve(LinearCurve(0.0)),
         fixed=0.0,
-        start_up=0.0,
-        shut_down=0.0,
     )
     colocated = ColocatedSupplyStorageTechnology{PSY.RenewableDispatch}(;
         name="colo_edge",
@@ -229,9 +228,9 @@ end
         power_systems_type="RenewableDispatch",
         operation_costs_power=sc,
         operation_costs_energy=sc,
-        operation_costs_inverter=sc,
-        operation_costs_solar=tc,
-        operation_costs_wind=tc,
+        operation_costs_inverter=CostCurve(LinearCurve(0.0)),
+        operation_costs_solar=rc,
+        operation_costs_wind=rc,
         inverter_efficiency=0.96,
         inverter_supply_ratio=1.0,
         capital_costs_inverter=LinearCurve(0.0),

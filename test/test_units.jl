@@ -153,16 +153,19 @@ colocated() = ColocatedSupplyStorageTechnology{PSY.ThermalStandard}(;
     capital_costs_energy=LinearCurve(3000.0),
     capital_costs_power=LinearCurve(1200.0),
     capital_costs_inverter=LinearCurve(1300.0),
-    operation_costs_solar=ThermalGenerationCost(
+    operation_costs_solar=RenewableGenerationCost(
         CostCurve(LinearCurve(5.0)),
+        CostCurve(LinearCurve(0.0)),
         10.0,
-        0.0,
-        0.0,
     ),
-    operation_costs_wind=ThermalGenerationCost(CostCurve(LinearCurve(6.0)), 11.0, 0.0, 0.0),
+    operation_costs_wind=RenewableGenerationCost(
+        CostCurve(LinearCurve(6.0)),
+        CostCurve(LinearCurve(0.0)),
+        11.0,
+    ),
     operation_costs_energy=StorageCost(; fixed=4.0),
     operation_costs_power=StorageCost(; fixed=5.0),
-    operation_costs_inverter=StorageCost(; fixed=6.0),
+    operation_costs_inverter=CostCurve(LinearCurve(6.0)),
     capacity_limits_solar=(min=0.0, max=300.0),
     capacity_limits_wind=(min=0.0, max=400.0),
     capacity_power_limits=(min=0.0, max=500.0),
@@ -218,7 +221,9 @@ function check_valuecurve(get, set, nat, alt; prop, ratio)
     @test get_proportional(get(nat)) ≈ prop
 end
 
-function check_thermal_cost(get, set, nat, alt; var_prop, fixed, ratio)
+# ThermalGenerationCost / RenewableGenerationCost field: both carry `variable` and
+# `fixed`, and both scale by `ratio`.
+function check_variable_fixed_cost(get, set, nat, alt; var_prop, fixed, ratio)
     o = get(nat)
     @test o.variable.value_curve.function_data.proportional_term ≈ var_prop
     @test o.fixed ≈ fixed
@@ -229,6 +234,14 @@ function check_thermal_cost(get, set, nat, alt; var_prop, fixed, ratio)
     o3 = get(nat)
     @test o3.variable.value_curve.function_data.proportional_term ≈ var_prop
     @test o3.fixed ≈ fixed
+end
+
+# ProductionVariableCostCurve field: the value curve's proportional term scales by `ratio`.
+function check_cost_curve(get, set, nat, alt; prop, ratio)
+    @test get_proportional(get_value_curve(get(nat))) ≈ prop
+    @test get_proportional(get_value_curve(get(alt))) ≈ prop * ratio
+    set(get(alt), alt)
+    @test get_proportional(get_value_curve(get(nat))) ≈ prop
 end
 
 # StorageCost field: the scalar `fixed` term scales by `ratio`.
@@ -997,8 +1010,8 @@ end
         prop=3000.0,
         ratio=1e-3,
     )
-    # --- OperationalCost: ThermalGenerationCost (solar/wind, usd_per_mwh) ---
-    check_thermal_cost(
+    # --- OperationalCost: RenewableGenerationCost (solar/wind, usd_per_mwh) ---
+    check_variable_fixed_cost(
         u -> PSIP.get_operation_costs_solar(t, u),
         (v, u) -> PSIP.set_operation_costs_solar!(t, v, u),
         conversion_unit(u"MW" * u"hr", USD),
@@ -1007,7 +1020,7 @@ end
         fixed=10.0,
         ratio=1e-3,
     )
-    check_thermal_cost(
+    check_variable_fixed_cost(
         u -> PSIP.get_operation_costs_wind(t, u),
         (v, u) -> PSIP.set_operation_costs_wind!(t, v, u),
         conversion_unit(u"MW" * u"hr", USD),
@@ -1016,7 +1029,7 @@ end
         fixed=11.0,
         ratio=1e-3,
     )
-    # --- OperationalCost: StorageCost (energy/inverter/power all usd_per_mwh) ---
+    # --- OperationalCost: StorageCost (energy/power) + inverter CostCurve, all usd_per_mwh ---
     check_storage_cost(
         u -> PSIP.get_operation_costs_energy(t, u),
         (v, u) -> PSIP.set_operation_costs_energy!(t, v, u),
@@ -1036,12 +1049,12 @@ end
         fixed=5.0,
         ratio=1e-3,
     )
-    check_storage_cost(
+    check_cost_curve(
         u -> PSIP.get_operation_costs_inverter(t, u),
         (v, u) -> PSIP.set_operation_costs_inverter!(t, v, u),
         conversion_unit(u"MW" * u"hr", USD),
         conversion_unit(u"kW" * u"hr", USD);
-        fixed=6.0,
+        prop=6.0,
         ratio=1e-3,
     )
     # --- lifetimes (yr, Int) ---

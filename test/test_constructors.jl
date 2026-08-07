@@ -99,7 +99,7 @@
     colocated_supply_storage = ColocatedSupplyStorageTechnology{PSY.RenewableDispatch}(
         name="colocated_supply_storage",
         id=17,
-        operation_costs_inverter=StorageCost(),
+        operation_costs_inverter=CostCurve(LinearCurve(0.0)),
         financial_data=tech_financial_data,
         inverter_efficiency=0.96,
         power_systems_type="RenewableDispatch",
