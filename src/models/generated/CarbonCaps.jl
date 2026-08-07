@@ -96,11 +96,25 @@ set_internal!(value::CarbonCaps, val) = value.internal = val
 
 
 
-function serialize_openapi_struct(technology::CarbonCaps, vals...)
-    base_struct = APIServer.CarbonCaps(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ CarbonCaps }, po, refs::OpenAPIRefs)
+    return CarbonCaps(;
+        name = po.name,
+        available = po.available,
+        id = po.id,
+        max_tons_mwh = po.max_tons_mwh,
+        target_year = po.target_year,
+        max_mtons = po.max_mtons,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:CarbonCaps}, vals::Dict)
-    return IS.deserialize_struct(APIServer.CarbonCaps, vals)
+function to_openapi(value::CarbonCaps, refs::OpenAPIRefs)
+    return PI.CarbonCaps(;
+        name = get_name(value),
+        available = get_available(value),
+        id = get_id(value),
+        max_tons_mwh = get_max_tons_mwh(value, IS.NU),
+        target_year = get_target_year(value),
+        max_mtons = get_max_mtons(value, IS.NU),
+    )
 end

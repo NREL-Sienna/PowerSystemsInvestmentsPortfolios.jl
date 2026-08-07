@@ -84,11 +84,23 @@ set_internal!(value::CarbonTax, val) = value.internal = val
 
 
 
-function serialize_openapi_struct(technology::CarbonTax, vals...)
-    base_struct = APIServer.CarbonTax(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ CarbonTax }, po, refs::OpenAPIRefs)
+    return CarbonTax(;
+        name = po.name,
+        available = po.available,
+        id = po.id,
+        target_year = po.target_year,
+        tax_dollars_per_ton = po.tax_dollars_per_ton,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:CarbonTax}, vals::Dict)
-    return IS.deserialize_struct(APIServer.CarbonTax, vals)
+function to_openapi(value::CarbonTax, refs::OpenAPIRefs)
+    return PI.CarbonTax(;
+        name = get_name(value),
+        available = get_available(value),
+        id = get_id(value),
+        target_year = get_target_year(value),
+        tax_dollars_per_ton = get_tax_dollars_per_ton(value, IS.NU),
+    )
 end

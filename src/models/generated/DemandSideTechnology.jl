@@ -191,12 +191,46 @@ set_ext!(value::DemandSideTechnology, val) = value.ext = val
 set_internal!(value::DemandSideTechnology, val) = value.internal = val
 
 
-function serialize_openapi_struct(technology::DemandSideTechnology{T}, vals...) where T <: PSY.StaticInjection
-    base_struct = APIServer.DemandSideTechnology(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ DemandSideTechnology }, po, refs::OpenAPIRefs)
+    parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
+    return DemandSideTechnology{parameter}(;
+        name = po.name,
+        id = po.id,
+        available = po.available,
+        power_systems_type = po.power_systems_type,
+        region = resolve_refs(refs, po.region),
+        technology_efficiency = po.technology_efficiency,
+        price_per_unit = convert_value_curve(po.price_per_unit),
+        min_power = po.min_power,
+        peak_demand_mw = po.peak_demand_mw,
+        curtailment_cost = convert_value_curve(po.curtailment_cost),
+        max_demand_curtailment = po.max_demand_curtailment,
+        max_demand_delay = po.max_demand_delay,
+        max_demand_advance = po.max_demand_advance,
+        demand_energy_efficiency = po.demand_energy_efficiency,
+        shift_variable_cost = convert_value_curve(po.shift_variable_cost),
+        requirements = resolve_refs(refs, po.requirements),
+    )
 end
 
-
-function deserialize_openapi_struct(::Type{<:DemandSideTechnology}, vals::Dict)
-    return IS.deserialize_struct(APIServer.DemandSideTechnology, vals)
+function to_openapi(value::DemandSideTechnology{T}, refs::OpenAPIRefs) where {T <: PSY.StaticInjection}
+    return PI.DemandSideTechnology(;
+        name = get_name(value),
+        id = get_id(value),
+        available = get_available(value),
+        power_systems_type = string(nameof(T)),
+        region = component_ids(refs, get_region(value)),
+        technology_efficiency = get_technology_efficiency(value),
+        price_per_unit = convert_value_curve_to_openapi(get_price_per_unit(value, IS.NU)),
+        min_power = get_min_power(value),
+        peak_demand_mw = get_peak_demand_mw(value, IS.NU),
+        curtailment_cost = convert_value_curve_to_openapi(get_curtailment_cost(value, IS.NU)),
+        max_demand_curtailment = get_max_demand_curtailment(value),
+        max_demand_delay = get_max_demand_delay(value, IS.NU),
+        max_demand_advance = get_max_demand_advance(value, IS.NU),
+        demand_energy_efficiency = get_demand_energy_efficiency(value),
+        shift_variable_cost = convert_value_curve_to_openapi(get_shift_variable_cost(value, IS.NU)),
+        requirements = component_ids(refs, get_requirements(value)),
+    )
 end

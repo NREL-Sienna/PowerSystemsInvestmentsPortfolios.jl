@@ -80,11 +80,23 @@ set_internal!(value::CapacityReserveMargin, val) = value.internal = val
 
 
 
-function serialize_openapi_struct(technology::CapacityReserveMargin, vals...)
-    base_struct = APIServer.CapacityReserveMargin(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ CapacityReserveMargin }, po, refs::OpenAPIRefs)
+    return CapacityReserveMargin(;
+        name = po.name,
+        available = po.available,
+        id = po.id,
+        target_year = po.target_year,
+        capacity_reserve_fraction = po.capacity_reserve_fraction,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:CapacityReserveMargin}, vals::Dict)
-    return IS.deserialize_struct(APIServer.CapacityReserveMargin, vals)
+function to_openapi(value::CapacityReserveMargin, refs::OpenAPIRefs)
+    return PI.CapacityReserveMargin(;
+        name = get_name(value),
+        available = get_available(value),
+        id = get_id(value),
+        target_year = get_target_year(value),
+        capacity_reserve_fraction = get_capacity_reserve_fraction(value),
+    )
 end

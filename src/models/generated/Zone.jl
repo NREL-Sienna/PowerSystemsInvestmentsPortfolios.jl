@@ -56,11 +56,17 @@ set_internal!(value::Zone, val) = value.internal = val
 
 
 
-function serialize_openapi_struct(technology::Zone, vals...)
-    base_struct = APIServer.Zone(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ Zone }, po, refs::OpenAPIRefs)
+    return Zone(;
+        name = po.name,
+        id = po.id,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:Zone}, vals::Dict)
-    return IS.deserialize_struct(APIServer.Zone, vals)
+function to_openapi(value::Zone, refs::OpenAPIRefs)
+    return PI.Zone(;
+        name = get_name(value),
+        id = get_id(value),
+    )
 end

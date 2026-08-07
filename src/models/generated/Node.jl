@@ -63,12 +63,22 @@ set_ext!(value::Node, val) = value.ext = val
 set_internal!(value::Node, val) = value.internal = val
 
 
+const ACBUSTYPES_FROM_STRING = Dict{String, ACBusTypes}(string(m) => m for m in instances(ACBusTypes))
+const ACBUSTYPES_TO_STRING = Dict{ ACBusTypes, String}(m => string(m) for m in instances(ACBusTypes))
 
-function serialize_openapi_struct(technology::Node, vals...)
-    base_struct = APIServer.Node(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ Node }, po, refs::OpenAPIRefs)
+    return Node(;
+        name = po.name,
+        id = po.id,
+        bus_type = ACBUSTYPES_FROM_STRING[po.bus_type],
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:Node}, vals::Dict)
-    return IS.deserialize_struct(APIServer.Node, vals)
+function to_openapi(value::Node, refs::OpenAPIRefs)
+    return PI.Node(;
+        name = get_name(value),
+        id = get_id(value),
+        bus_type = ACBUSTYPES_TO_STRING[get_bus_type(value)],
+    )
 end

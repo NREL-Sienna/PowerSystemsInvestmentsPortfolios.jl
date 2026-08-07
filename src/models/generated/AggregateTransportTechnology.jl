@@ -147,12 +147,38 @@ set_ext!(value::AggregateTransportTechnology, val) = value.ext = val
 set_internal!(value::AggregateTransportTechnology, val) = value.internal = val
 
 
-function serialize_openapi_struct(technology::AggregateTransportTechnology{T}, vals...) where T <: PSY.Device
-    base_struct = APIServer.AggregateTransportTechnology(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ AggregateTransportTechnology }, po, refs::OpenAPIRefs)
+    parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
+    return AggregateTransportTechnology{parameter}(;
+        name = po.name,
+        id = po.id,
+        available = po.available,
+        power_systems_type = po.power_systems_type,
+        start_region = resolve_ref(refs, po.start_region),
+        end_region = resolve_ref(refs, po.end_region),
+        capacity_limits = (min = po.capacity_limits.min, max = po.capacity_limits.max),
+        unit_size = po.unit_size,
+        capital_costs = convert_value_curve(po.capital_costs),
+        line_loss = po.line_loss,
+        requirements = resolve_refs(refs, po.requirements),
+        financial_data = convert_financial_data(po.financial_data),
+    )
 end
 
-
-function deserialize_openapi_struct(::Type{<:AggregateTransportTechnology}, vals::Dict)
-    return IS.deserialize_struct(APIServer.AggregateTransportTechnology, vals)
+function to_openapi(value::AggregateTransportTechnology{T}, refs::OpenAPIRefs) where {T <: PSY.Device}
+    return PI.AggregateTransportTechnology(;
+        name = get_name(value),
+        id = get_id(value),
+        available = get_available(value),
+        power_systems_type = string(nameof(T)),
+        start_region = component_id(refs, get_start_region(value)),
+        end_region = component_id(refs, get_end_region(value)),
+        capacity_limits = _minmax_po(get_capacity_limits(value, IS.NU)),
+        unit_size = get_unit_size(value, IS.NU),
+        capital_costs = convert_value_curve_to_openapi(get_capital_costs(value, IS.NU)),
+        line_loss = get_line_loss(value),
+        requirements = component_ids(refs, get_requirements(value)),
+        financial_data = convert_financial_data_to_openapi(get_financial_data(value)),
+    )
 end

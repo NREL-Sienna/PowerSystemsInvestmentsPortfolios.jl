@@ -72,11 +72,21 @@ set_internal!(value::RetirementPotential, val) = value.internal = val
 
 
 
-function serialize_openapi_struct(technology::RetirementPotential, vals...)
-    base_struct = APIServer.RetirementPotential(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ RetirementPotential }, po, refs::OpenAPIRefs)
+    return RetirementPotential(;
+        id = po.id,
+        eligible_generators = po.eligible_generators,
+        planned_retirement_year = po.planned_retirement_year,
+        build_year = po.build_year,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:RetirementPotential}, vals::Dict)
-    return IS.deserialize_struct(APIServer.RetirementPotential, vals)
+function to_openapi(value::RetirementPotential, refs::OpenAPIRefs)
+    return PI.RetirementPotential(;
+        id = get_id(value),
+        eligible_generators = get_eligible_generators(value),
+        planned_retirement_year = get_planned_retirement_year(value),
+        build_year = get_build_year(value),
+    )
 end

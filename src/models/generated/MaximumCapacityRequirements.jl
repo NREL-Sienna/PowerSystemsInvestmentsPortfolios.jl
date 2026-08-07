@@ -84,11 +84,23 @@ set_internal!(value::MaximumCapacityRequirements, val) = value.internal = val
 
 
 
-function serialize_openapi_struct(technology::MaximumCapacityRequirements, vals...)
-    base_struct = APIServer.MaximumCapacityRequirements(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ MaximumCapacityRequirements }, po, refs::OpenAPIRefs)
+    return MaximumCapacityRequirements(;
+        name = po.name,
+        available = po.available,
+        id = po.id,
+        max_capacity_mw = po.max_capacity_mw,
+        target_year = po.target_year,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:MaximumCapacityRequirements}, vals::Dict)
-    return IS.deserialize_struct(APIServer.MaximumCapacityRequirements, vals)
+function to_openapi(value::MaximumCapacityRequirements, refs::OpenAPIRefs)
+    return PI.MaximumCapacityRequirements(;
+        name = get_name(value),
+        available = get_available(value),
+        id = get_id(value),
+        max_capacity_mw = get_max_capacity_mw(value, IS.NU),
+        target_year = get_target_year(value),
+    )
 end

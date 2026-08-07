@@ -175,12 +175,42 @@ set_ext!(value::NodalACTransportTechnology, val) = value.ext = val
 set_internal!(value::NodalACTransportTechnology, val) = value.internal = val
 
 
-function serialize_openapi_struct(technology::NodalACTransportTechnology{T}, vals...) where T <: PSY.Device
-    base_struct = APIServer.NodalACTransportTechnology(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ NodalACTransportTechnology }, po, refs::OpenAPIRefs)
+    parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
+    return NodalACTransportTechnology{parameter}(;
+        name = po.name,
+        id = po.id,
+        available = po.available,
+        power_systems_type = po.power_systems_type,
+        start_node = resolve_ref(refs, po.start_node),
+        end_node = resolve_ref(refs, po.end_node),
+        capacity_limits = (min = po.capacity_limits.min, max = po.capacity_limits.max),
+        unit_size = po.unit_size,
+        capital_costs = convert_value_curve(po.capital_costs),
+        resistance = po.resistance,
+        voltage = po.voltage,
+        reactance = po.reactance,
+        requirements = resolve_refs(refs, po.requirements),
+        financial_data = convert_financial_data(po.financial_data),
+    )
 end
 
-
-function deserialize_openapi_struct(::Type{<:NodalACTransportTechnology}, vals::Dict)
-    return IS.deserialize_struct(APIServer.NodalACTransportTechnology, vals)
+function to_openapi(value::NodalACTransportTechnology{T}, refs::OpenAPIRefs) where {T <: PSY.Device}
+    return PI.NodalACTransportTechnology(;
+        name = get_name(value),
+        id = get_id(value),
+        available = get_available(value),
+        power_systems_type = string(nameof(T)),
+        start_node = component_id(refs, get_start_node(value)),
+        end_node = component_id(refs, get_end_node(value)),
+        capacity_limits = _minmax_po(get_capacity_limits(value, IS.NU)),
+        unit_size = get_unit_size(value, IS.NU),
+        capital_costs = convert_value_curve_to_openapi(get_capital_costs(value, IS.NU)),
+        resistance = get_resistance(value, IS.NU),
+        voltage = get_voltage(value, IS.NU),
+        reactance = get_reactance(value, IS.NU),
+        requirements = component_ids(refs, get_requirements(value)),
+        financial_data = convert_financial_data_to_openapi(get_financial_data(value)),
+    )
 end

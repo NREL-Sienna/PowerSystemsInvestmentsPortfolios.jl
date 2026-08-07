@@ -84,11 +84,23 @@ set_internal!(value::MinimumCapacityRequirements, val) = value.internal = val
 
 
 
-function serialize_openapi_struct(technology::MinimumCapacityRequirements, vals...)
-    base_struct = APIServer.MinimumCapacityRequirements(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ MinimumCapacityRequirements }, po, refs::OpenAPIRefs)
+    return MinimumCapacityRequirements(;
+        name = po.name,
+        available = po.available,
+        id = po.id,
+        min_capacity_mw = po.min_capacity_mw,
+        target_year = po.target_year,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:MinimumCapacityRequirements}, vals::Dict)
-    return IS.deserialize_struct(APIServer.MinimumCapacityRequirements, vals)
+function to_openapi(value::MinimumCapacityRequirements, refs::OpenAPIRefs)
+    return PI.MinimumCapacityRequirements(;
+        name = get_name(value),
+        available = get_available(value),
+        id = get_id(value),
+        min_capacity_mw = get_min_capacity_mw(value, IS.NU),
+        target_year = get_target_year(value),
+    )
 end

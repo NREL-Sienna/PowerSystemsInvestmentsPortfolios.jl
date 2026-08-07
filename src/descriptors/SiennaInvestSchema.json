@@ -116,7 +116,7 @@
           "name": "available",
           "type": "Bool",
           "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)",
-          "default": "True"
+          "default": "true"
         },
         {
           "name": "prime_mover_type",
@@ -581,7 +581,7 @@
         },
         {
           "name": "operation_costs",
-          "type": "PSY.OperationalCost",
+          "type": "PSY.StorageCost",
           "description": "Fixed and variable O&M costs for a technology",
           "default": "StorageCost(nothing)",
           "needs_conversion": true,
@@ -1658,7 +1658,7 @@
           "name": "available",
           "type": "Bool",
           "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)",
-          "default": "True"
+          "default": "true"
         },
         {
           "name": "capital_costs_solar",
@@ -1670,9 +1670,9 @@
         },
         {
           "name": "operation_costs_solar",
-          "type": "PSY.OperationalCost",
+          "type": "PSY.RenewableGenerationCost",
           "description": "Fixed and variable O&M costs for a technology",
-          "default": "ThermalGenerationCost(nothing)",
+          "default": "RenewableGenerationCost(nothing)",
           "needs_conversion": true,
           "conversion_unit": ":usd_per_mwh"
         },
@@ -1702,9 +1702,9 @@
         },
         {
           "name": "operation_costs_wind",
-          "type": "PSY.OperationalCost",
+          "type": "PSY.RenewableGenerationCost",
           "description": "Fixed and variable O&M costs for a technology",
-          "default": "ThermalGenerationCost(nothing)",
+          "default": "RenewableGenerationCost(nothing)",
           "needs_conversion": true,
           "conversion_unit": ":usd_per_mwh"
         },
@@ -1742,7 +1742,7 @@
         },
         {
           "name": "operation_costs_energy",
-          "type": "PSY.OperationalCost",
+          "type": "PSY.StorageCost",
           "description": "Fixed and variable O&M costs for a storage technology",
           "default": "StorageCost(nothing)",
           "needs_conversion": true,
@@ -1750,7 +1750,7 @@
         },
         {
           "name": "operation_costs_power",
-          "type": "PSY.OperationalCost",
+          "type": "PSY.StorageCost",
           "description": "Fixed and variable O&M costs for the storage power component. Units: USD/MWh.",
           "default": "StorageCost(nothing)",
           "needs_conversion": true,
@@ -1830,7 +1830,7 @@
         },
         {
           "name": "operation_costs_inverter",
-          "type": "PSY.OperationalCost",
+          "type": "IS.ProductionVariableCostCurve",
           "description": "Operational costs for using inverter in co-located systems",
           "needs_conversion": true,
           "conversion_unit": ":usd_per_mwh"

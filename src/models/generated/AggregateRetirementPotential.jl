@@ -60,11 +60,17 @@ set_internal!(value::AggregateRetirementPotential, val) = value.internal = val
 
 
 
-function serialize_openapi_struct(technology::AggregateRetirementPotential, vals...)
-    base_struct = APIServer.AggregateRetirementPotential(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ AggregateRetirementPotential }, po, refs::OpenAPIRefs)
+    return AggregateRetirementPotential(;
+        id = po.id,
+        retirement_potential = po.retirement_potential,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:AggregateRetirementPotential}, vals::Dict)
-    return IS.deserialize_struct(APIServer.AggregateRetirementPotential, vals)
+function to_openapi(value::AggregateRetirementPotential, refs::OpenAPIRefs)
+    return PI.AggregateRetirementPotential(;
+        id = get_id(value),
+        retirement_potential = get_retirement_potential(value, IS.NU),
+    )
 end

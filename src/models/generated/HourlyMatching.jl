@@ -64,11 +64,19 @@ set_internal!(value::HourlyMatching, val) = value.internal = val
 
 
 
-function serialize_openapi_struct(technology::HourlyMatching, vals...)
-    base_struct = APIServer.HourlyMatching(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ HourlyMatching }, po, refs::OpenAPIRefs)
+    return HourlyMatching(;
+        name = po.name,
+        id = po.id,
+        available = po.available,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:HourlyMatching}, vals::Dict)
-    return IS.deserialize_struct(APIServer.HourlyMatching, vals)
+function to_openapi(value::HourlyMatching, refs::OpenAPIRefs)
+    return PI.HourlyMatching(;
+        name = get_name(value),
+        id = get_id(value),
+        available = get_available(value),
+    )
 end

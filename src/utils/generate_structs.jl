@@ -105,28 +105,489 @@ InfrastructureSystems.display_units_arg(::typeof({{accessor}}_unitful), ::{{unit
 {{{custom_code}}}
 {{/custom_code}}
 
+{{#openapi_enum_tables}}
+const {{const_name}} = Dict{String, {{{enum_type}}}}(string(m) => m for m in instances({{{enum_type}}}))
+{{/openapi_enum_tables}}
+{{#openapi_export_enum_tables}}
+const {{const_name}} = Dict{ {{{enum_type}}}, String}(m => string(m) for m in instances({{{enum_type}}}))
+{{/openapi_export_enum_tables}}
+
 {{#has_parametric}}
-function serialize_openapi_struct(technology::{{struct_name}}{T}, vals...) where T <: {{parametric}}
-    base_struct = APIServer.{{struct_name}}(; vals...)
-    return base_struct
+function from_openapi(::Type{ {{struct_name}} }, po, refs::OpenAPIRefs)
+    parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
+    return {{struct_name}}{parameter}(;
+        {{#openapi_kwargs}}
+        {{name}} = {{{expr}}},
+        {{/openapi_kwargs}}
+    )
+end
+
+function to_openapi(value::{{struct_name}}{T}, refs::OpenAPIRefs) where {T <: {{parametric}}}
+    return PI.{{struct_name}}(;
+        {{#openapi_export_kwargs}}
+        {{name}} = {{{expr}}},
+        {{/openapi_export_kwargs}}
+    )
 end
 {{/has_parametric}}
 
 {{^has_parametric}}
-function serialize_openapi_struct(technology::{{struct_name}}, vals...)
-    base_struct = APIServer.{{struct_name}}(; vals...)
-    return base_struct
+function from_openapi(::Type{ {{struct_name}} }, po, refs::OpenAPIRefs)
+    return {{struct_name}}(;
+        {{#openapi_kwargs}}
+        {{name}} = {{{expr}}},
+        {{/openapi_kwargs}}
+    )
+end
+
+function to_openapi(value::{{struct_name}}, refs::OpenAPIRefs)
+    return PI.{{struct_name}}(;
+        {{#openapi_export_kwargs}}
+        {{name}} = {{{expr}}},
+        {{/openapi_export_kwargs}}
+    )
 end
 {{/has_parametric}}
 
-function deserialize_openapi_struct(::Type{<:{{struct_name}}}, vals::Dict)
-    return IS.deserialize_struct(APIServer.{{struct_name}}, vals)
+"""
+
+# ── OpenAPI converter generation ──────────────────────────────────────────────
+# Ported from PowerSystems.jl's src/generate_structs.jl. Two differences, both
+# structural rather than stylistic:
+#
+#  * No unit-system axis. PSY emits four methods per type because a PSY document can
+#    state values in either of two per-unit bases. PSIP has one representation, so it
+#    emits two and takes no `Val`.
+#  * Parametric types are generated, not rejected. PSY hand-writes those; PSIP cannot,
+#    since 8 of its 23 types are parametric. `power_systems_type` carries the parameter.
+
+const OPENAPI_SKIP_FIELDS = Set(["ext", "internal"])
+
+const OPENAPI_SCALAR_TYPES = Set([
+    "Float64",
+    "Int",
+    "Int64",
+    "String",
+    "Bool",
+    "Vector{String}",
+    "Dict{String, Int64}",
+    "Dict{String, Float64}",
+])
+
+const OPENAPI_COMPOUND_MEMBERS =
+    Dict("MinMax" => ("min", "max"), "UpDown" => ("up", "down"), "InOut" => ("in", "out"))
+
+const OPENAPI_COMPOUND_CTORS = Dict(
+    "MinMax" => (required="_minmax_po", optional="_minmax_po_optional"),
+    "UpDown" => (required="_updown_po", optional="_updown_po_optional"),
+    "InOut" => (required="_inout_po", optional="_inout_po_optional"),
+)
+
+# PSY derives this from the descriptor's own struct names. That fails here: PSIP's
+# reference fields are typed with the ABSTRACT supertypes `RegionTopology` and
+# `Requirement`, which are never component names, so the set is declared instead.
+const OPENAPI_REFERENCE_TYPES = Set(["RegionTopology", "Requirement", "Zone", "Node"])
+
+const OPENAPI_ENUM_TYPES =
+    Set(["PrimeMovers", "ThermalFuels", "StorageTech", "ACBusTypes", "PSY.LoadConformity"])
+
+const OPENAPI_CURVE_TYPES =
+    Set(["PSY.ValueCurve", "Union{IS.LinearCurve, IS.PiecewiseIncrementalCurve}"])
+
+# A cost field's declared Julia type must be as narrow as the OpenAPI model's, because the
+# PO side has no enum validation on the read path: writing a `ThermalGenerationCost` into a
+# field the document types `RenewableGenerationCost` round-trips into a different cost type
+# with fields dropped and nothing raised. `test/test_openapi_parity.jl` holds the pairing.
+# `PSY.OperationalCost` stays legal only where the PO type is the `GenericOperationCost`
+# oneOf, which spans the whole family.
+const OPENAPI_COST_TYPES = Set([
+    "PSY.OperationalCost",
+    "PSY.ThermalGenerationCost",
+    "PSY.RenewableGenerationCost",
+    "PSY.StorageCost",
+    "IS.ProductionVariableCostCurve",
+])
+
+const OPENAPI_NESTED_TYPES = Set(["TechnologyFinancialData"])
+
+"""
+Split `Union{Nothing, X}` into `(X, true)`; any other type string is `(type, false)`.
+"""
+function openapi_strip_nullable(data_type::AbstractString)
+    m = match(r"^Union\{Nothing,\s*(.+)\}$", data_type)
+    if isnothing(m)
+        return (String(data_type), false)
+    end
+    return (String(m.captures[1]), true)
+end
+
+openapi_enum_table_name(bare) = uppercase(replace(bare, "." => "_")) * "_FROM_STRING"
+openapi_enum_table_name_export(bare) = uppercase(replace(bare, "." => "_")) * "_TO_STRING"
+
+"""
+Classify one field's role in an OpenAPI converter, returning `(kind, bare, nullable)`
+with `kind` one of `:skip`, `:scalar`, `:compound`, `:reference`, `:reference_vector`,
+`:enum`, `:enum_vector`, `:enum_dict`, `:enum_compound_dict`, `:curve`, `:cost`,
+`:nested`.
+
+Raises `DataFormatError` rather than guessing: a field whose Julia type matches none of
+the declared tables is a descriptor change the generator has not been taught about, and
+emitting a silently-wrong converter for it would corrupt data at run time.
+"""
+function openapi_classify_field(struct_name, field)
+    name = field["name"]
+    if name in OPENAPI_SKIP_FIELDS
+        return (:skip, String(field["type"]), false)
+    end
+    bare, nullable = openapi_strip_nullable(field["type"])
+    bare in OPENAPI_SCALAR_TYPES && return (:scalar, bare, nullable)
+    haskey(OPENAPI_COMPOUND_MEMBERS, bare) && return (:compound, bare, nullable)
+    bare in OPENAPI_REFERENCE_TYPES && return (:reference, bare, nullable)
+    bare in OPENAPI_ENUM_TYPES && return (:enum, bare, nullable)
+    bare in OPENAPI_CURVE_TYPES && return (:curve, bare, nullable)
+    bare in OPENAPI_COST_TYPES && return (:cost, bare, nullable)
+    bare in OPENAPI_NESTED_TYPES && return (:nested, bare, nullable)
+
+    inner = match(r"^Vector\{(.+)\}$", bare)
+    if !isnothing(inner)
+        element = String(inner.captures[1])
+        element in OPENAPI_REFERENCE_TYPES && return (:reference_vector, element, nullable)
+        element in OPENAPI_ENUM_TYPES && return (:enum_vector, element, nullable)
+    end
+
+    dict = match(r"^Dict\{(.+?),\s*(.+)\}$", bare)
+    if !isnothing(dict)
+        key = String(dict.captures[1])
+        value = String(dict.captures[2])
+        if key in OPENAPI_ENUM_TYPES
+            haskey(OPENAPI_COMPOUND_MEMBERS, value) &&
+                return (:enum_compound_dict, (key, value), nullable)
+            value in OPENAPI_SCALAR_TYPES && return (:enum_dict, key, nullable)
+        end
+    end
+
+    throw(
+        DataFormatError(
+            "$struct_name field=$name type=$(field["type"]) has no determinable " *
+            "OpenAPI converter kind (not a scalar, compound, reference, enum, curve, " *
+            "cost, or nested struct declared in the generator's tables)",
+        ),
+    )
 end
 
 """
+Record one enum's lookup table on `tables` the first time it is needed anywhere in the
+generation run. `defined` is threaded across every struct: two files each emitting
+`const THERMALFUELS_FROM_STRING` is a duplicate-`const` error at include time, long
+after generation itself looked successful.
+"""
+function openapi_register_enum_table!(tables, defined, const_name, enum_type)
+    if const_name in defined
+        return const_name
+    end
+    push!(defined, const_name)
+    push!(tables, Dict("const_name" => const_name, "enum_type" => enum_type))
+    return const_name
+end
 
-#=
-=#
+"""
+Wrap an import expression that would index into a `nothing` PO field.
+"""
+function openapi_nullable_wrap(name, body)
+    return "(if isnothing(po.$name); nothing; else; $body; end)"
+end
+
+# `openapi_classify_field` computes `nullable` for every kind, but only `:compound` and
+# `:curve` have a nullable emission (and `:reference` raises its own, more specific error on
+# the export side). The kinds listed here would emit code that indexes or converts
+# `nothing` — `PRIMEMOVERS_FROM_STRING[nothing]`, `convert_cost(nothing)` — and surface as a
+# `MethodError` at load time rather than a generation failure. `:scalar` is deliberately
+# absent: `nothing` passes straight through `po.x` and through the PO field's own
+# `Union{Nothing, T}`, so a nullable scalar is already correct in both directions.
+const OPENAPI_NULLABLE_UNSUPPORTED_KINDS = Set([
+    :reference_vector,
+    :enum,
+    :enum_vector,
+    :enum_dict,
+    :enum_compound_dict,
+    :cost,
+    :nested,
+])
+
+"""
+Raise when a field is nullable and its kind has no nullable emission rule, naming the
+driver that would otherwise emit `nothing`-indexing code.
+"""
+function openapi_check_nullable(struct_name, name, kind, nullable, driver)
+    if nullable && kind in OPENAPI_NULLABLE_UNSUPPORTED_KINDS
+        throw(
+            DataFormatError(
+                "$struct_name field=$name kind=$kind is nullable, and $driver has no " *
+                "nullable emission for that kind; add the nullable helper to " *
+                "src/openapi/converters.jl and teach the driver to call it before " *
+                "making this field nullable in the descriptor",
+            ),
+        )
+    end
+    return nothing
+end
+
+"""
+The export-direction accessor call for one field. A field the descriptor marks
+`needs_conversion` gets only the units-taking accessor `get_x(value, units)`; a field
+without it gets only `get_x(value)`. This must read the same `needs_conversion` key the
+accessor generation reads or the emitted call is a `MethodError` at run time.
+"""
+function openapi_export_getter_call(field)
+    name = field["name"]
+    if get(field, "needs_conversion", false)
+        return "get_$name(value, IS.NU)"
+    end
+    return "get_$name(value)"
+end
+
+"""
+Build the `from_openapi` kwargs and the `<ENUM>_FROM_STRING` tables for one struct,
+storing them on `item` for the template. `defined_enum_tables` is the run-wide dedup set.
+"""
+function compute_openapi_converter!(item, defined_enum_tables)
+    struct_name = item["struct_name"]
+    kwargs = Vector{Dict{String, Any}}()
+    tables = Vector{Dict{String, Any}}()
+
+    for field in item["properties"]
+        kind, bare, nullable = openapi_classify_field(struct_name, field)
+        kind == :skip && continue
+        name = String(field["name"])
+        expr = openapi_import_expr(
+            struct_name,
+            name,
+            kind,
+            bare,
+            nullable,
+            tables,
+            defined_enum_tables,
+        )
+        push!(kwargs, Dict("name" => name, "expr" => expr))
+    end
+
+    item["openapi_kwargs"] = kwargs
+    item["openapi_enum_tables"] = tables
+    return item
+end
+
+function openapi_import_expr(struct_name, name, kind, bare, nullable, tables, defined)
+    openapi_check_nullable(struct_name, name, kind, nullable, "openapi_import_expr")
+    if kind == :scalar
+        return "po.$name"
+    end
+    if kind == :compound
+        members = OPENAPI_COMPOUND_MEMBERS[bare]
+        body = "(" * join(("$m = po.$name.$m" for m in members), ", ") * ")"
+        if nullable
+            return openapi_nullable_wrap(name, body)
+        end
+        return body
+    end
+    if kind == :reference
+        return "resolve_ref(refs, po.$name)"
+    end
+    if kind == :reference_vector
+        return "resolve_refs(refs, po.$name)"
+    end
+    if kind == :enum
+        table = openapi_register_enum_table!(
+            tables,
+            defined,
+            openapi_enum_table_name(bare),
+            bare,
+        )
+        return "$table[po.$name]"
+    end
+    if kind == :enum_vector
+        table = openapi_register_enum_table!(
+            tables,
+            defined,
+            openapi_enum_table_name(bare),
+            bare,
+        )
+        return "[$table[v] for v in po.$name]"
+    end
+    if kind == :enum_dict
+        table = openapi_register_enum_table!(
+            tables,
+            defined,
+            openapi_enum_table_name(bare),
+            bare,
+        )
+        return "Dict($table[k] => v for (k, v) in po.$name)"
+    end
+    if kind == :enum_compound_dict
+        key, value = bare
+        table =
+            openapi_register_enum_table!(tables, defined, openapi_enum_table_name(key), key)
+        members = OPENAPI_COMPOUND_MEMBERS[value]
+        body = "(" * join(("$m = v.$m" for m in members), ", ") * ")"
+        return "Dict($table[k] => $body for (k, v) in po.$name)"
+    end
+    if kind == :curve
+        if nullable
+            return "_value_curve_optional(po.$name)"
+        end
+        return "convert_value_curve(po.$name)"
+    end
+    if kind == :cost
+        return "convert_cost(po.$name)"
+    end
+    if kind == :nested
+        return "convert_financial_data(po.$name)"
+    end
+    throw(
+        DataFormatError(
+            "$struct_name field=$name kind=$kind has no emission rule in " *
+            "openapi_import_expr; the classifier learned a kind the import driver " *
+            "was not taught",
+        ),
+    )
+end
+
+"""
+Build the `to_openapi` kwargs and the `<ENUM>_TO_STRING` tables for one struct, storing
+them on `item` for the template. The mirror of [`compute_openapi_converter!`](@ref):
+same classification, same single pass, opposite direction.
+"""
+function compute_openapi_export_converter!(item, defined_enum_tables)
+    struct_name = item["struct_name"]
+    kwargs = Vector{Dict{String, Any}}()
+    tables = Vector{Dict{String, Any}}()
+    parametric = get(item, "has_parametric", false)
+
+    for field in item["properties"]
+        kind, bare, nullable = openapi_classify_field(struct_name, field)
+        kind == :skip && continue
+        name = String(field["name"])
+        expr = openapi_export_expr(
+            struct_name,
+            field,
+            kind,
+            bare,
+            nullable,
+            parametric,
+            tables,
+            defined_enum_tables,
+        )
+        push!(kwargs, Dict("name" => name, "expr" => expr))
+    end
+
+    item["openapi_export_kwargs"] = kwargs
+    item["openapi_export_enum_tables"] = tables
+    return item
+end
+
+function openapi_export_expr(
+    struct_name,
+    field,
+    kind,
+    bare,
+    nullable,
+    parametric,
+    tables,
+    defined,
+)
+    name = String(field["name"])
+    openapi_check_nullable(struct_name, name, kind, nullable, "openapi_export_expr")
+    getter = openapi_export_getter_call(field)
+    if kind == :scalar
+        # The type parameter is the single carrier of the PSY type on a parametric
+        # struct; regenerating the string from `T` is what keeps the stored field and
+        # the parameter from drifting apart, as they could under the old serializer.
+        if parametric && name == "power_systems_type"
+            return "string(nameof(T))"
+        end
+        return getter
+    end
+    if kind == :compound
+        ctors = OPENAPI_COMPOUND_CTORS[bare]
+        if nullable
+            return "$(ctors.optional)($getter)"
+        end
+        return "$(ctors.required)($getter)"
+    end
+    if kind == :reference
+        if nullable
+            throw(
+                DataFormatError(
+                    "$struct_name field=$name is a nullable reference, and no " *
+                    "`_component_id_optional` helper exists in src/openapi/" *
+                    "converters.jl for the generator to call; add one there before " *
+                    "making a reference field nullable in the descriptor",
+                ),
+            )
+        end
+        return "component_id(refs, $getter)"
+    end
+    if kind == :reference_vector
+        return "component_ids(refs, $getter)"
+    end
+    if kind == :enum
+        table = openapi_register_enum_table!(
+            tables,
+            defined,
+            openapi_enum_table_name_export(bare),
+            bare,
+        )
+        return "$table[$getter]"
+    end
+    if kind == :enum_vector
+        table = openapi_register_enum_table!(
+            tables,
+            defined,
+            openapi_enum_table_name_export(bare),
+            bare,
+        )
+        return "[$table[v] for v in $getter]"
+    end
+    if kind == :enum_dict
+        table = openapi_register_enum_table!(
+            tables,
+            defined,
+            openapi_enum_table_name_export(bare),
+            bare,
+        )
+        return "Dict($table[k] => v for (k, v) in $getter)"
+    end
+    if kind == :enum_compound_dict
+        key, value = bare
+        table = openapi_register_enum_table!(
+            tables,
+            defined,
+            openapi_enum_table_name_export(key),
+            key,
+        )
+        ctor = OPENAPI_COMPOUND_CTORS[value].required
+        return "Dict($table[k] => $ctor(v) for (k, v) in $getter)"
+    end
+    if kind == :curve
+        if nullable
+            return "_value_curve_po_optional($getter)"
+        end
+        return "convert_value_curve_to_openapi($getter)"
+    end
+    if kind == :cost
+        return "convert_cost_to_openapi($getter)"
+    end
+    if kind == :nested
+        return "convert_financial_data_to_openapi($getter)"
+    end
+    throw(
+        DataFormatError(
+            "$struct_name field=$name kind=$kind has no emission rule in " *
+            "openapi_export_expr; the classifier learned a kind the export driver " *
+            "was not taught",
+        ),
+    )
+end
+
 function read_json_data(filename::String)
     try
         return JSONSchema.Schema(JSON3.read(filename))
@@ -139,11 +600,16 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
     struct_names = Vector{String}()
     unique_accessor_functions = Set{String}()
     unique_setter_functions = Set{String}()
+    # Run-wide, not per-file: an enum's lookup table is emitted into whichever generated
+    # file needs it first, and every later file references that one binding.
+    defined_enum_tables = Set{String}()
+    defined_export_enum_tables = Set{String}()
 
     for input in data.data["components"]
         struct_name = input["name"]
         properties = input["properties"]
         item = Dict{String, Any}()
+        item["properties"] = properties
         item["has_internal"] = false
         item["has_null_values"] = true
         item["supertype"] = input["supertype"]
@@ -289,6 +755,9 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
         # collide with the kwarg constructor.
         item["needs_positional_constructor"] =
             item["has_internal"] && item["has_non_default_values"]
+
+        compute_openapi_converter!(item, defined_enum_tables)
+        compute_openapi_export_converter!(item, defined_export_enum_tables)
 
         filename = joinpath(directory, item["struct_name"] * ".jl")
 

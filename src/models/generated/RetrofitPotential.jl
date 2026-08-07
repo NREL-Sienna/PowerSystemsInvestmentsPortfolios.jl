@@ -56,11 +56,17 @@ set_internal!(value::RetrofitPotential, val) = value.internal = val
 
 
 
-function serialize_openapi_struct(technology::RetrofitPotential, vals...)
-    base_struct = APIServer.RetrofitPotential(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ RetrofitPotential }, po, refs::OpenAPIRefs)
+    return RetrofitPotential(;
+        id = po.id,
+        eligible_generators = po.eligible_generators,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:RetrofitPotential}, vals::Dict)
-    return IS.deserialize_struct(APIServer.RetrofitPotential, vals)
+function to_openapi(value::RetrofitPotential, refs::OpenAPIRefs)
+    return PI.RetrofitPotential(;
+        id = get_id(value),
+        eligible_generators = get_eligible_generators(value),
+    )
 end

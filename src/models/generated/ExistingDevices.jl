@@ -56,11 +56,17 @@ set_internal!(value::ExistingDevices, val) = value.internal = val
 
 
 
-function serialize_openapi_struct(technology::ExistingDevices, vals...)
-    base_struct = APIServer.ExistingDevices(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ ExistingDevices }, po, refs::OpenAPIRefs)
+    return ExistingDevices(;
+        id = po.id,
+        existing_devices = po.existing_devices,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:ExistingDevices}, vals::Dict)
-    return IS.deserialize_struct(APIServer.ExistingDevices, vals)
+function to_openapi(value::ExistingDevices, refs::OpenAPIRefs)
+    return PI.ExistingDevices(;
+        id = get_id(value),
+        existing_devices = get_existing_devices(value),
+    )
 end

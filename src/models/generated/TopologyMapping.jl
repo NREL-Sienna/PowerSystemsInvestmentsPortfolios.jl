@@ -56,11 +56,17 @@ set_internal!(value::TopologyMapping, val) = value.internal = val
 
 
 
-function serialize_openapi_struct(technology::TopologyMapping, vals...)
-    base_struct = APIServer.TopologyMapping(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ TopologyMapping }, po, refs::OpenAPIRefs)
+    return TopologyMapping(;
+        id = po.id,
+        buses = po.buses,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:TopologyMapping}, vals::Dict)
-    return IS.deserialize_struct(APIServer.TopologyMapping, vals)
+function to_openapi(value::TopologyMapping, refs::OpenAPIRefs)
+    return PI.TopologyMapping(;
+        id = get_id(value),
+        buses = get_buses(value),
+    )
 end

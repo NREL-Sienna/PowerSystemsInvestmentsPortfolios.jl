@@ -39,7 +39,7 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology operates. Can be a zone or node.
 - `id::Int64`: ID for individual technology
-- `available::Bool`: (default: `True`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
+- `available::Bool`: (default: `true`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover technology according to EIA 923.
 - `fuel::Vector{ThermalFuels}`: (default: `[ThermalFuels.OTHER]`) Prime mover fuel according to EIA 923.
 - `co2::Dict{ThermalFuels, Float64}`: (default: `Dict()`) Carbon Intensity of fuel for generator, units of tons CO2 per MMBTU of fuel. Units: t/MMBtu.
@@ -112,7 +112,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
 end
 
 
-function SupplyTechnology{T}(; name, power_systems_type, region=Vector(), id, available=True, prime_mover_type=PrimeMovers.OT, fuel=[ThermalFuels.OTHER], co2=Dict(), cofire_start_limits=Dict(), cofire_level_limits=Dict(), capital_costs=LinearCurve(0.0), operation_costs=ThermalGenerationCost(nothing), unit_size=0.0, capacity_limits=(min=0, max=1e8), outage_factor=1.0, min_generation_fraction=0.0, ramp_limits=(up=1.0, down=1.0), time_limits=(up=60.0, down=60.0), start_fuel_mmbtu_per_mw=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
+function SupplyTechnology{T}(; name, power_systems_type, region=Vector(), id, available=true, prime_mover_type=PrimeMovers.OT, fuel=[ThermalFuels.OTHER], co2=Dict(), cofire_start_limits=Dict(), cofire_level_limits=Dict(), capital_costs=LinearCurve(0.0), operation_costs=ThermalGenerationCost(nothing), unit_size=0.0, capacity_limits=(min=0, max=1e8), outage_factor=1.0, min_generation_fraction=0.0, ramp_limits=(up=1.0, down=1.0), time_limits=(up=60.0, down=60.0), start_fuel_mmbtu_per_mw=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
     SupplyTechnology{T}(name, power_systems_type, region, id, available, prime_mover_type, fuel, co2, cofire_start_limits, cofire_level_limits, capital_costs, operation_costs, unit_size, capacity_limits, outage_factor, min_generation_fraction, ramp_limits, time_limits, start_fuel_mmbtu_per_mw, lifetime, requirements, financial_data, ext, internal, )
 end
 
@@ -251,12 +251,62 @@ set_ext!(value::SupplyTechnology, val) = value.ext = val
 set_internal!(value::SupplyTechnology, val) = value.internal = val
 
 
-function serialize_openapi_struct(technology::SupplyTechnology{T}, vals...) where T <: PSY.Generator
-    base_struct = APIServer.SupplyTechnology(; vals...)
-    return base_struct
+const PRIMEMOVERS_FROM_STRING = Dict{String, PrimeMovers}(string(m) => m for m in instances(PrimeMovers))
+const THERMALFUELS_FROM_STRING = Dict{String, ThermalFuels}(string(m) => m for m in instances(ThermalFuels))
+const PRIMEMOVERS_TO_STRING = Dict{ PrimeMovers, String}(m => string(m) for m in instances(PrimeMovers))
+const THERMALFUELS_TO_STRING = Dict{ ThermalFuels, String}(m => string(m) for m in instances(ThermalFuels))
+
+function from_openapi(::Type{ SupplyTechnology }, po, refs::OpenAPIRefs)
+    parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
+    return SupplyTechnology{parameter}(;
+        name = po.name,
+        power_systems_type = po.power_systems_type,
+        region = resolve_refs(refs, po.region),
+        id = po.id,
+        available = po.available,
+        prime_mover_type = PRIMEMOVERS_FROM_STRING[po.prime_mover_type],
+        fuel = [THERMALFUELS_FROM_STRING[v] for v in po.fuel],
+        co2 = Dict(THERMALFUELS_FROM_STRING[k] => v for (k, v) in po.co2),
+        cofire_start_limits = Dict(THERMALFUELS_FROM_STRING[k] => (min = v.min, max = v.max) for (k, v) in po.cofire_start_limits),
+        cofire_level_limits = Dict(THERMALFUELS_FROM_STRING[k] => (min = v.min, max = v.max) for (k, v) in po.cofire_level_limits),
+        capital_costs = convert_value_curve(po.capital_costs),
+        operation_costs = convert_cost(po.operation_costs),
+        unit_size = po.unit_size,
+        capacity_limits = (min = po.capacity_limits.min, max = po.capacity_limits.max),
+        outage_factor = po.outage_factor,
+        min_generation_fraction = po.min_generation_fraction,
+        ramp_limits = (up = po.ramp_limits.up, down = po.ramp_limits.down),
+        time_limits = (up = po.time_limits.up, down = po.time_limits.down),
+        start_fuel_mmbtu_per_mw = po.start_fuel_mmbtu_per_mw,
+        lifetime = po.lifetime,
+        requirements = resolve_refs(refs, po.requirements),
+        financial_data = convert_financial_data(po.financial_data),
+    )
 end
 
-
-function deserialize_openapi_struct(::Type{<:SupplyTechnology}, vals::Dict)
-    return IS.deserialize_struct(APIServer.SupplyTechnology, vals)
+function to_openapi(value::SupplyTechnology{T}, refs::OpenAPIRefs) where {T <: PSY.Generator}
+    return PI.SupplyTechnology(;
+        name = get_name(value),
+        power_systems_type = string(nameof(T)),
+        region = component_ids(refs, get_region(value)),
+        id = get_id(value),
+        available = get_available(value),
+        prime_mover_type = PRIMEMOVERS_TO_STRING[get_prime_mover_type(value)],
+        fuel = [THERMALFUELS_TO_STRING[v] for v in get_fuel(value)],
+        co2 = Dict(THERMALFUELS_TO_STRING[k] => v for (k, v) in get_co2(value, IS.NU)),
+        cofire_start_limits = Dict(THERMALFUELS_TO_STRING[k] => _minmax_po(v) for (k, v) in get_cofire_start_limits(value)),
+        cofire_level_limits = Dict(THERMALFUELS_TO_STRING[k] => _minmax_po(v) for (k, v) in get_cofire_level_limits(value)),
+        capital_costs = convert_value_curve_to_openapi(get_capital_costs(value, IS.NU)),
+        operation_costs = convert_cost_to_openapi(get_operation_costs(value, IS.NU)),
+        unit_size = get_unit_size(value, IS.NU),
+        capacity_limits = _minmax_po(get_capacity_limits(value, IS.NU)),
+        outage_factor = get_outage_factor(value),
+        min_generation_fraction = get_min_generation_fraction(value),
+        ramp_limits = _updown_po(get_ramp_limits(value, IS.NU)),
+        time_limits = _updown_po(get_time_limits(value, IS.NU)),
+        start_fuel_mmbtu_per_mw = get_start_fuel_mmbtu_per_mw(value, IS.NU),
+        lifetime = get_lifetime(value, IS.NU),
+        requirements = component_ids(refs, get_requirements(value)),
+        financial_data = convert_financial_data_to_openapi(get_financial_data(value)),
+    )
 end

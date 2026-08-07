@@ -80,11 +80,23 @@ set_internal!(value::EnergyShareRequirements, val) = value.internal = val
 
 
 
-function serialize_openapi_struct(technology::EnergyShareRequirements, vals...)
-    base_struct = APIServer.EnergyShareRequirements(; vals...)
-    return base_struct
+
+function from_openapi(::Type{ EnergyShareRequirements }, po, refs::OpenAPIRefs)
+    return EnergyShareRequirements(;
+        name = po.name,
+        id = po.id,
+        available = po.available,
+        target_year = po.target_year,
+        generation_fraction_requirement = po.generation_fraction_requirement,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:EnergyShareRequirements}, vals::Dict)
-    return IS.deserialize_struct(APIServer.EnergyShareRequirements, vals)
+function to_openapi(value::EnergyShareRequirements, refs::OpenAPIRefs)
+    return PI.EnergyShareRequirements(;
+        name = get_name(value),
+        id = get_id(value),
+        available = get_available(value),
+        target_year = get_target_year(value),
+        generation_fraction_requirement = get_generation_fraction_requirement(value),
+    )
 end

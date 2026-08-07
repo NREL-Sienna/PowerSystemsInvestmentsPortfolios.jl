@@ -16,7 +16,7 @@ This file is auto-generated. Do not edit.
         capital_costs_energy::PSY.ValueCurve
         capital_costs_charge::Union{Nothing, PSY.ValueCurve}
         capital_costs_discharge::PSY.ValueCurve
-        operation_costs::PSY.OperationalCost
+        operation_costs::PSY.StorageCost
         min_discharge_fraction::Float64
         unit_size_charge::Union{Nothing, Float64}
         unit_size_discharge::Float64
@@ -47,7 +47,7 @@ Candidate storage technology in a region.
 - `capital_costs_energy::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MWh)
 - `capital_costs_charge::Union{Nothing, PSY.ValueCurve}`: (default: `nothing`) Capital costs for investing in a technology. (USD/MW)
 - `capital_costs_discharge::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
-- `operation_costs::PSY.OperationalCost`: (default: `StorageCost(nothing)`) Fixed and variable O&M costs for a technology
+- `operation_costs::PSY.StorageCost`: (default: `StorageCost(nothing)`) Fixed and variable O&M costs for a technology
 - `min_discharge_fraction::Float64`: (default: `0.0`) Minimum discharge as a fraction of total discharge capacity
 - `unit_size_charge::Union{Nothing, Float64}`: (default: `nothing`) Used for discrete investment decisions. Unit size of charging capacity (MW)
 - `unit_size_discharge::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit of discharging capacity being built (MW)
@@ -86,7 +86,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
     "Capital costs for investing in a technology. (USD/MW)"
     capital_costs_discharge::PSY.ValueCurve
     "Fixed and variable O&M costs for a technology"
-    operation_costs::PSY.OperationalCost
+    operation_costs::PSY.StorageCost
     "Minimum discharge as a fraction of total discharge capacity"
     min_discharge_fraction::Float64
     "Used for discrete investment decisions. Unit size of charging capacity (MW)"
@@ -279,12 +279,64 @@ set_ext!(value::StorageTechnology, val) = value.ext = val
 set_internal!(value::StorageTechnology, val) = value.internal = val
 
 
-function serialize_openapi_struct(technology::StorageTechnology{T}, vals...) where T <: PSY.Storage
-    base_struct = APIServer.StorageTechnology(; vals...)
-    return base_struct
+const STORAGETECH_FROM_STRING = Dict{String, StorageTech}(string(m) => m for m in instances(StorageTech))
+const STORAGETECH_TO_STRING = Dict{ StorageTech, String}(m => string(m) for m in instances(StorageTech))
+
+function from_openapi(::Type{ StorageTechnology }, po, refs::OpenAPIRefs)
+    parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
+    return StorageTechnology{parameter}(;
+        name = po.name,
+        region = resolve_refs(refs, po.region),
+        id = po.id,
+        available = po.available,
+        power_systems_type = po.power_systems_type,
+        prime_mover_type = PRIMEMOVERS_FROM_STRING[po.prime_mover_type],
+        storage_tech = STORAGETECH_FROM_STRING[po.storage_tech],
+        capital_costs_energy = convert_value_curve(po.capital_costs_energy),
+        capital_costs_charge = _value_curve_optional(po.capital_costs_charge),
+        capital_costs_discharge = convert_value_curve(po.capital_costs_discharge),
+        operation_costs = convert_cost(po.operation_costs),
+        min_discharge_fraction = po.min_discharge_fraction,
+        unit_size_charge = po.unit_size_charge,
+        unit_size_discharge = po.unit_size_discharge,
+        unit_size_energy = po.unit_size_energy,
+        capacity_limits_charge = (if isnothing(po.capacity_limits_charge); nothing; else; (min = po.capacity_limits_charge.min, max = po.capacity_limits_charge.max); end),
+        capacity_limits_discharge = (min = po.capacity_limits_discharge.min, max = po.capacity_limits_discharge.max),
+        capacity_limits_energy = (min = po.capacity_limits_energy.min, max = po.capacity_limits_energy.max),
+        duration_limits = (min = po.duration_limits.min, max = po.duration_limits.max),
+        efficiency = (in = po.efficiency.in, out = po.efficiency.out),
+        losses = po.losses,
+        lifetime = po.lifetime,
+        requirements = resolve_refs(refs, po.requirements),
+        financial_data = convert_financial_data(po.financial_data),
+    )
 end
 
-
-function deserialize_openapi_struct(::Type{<:StorageTechnology}, vals::Dict)
-    return IS.deserialize_struct(APIServer.StorageTechnology, vals)
+function to_openapi(value::StorageTechnology{T}, refs::OpenAPIRefs) where {T <: PSY.Storage}
+    return PI.StorageTechnology(;
+        name = get_name(value),
+        region = component_ids(refs, get_region(value)),
+        id = get_id(value),
+        available = get_available(value),
+        power_systems_type = string(nameof(T)),
+        prime_mover_type = PRIMEMOVERS_TO_STRING[get_prime_mover_type(value)],
+        storage_tech = STORAGETECH_TO_STRING[get_storage_tech(value)],
+        capital_costs_energy = convert_value_curve_to_openapi(get_capital_costs_energy(value, IS.NU)),
+        capital_costs_charge = _value_curve_po_optional(get_capital_costs_charge(value, IS.NU)),
+        capital_costs_discharge = convert_value_curve_to_openapi(get_capital_costs_discharge(value, IS.NU)),
+        operation_costs = convert_cost_to_openapi(get_operation_costs(value, IS.NU)),
+        min_discharge_fraction = get_min_discharge_fraction(value),
+        unit_size_charge = get_unit_size_charge(value, IS.NU),
+        unit_size_discharge = get_unit_size_discharge(value, IS.NU),
+        unit_size_energy = get_unit_size_energy(value, IS.NU),
+        capacity_limits_charge = _minmax_po_optional(get_capacity_limits_charge(value, IS.NU)),
+        capacity_limits_discharge = _minmax_po(get_capacity_limits_discharge(value, IS.NU)),
+        capacity_limits_energy = _minmax_po(get_capacity_limits_energy(value, IS.NU)),
+        duration_limits = _minmax_po(get_duration_limits(value, IS.NU)),
+        efficiency = _inout_po(get_efficiency(value)),
+        losses = get_losses(value),
+        lifetime = get_lifetime(value, IS.NU),
+        requirements = component_ids(refs, get_requirements(value)),
+        financial_data = convert_financial_data_to_openapi(get_financial_data(value)),
+    )
 end
