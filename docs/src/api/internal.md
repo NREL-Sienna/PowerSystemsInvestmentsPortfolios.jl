@@ -1,7 +1,7 @@
 # Internal API
 
 ```@autodocs
-Modules = [PowerSystemsInvestmentsPortfolios]
+Modules = [PowerSystemsInvestmentsPortfolios, PowerSystemsInvestmentsPortfolios.DBParser]
 Pages   = [
     "portfolio.jl",
     "time_mapping.jl",

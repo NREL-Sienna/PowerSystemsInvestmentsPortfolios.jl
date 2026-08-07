@@ -8,7 +8,6 @@ Pages   = [
     "serialization.jl",
     "investment_schedule.jl",
     "definitions.jl",
-    "db_parser.jl",
     "update_system.jl",
     "models/technologies.jl",
     "models/regions.jl",
