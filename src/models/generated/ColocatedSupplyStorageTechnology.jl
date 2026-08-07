@@ -59,10 +59,10 @@ Supply Technology that supports a StorageTechnology co-located with wind and sol
 - `capital_costs_energy::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a storage technology's energy capacity. (USD/MWh)
 - `capital_costs_power::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a storage technology's charge/discharge capacity. (USD/MW)
 - `operation_costs_energy::PSY.OperationalCost`: (default: `StorageCost(nothing)`) Fixed and variable O&M costs for a storage technology
-- `operation_costs_power::PSY.OperationalCost`: (default: `StorageCost(nothing)`) Fixed and variable O&M costs for a storage technology
+- `operation_costs_power::PSY.OperationalCost`: (default: `StorageCost(nothing)`) Fixed and variable O&M costs for the storage power component. Units: USD/MWh.
 - `capacity_power_limits::MinMax`: (default: `(min=0,max=1e8)`) allowable installed power capacity for a storage technology (MW)
 - `capacity_energy_limits::MinMax`: (default: `(min=0,max=1e8)`) allowable installed energy capacity for a storage technology (MWh)
-- `duration_limits::MinMax`: (default: `(min=0,max=1000)`) Minimum required duration for a storage technology (hours)
+- `duration_limits::MinMax`: (default: `(min=0,max=60000)`) Minimum and maximum duration limits for the storage component (minutes). Units: min.
 - `efficiency_storage::InOut`: (default: `(in=1, out=1)`) Efficiency of charging storage (fraction of total charge (in) and discharge (out) capacity
 - `losses_storage::Float64`: (default: `0.0`) Power loss (fraction of stored energy per hour)
 - `lifetime_storage::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
@@ -109,13 +109,13 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: ResourceT
     capital_costs_power::PSY.ValueCurve
     "Fixed and variable O&M costs for a storage technology"
     operation_costs_energy::PSY.OperationalCost
-    "Fixed and variable O&M costs for a storage technology"
+    "Fixed and variable O&M costs for the storage power component. Units: USD/MWh."
     operation_costs_power::PSY.OperationalCost
     "allowable installed power capacity for a storage technology (MW)"
     capacity_power_limits::MinMax
     "allowable installed energy capacity for a storage technology (MWh)"
     capacity_energy_limits::MinMax
-    "Minimum required duration for a storage technology (hours)"
+    "Minimum and maximum duration limits for the storage component (minutes). Units: min."
     duration_limits::MinMax
     "Efficiency of charging storage (fraction of total charge (in) and discharge (out) capacity"
     efficiency_storage::InOut
@@ -144,7 +144,7 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: ResourceT
 end
 
 
-function ColocatedSupplyStorageTechnology{T}(; name, power_systems_type, region=Vector(), id, available=True, capital_costs_solar=LinearCurve(0.0), operation_costs_solar=ThermalGenerationCost(nothing), capacity_limits_solar=(min=0, max=1e8), lifetime_solar=100, capital_costs_wind=LinearCurve(0.0), operation_costs_wind=ThermalGenerationCost(nothing), capacity_limits_wind=(min=0, max=1e8), lifetime_wind=100, capital_costs_energy=LinearCurve(0.0), capital_costs_power=LinearCurve(0.0), operation_costs_energy=StorageCost(nothing), operation_costs_power=StorageCost(nothing), capacity_power_limits=(min=0,max=1e8), capacity_energy_limits=(min=0,max=1e8), duration_limits=(min=0,max=1000), efficiency_storage=(in=1, out=1), losses_storage=0.0, lifetime_storage=100, financial_data, max_inverter_capacity=1e8, min_inverter_capacity=1e8, capital_costs_inverter, operation_costs_inverter, inverter_efficiency, inverter_supply_ratio, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
+function ColocatedSupplyStorageTechnology{T}(; name, power_systems_type, region=Vector(), id, available=True, capital_costs_solar=LinearCurve(0.0), operation_costs_solar=ThermalGenerationCost(nothing), capacity_limits_solar=(min=0, max=1e8), lifetime_solar=100, capital_costs_wind=LinearCurve(0.0), operation_costs_wind=ThermalGenerationCost(nothing), capacity_limits_wind=(min=0, max=1e8), lifetime_wind=100, capital_costs_energy=LinearCurve(0.0), capital_costs_power=LinearCurve(0.0), operation_costs_energy=StorageCost(nothing), operation_costs_power=StorageCost(nothing), capacity_power_limits=(min=0,max=1e8), capacity_energy_limits=(min=0,max=1e8), duration_limits=(min=0,max=60000), efficiency_storage=(in=1, out=1), losses_storage=0.0, lifetime_storage=100, financial_data, max_inverter_capacity=1e8, min_inverter_capacity=1e8, capital_costs_inverter, operation_costs_inverter, inverter_efficiency, inverter_supply_ratio, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
     ColocatedSupplyStorageTechnology{T}(name, power_systems_type, region, id, available, capital_costs_solar, operation_costs_solar, capacity_limits_solar, lifetime_solar, capital_costs_wind, operation_costs_wind, capacity_limits_wind, lifetime_wind, capital_costs_energy, capital_costs_power, operation_costs_energy, operation_costs_power, capacity_power_limits, capacity_energy_limits, duration_limits, efficiency_storage, losses_storage, lifetime_storage, financial_data, max_inverter_capacity, min_inverter_capacity, capital_costs_inverter, operation_costs_inverter, inverter_efficiency, inverter_supply_ratio, ext, internal, )
 end
 
@@ -225,9 +225,9 @@ get_operation_costs_energy_unitful(value::ColocatedSupplyStorageTechnology, unit
 InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_energy), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_energy_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_power` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_operation_costs_power_unitful`](@ref)."""
-get_operation_costs_power(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:operation_costs_power), Val(:usd_per_mw), units))
+get_operation_costs_power(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:operation_costs_power), Val(:usd_per_mwh), units))
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_power` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_operation_costs_power`](@ref)."""
-get_operation_costs_power_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:operation_costs_power), Val(:usd_per_mw), units)
+get_operation_costs_power_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:operation_costs_power), Val(:usd_per_mwh), units)
 InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_power), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_operation_costs_power_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `capacity_power_limits` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capacity_power_limits_unitful`](@ref)."""
@@ -243,9 +243,9 @@ get_capacity_energy_limits_unitful(value::ColocatedSupplyStorageTechnology, unit
 InfrastructureSystems.display_units_arg(::typeof(get_capacity_energy_limits), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_capacity_energy_limits_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `duration_limits` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_duration_limits_unitful`](@ref)."""
-get_duration_limits(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:duration_limits), Val(:hr), units))
+get_duration_limits(value::ColocatedSupplyStorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:duration_limits), Val(:min), units))
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `duration_limits` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_duration_limits`](@ref)."""
-get_duration_limits_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:duration_limits), Val(:hr), units)
+get_duration_limits_unitful(value::ColocatedSupplyStorageTechnology, units) = get_value(value, Val(:duration_limits), Val(:min), units)
 InfrastructureSystems.display_units_arg(::typeof(get_duration_limits), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_duration_limits_unitful), ::Type{ColocatedSupplyStorageTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `efficiency_storage`."""
@@ -326,13 +326,13 @@ set_capital_costs_power!(value::ColocatedSupplyStorageTechnology, val, unit) = v
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_energy`."""
 set_operation_costs_energy!(value::ColocatedSupplyStorageTechnology, val, unit) = value.operation_costs_energy = set_value(value, Val(:operation_costs_energy), val, unit, Val(:usd_per_mwh))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `operation_costs_power`."""
-set_operation_costs_power!(value::ColocatedSupplyStorageTechnology, val, unit) = value.operation_costs_power = set_value(value, Val(:operation_costs_power), val, unit, Val(:usd_per_mw))
+set_operation_costs_power!(value::ColocatedSupplyStorageTechnology, val, unit) = value.operation_costs_power = set_value(value, Val(:operation_costs_power), val, unit, Val(:usd_per_mwh))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capacity_power_limits`."""
 set_capacity_power_limits!(value::ColocatedSupplyStorageTechnology, val, unit) = value.capacity_power_limits = set_value(value, Val(:capacity_power_limits), val, unit, Val(:mw))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capacity_energy_limits`."""
 set_capacity_energy_limits!(value::ColocatedSupplyStorageTechnology, val, unit) = value.capacity_energy_limits = set_value(value, Val(:capacity_energy_limits), val, unit, Val(:mwh))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `duration_limits`."""
-set_duration_limits!(value::ColocatedSupplyStorageTechnology, val, unit) = value.duration_limits = set_value(value, Val(:duration_limits), val, unit, Val(:hr))
+set_duration_limits!(value::ColocatedSupplyStorageTechnology, val, unit) = value.duration_limits = set_value(value, Val(:duration_limits), val, unit, Val(:min))
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `efficiency_storage`."""
 set_efficiency_storage!(value::ColocatedSupplyStorageTechnology, val) = value.efficiency_storage = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `losses_storage`."""

@@ -55,7 +55,7 @@ Candidate storage technology in a region.
 - `capacity_limits_charge::Union{Nothing, MinMax}`: (default: `nothing`) allowable installed power capacity for a storage technology (MW)
 - `capacity_limits_discharge::MinMax`: (default: `(min=0,max=1e8)`) allowable installed power capacity for a storage technology (MW)
 - `capacity_limits_energy::MinMax`: (default: `(min=0,max=1e8)`) allowable installed energy capacity for a storage technology (MWh)
-- `duration_limits::MinMax`: (default: `(min=0,max=1000.0)`) Minimum and maximum duration limits (energy to discharge capacity ratio) for a storage technology (hours)
+- `duration_limits::MinMax`: (default: `(min=0,max=60000.0)`) Minimum and maximum duration limits (energy to discharge capacity ratio) for a storage technology (minutes). Units: min.
 - `efficiency::InOut`: (default: `(in=1, out=1)`) Efficiency of charging storage, fraction of total charge (in) and discharge (out) capacity
 - `losses::Float64`: (default: `0.0`) Self-discharge of storage (fraction of energy stored per hour)
 - `lifetime::Int`: (default: `100`) Maximum number of years a technology can be active once installed (years)
@@ -101,7 +101,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
     capacity_limits_discharge::MinMax
     "allowable installed energy capacity for a storage technology (MWh)"
     capacity_limits_energy::MinMax
-    "Minimum and maximum duration limits (energy to discharge capacity ratio) for a storage technology (hours)"
+    "Minimum and maximum duration limits (energy to discharge capacity ratio) for a storage technology (minutes). Units: min."
     duration_limits::MinMax
     "Efficiency of charging storage, fraction of total charge (in) and discharge (out) capacity"
     efficiency::InOut
@@ -120,7 +120,7 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
 end
 
 
-function StorageTechnology{T}(; name, region=Vector(), id, available, power_systems_type, prime_mover_type=PrimeMovers.OT, storage_tech=StorageTech.OTHER_CHEM, capital_costs_energy=LinearCurve(0.0), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), operation_costs=StorageCost(nothing), min_discharge_fraction=0.0, unit_size_charge=nothing, unit_size_discharge=0.0, unit_size_energy=0.0, capacity_limits_charge=nothing, capacity_limits_discharge=(min=0,max=1e8), capacity_limits_energy=(min=0,max=1e8), duration_limits=(min=0,max=1000.0), efficiency=(in=1, out=1), losses=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Storage
+function StorageTechnology{T}(; name, region=Vector(), id, available, power_systems_type, prime_mover_type=PrimeMovers.OT, storage_tech=StorageTech.OTHER_CHEM, capital_costs_energy=LinearCurve(0.0), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), operation_costs=StorageCost(nothing), min_discharge_fraction=0.0, unit_size_charge=nothing, unit_size_discharge=0.0, unit_size_energy=0.0, capacity_limits_charge=nothing, capacity_limits_discharge=(min=0,max=1e8), capacity_limits_energy=(min=0,max=1e8), duration_limits=(min=0,max=60000.0), efficiency=(in=1, out=1), losses=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Storage
     StorageTechnology{T}(name, region, id, available, power_systems_type, prime_mover_type, storage_tech, capital_costs_energy, capital_costs_charge, capital_costs_discharge, operation_costs, min_discharge_fraction, unit_size_charge, unit_size_discharge, unit_size_energy, capacity_limits_charge, capacity_limits_discharge, capacity_limits_energy, duration_limits, efficiency, losses, lifetime, requirements, financial_data, ext, internal, )
 end
 
@@ -201,9 +201,9 @@ get_capacity_limits_energy_unitful(value::StorageTechnology, units) = get_value(
 InfrastructureSystems.display_units_arg(::typeof(get_capacity_limits_energy), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_capacity_limits_energy_unitful), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
 """Get [`StorageTechnology`](@ref) `duration_limits` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_duration_limits_unitful`](@ref)."""
-get_duration_limits(value::StorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:duration_limits), Val(:hr), units))
+get_duration_limits(value::StorageTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:duration_limits), Val(:min), units))
 """Get [`StorageTechnology`](@ref) `duration_limits` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_duration_limits`](@ref)."""
-get_duration_limits_unitful(value::StorageTechnology, units) = get_value(value, Val(:duration_limits), Val(:hr), units)
+get_duration_limits_unitful(value::StorageTechnology, units) = get_value(value, Val(:duration_limits), Val(:min), units)
 InfrastructureSystems.display_units_arg(::typeof(get_duration_limits), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_duration_limits_unitful), ::Type{StorageTechnology{T}}) where {T <: PSY.Storage} = InfrastructureSystems.NU
 """Get [`StorageTechnology`](@ref) `efficiency`."""
@@ -262,7 +262,7 @@ set_capacity_limits_discharge!(value::StorageTechnology, val, unit) = value.capa
 """Set [`StorageTechnology`](@ref) `capacity_limits_energy`."""
 set_capacity_limits_energy!(value::StorageTechnology, val, unit) = value.capacity_limits_energy = set_value(value, Val(:capacity_limits_energy), val, unit, Val(:mwh))
 """Set [`StorageTechnology`](@ref) `duration_limits`."""
-set_duration_limits!(value::StorageTechnology, val, unit) = value.duration_limits = set_value(value, Val(:duration_limits), val, unit, Val(:hr))
+set_duration_limits!(value::StorageTechnology, val, unit) = value.duration_limits = set_value(value, Val(:duration_limits), val, unit, Val(:min))
 """Set [`StorageTechnology`](@ref) `efficiency`."""
 set_efficiency!(value::StorageTechnology, val) = value.efficiency = val
 """Set [`StorageTechnology`](@ref) `losses`."""

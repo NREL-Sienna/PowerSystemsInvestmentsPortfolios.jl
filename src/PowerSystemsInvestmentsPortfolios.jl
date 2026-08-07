@@ -155,7 +155,7 @@ const PSY = PowerSystems
 const IS = InfrastructureSystems
 const MU = IS.Mustache
 
-export USD, MMBtu, tonne, ustrip, uconvert, @u_str
+export USD, MMBtu, tonne, Mt, ustrip, uconvert, @u_str
 export POWER, IMPEDANCE, ADMITTANCE, VOLTAGE, CURRENT, INV_TIME, OPS_TIME, ENERGY
 export natural_unit, ConversionUnits, FuelCurveUnits
 

@@ -35,13 +35,13 @@ Represents demand side technologies such as electric vehicles or hydrogen electr
 - `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology is operated
 - `technology_efficiency::Float64`: (default: `0.0`) MWh of electricity per unit of output. Ex: MWh per ton of hydrogen for electrolyzers
-- `price_per_unit::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Price or value per unit of energy output. Ex: USD per MMBtu of hydrogen for electrolyzers
+- `price_per_unit::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers. Units: USD/t.
 - `min_power::Float64`: (default: `0.0`) Minimum operation of demandside unit as a fraction of peak demand
 - `peak_demand_mw::Float64`: (default: `0.0`) Peak demand value in MW
 - `curtailment_cost::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Energy cost of curtailed demand, USD per Mwh
 - `max_demand_curtailment::Float64`: (default: `0.0`) Maximum fraction of demand that can be curtailed
-- `max_demand_delay::Float64`: (default: `0.0`) Maximum number of hours that demand can be deferred or delayed (hours).
-- `max_demand_advance::Float64`: (default: `0.0`) Maximum number of hours that demand can be scheduled in advance of the original schedule (hours).
+- `max_demand_delay::Float64`: (default: `0.0`) Maximum number of minutes that demand can be deferred or delayed (minutes). Units: min.
+- `max_demand_advance::Float64`: (default: `0.0`) Maximum number of minutes that demand can be scheduled in advance of the original schedule (minutes). Units: min.
 - `demand_energy_efficiency::Float64`: (default: `0.0`) Energy efficiency associated with time shifting demand. Represents energy losses due to time shifting
 - `shift_variable_cost::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Variable operation and maintenance costs associated with flexible demand deferral/advancement
 - `requirements::Vector{Requirement}`: (default: `Vector()`) List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology
@@ -61,7 +61,7 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnolog
     region::Vector{RegionTopology}
     "MWh of electricity per unit of output. Ex: MWh per ton of hydrogen for electrolyzers"
     technology_efficiency::Float64
-    "Price or value per unit of energy output. Ex: USD per MMBtu of hydrogen for electrolyzers"
+    "Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers. Units: USD/t."
     price_per_unit::PSY.ValueCurve
     "Minimum operation of demandside unit as a fraction of peak demand"
     min_power::Float64
@@ -71,9 +71,9 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnolog
     curtailment_cost::PSY.ValueCurve
     "Maximum fraction of demand that can be curtailed"
     max_demand_curtailment::Float64
-    "Maximum number of hours that demand can be deferred or delayed (hours)."
+    "Maximum number of minutes that demand can be deferred or delayed (minutes). Units: min."
     max_demand_delay::Float64
-    "Maximum number of hours that demand can be scheduled in advance of the original schedule (hours)."
+    "Maximum number of minutes that demand can be scheduled in advance of the original schedule (minutes). Units: min."
     max_demand_advance::Float64
     "Energy efficiency associated with time shifting demand. Represents energy losses due to time shifting"
     demand_energy_efficiency::Float64
@@ -105,9 +105,9 @@ get_region(value::DemandSideTechnology) = value.region
 """Get [`DemandSideTechnology`](@ref) `technology_efficiency`."""
 get_technology_efficiency(value::DemandSideTechnology) = value.technology_efficiency
 """Get [`DemandSideTechnology`](@ref) `price_per_unit` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_price_per_unit_unitful`](@ref)."""
-get_price_per_unit(value::DemandSideTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:price_per_unit), Val(:usd_per_mmbtu), units))
+get_price_per_unit(value::DemandSideTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:price_per_unit), Val(:usd_per_t), units))
 """Get [`DemandSideTechnology`](@ref) `price_per_unit` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_price_per_unit`](@ref)."""
-get_price_per_unit_unitful(value::DemandSideTechnology, units) = get_value(value, Val(:price_per_unit), Val(:usd_per_mmbtu), units)
+get_price_per_unit_unitful(value::DemandSideTechnology, units) = get_value(value, Val(:price_per_unit), Val(:usd_per_t), units)
 InfrastructureSystems.display_units_arg(::typeof(get_price_per_unit), ::Type{DemandSideTechnology{T}}) where {T <: PSY.StaticInjection} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_price_per_unit_unitful), ::Type{DemandSideTechnology{T}}) where {T <: PSY.StaticInjection} = InfrastructureSystems.NU
 """Get [`DemandSideTechnology`](@ref) `min_power`."""
@@ -127,15 +127,15 @@ InfrastructureSystems.display_units_arg(::typeof(get_curtailment_cost_unitful), 
 """Get [`DemandSideTechnology`](@ref) `max_demand_curtailment`."""
 get_max_demand_curtailment(value::DemandSideTechnology) = value.max_demand_curtailment
 """Get [`DemandSideTechnology`](@ref) `max_demand_delay` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_max_demand_delay_unitful`](@ref)."""
-get_max_demand_delay(value::DemandSideTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:max_demand_delay), Val(:hr), units))
+get_max_demand_delay(value::DemandSideTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:max_demand_delay), Val(:min), units))
 """Get [`DemandSideTechnology`](@ref) `max_demand_delay` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_max_demand_delay`](@ref)."""
-get_max_demand_delay_unitful(value::DemandSideTechnology, units) = get_value(value, Val(:max_demand_delay), Val(:hr), units)
+get_max_demand_delay_unitful(value::DemandSideTechnology, units) = get_value(value, Val(:max_demand_delay), Val(:min), units)
 InfrastructureSystems.display_units_arg(::typeof(get_max_demand_delay), ::Type{DemandSideTechnology{T}}) where {T <: PSY.StaticInjection} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_max_demand_delay_unitful), ::Type{DemandSideTechnology{T}}) where {T <: PSY.StaticInjection} = InfrastructureSystems.NU
 """Get [`DemandSideTechnology`](@ref) `max_demand_advance` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_max_demand_advance_unitful`](@ref)."""
-get_max_demand_advance(value::DemandSideTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:max_demand_advance), Val(:hr), units))
+get_max_demand_advance(value::DemandSideTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:max_demand_advance), Val(:min), units))
 """Get [`DemandSideTechnology`](@ref) `max_demand_advance` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_max_demand_advance`](@ref)."""
-get_max_demand_advance_unitful(value::DemandSideTechnology, units) = get_value(value, Val(:max_demand_advance), Val(:hr), units)
+get_max_demand_advance_unitful(value::DemandSideTechnology, units) = get_value(value, Val(:max_demand_advance), Val(:min), units)
 InfrastructureSystems.display_units_arg(::typeof(get_max_demand_advance), ::Type{DemandSideTechnology{T}}) where {T <: PSY.StaticInjection} = InfrastructureSystems.NU
 InfrastructureSystems.display_units_arg(::typeof(get_max_demand_advance_unitful), ::Type{DemandSideTechnology{T}}) where {T <: PSY.StaticInjection} = InfrastructureSystems.NU
 """Get [`DemandSideTechnology`](@ref) `demand_energy_efficiency`."""
@@ -166,7 +166,7 @@ set_region!(value::DemandSideTechnology, val) = value.region = val
 """Set [`DemandSideTechnology`](@ref) `technology_efficiency`."""
 set_technology_efficiency!(value::DemandSideTechnology, val) = value.technology_efficiency = val
 """Set [`DemandSideTechnology`](@ref) `price_per_unit`."""
-set_price_per_unit!(value::DemandSideTechnology, val, unit) = value.price_per_unit = set_value(value, Val(:price_per_unit), val, unit, Val(:usd_per_mmbtu))
+set_price_per_unit!(value::DemandSideTechnology, val, unit) = value.price_per_unit = set_value(value, Val(:price_per_unit), val, unit, Val(:usd_per_t))
 """Set [`DemandSideTechnology`](@ref) `min_power`."""
 set_min_power!(value::DemandSideTechnology, val) = value.min_power = val
 """Set [`DemandSideTechnology`](@ref) `peak_demand_mw`."""
@@ -176,9 +176,9 @@ set_curtailment_cost!(value::DemandSideTechnology, val, unit) = value.curtailmen
 """Set [`DemandSideTechnology`](@ref) `max_demand_curtailment`."""
 set_max_demand_curtailment!(value::DemandSideTechnology, val) = value.max_demand_curtailment = val
 """Set [`DemandSideTechnology`](@ref) `max_demand_delay`."""
-set_max_demand_delay!(value::DemandSideTechnology, val, unit) = value.max_demand_delay = set_value(value, Val(:max_demand_delay), val, unit, Val(:hr))
+set_max_demand_delay!(value::DemandSideTechnology, val, unit) = value.max_demand_delay = set_value(value, Val(:max_demand_delay), val, unit, Val(:min))
 """Set [`DemandSideTechnology`](@ref) `max_demand_advance`."""
-set_max_demand_advance!(value::DemandSideTechnology, val, unit) = value.max_demand_advance = set_value(value, Val(:max_demand_advance), val, unit, Val(:hr))
+set_max_demand_advance!(value::DemandSideTechnology, val, unit) = value.max_demand_advance = set_value(value, Val(:max_demand_advance), val, unit, Val(:min))
 """Set [`DemandSideTechnology`](@ref) `demand_energy_efficiency`."""
 set_demand_energy_efficiency!(value::DemandSideTechnology, val) = value.demand_energy_efficiency = val
 """Set [`DemandSideTechnology`](@ref) `shift_variable_cost`."""

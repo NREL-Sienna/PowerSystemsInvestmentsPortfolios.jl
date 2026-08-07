@@ -86,7 +86,7 @@
     PSIP.set_name!(supply, "supply_updated")
     PSIP.set_id!(supply, 110)
     PSIP.set_available!(supply, false)
-    PSIP.set_co2!(supply, supply_co2)
+    PSIP.set_co2!(supply, supply_co2, tonne / MMBtu)
     PSIP.set_cofire_start_limits!(supply, supply_cofire_start)
     PSIP.set_financial_data!(supply, tech_financial_data)
     PSIP.set_start_fuel_mmbtu_per_mw!(supply, 1.7, IS.NU)
@@ -111,7 +111,7 @@
     @test PSIP.get_name(supply) == "supply_updated"
     @test PSIP.get_id(supply) == 110
     @test !PSIP.get_available(supply)
-    @test PSIP.get_co2(supply) === supply_co2
+    @test PSIP.get_co2(supply, tonne / MMBtu) == supply_co2
     @test PSIP.get_cofire_start_limits(supply) === supply_cofire_start
     @test PSIP.get_financial_data(supply) === tech_financial_data
     @test PSIP.get_start_fuel_mmbtu_per_mw(supply, IS.NU) == 1.7

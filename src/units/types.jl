@@ -5,6 +5,7 @@
 # Fuel and emissions units
 @unit MMBtu "MMBtu" MMBtu 1e6u"btu" false
 @unit tonne "tonne" tonne 1e3u"kg" false
+@unit Mt "Mt" Mt 1e6 * tonne false
 
 # Re-export common Unitful units for power systems
 const MW = u"MW"

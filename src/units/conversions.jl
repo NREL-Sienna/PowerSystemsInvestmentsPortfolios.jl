@@ -60,6 +60,7 @@ struct EnergyCostScalarCategory <: UnitCategory end
 struct FuelCostCategory <: UnitCategory end
 struct OPSTimeCategory <: UnitCategory end
 struct INVTimeCategory <: UnitCategory end
+struct MinuteTimeCategory <: UnitCategory end
 struct EnergyCategory <: UnitCategory end
 struct RampingCategory <: UnitCategory end
 
@@ -70,6 +71,7 @@ const VOLTAGE = VoltageCategory()
 const CURRENT = CurrentCategory()
 const OPS_TIME = OPSTimeCategory()
 const INV_TIME = INVTimeCategory()
+const MINUTE_TIME = MinuteTimeCategory()
 const ENERGY = EnergyCategory()
 const COST = CostCategory()
 const FUEL = FuelCategory()
@@ -98,6 +100,7 @@ natural_unit(::VoltageCategory) = u"kV"
 natural_unit(::CurrentCategory) = u"kA"
 natural_unit(::OPSTimeCategory) = u"hr"
 natural_unit(::INVTimeCategory) = u"yr"
+natural_unit(::MinuteTimeCategory) = u"minute"
 natural_unit(::EnergyCategory) = natural_unit(POWER) * natural_unit(OPS_TIME)
 natural_unit(::RampingCategory) = u"MW/minute"
 
@@ -109,10 +112,10 @@ natural_unit(::EnergyCostScalarCategory) = USD / (u"MW" * u"hr")
 natural_unit(::FuelCategory) = MMBtu
 natural_unit(::FuelConsumptionEnergyCategory) = (x_unit=u"MW" * u"hr", y_unit=MMBtu)
 natural_unit(::FuelConsumptionPowerCategory) = MMBtu / u"MW"
-natural_unit(::EmissionsMassCategory) = tonne
+natural_unit(::EmissionsMassCategory) = Mt
 natural_unit(::EmissionsCostCategory) = USD / tonne
 natural_unit(::EmissionsFuelCategory) = tonne / MMBtu
-natural_unit(::EmissionsEnergyCategory) = tonne / (u"MW" * u"hr")
+natural_unit(::EmissionsEnergyCategory) = Mt / (u"MW" * u"hr")
 natural_unit(::FuelCostCategory) = (x_unit=MMBtu, y_unit=USD)
 natural_unit(::FuelCurveCategory) =
     (energy_unit=u"MW" * u"hr", fuel_unit=MMBtu, currency_unit=USD)
@@ -260,6 +263,14 @@ _natural_unit_conversions(base, v::PSY.STORAGE_OPERATION_MODES, from, to) = (
     discharge=IS._strip_units(_natural_unit_conversions(base, v.discharge, from, to)),
 )
 
+# ---- Dict-valued fields (e.g. per-fuel rates keyed by an enum) ----
+_natural_unit_conversions(base, v::Dict, cu, u) =
+    Dict(k => _natural_unit_conversions(base, val, cu, u) for (k, val) in v)
+
+# `_strip_units` has no generic Dict method (IS's fallback is the identity); a
+# Dict-valued convertible field needs each value stripped individually.
+IS._strip_units(d::Dict) = Dict(k => IS._strip_units(v) for (k, v) in d)
+
 # _set_value(t::Technology, val::Quantity, cu::Val)
 
 # Physical category implied by a field's conversion unit.
@@ -268,6 +279,7 @@ _unit_category(::Val{:mwh}) = ENERGY
 _unit_category(::Val{:ohm}) = IMPEDANCE
 _unit_category(::Val{:kv}) = VOLTAGE
 _unit_category(::Val{:hr}) = OPS_TIME
+_unit_category(::Val{:min}) = MINUTE_TIME
 _unit_category(::Val{:yr}) = INV_TIME
 _unit_category(::Val{:usd_per_mw}) = POWER_COST
 _unit_category(::Val{:usd_per_mwh}) = ENERGY_COST
@@ -278,8 +290,8 @@ _unit_category(::Val{:mmbtu}) = FUEL
 _unit_category(::Val{:mmbtu_per_mwh}) = FUEL_CONSUMPTION_ENERGY
 _unit_category(::Val{:mmbtu_per_mw}) = FUEL_CONSUMPTION_POWER
 _unit_category(::Val{:fuel_curve}) = FUEL_CURVE
-_unit_category(::Val{:t}) = EMISSIONS_MASS
+_unit_category(::Val{:mt}) = EMISSIONS_MASS
 _unit_category(::Val{:usd_per_t}) = EMISSIONS_COST
 _unit_category(::Val{:t_per_mmbtu}) = EMISSIONS_FUEL
-_unit_category(::Val{:t_per_mwh}) = EMISSIONS_ENERGY
+_unit_category(::Val{:mt_per_mwh}) = EMISSIONS_ENERGY
 _unit_category(::Val{:mw_per_min}) = RAMPING

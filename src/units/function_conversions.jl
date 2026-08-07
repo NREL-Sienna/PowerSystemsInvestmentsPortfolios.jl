@@ -8,6 +8,28 @@
 # - Fuel cost (USD) as a function of fuel consumption (MMBtu)
 #######################################################
 
+# A `Val(:conversion_unit)` symbol maps to exactly one category (one Julia
+# method per `Val` type), but some fields share a physical unit with a
+# scalar field while being ValueCurve-typed (e.g. DemandSideTechnology's
+# price_per_unit is USD/t, the same unit as CarbonTax's scalar
+# tax_dollars_per_ton). Rather than mint a second `:usd_per_t`-shaped symbol
+# purely to satisfy the curve machinery's (x_unit, y_unit) pair shape, bridge
+# a bare currency-per-x rate into that pair: y_unit is always USD for these
+# cost categories, so x_unit = USD / rate is recovered exactly, dimensionally.
+function _natural_unit_conversions(
+    base,
+    v::PSY.ValueCurve,
+    from::Unitful.Units,
+    to::Unitful.Units,
+)
+    return _natural_unit_conversions(
+        base,
+        v,
+        (x_unit=USD / from, y_unit=USD),
+        (x_unit=USD / to, y_unit=USD),
+    )
+end
+
 # ----Function Data----
 function _natural_unit_conversions(
     base,

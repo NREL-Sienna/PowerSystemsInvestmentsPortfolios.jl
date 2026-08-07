@@ -18,7 +18,7 @@ supply() = SupplyTechnology{PSY.ThermalStandard}(;
     unit_size=100.0,
     capacity_limits=(min=0.0, max=500.0),
     ramp_limits=(up=1.0, down=2.0),
-    time_limits=(up=10.0, down=20.0),
+    time_limits=(up=600.0, down=1200.0),
     start_fuel_mmbtu_per_mw=5.0,
     lifetime=30,
 )
@@ -35,7 +35,7 @@ storage() = StorageTechnology{PSY.EnergyReservoirStorage}(;
     capacity_limits_charge=(min=0.0, max=100.0),
     capacity_limits_discharge=(min=0.0, max=200.0),
     capacity_limits_energy=(min=0.0, max=1000.0),
-    duration_limits=(min=1.0, max=10.0),
+    duration_limits=(min=60.0, max=600.0),
     capital_costs_energy=LinearCurve(3000.0),
     capital_costs_charge=LinearCurve(1000.0),
     capital_costs_discharge=LinearCurve(2000.0),
@@ -101,11 +101,13 @@ demand_side() = DemandSideTechnology{PSY.PowerLoad}(;
     available=true,
     power_systems_type=string(PSY.PowerLoad),
     peak_demand_mw=250.0,
-    price_per_unit=LinearCurve(8.0),
+    # USD/t, not derived: no valid MMBtu->t factor exists (fuel-dependent). Chosen
+    # to be plausible for a per-tonne hydrogen output price; see report.
+    price_per_unit=LinearCurve(3000.0),
     curtailment_cost=LinearCurve(30.0),
     shift_variable_cost=LinearCurve(12.0),
-    max_demand_advance=4.0,
-    max_demand_delay=6.0,
+    max_demand_advance=240.0,
+    max_demand_delay=360.0,
 )
 
 retro() = AggregateRetrofitPotential(;
@@ -114,8 +116,13 @@ retro() = AggregateRetrofitPotential(;
     retrofit_fraction=0.5,
 )
 
-carbon_caps() =
-    CarbonCaps(; name="carbon_caps", available=true, id=8, max_tons_mwh=2.0, max_mtons=50.0)
+carbon_caps() = CarbonCaps(;
+    name="carbon_caps",
+    available=true,
+    id=8,
+    max_tons_mwh=2.0e-6,
+    max_mtons=50.0,
+)
 
 carbon_tax() =
     CarbonTax(; name="carbon_tax", available=true, id=9, tax_dollars_per_ton=50.0)
@@ -159,7 +166,7 @@ colocated() = ColocatedSupplyStorageTechnology{PSY.ThermalStandard}(;
     capacity_limits_wind=(min=0.0, max=400.0),
     capacity_power_limits=(min=0.0, max=500.0),
     capacity_energy_limits=(min=0.0, max=2000.0),
-    duration_limits=(min=1.0, max=8.0),
+    duration_limits=(min=60.0, max=480.0),
     max_inverter_capacity=600.0,
     min_inverter_capacity=50.0,
     lifetime_solar=25,
@@ -238,13 +245,14 @@ end
     @test PSIP.natural_unit(PSIP.IMPEDANCE) == u"Ω"
     @test PSIP.natural_unit(PSIP.OPS_TIME) == u"hr"
     @test PSIP.natural_unit(PSIP.INV_TIME) == u"yr"
+    @test PSIP.natural_unit(PSIP.MINUTE_TIME) == u"minute"
     @test PSIP.natural_unit(PSIP.COST) == USD
     @test PSIP.natural_unit(PSIP.FUEL) == MMBtu
     # Custom composite units added on this branch.
-    @test PSIP.natural_unit(PSIP.EMISSIONS_MASS) == tonne
+    @test PSIP.natural_unit(PSIP.EMISSIONS_MASS) == Mt
     @test PSIP.natural_unit(PSIP.EMISSIONS_COST) == USD / tonne
     @test PSIP.natural_unit(PSIP.EMISSIONS_FUEL) == tonne / MMBtu
-    @test PSIP.natural_unit(PSIP.EMISSIONS_ENERGY) == tonne / (u"MW" * u"hr")
+    @test PSIP.natural_unit(PSIP.EMISSIONS_ENERGY) == Mt / (u"MW" * u"hr")
     @test PSIP.natural_unit(PSIP.RAMPING) == u"MW" / u"minute"
     @test PSIP.natural_unit(PSIP.FUEL_CONSUMPTION_POWER) == MMBtu / u"MW"
 
@@ -261,16 +269,17 @@ end
     @test PSIP._unit_category(Val(:kv)) === PSIP.VOLTAGE
     @test PSIP._unit_category(Val(:ohm)) === PSIP.IMPEDANCE
     @test PSIP._unit_category(Val(:hr)) === PSIP.OPS_TIME
+    @test PSIP._unit_category(Val(:min)) === PSIP.MINUTE_TIME
     @test PSIP._unit_category(Val(:yr)) === PSIP.INV_TIME
     @test PSIP._unit_category(Val(:mw_per_min)) === PSIP.RAMPING
     @test PSIP._unit_category(Val(:mmbtu_per_mw)) === PSIP.FUEL_CONSUMPTION_POWER
     @test PSIP._unit_category(Val(:usd_per_mw)) === PSIP.POWER_COST
     @test PSIP._unit_category(Val(:usd_per_mwh)) === PSIP.ENERGY_COST
     @test PSIP._unit_category(Val(:usd_per_mmbtu)) === PSIP.FUEL_COST
-    @test PSIP._unit_category(Val(:t)) === PSIP.EMISSIONS_MASS
+    @test PSIP._unit_category(Val(:mt)) === PSIP.EMISSIONS_MASS
     @test PSIP._unit_category(Val(:usd_per_t)) === PSIP.EMISSIONS_COST
     @test PSIP._unit_category(Val(:t_per_mmbtu)) === PSIP.EMISSIONS_FUEL
-    @test PSIP._unit_category(Val(:t_per_mwh)) === PSIP.EMISSIONS_ENERGY
+    @test PSIP._unit_category(Val(:mt_per_mwh)) === PSIP.EMISSIONS_ENERGY
 end
 
 @testset "scalar conversions" begin
@@ -454,6 +463,12 @@ end
         mx=500.0,
         ratio=1000.0,
     )
+    # co2 (t_per_mmbtu, Dict{ThermalFuels,Float64}) — newly wired conversion;
+    # SiennaSchemas declares x-unit t/MMBtu, but PSIP never marked this field
+    # `needs_conversion` before this branch, so it silently never converted.
+    PSIP.set_co2!(t, Dict(ThermalFuels.OTHER => 0.05), tonne / MMBtu)
+    @test PSIP.get_co2(t, tonne / MMBtu)[ThermalFuels.OTHER] ≈ 0.05
+    @test PSIP.get_co2(t, u"kg" / MMBtu)[ThermalFuels.OTHER] ≈ 50.0
     # ramp_limits (mw_per_min, UpDown)
     check_updown(
         u -> PSIP.get_ramp_limits(t, u),
@@ -464,15 +479,15 @@ end
         down=2.0,
         ratio=1 / 60,
     )
-    # time_limits (hr, UpDown)
+    # time_limits (min, UpDown) — natural unit follows SiennaSchemas (minutes)
     check_updown(
         u -> PSIP.get_time_limits(t, u),
         (v, u) -> PSIP.set_time_limits!(t, v, u),
-        u"hr",
-        u"minute";
-        up=10.0,
-        down=20.0,
-        ratio=60.0,
+        u"minute",
+        u"hr";
+        up=600.0,
+        down=1200.0,
+        ratio=1 / 60,
     )
     # capital_costs (usd_per_mw, ValueCurve)
     check_valuecurve(
@@ -550,14 +565,15 @@ end
         mx=1000.0,
         ratio=1000.0,
     )
+    # duration_limits (min, MinMax) — natural unit follows SiennaSchemas (minutes)
     check_minmax(
         u -> PSIP.get_duration_limits(t, u),
         (v, u) -> PSIP.set_duration_limits!(t, v, u),
-        u"hr",
-        u"minute";
-        mn=1.0,
-        mx=10.0,
-        ratio=60.0,
+        u"minute",
+        u"hr";
+        mn=60.0,
+        mx=600.0,
+        ratio=1 / 60,
     )
     check_valuecurve(
         u -> PSIP.get_capital_costs_energy(t, u),
@@ -739,29 +755,33 @@ end
         base=250.0,
         ratio=1000.0,
     )
+    # max_demand_advance/delay (min) — natural unit follows SiennaSchemas (minutes)
     check_scalar(
         u -> PSIP.get_max_demand_advance(t, u),
         (v, u) -> PSIP.set_max_demand_advance!(t, v, u),
-        u"hr",
-        u"minute";
-        base=4.0,
-        ratio=60.0,
+        u"minute",
+        u"hr";
+        base=240.0,
+        ratio=1 / 60,
     )
     check_scalar(
         u -> PSIP.get_max_demand_delay(t, u),
         (v, u) -> PSIP.set_max_demand_delay!(t, v, u),
-        u"hr",
-        u"minute";
-        base=6.0,
-        ratio=60.0,
+        u"minute",
+        u"hr";
+        base=360.0,
+        ratio=1 / 60,
     )
+    # price_per_unit (USD/t) — basis change, not a scale factor; follows SiennaSchemas.
+    # Shares the :usd_per_t symbol with CarbonTax's scalar field, so units here
+    # are a bare currency-per-mass rate, not an (x_unit, y_unit) pair.
     check_valuecurve(
         u -> PSIP.get_price_per_unit(t, u),
         (v, u) -> PSIP.set_price_per_unit!(t, v, u),
-        conversion_unit(MMBtu, USD),
-        conversion_unit(u"btu", USD);
-        prop=8.0,
-        ratio=1e-6,
+        USD / tonne,
+        USD / u"kg";
+        prop=3000.0,
+        ratio=1e-3,
     )
     check_valuecurve(
         u -> PSIP.get_curtailment_cost(t, u),
@@ -795,24 +815,39 @@ end
     )
 end
 
+@testset "AggregateRetirementPotential getters/setters" begin
+    # newly wired conversion; SiennaSchemas declares x-unit MW, but PSIP never
+    # marked this field `needs_conversion` before this branch.
+    t = AggregateRetirementPotential(retirement_potential=100.0)
+    check_scalar(
+        u -> PSIP.get_retirement_potential(t, u),
+        (v, u) -> PSIP.set_retirement_potential!(t, v, u),
+        u"MW",
+        u"kW";
+        base=100.0,
+        ratio=1000.0,
+    )
+end
+
 @testset "CarbonCaps getters/setters" begin
     t = carbon_caps()
-    # max_mtons (t) — emissions mass
+    # max_mtons (mt) — emissions mass, natural unit follows SiennaSchemas (Mt)
     check_scalar(
         u -> PSIP.get_max_mtons(t, u),
         (v, u) -> PSIP.set_max_mtons!(t, v, u),
-        tonne,
-        u"kg";
+        Mt,
+        tonne;
         base=50.0,
-        ratio=1000.0,
+        ratio=1.0e6,
     )
-    # max_tons_mwh (t_per_mwh) — emissions rate per energy
+    # max_tons_mwh (mt_per_mwh) — emissions rate per energy, natural unit follows
+    # SiennaSchemas (Mt/MWh)
     check_scalar(
         u -> PSIP.get_max_tons_mwh(t, u),
         (v, u) -> PSIP.set_max_tons_mwh!(t, v, u),
-        tonne / (u"MW" * u"hr"),
-        tonne / (u"kW" * u"hr");
-        base=2.0,
+        Mt / (u"MW" * u"hr"),
+        Mt / (u"kW" * u"hr");
+        base=2.0e-6,
         ratio=1e-3,
     )
 end
@@ -893,14 +928,15 @@ end
         mx=2000.0,
         ratio=1000.0,
     )
+    # duration_limits (min, MinMax) — natural unit follows SiennaSchemas (minutes)
     check_minmax(
         u -> PSIP.get_duration_limits(t, u),
         (v, u) -> PSIP.set_duration_limits!(t, v, u),
-        u"hr",
-        u"minute";
-        mn=1.0,
-        mx=8.0,
-        ratio=60.0,
+        u"minute",
+        u"hr";
+        mn=60.0,
+        mx=480.0,
+        ratio=1 / 60,
     )
     # --- scalar power (inverter) ---
     check_scalar(
@@ -979,7 +1015,7 @@ end
         fixed=11.0,
         ratio=1e-3,
     )
-    # --- OperationalCost: StorageCost (energy/inverter usd_per_mwh, power usd_per_mw) ---
+    # --- OperationalCost: StorageCost (energy/inverter/power all usd_per_mwh) ---
     check_storage_cost(
         u -> PSIP.get_operation_costs_energy(t, u),
         (v, u) -> PSIP.set_operation_costs_energy!(t, v, u),
@@ -988,11 +1024,14 @@ end
         fixed=4.0,
         ratio=1e-3,
     )
+    # operation_costs_power: basis change (USD/MW -> USD/MWh), not a scale factor;
+    # follows SiennaSchemas. fixed=5.0 kept as-is: already a plausible USD/MWh
+    # O&M rate (same order as the operation_costs_energy sibling's 4.0).
     check_storage_cost(
         u -> PSIP.get_operation_costs_power(t, u),
         (v, u) -> PSIP.set_operation_costs_power!(t, v, u),
-        conversion_unit(u"MW", USD),
-        conversion_unit(u"kW", USD);
+        conversion_unit(u"MW" * u"hr", USD),
+        conversion_unit(u"kW" * u"hr", USD);
         fixed=5.0,
         ratio=1e-3,
     )
@@ -1024,4 +1063,82 @@ end
     # Fields without units have no display_units_arg method -> default `missing`.
     @test ismissing(IS.display_units_arg(PSIP.get_name, typeof(t)))
     @test ismissing(IS.display_units_arg(PSIP.get_available, typeof(t)))
+end
+
+# ---------------------------------------------------------------------------
+# Cross-repo unit pin: PSIP's descriptor `conversion_unit` must denote the same
+# physical unit as SiennaSchemas' `x-unit` for every field this branch
+# corrected. Both sides are read from their own JSON/engine source of truth —
+# no unit string is hard-coded here — so this fails the moment either side
+# drifts again, rather than only at the next manual audit.
+# ---------------------------------------------------------------------------
+@testset "PSIP conversion_unit matches SiennaSchemas x-unit" begin
+    schemas_root = joinpath(dirname(BASE_DIR), "SiennaSchemas", "Investments")
+    if !isdir(schemas_root)
+        @info "SiennaSchemas sibling checkout not found; skipping cross-repo unit-parity check" schemas_root
+    else
+        descriptor =
+            JSON3.read(joinpath(BASE_DIR, "src", "descriptors", "SiennaInvestSchema.json"))
+        components = Dict(String(c["name"]) => c for c in descriptor["components"])
+
+        # SiennaSchemas spells a few units differently than Unitful's registered
+        # symbols (minute abbreviates to "min" there, "MWh"/"kWh" aren't atomic
+        # Unitful symbols); translate token-by-token, then let Unitful parse it.
+        function schema_unit_token(tok)
+            tok == "min" && return "minute"
+            tok == "t" && return "tonne"
+            tok == "MWh" && return "(MW*hr)"
+            tok == "kWh" && return "(kW*hr)"
+            return tok
+        end
+        function parse_schema_unit(str)
+            s = join(schema_unit_token.(split(str, "/")), "/")
+            return Unitful.uparse(s; unit_context=[PSIP, Unitful])
+        end
+        # A curve-shaped category's "unit" is its rate y_unit/x_unit; a scalar
+        # category's natural_unit already is that rate.
+        function psip_rate_unit(conversion_unit_str)
+            sym = Symbol(lstrip(conversion_unit_str, ':'))
+            nu = PSIP.natural_unit(PSIP._unit_category(Val(sym)))
+            return nu isa NamedTuple ? nu.y_unit / nu.x_unit : nu
+        end
+        function find_schema_file(type_name)
+            for (root, _, files) in walkdir(schemas_root)
+                "$type_name.json" in files && return joinpath(root, "$type_name.json")
+            end
+            return nothing
+        end
+
+        # (Sienna component type, field name) for every field corrected on this
+        # branch — the 9 scale/basis mismatches plus the 2 fields SiennaSchemas
+        # annotated but PSIP never converted at all.
+        checked_fields = [
+            ("SupplyTechnology", "time_limits"),
+            ("StorageTechnology", "duration_limits"),
+            ("ColocatedSupplyStorageTechnology", "duration_limits"),
+            ("DemandSideTechnology", "max_demand_delay"),
+            ("DemandSideTechnology", "max_demand_advance"),
+            ("CarbonCaps", "max_mtons"),
+            ("CarbonCaps", "max_tons_mwh"),
+            ("DemandSideTechnology", "price_per_unit"),
+            ("ColocatedSupplyStorageTechnology", "operation_costs_power"),
+            ("AggregateRetirementPotential", "retirement_potential"),
+            ("SupplyTechnology", "co2"),
+        ]
+
+        for (type_name, field_name) in checked_fields
+            props = components[type_name]["properties"]
+            prop = only(filter(p -> p["name"] == field_name, props))
+            @test get(prop, "needs_conversion", false)
+
+            schema_file = find_schema_file(type_name)
+            @test !isnothing(schema_file)
+            schema = JSON3.read(schema_file)
+            x_unit = schema["properties"][Symbol(field_name)]["x-unit"]
+
+            psip_unit = psip_rate_unit(prop["conversion_unit"])
+            schema_unit = parse_schema_unit(x_unit)
+            @test uconvert(psip_unit, 1.0 * schema_unit) ≈ 1.0 * psip_unit
+        end
+    end
 end
