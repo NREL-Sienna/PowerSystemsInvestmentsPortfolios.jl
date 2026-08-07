@@ -27,8 +27,6 @@ import PowerSystems:
     InputOutputCurve,
     LinearFunctionData,
     PiecewiseStepData,
-    RenewableDispatch,
-    RenewableNonDispatch,
     RenewableGenerationCost,
     SingleTimeSeries,
     StorageCost,
@@ -36,6 +34,8 @@ import PowerSystems:
     ThermalFuels,
     PrimeMovers,
     StorageTech,
+    RenewableDispatch,
+    RenewableNonDispatch,
     ACBusTypes,
     add_component!,
     get_arc,
@@ -48,6 +48,8 @@ import PowerSystems:
     get_from,
     get_max_active_power,
     get_rating,
+    get_time_series_array,
+    get_time_series_values,
     get_to,
     get_value_curve,
     get_variable,
@@ -59,12 +61,7 @@ import PowerSystems:
 
 import InfrastructureSystems
 const IS = InfrastructureSystems
-import InfrastructureSystems:
-    InfrastructureSystemsInternal,
-    CostCurve,
-    LinearCurve,
-    get_time_series_values,
-    get_time_series_array
+import InfrastructureSystems: InfrastructureSystemsInternal, CostCurve, LinearCurve
 
 import SQLite
 import DBInterface
