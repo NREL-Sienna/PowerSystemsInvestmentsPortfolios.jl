@@ -195,3 +195,78 @@ end
     @test PSIP.get_base_year_for_load(demand_b, p_5bus) == get_base_year(p_5bus)
     @test PSIP.get_base_year_for_load(demand_b, p_5bus) == 2025
 end
+
+@testset "getters edge cases (ExistingDevices branches)" begin
+    p_5bus = build_portfolio()
+    sys = get_base_system(p_5bus)
+    load_names = [PSY.get_name(l) for l in get_components(PowerLoad, sys)]
+    @test !isempty(load_names)
+
+    # --- ColocatedSupplyStorageTechnology short-circuits with a warning -> 0.0 ---
+    tech_fd = TechnologyFinancialData(;
+        capital_recovery_period=30, technology_base_year=2025, debt_fraction=0.5,
+        debt_rate=0.07, return_on_equity=0.1, tax_rate=0.257,
+    )
+    sc = StorageCost(
+        charge_variable_cost=CostCurve(LinearCurve(0.0)),
+        discharge_variable_cost=CostCurve(LinearCurve(0.0)),
+        fixed=0.0,
+    )
+    tc = ThermalGenerationCost(
+        variable=CostCurve(LinearCurve(0.0)), fixed=0.0, start_up=0.0, shut_down=0.0,
+    )
+    colocated = ColocatedSupplyStorageTechnology{PSY.RenewableDispatch}(;
+        name="colo_edge", id=999, financial_data=tech_fd,
+        power_systems_type="RenewableDispatch",
+        operation_costs_power=sc, operation_costs_energy=sc, operation_costs_inverter=sc,
+        operation_costs_solar=tc, operation_costs_wind=tc,
+        inverter_efficiency=0.96, inverter_supply_ratio=1.0,
+        capital_costs_inverter=LinearCurve(0.0), available=true,
+        region=[get_region(Zone, p_5bus, "Zone_1")],
+    )
+    @test get_existing_capacity_mw(p_5bus, colocated) == 0.0
+
+    # --- get_existing_capacity_mw: multiple ExistingDevices attributes -> 0.0 ---
+    thermal = get_technology(SupplyTechnology{ThermalStandard}, p_5bus, "cheap_thermal")
+    PSIP.add_supplemental_attribute!(p_5bus, thermal, ExistingDevices(existing_devices=["extra"]))
+    @test get_existing_capacity_mw(p_5bus, thermal) == 0.0   # >1 attr
+
+    # --- get_existing_capacity_mw: empty ExistingDevices name list -> 0.0 ---
+    wind = get_technology(SupplyTechnology{RenewableDispatch}, p_5bus, "wind")
+    PSIP.add_supplemental_attribute!(p_5bus, wind, ExistingDevices(existing_devices=String[]))
+    @test get_existing_capacity_mw(p_5bus, wind) == 0.0
+
+    # --- get_existing_capacity_mwh: multiple attributes -> 0.0 ---
+    storage = get_technology(StorageTechnology, p_5bus, "test_storage")
+    PSIP.add_supplemental_attribute!(p_5bus, storage, ExistingDevices(existing_devices=["a"]))
+    PSIP.add_supplemental_attribute!(p_5bus, storage, ExistingDevices(existing_devices=["b"]))
+    @test get_existing_capacity_mwh(p_5bus, storage) == 0.0
+
+    # --- get_peak_demand_mw: non-new demand with real loads attached -> > 0 ---
+    demand_b = get_technology(DemandRequirement{PowerLoad}, p_5bus, "demand_b")
+    PSIP.add_supplemental_attribute!(
+        p_5bus, demand_b, ExistingDevices(existing_devices=load_names),
+    )
+    peak = get_peak_demand_mw(p_5bus, demand_b)
+    @test peak isa Float64
+    @test peak > 0.0
+    # scale_conforming_load on a non-new, conforming demand exercises the else branch
+    scaled = PSIP.scale_conforming_load(demand_b, p_5bus, 2030)
+    @test scaled isa Float64
+    @test scaled ≈ peak   # growth_rate defaults to 0
+
+    # --- get_peak_demand_mw: multiple ExistingDevices attributes -> 0.0 ---
+    demand_c = get_technology(DemandRequirement{PowerLoad}, p_5bus, "demand_c")
+    PSIP.add_supplemental_attribute!(p_5bus, demand_c, ExistingDevices(existing_devices=["x"]))
+    PSIP.add_supplemental_attribute!(p_5bus, demand_c, ExistingDevices(existing_devices=["y"]))
+    @test get_peak_demand_mw(p_5bus, demand_c) == 0.0
+
+    # --- get_peak_demand_mw: empty names + NON_CONFORMING scale branch ---
+    demand_d = get_technology(DemandRequirement{PowerLoad}, p_5bus, "demand_d")
+    PSIP.add_supplemental_attribute!(
+        p_5bus, demand_d, ExistingDevices(existing_devices=String[]),
+    )
+    @test get_peak_demand_mw(p_5bus, demand_d) == 0.0
+    PSIP.set_conformity!(demand_d, PSY.LoadConformity.NON_CONFORMING)
+    @test PSIP.scale_conforming_load(demand_d, p_5bus, 2030) == 0.0  # non-conforming path
+end

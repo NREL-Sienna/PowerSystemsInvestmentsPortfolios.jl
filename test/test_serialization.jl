@@ -130,3 +130,28 @@ end
         end
     end
 end
+
+@testset "serialization edge cases" begin
+    # --- unsupported file extension throws DataFormatError ---
+    @test_throws IS.DataFormatError Portfolio("not_a_portfolio.txt")
+
+    portfolio = build_portfolio()
+
+    # --- pretty-printed to_json of a technology returns non-empty output ---
+    tech = first(get_technologies(SupplyTechnology, portfolio))
+    pretty_bytes = PSIP.to_json(tech; pretty=true)
+    @test !isempty(pretty_bytes)
+    plain_bytes = PSIP.to_json(tech; pretty=false)
+    @test !isempty(plain_bytes)
+
+    test_dir = mktempdir()
+    path = joinpath(test_dir, "edge_portfolio.json")
+
+    # --- to_json with user_data writes metadata (covers user_data branch) ---
+    PSIP.to_json(portfolio, path; user_data=Dict("scenario" => "edge"), force=true)
+    @test isfile(path)
+    mfile = joinpath(test_dir, "edge_portfolio_metadata.json")
+    @test isfile(mfile)
+    meta = JSON3.read(read(mfile, String))
+    @test meta["user_data"]["scenario"] == "edge"
+end

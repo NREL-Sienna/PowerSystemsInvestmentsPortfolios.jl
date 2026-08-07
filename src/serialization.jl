@@ -85,7 +85,7 @@ function Portfolio(
         )
         return portfolio
     else
-        throw(DataFormatError("$file_path is not a supported file type"))
+        throw(IS.DataFormatError("$file_path is not a supported file type"))
     end
 end
 
