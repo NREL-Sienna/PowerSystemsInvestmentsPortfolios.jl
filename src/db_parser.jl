@@ -1,3 +1,109 @@
+"""
+SQLite/DBInterface reader for the SiennaGridDB schema, staged here for later extraction
+into its own package. A submodule (not a flat include) so that boundary is explicit today:
+it declares its own imports rather than inheriting PSIP's ambient `using` statements, and
+it exports nothing — the only call site outside this file is the qualified
+`PowerSystemsInvestmentsPortfolios.DBParser.database_to_portfolio`.
+"""
+module DBParser
+
+# `@u_str` is a macro, so it must be imported by name rather than reached through a
+# qualified module path the way the function imports below are.
+using Unitful: @u_str
+
+import PowerSystems
+const PSY = PowerSystems
+import PowerSystems:
+    ACBus,
+    ACBranch,
+    Arc,
+    Area,
+    FuelCurve,
+    HydroGenerationCost,
+    HydroReservoir,
+    HydroReservoirCost,
+    HydroTurbine,
+    IncrementalCurve,
+    InputOutputCurve,
+    LinearFunctionData,
+    PiecewiseStepData,
+    RenewableGenerationCost,
+    SingleTimeSeries,
+    StorageCost,
+    ThermalGenerationCost,
+    ThermalFuels,
+    PrimeMovers,
+    StorageTech,
+    ACBusTypes,
+    add_component!,
+    get_arc,
+    get_area,
+    get_base_power,
+    get_base_voltage,
+    get_component,
+    get_components,
+    get_fixed,
+    get_from,
+    get_max_active_power,
+    get_rating,
+    get_to,
+    get_value_curve,
+    get_variable,
+    has_supplemental_attributes,
+    set_downstream_turbines!,
+    set_fixed!,
+    set_upstream_turbines!,
+    set_variable!
+
+import InfrastructureSystems
+const IS = InfrastructureSystems
+import InfrastructureSystems: InfrastructureSystemsInternal, CostCurve, LinearCurve
+
+import SQLite
+import DBInterface
+import Tables
+import TimeSeries
+import Dates
+import JSON3
+
+# PSIP's own public surface. `get_aggregation` is used below despite not being
+# exported by PSIP (finding, recorded for the extraction: see
+# .claude/plans/2026-08-06-psip-serde-strategy-port.md report) — everything
+# else here is genuinely public.
+import ..PowerSystemsInvestmentsPortfolios:
+    Portfolio,
+    Zone,
+    Node,
+    RegionTopology,
+    ExistingDevices,
+    TechnologyFinancialData,
+    SupplyTechnology,
+    StorageTechnology,
+    DemandRequirement,
+    NodalACTransportTechnology,
+    AggregateTransportTechnology,
+    add_technology!,
+    add_region!,
+    add_supplemental_attribute!,
+    add_time_series!,
+    set_capacity_limits!,
+    set_capital_costs!,
+    set_operation_costs!,
+    get_id,
+    get_name,
+    get_region,
+    get_fuel,
+    get_prime_mover_type,
+    get_fixed_cost,
+    get_variable_cost,
+    get_operation_costs,
+    get_base_year,
+    get_existing_capacity_mw,
+    get_existing_devices,
+    get_supplemental_attributes,
+    get_technologies,
+    is_new,
+    get_aggregation
 
 """
 Set of queries to extract relevant data from the database. Need to be maintained to be consistent with the most recent version of the database
@@ -1701,3 +1807,5 @@ function deserialize_timeseries!(sys::PowerSystems.System, db, attributes)
         end
     end
 end
+
+end # module DBParser

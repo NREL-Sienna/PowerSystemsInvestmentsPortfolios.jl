@@ -120,7 +120,6 @@ export add_region!
 export add_requirement!
 export add_time_series!
 export clear_time_series!
-export database_to_portfolio
 export add_supplemental_attribute!
 export remove_supplemental_attribute!
 export get_supplemental_attribute
@@ -181,6 +180,7 @@ include("units/function_conversions.jl")
 include("portfolio.jl")
 include("time_mapping.jl")
 include("serialization.jl")
+include("utils/getters.jl")
 include("db_parser.jl")
 include("utils/generate_structs.jl")
 include("utils/print.jl")
@@ -189,7 +189,6 @@ include("utils/print.jl")
 else
     include("utils/print_pt_v3.jl")
 end
-include("utils/getters.jl")
 include("update_system.jl")
 
 using DocStringExtensions
