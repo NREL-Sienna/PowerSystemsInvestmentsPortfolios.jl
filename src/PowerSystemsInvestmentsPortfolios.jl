@@ -120,9 +120,6 @@ export add_region!
 export add_requirement!
 export add_time_series!
 export clear_time_series!
-export read_json_data
-export generate_invest_structs
-export generate_structs
 export database_to_portfolio
 export add_supplemental_attribute!
 export remove_supplemental_attribute!

@@ -1,4 +1,18 @@
+"""
+PSIP-owned struct code generator (mirrors PowerSystems.jl's `StructGeneration` fork of
+InfrastructureSystems.jl's generator). Self-contained: it emits Julia source as text and
+declares its own imports, so it has no dependency on PowerSystemsInvestmentsPortfolios'
+own types. `generate_structs`/`generate_invest_structs` are dev-tool entry points, not
+part of PSIP's public `get_*`/`set_*` surface — call them module-qualified,
+`PowerSystemsInvestmentsPortfolios.StructGeneration.generate_structs(...)`, never exported.
+"""
+module StructGeneration
+
+import JSON3
+import JSONSchema
 import Mustache
+const MU = Mustache
+import InfrastructureSystems: DataFormatError
 
 const STRUCT_TEMPLATE = """
 #=
@@ -325,3 +339,5 @@ function generate_structs(
     generate_invest_structs(output_directory, data; print_results=print_results)
     return
 end
+
+end # module StructGeneration
