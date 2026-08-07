@@ -80,21 +80,21 @@ function _validate_storage_fields(technology::StorageTechnology)
 
     is_valid &= _validate_nonnegative_limits(
         technology,
-        get_duration_limits(technology),
+        get_duration_limits(technology, IS.NU),
         "Storage duration limits",
     )
     is_valid &= _validate_nonnegative_limits(
         technology,
-        get_capacity_limits_energy(technology),
+        get_capacity_limits_energy(technology, IS.NU),
         "Storage energy capacity limits",
     )
     is_valid &= _validate_nonnegative_limits(
         technology,
-        get_capacity_limits_discharge(technology),
+        get_capacity_limits_discharge(technology, IS.NU),
         "Storage discharge capacity limits",
     )
 
-    charge_capacity_limits = get_capacity_limits_charge(technology)
+    charge_capacity_limits = get_capacity_limits_charge(technology, IS.NU)
     if !isnothing(charge_capacity_limits)
         is_valid &= _validate_nonnegative_limits(
             technology,
@@ -105,16 +105,16 @@ function _validate_storage_fields(technology::StorageTechnology)
 
     is_valid &= _validate_nonnegative_value(
         technology,
-        get_unit_size_energy(technology),
+        get_unit_size_energy(technology, IS.NU),
         "Storage energy unit size",
     )
     is_valid &= _validate_nonnegative_value(
         technology,
-        get_unit_size_discharge(technology),
+        get_unit_size_discharge(technology, IS.NU),
         "Storage discharge unit size",
     )
 
-    charge_unit_size = get_unit_size_charge(technology)
+    charge_unit_size = get_unit_size_charge(technology, IS.NU)
     if !isnothing(charge_unit_size)
         is_valid &= _validate_nonnegative_value(
             technology,
@@ -150,17 +150,17 @@ end
 function validate_technology(technology::SupplyTechnology)
     is_valid = _validate_positive_value(
         technology,
-        get_lifetime(technology),
+        get_lifetime(technology, IS.NU),
         "Technology lifetime",
     )
     is_valid &= _validate_nonnegative_limits(
         technology,
-        get_capacity_limits(technology),
+        get_capacity_limits(technology, IS.NU),
         "Supply capacity limits",
     )
     is_valid &= _validate_nonnegative_value(
         technology,
-        get_unit_size(technology),
+        get_unit_size(technology, IS.NU),
         "Supply unit size",
     )
     is_valid &= _validate_fraction(
@@ -174,7 +174,7 @@ end
 function validate_technology(technology::StorageTechnology)
     is_valid = _validate_positive_value(
         technology,
-        get_lifetime(technology),
+        get_lifetime(technology, IS.NU),
         "Technology lifetime",
     )
     is_valid &= _validate_storage_fields(technology)
@@ -186,34 +186,34 @@ function _validate_colocated_supply_storage_fields(
 )
     is_valid = _validate_nonnegative_limits(
         technology,
-        get_capacity_limits_wind(technology),
+        get_capacity_limits_wind(technology, IS.NU),
         "Colocated wind capacity limits",
     )
     is_valid &= _validate_nonnegative_limits(
         technology,
-        get_capacity_limits_solar(technology),
+        get_capacity_limits_solar(technology, IS.NU),
         "Colocated solar capacity limits",
     )
     is_valid &= _validate_nonnegative_limits(
         technology,
-        get_capacity_power_limits(technology),
+        get_capacity_power_limits(technology, IS.NU),
         "Colocated storage power capacity limits",
     )
     is_valid &= _validate_nonnegative_limits(
         technology,
-        get_capacity_energy_limits(technology),
+        get_capacity_energy_limits(technology, IS.NU),
         "Colocated storage energy capacity limits",
     )
     is_valid &= _validate_nonnegative_limits(
         technology,
-        get_duration_limits(technology),
+        get_duration_limits(technology, IS.NU),
         "Colocated storage duration limits",
     )
     is_valid &= _validate_nonnegative_limits(
         technology,
         (
-            min=get_min_inverter_capacity(technology),
-            max=get_max_inverter_capacity(technology),
+            min=get_min_inverter_capacity(technology, IS.NU),
+            max=get_max_inverter_capacity(technology, IS.NU),
         ),
         "Colocated inverter capacity limits",
     )
@@ -248,17 +248,17 @@ end
 function validate_technology(technology::ColocatedSupplyStorageTechnology)
     is_valid = _validate_positive_value(
         technology,
-        get_lifetime_storage(technology),
+        get_lifetime_storage(technology, IS.NU),
         "Colocated storage lifetime",
     )
     is_valid &= _validate_positive_value(
         technology,
-        get_lifetime_wind(technology),
+        get_lifetime_wind(technology, IS.NU),
         "Colocated wind lifetime",
     )
     is_valid &= _validate_positive_value(
         technology,
-        get_lifetime_solar(technology),
+        get_lifetime_solar(technology, IS.NU),
         "Colocated solar lifetime",
     )
     is_valid &= _validate_colocated_supply_storage_fields(technology)
@@ -268,12 +268,12 @@ end
 function _validate_transmission_fields(technology::TransmissionTechnology)
     is_valid = _validate_nonnegative_limits(
         technology,
-        get_capacity_limits(technology),
+        get_capacity_limits(technology, IS.NU),
         "Transport capacity limits",
     )
     is_valid &= _validate_positive_value(
         technology,
-        get_unit_size(technology),
+        get_unit_size(technology, IS.NU),
         "Transport unit size",
     )
     return is_valid

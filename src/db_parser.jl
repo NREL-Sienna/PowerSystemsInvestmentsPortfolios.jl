@@ -27,6 +27,8 @@ import PowerSystems:
     InputOutputCurve,
     LinearFunctionData,
     PiecewiseStepData,
+    RenewableDispatch,
+    RenewableNonDispatch,
     RenewableGenerationCost,
     SingleTimeSeries,
     StorageCost,
@@ -57,7 +59,12 @@ import PowerSystems:
 
 import InfrastructureSystems
 const IS = InfrastructureSystems
-import InfrastructureSystems: InfrastructureSystemsInternal, CostCurve, LinearCurve
+import InfrastructureSystems:
+    InfrastructureSystemsInternal,
+    CostCurve,
+    LinearCurve,
+    get_time_series_values,
+    get_time_series_array
 
 import SQLite
 import DBInterface
@@ -103,7 +110,11 @@ import ..PowerSystemsInvestmentsPortfolios:
     get_supplemental_attributes,
     get_technologies,
     is_new,
-    get_aggregation
+    get_aggregation,
+    get_fuel_cost,
+    DEFAULT_AGGREGATION,
+    MMBtu,
+    USD
 
 """
 Set of queries to extract relevant data from the database. Need to be maintained to be consistent with the most recent version of the database
