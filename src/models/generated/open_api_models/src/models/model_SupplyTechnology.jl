@@ -28,27 +28,27 @@
         financial_data=nothing,
     )
 
-    - id::Int64
-    - name::String
-    - available::Bool
-    - power_systems_type::String
-    - region::Vector{Int64}
-    - prime_mover_type::String
-    - fuel::Vector{String}
-    - co2::Dict{String, Float64}
-    - cofire_start_limits::Dict{String, MinMax}
-    - cofire_level_limits::Dict{String, MinMax}
+    - id::Int64 : ID for individual component.
+    - name::String : Name of the component.
+    - available::Bool : Indicator of whether the component is connected and online (&#x60;true&#x60;) or disconnected, offline, or down (&#x60;false&#x60;).
+    - power_systems_type::String : Corresponding type to be used in PCM modeling.
+    - region::Vector{Int64} : Location where the component applies. Can be a zone or node.
+    - prime_mover_type::String : Prime mover for generator.
+    - fuel::Vector{String} : Fuel type according to IEA.
+    - co2::Dict{String, Float64} : Carbon intensity of fuel. Units: t/MMBtu.
+    - cofire_start_limits::Dict{String, MinMax} : Minimum and maximum blending level of each fuel during start-up process for multi-fuel generator. Units: 1.
+    - cofire_level_limits::Dict{String, MinMax} : Minimum and maximum blending level of each fuel during normal generation process for multi-fuel generator. Units: 1.
     - capital_costs::ValueCurve
     - operation_costs::GenericOperationCost
-    - unit_size::Float64
+    - unit_size::Float64 : Used for discrete investment decisions. Size of each unit being built. Units: MW.
     - capacity_limits::MinMax
-    - outage_factor::Float64
-    - min_generation_fraction::Float64
+    - outage_factor::Float64 : Derating factor to account for planned or forced outages of a technology. Fraction of hours in a year where technology is unavailable. Units: 1.
+    - min_generation_fraction::Float64 : Minimum generation as a fraction of total capacity. Units: 1.
     - ramp_limits::UpDown
     - time_limits::UpDown
-    - start_fuel_mmbtu_per_mw::Float64
-    - lifetime::Int64
-    - requirements::Vector{Int64}
+    - start_fuel_mmbtu_per_mw::Float64 : Startup fuel use per MW of nameplate capacity of each generator. Units: MMBtu/MW.
+    - lifetime::Int64 : Maximum number of years a technology can be active once installed. Units: yr.
+    - requirements::Vector{Int64} : List of requirement IDs associated with the component.
     - financial_data::TechnologyFinancialData
 """
 Base.@kwdef mutable struct SupplyTechnology <: OpenAPI.APIModel
@@ -158,18 +158,7 @@ OpenAPI.property_type(::Type{SupplyTechnology}, name::Symbol) =
 function OpenAPI.check_required(o::SupplyTechnology)
     o.id === nothing && (return false)
     o.name === nothing && (return false)
-    o.available === nothing && (return false)
     o.power_systems_type === nothing && (return false)
-    o.region === nothing && (return false)
-    o.fuel === nothing && (return false)
-    o.co2 === nothing && (return false)
-    o.cofire_start_limits === nothing && (return false)
-    o.cofire_level_limits === nothing && (return false)
-    o.capital_costs === nothing && (return false)
-    o.operation_costs === nothing && (return false)
-    o.capacity_limits === nothing && (return false)
-    o.ramp_limits === nothing && (return false)
-    o.time_limits === nothing && (return false)
     o.financial_data === nothing && (return false)
     true
 end

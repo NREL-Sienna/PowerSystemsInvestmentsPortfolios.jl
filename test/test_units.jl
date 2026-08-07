@@ -111,6 +111,7 @@ demand_side() = DemandSideTechnology{PSY.PowerLoad}(;
 )
 
 retro() = AggregateRetrofitPotential(;
+    id=9,
     retrofit_id=1,
     retrofit_potential=150.0,
     retrofit_fraction=0.5,
@@ -818,7 +819,7 @@ end
 @testset "AggregateRetirementPotential getters/setters" begin
     # newly wired conversion; SiennaSchemas declares x-unit MW, but PSIP never
     # marked this field `needs_conversion` before this branch.
-    t = AggregateRetirementPotential(retirement_potential=100.0)
+    t = AggregateRetirementPotential(id=10, retirement_potential=100.0)
     check_scalar(
         u -> PSIP.get_retirement_potential(t, u),
         (v, u) -> PSIP.set_retirement_potential!(t, v, u),

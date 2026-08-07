@@ -10,7 +10,8 @@
       "name": "Zone",
       "type": "object",
       "required": [
-        "name"
+        "name",
+        "id"
       ],
       "docstring": "A unit of spatial aggregation for zonal capacity expansion models. Used to define locations for supply, demand, transport, and storage technologies and relevant policy requirements.",
       "properties": [
@@ -43,7 +44,8 @@
       "name": "Node",
       "type": "object",
       "required": [
-        "name"
+        "name",
+        "id"
       ],
       "docstring": "A unit of spatial aggregation for nodal capacity expansion models. Used to define locations for supply, demand, transport, and storage technologies and relevant policy requirements.",
       "properties": [
@@ -83,8 +85,9 @@
       "type": "object",
       "required": [
         "name",
-        "available",
-        "power_systems_type"
+        "id",
+        "power_systems_type",
+        "financial_data"
       ],
       "docstring": "Candidate generation technology for a region. Can represent either a thermal or renewable generation technology",
       "properties": [
@@ -254,10 +257,15 @@
       "name": "RetirementPotential",
       "type": "object",
       "required": [
-        "eligible_generators"
+        "id"
       ],
       "docstring": "Supplemental attribute used to define what existing generators are eligible for retirement for a SupplyTechnology",
       "properties": [
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual component"
+        },
         {
           "name": "eligible_generators",
           "type": "Vector{String}",
@@ -295,10 +303,15 @@
       "name": "AggregateRetirementPotential",
       "type": "object",
       "required": [
-        "retirement_potential"
+        "id"
       ],
       "docstring": "Supplemental attribute used to define a total amount of existing capacity that can be retired for a technology",
       "properties": [
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual component"
+        },
         {
           "name": "retirement_potential",
           "type": "Float64",
@@ -326,10 +339,15 @@
       "name": "RetrofitPotential",
       "type": "object",
       "required": [
-        "retrofit_potential"
+        "id"
       ],
       "docstring": "Supplemental attribute used to define what existing generators are eligible for retrofit for a SupplyTechnology",
       "properties": [
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual component"
+        },
         {
           "name": "eligible_generators",
           "type": "Vector{String}",
@@ -355,10 +373,15 @@
       "name": "AggregateRetrofitPotential",
       "type": "object",
       "required": [
-        "retrofit_id"
+        "id"
       ],
       "docstring": "Supplemental attribute used to define a total amount of capacity that can be retrofit for a SupplyTechnology",
       "properties": [
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual component"
+        },
         {
           "name": "retrofit_id",
           "type": "Int64",
@@ -398,10 +421,15 @@
       "name": "ExistingDevices",
       "type": "object",
       "required": [
-        "existing_devices"
+        "id"
       ],
       "docstring": "Supplemental attributed used to map technologies in a portfolio to the existing system. For example, contains a list of existing generators that correspond to a SupplyTechnology.",
       "properties": [
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual component"
+        },
         {
           "name": "existing_devices",
           "type": "Vector{String}",
@@ -427,10 +455,15 @@
       "name": "TopologyMapping",
       "type": "object",
       "required": [
-        "buses"
+        "id"
       ],
       "docstring": "Supplemental attributed used to store mapping between the PSIP Zone and the associated buses in the base system.",
       "properties": [
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual component"
+        },
         {
           "name": "buses",
           "type": "Vector{String}",
@@ -457,8 +490,11 @@
       "type": "object",
       "required": [
         "name",
+        "id",
         "available",
-        "power_systems_type"
+        "power_systems_type",
+        "storage_tech",
+        "financial_data"
       ],
       "docstring": "Candidate storage technology in a region.",
       "properties": [
@@ -665,6 +701,7 @@
       "type": "object",
       "required": [
         "name",
+        "id",
         "available",
         "power_systems_type"
       ],
@@ -795,7 +832,12 @@
       "type": "object",
       "required": [
         "name",
-        "available"
+        "id",
+        "available",
+        "power_systems_type",
+        "start_node",
+        "end_node",
+        "financial_data"
       ],
       "docstring": "A nodal representation of candidate HVDC transmission lines between two regions.",
       "properties": [
@@ -891,7 +933,12 @@
       "type": "object",
       "required": [
         "name",
-        "available"
+        "id",
+        "available",
+        "power_systems_type",
+        "start_region",
+        "end_region",
+        "financial_data"
       ],
       "docstring": "An aggregated representation of a transmission interchange between two regions.",
       "properties": [
@@ -987,7 +1034,12 @@
       "type": "object",
       "required": [
         "name",
-        "available"
+        "id",
+        "available",
+        "power_systems_type",
+        "start_node",
+        "end_node",
+        "financial_data"
       ],
       "docstring": "Nodal representation of candidate AC transmission lines between two regions.",
       "properties": [
@@ -1101,8 +1153,9 @@
       "type": "object",
       "required": [
         "name",
-        "available",
-        "power_systems_type"
+        "id",
+        "power_systems_type",
+        "value_of_lost_load"
       ],
       "docstring": "Demand requirements for a region.",
       "properties": [
@@ -1202,7 +1255,8 @@
       "type": "object",
       "required": [
         "name",
-        "available"
+        "available",
+        "id"
       ],
       "docstring": "Defines limits to the amount of carbon produced. Can be defined either by the total amount of carbon produced (tons CO2) or by the carbon intensity of the portfolio (tons CO2 per MWh of electricity)",
       "properties": [
@@ -1263,7 +1317,8 @@
       "type": "object",
       "required": [
         "name",
-        "available"
+        "available",
+        "id"
       ],
       "docstring": "Policy requirement that defines an additional cost penalty per ton of CO2 produced in the target in the eligible regions",
       "properties": [
@@ -1316,7 +1371,8 @@
       "type": "object",
       "required": [
         "name",
-        "available"
+        "available",
+        "id"
       ],
       "docstring": "Policy requirement to enforce a minimum capacity reserve margin, such that (total_capacity - peak_demand)/peak_demand >= capacity_reserve_fraction",
       "properties": [
@@ -1367,7 +1423,8 @@
       "type": "object",
       "required": [
         "name",
-        "available"
+        "available",
+        "id"
       ],
       "docstring": "Policy requirement that the total capacity of all technologies in `eligible_technologies` in the target year is greater than or equal to the specific minimum in MW",
       "properties": [
@@ -1420,7 +1477,8 @@
       "type": "object",
       "required": [
         "name",
-        "available"
+        "available",
+        "id"
       ],
       "docstring": "Policy requirement that the total generation of `eligible_technologies` must be greater than or equal to a pre-determined fraction of the total demand in eligible zones, such that `sum(P)_eligible_technologies >= total_fraction * sum(D)_eligible_regions`",
       "properties": [
@@ -1471,7 +1529,8 @@
       "type": "object",
       "required": [
         "name",
-        "available"
+        "available",
+        "id"
       ],
       "docstring": "Policy requirement that all DemandSideTechnologies in `qualified_demand` must have their demand met by an equal amount of electricity generation from `qualified_supply` at all hours, such that: `sum(P)_qualified_supply >= sum(D)_qualified_demand`",
       "properties": [
@@ -1510,7 +1569,8 @@
       "type": "object",
       "required": [
         "name",
-        "available"
+        "available",
+        "id"
       ],
       "docstring": "Policy requirement that the total capacity of all technologies in `eligible_resources` in the target year is less than the specified limit in MW",
       "properties": [
@@ -1563,8 +1623,13 @@
       "type": "object",
       "required": [
         "name",
-        "available",
-        "power_systems_type"
+        "id",
+        "power_systems_type",
+        "financial_data",
+        "capital_costs_inverter",
+        "operation_costs_inverter",
+        "inverter_efficiency",
+        "inverter_supply_ratio"
       ],
       "docstring": "Supply Technology that supports a StorageTechnology co-located with wind and solar generation",
       "properties": [

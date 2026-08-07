@@ -6,6 +6,7 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct RetirementPotential <: IS.SupplementalAttribute
+        id::Int64
         eligible_generators::Vector{String}
         planned_retirement_year::Dict{String, Int64}
         build_year::Dict{String, Int64}
@@ -16,6 +17,7 @@ This file is auto-generated. Do not edit.
 Supplemental attribute used to define what existing generators are eligible for retirement for a SupplyTechnology
 
 # Arguments
+- `id::Int64`: ID for individual component
 - `eligible_generators::Vector{String}`: (default: `Vector()`) Names of individual generation units mapped to a technology that are eligible for retirement
 - `planned_retirement_year::Dict{String, Int64}`: (default: `Dict{String, Int64}()`) Optional dictionary to indicate the year in which the forced/planned retirement will occur
 - `build_year::Dict{String, Int64}`: (default: `Dict{String, Int64}()`) Optional dictionary to indicate the year in which existing generators in the base system were built
@@ -23,6 +25,8 @@ Supplemental attribute used to define what existing generators are eligible for 
 - `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 """
 mutable struct RetirementPotential <: IS.SupplementalAttribute
+    "ID for individual component"
+    id::Int64
     "Names of individual generation units mapped to a technology that are eligible for retirement"
     eligible_generators::Vector{String}
     "Optional dictionary to indicate the year in which the forced/planned retirement will occur"
@@ -36,21 +40,12 @@ mutable struct RetirementPotential <: IS.SupplementalAttribute
 end
 
 
-function RetirementPotential(; eligible_generators=Vector(), planned_retirement_year=Dict{String, Int64}(), build_year=Dict{String, Int64}(), ext=Dict(), internal=InfrastructureSystemsInternal(), )
-    RetirementPotential(eligible_generators, planned_retirement_year, build_year, ext, internal, )
+function RetirementPotential(; id, eligible_generators=Vector(), planned_retirement_year=Dict{String, Int64}(), build_year=Dict{String, Int64}(), ext=Dict(), internal=InfrastructureSystemsInternal(), )
+    RetirementPotential(id, eligible_generators, planned_retirement_year, build_year, ext, internal, )
 end
 
-# Constructor for demo purposes; non-functional.
-function RetirementPotential(::Nothing)
-    RetirementPotential(;
-        eligible_generators=InfrastructureSystemsInternal(),
-        planned_retirement_year=InfrastructureSystemsInternal(),
-        build_year=InfrastructureSystemsInternal(),
-        ext=InfrastructureSystemsInternal(),
-        internal=InfrastructureSystemsInternal(),
-    )
-end
-
+"""Get [`RetirementPotential`](@ref) `id`."""
+get_id(value::RetirementPotential) = value.id
 """Get [`RetirementPotential`](@ref) `eligible_generators`."""
 get_eligible_generators(value::RetirementPotential) = value.eligible_generators
 """Get [`RetirementPotential`](@ref) `planned_retirement_year`."""
@@ -62,6 +57,8 @@ get_ext(value::RetirementPotential) = value.ext
 """Get [`RetirementPotential`](@ref) `internal`."""
 get_internal(value::RetirementPotential) = value.internal
 
+"""Set [`RetirementPotential`](@ref) `id`."""
+set_id!(value::RetirementPotential, val) = value.id = val
 """Set [`RetirementPotential`](@ref) `eligible_generators`."""
 set_eligible_generators!(value::RetirementPotential, val) = value.eligible_generators = val
 """Set [`RetirementPotential`](@ref) `planned_retirement_year`."""

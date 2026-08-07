@@ -115,6 +115,9 @@ export set_investment_schedule!
 export set_base_system!
 export add_technology!
 export add_technologies!
+export validate_technology
+export check_technology
+export check_technologies
 export remove_technology!
 export add_region!
 export add_requirement!
@@ -178,6 +181,7 @@ include("units/conversions.jl")
 include("units/function_conversions.jl")
 
 include("portfolio.jl")
+include("validation.jl")
 include("time_mapping.jl")
 include("serialization.jl")
 include("utils/getters.jl")

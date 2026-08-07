@@ -2,6 +2,7 @@
 # Do not modify this file directly. Modify the OpenAPI specification instead.
 
 @doc raw"""GenericOperationCost
+Fixed and variable O&amp;M costs for a technology. Units: USD/MWh.
 
     GenericOperationCost(; value=nothing)
 """

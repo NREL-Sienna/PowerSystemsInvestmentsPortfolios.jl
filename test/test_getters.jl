@@ -245,7 +245,7 @@ end
     PSIP.add_supplemental_attribute!(
         p_5bus,
         thermal,
-        ExistingDevices(existing_devices=["extra"]),
+        ExistingDevices(id=60, existing_devices=["extra"]),
     )
     @test get_existing_capacity_mw(p_5bus, thermal) == 0.0   # >1 attr
 
@@ -254,7 +254,7 @@ end
     PSIP.add_supplemental_attribute!(
         p_5bus,
         wind,
-        ExistingDevices(existing_devices=String[]),
+        ExistingDevices(id=61, existing_devices=String[]),
     )
     @test get_existing_capacity_mw(p_5bus, wind) == 0.0
 
@@ -263,12 +263,12 @@ end
     PSIP.add_supplemental_attribute!(
         p_5bus,
         storage,
-        ExistingDevices(existing_devices=["a"]),
+        ExistingDevices(id=62, existing_devices=["a"]),
     )
     PSIP.add_supplemental_attribute!(
         p_5bus,
         storage,
-        ExistingDevices(existing_devices=["b"]),
+        ExistingDevices(id=63, existing_devices=["b"]),
     )
     @test get_existing_capacity_mwh(p_5bus, storage) == 0.0
 
@@ -277,7 +277,7 @@ end
     PSIP.add_supplemental_attribute!(
         p_5bus,
         demand_b,
-        ExistingDevices(existing_devices=load_names),
+        ExistingDevices(id=64, existing_devices=load_names),
     )
     peak = get_peak_demand_mw(p_5bus, demand_b)
     @test peak isa Float64
@@ -292,12 +292,12 @@ end
     PSIP.add_supplemental_attribute!(
         p_5bus,
         demand_c,
-        ExistingDevices(existing_devices=["x"]),
+        ExistingDevices(id=65, existing_devices=["x"]),
     )
     PSIP.add_supplemental_attribute!(
         p_5bus,
         demand_c,
-        ExistingDevices(existing_devices=["y"]),
+        ExistingDevices(id=66, existing_devices=["y"]),
     )
     @test get_peak_demand_mw(p_5bus, demand_c) == 0.0
 
@@ -306,7 +306,7 @@ end
     PSIP.add_supplemental_attribute!(
         p_5bus,
         demand_d,
-        ExistingDevices(existing_devices=String[]),
+        ExistingDevices(id=67, existing_devices=String[]),
     )
     @test get_peak_demand_mw(p_5bus, demand_d) == 0.0
     PSIP.set_conformity!(demand_d, PSY.LoadConformity.NON_CONFORMING)

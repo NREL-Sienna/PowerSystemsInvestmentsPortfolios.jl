@@ -20,6 +20,7 @@ import InteractiveUtils
 import JSON3
 import Pkg
 import PowerSystems as PSY
+using Unitful
 
 # Automatically download and get path to CaseData artifact from test/Artifacts.toml
 const ARTIFACTS_TOML = joinpath(@__DIR__, "Artifacts.toml")
