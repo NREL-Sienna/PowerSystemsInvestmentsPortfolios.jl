@@ -15,7 +15,13 @@
     _, maxp_before = PSY.get_active_power_limits(g, u"MW")
     add_cap = 40.0
     PSIP.update_or_create_new_generator!(
-        PSY.ThermalStandard, sys, p, gbus_name, "cheap_thermal", gname, add_cap,
+        PSY.ThermalStandard,
+        sys,
+        p,
+        gbus_name,
+        "cheap_thermal",
+        gname,
+        add_cap,
     )
     @test PSY.get_rating(g, u"MW") ≈ rating_before + add_cap
     _, maxp_after = PSY.get_active_power_limits(g, u"MW")
@@ -24,7 +30,13 @@
     # ----- ThermalStandard: create new generator -----
     @test isnothing(PSY.get_component(PSY.ThermalStandard, sys, "new_thermal_unit"))
     PSIP.update_or_create_new_generator!(
-        PSY.ThermalStandard, sys, p, gbus_name, "cheap_thermal", "new_thermal_unit", 120.0,
+        PSY.ThermalStandard,
+        sys,
+        p,
+        gbus_name,
+        "cheap_thermal",
+        "new_thermal_unit",
+        120.0,
     )
     newg = PSY.get_component(PSY.ThermalStandard, sys, "new_thermal_unit")
     @test !isnothing(newg)
@@ -38,7 +50,13 @@
     rbus_name = PSY.get_name(PSY.get_bus(r))
     rrating_before = PSY.get_rating(r, u"MW")
     PSIP.update_or_create_new_generator!(
-        PSY.RenewableDispatch, sys, p, rbus_name, "wind", rname, 25.0,
+        PSY.RenewableDispatch,
+        sys,
+        p,
+        rbus_name,
+        "wind",
+        rname,
+        25.0,
     )
     @test PSY.get_rating(r, u"MW") ≈ rrating_before + 25.0
 
@@ -51,7 +69,13 @@
 
     @test isnothing(PSY.get_component(PSY.RenewableDispatch, sys, "new_wind_unit"))
     PSIP.update_or_create_new_generator!(
-        PSY.RenewableDispatch, sys, p, rbus_name, "wind", "new_wind_unit", 80.0,
+        PSY.RenewableDispatch,
+        sys,
+        p,
+        rbus_name,
+        "wind",
+        "new_wind_unit",
+        80.0,
     )
     newr = PSY.get_component(PSY.RenewableDispatch, sys, "new_wind_unit")
     @test !isnothing(newr)
@@ -63,8 +87,7 @@
     # key = (tech_type, node, tech_name, unit_name); only node.name is used.
     node = (name=gbus_name,)
     solutions = Dict(
-        (SupplyTechnology{PSY.ThermalStandard}, node, "cheap_thermal", "wrapper_thermal") =>
-            60.0,
+        (SupplyTechnology{PSY.ThermalStandard}, node, "cheap_thermal", "wrapper_thermal") => 60.0,
     )
     PSIP.update_system_with_nodal_results!(sys, p, solutions)
     wrapped = PSY.get_component(PSY.ThermalStandard, sys, "wrapper_thermal")
