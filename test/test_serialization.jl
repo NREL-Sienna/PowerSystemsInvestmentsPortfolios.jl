@@ -159,7 +159,11 @@ end
 
     # --- to_json of a lone technology raises: references need the portfolio's id registry ---
     tech = first(get_technologies(SupplyTechnology, portfolio))
-    @test_throws ErrorException PSIP.to_json(tech; pretty=true)
+    @test_logs(
+        (:error, r"Failed to serialize"),
+        min_level = Logging.Error,
+        @test_throws(ErrorException, PSIP.to_json(tech; pretty=true)),
+    )
 
     # --- pretty-printed to_json of the portfolio returns non-empty output ---
     pretty_bytes = PSIP.to_json(portfolio; pretty=true)

@@ -562,12 +562,18 @@ end
 
 @testset "serializing a lone component names the supported entry point" begin
     zone = Zone(name="orphan", id=1)
-    err = try
-        PSIP.to_json(zone)
-        nothing
-    catch e
-        e
-    end
+    # @test_logs captures the intentional `@error` from to_json so the harness
+    # LogEventTracker does not count it as a real error.
+    err = @test_logs(
+        (:error, r"Failed to serialize"),
+        min_level = Logging.Error,
+        try
+            PSIP.to_json(zone)
+            nothing
+        catch e
+            e
+        end,
+    )
     @test err isa ErrorException
     @test occursin("no active OpenAPI export registry", err.msg)
     @test occursin("to_json(portfolio, filename)", err.msg)

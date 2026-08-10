@@ -191,11 +191,23 @@ _as_linear_curve(curve, context::AbstractString) = error(
 )
 
 _vom_cost(::Nothing) = LinearCurve(0.0)
-_vom_cost(io::PC.InputOutputCurve) = _as_linear_curve(convert_value_curve(io), "vom_cost")
+_vom_cost(io::PC.InputOutputCurve) = _linear_curve_no_input_at_zero(io, "vom_cost")
 
 _startup_fuel_offtake(::Nothing) = LinearCurve(0.0)
 _startup_fuel_offtake(io::PC.InputOutputCurve) =
-    _as_linear_curve(convert_value_curve(io), "startup_fuel_offtake")
+    _linear_curve_no_input_at_zero(io, "startup_fuel_offtake")
+
+"""
+`vom_cost` / `startup_fuel_offtake` are canonically linear curves with no `input_at_zero`
+(that is how PSY constructs them, and the export side cannot preserve it). The generated
+`CostCurve`/`FuelCurve` OpenAPI models fill an omitted `vom_cost` with a default whose
+`input_at_zero` is `0.0` — a spec-default artifact — so rebuild the canonical linear curve
+(`input_at_zero = nothing`) rather than round-trip that zero.
+"""
+function _linear_curve_no_input_at_zero(io::PC.InputOutputCurve, context::AbstractString)
+    curve = _as_linear_curve(convert_value_curve(io), context)
+    return InputOutputCurve(get_function_data(curve))
+end
 
 """
 `LinearCurve(0.0)` is the sentinel `_vom_cost`/`_startup_fuel_offtake` map `nothing` to on
