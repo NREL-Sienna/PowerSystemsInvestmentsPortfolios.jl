@@ -17,20 +17,20 @@ const SYSTEM_KWARGS = Set((
 # that `__metadata__` resolves to. Parametric PSIP types key on their `UnionAll`, which is
 # what `IS.get_type_from_serialization_metadata` returns now that `__metadata__` no longer
 # carries `parameters`.
-const _OPENAPI_TRANSPORT_TYPES = Dict{Any, DataType}(
+const _OPENAPI_WIRE_TYPES = Dict{Any, DataType}(
     psip_type => getproperty(PI, Symbol(key)) for
     (psip_type, key) in Iterators.flatten((DOCUMENT_PLAN, SUPPLEMENTAL_ATTRIBUTE_PLAN))
 )
 
-function _openapi_transport_type(psip_type)
-    if !haskey(_OPENAPI_TRANSPORT_TYPES, psip_type)
+function _openapi_wire_type(psip_type)
+    if !haskey(_OPENAPI_WIRE_TYPES, psip_type)
         error(
-            "$psip_type has no OpenAPI transport type — every serialized PSIP type must " *
+            "$psip_type has no OpenAPI wire type — every serialized PSIP type must " *
             "be declared in DOCUMENT_PLAN or SUPPLEMENTAL_ATTRIBUTE_PLAN " *
             "(src/openapi/document.jl)",
         )
     end
-    return _OPENAPI_TRANSPORT_TYPES[psip_type]
+    return _OPENAPI_WIRE_TYPES[psip_type]
 end
 
 # `IS.serialize` reaches each component through `IS.serialize(::IS.SystemData)`, which hands
@@ -166,7 +166,7 @@ function _serialize_openapi(component)
     # be emitted happily and then refused by `deserialize_components!`, producing a
     # document that cannot be read back. `Base.typename(...).wrapper` is the plan key for
     # a parametric type, matching what `_group_by_serialized_type` resolves to.
-    _openapi_transport_type(Base.typename(typeof(component)).wrapper)
+    _openapi_wire_type(Base.typename(typeof(component)).wrapper)
     po = to_openapi(component, _active_export_refs())
     data = JSON3.read(OpenAPI.to_json(po), Dict{String, Any})
     add_serialization_metadata!(data, typeof(component))
@@ -480,7 +480,7 @@ function deserialize_attributes(
     for (attribute_type, _key) in SUPPLEMENTAL_ATTRIBUTE_PLAN
         haskey(by_type, attribute_type) || continue
         for raw_attribute in pop!(by_type, attribute_type)
-            po = OpenAPI.from_json(_openapi_transport_type(attribute_type), raw_attribute)
+            po = OpenAPI.from_json(_openapi_wire_type(attribute_type), raw_attribute)
             attribute = from_openapi(attribute_type, po, refs)
             if !haskey(mgr.data, attribute_type)
                 mgr.data[attribute_type] = Dict{Base.UUID, IS.SupplementalAttribute}()
@@ -516,7 +516,7 @@ function deserialize_components!(portfolio::Portfolio, raw, refs::OpenAPIRefs)
             # special-case method written for a concrete `Name{Param}` would never
             # dispatch here; declare it on the `UnionAll`.
             handle_deserialization_special_cases!(raw_component, psip_type)
-            po = OpenAPI.from_json(_openapi_transport_type(psip_type), raw_component)
+            po = OpenAPI.from_json(_openapi_wire_type(psip_type), raw_component)
             component = from_openapi(psip_type, po, refs)
             #TODO: skip_validation currently set to true, review the IS validation
             IS.add_component!(portfolio.data, component; skip_validation=true)

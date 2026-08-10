@@ -157,12 +157,18 @@ _value_curve_po_optional(curve) = convert_value_curve_to_openapi(curve)
 
 # ── operational costs ────────────────────────────────────────────────────────
 #
-# Only the cost types PSIP's descriptor actually uses as field defaults are covered:
-# `ThermalGenerationCost`, `StorageCost`, `RenewableGenerationCost`, and the `CostCurve`/
-# `FuelCurve` (`ProductionVariableCostCurve`) pair nested inside them. PSY cost types PSIP
-# never uses (`MarketBidCost`, `LoadCost`, `ImportExportCost`, `HydroReservoirCost`,
-# `HydroGenerationCost`, the reserve ORDC `variable` special-casing) are deliberately absent —
-# `convert_cost`'s terminal fallback errors loudly on them rather than guessing.
+# `ThermalGenerationCost`, `StorageCost`, `RenewableGenerationCost`, `HydroGenerationCost`,
+# and the `CostCurve`/`FuelCurve` (`ProductionVariableCostCurve`) pair nested inside them are
+# covered. `SupplyTechnology.operation_costs` is typed as the abstract `PSY.OperationalCost`
+# (not narrowed to these four), but on import it arrives wrapped in `PC.GenericOperationCost`,
+# whose oneOf discriminator (`cost_type`) only resolves `HYDRO_GEN`/`RENEWABLE`/`THERMAL` —
+# `LoadCost` and `HydroReservoirCost` are real PSY cost types with real PC wire structs, but
+# their discriminators (`LOAD`/`HYDRO_RES`) aren't in that oneOf, so `OpenAPI.from_json` can
+# never produce them for this field; converters for them would be unreachable dead code until
+# `GenericOperationCost` is regenerated upstream in PowerOpenAPIModels/SiennaSchemas to add
+# those branches. `MarketBidCost`/`ImportExportCost` have no PSY OpenAPI converters yet either.
+# The reserve ORDC `variable` special-casing is PSY-only and does not apply here.
+# `convert_cost`'s terminal fallback errors loudly on anything else rather than guessing.
 
 """
 Required-field guard: dispatches on `Nothing` vs. anything else, per style (no
@@ -350,6 +356,13 @@ function convert_cost(po::PC.RenewableGenerationCost)
     )
 end
 
+function convert_cost(po::PC.HydroGenerationCost)
+    return HydroGenerationCost(;
+        variable=convert_cost(_require(po.variable, "HydroGenerationCost.variable")),
+        fixed=po.fixed,
+    )
+end
+
 function convert_cost(po::PC.StorageCost)
     return StorageCost(;
         charge_variable_cost=_optional_cost_curve(po.charge_variable_cost),
@@ -391,6 +404,15 @@ function convert_cost_to_openapi(cost::RenewableGenerationCost)
         # generated 2-arg getter of the same name, so PSY's 1-arg getter must be qualified.
         curtailment_cost=_optional_cost_curve_to_openapi(PSY.get_curtailment_cost(cost)),
         fixed=get_fixed(cost),
+    )
+end
+
+function convert_cost_to_openapi(cost::HydroGenerationCost)
+    return PC.HydroGenerationCost(;
+        fixed=get_fixed(cost),
+        variable=PC.ProductionVariableCostCurve(
+            convert_cost_to_openapi(get_variable(cost)),
+        ),
     )
 end
 
