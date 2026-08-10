@@ -110,11 +110,7 @@ function IS.serialize(portfolio::T) where {T <: Portfolio}
     end
 end
 
-function deserialize(
-    ::Type{Portfolio},
-    filename::AbstractString;
-    kwargs...,
-)
+function deserialize(::Type{Portfolio}, filename::AbstractString; kwargs...)
     raw = open(filename) do io
         JSON3.read(io, Dict)
     end
