@@ -278,7 +278,7 @@ function convert_cost_to_openapi(cost::FuelCurve)
     return PC.FuelCurve(;
         power_units=_power_units_to_string(get_power_units(cost), cost),
         value_curve=convert_value_curve_to_openapi(get_value_curve(cost)),
-        fuel_cost=_fuel_cost_to_openapi(get_fuel_cost(cost)),
+        fuel_cost=_fuel_cost_to_openapi(IS.get_fuel_cost(cost)),
         startup_fuel_offtake=_startup_fuel_offtake_to_openapi(
             PSY.get_startup_fuel_offtake(cost),
         ),

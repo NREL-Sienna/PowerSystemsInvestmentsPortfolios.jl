@@ -186,7 +186,7 @@ is_new(t::Technology) = !(IS.has_supplemental_attributes(ExistingDevices, t))
 """
 Get constant heat rate value from FuelCurve stored in a SupplyTechnology
 """
-get_heat_rate(t::SupplyTechnology, units::Union{ConversionUnits, FuelCurveUnits}) =
+get_heat_rate(t::SupplyTechnology, units::_UNIT_OPTIONS) =
     IS.get_proportional_term(
         IS.get_value_curve(PSY.get_variable(get_operation_costs(t, units))),
     )
@@ -194,13 +194,13 @@ get_heat_rate(t::SupplyTechnology, units::Union{ConversionUnits, FuelCurveUnits}
 """
 Get constant fuel cost from FuelCurve stored in a SupplyTechnology
 """
-get_fuel_cost(t::SupplyTechnology, units::Union{ConversionUnits, FuelCurveUnits}) =
+get_fuel_cost(t::SupplyTechnology, units::_UNIT_OPTIONS) =
     IS.get_fuel_cost(PSY.get_variable(get_operation_costs(t, units)))
 
 """
 Get constant variable OM costs from OperationalCost in a SupplyTechnology
 """
-get_variable_cost(t::SupplyTechnology, units::Union{ConversionUnits, FuelCurveUnits}) =
+get_variable_cost(t::SupplyTechnology, units::_UNIT_OPTIONS) =
     IS.get_proportional_term(
         IS.get_vom_cost(PSY.get_variable(get_operation_costs(t, units))),
     )
@@ -208,7 +208,7 @@ get_variable_cost(t::SupplyTechnology, units::Union{ConversionUnits, FuelCurveUn
 """
 Get constant variable OM costs for storage charging from OperationalCost in a StorageTechnology
 """
-get_variable_cost_charge(t::StorageTechnology, units::ConversionUnits) =
+get_variable_cost_charge(t::StorageTechnology, units::_UNIT_OPTIONS) =
     PSY.get_proportional_term(
         PSY.get_vom_cost(PSY.get_charge_variable_cost(get_operation_costs(t, units))),
     )
@@ -216,7 +216,7 @@ get_variable_cost_charge(t::StorageTechnology, units::ConversionUnits) =
 """
 Get constant variable OM costs for storage discharging from OperationalCost in a StorageTechnology
 """
-get_variable_cost_discharge(t::StorageTechnology, units::ConversionUnits) =
+get_variable_cost_discharge(t::StorageTechnology, units::_UNIT_OPTIONS) =
     PSY.get_proportional_term(
         PSY.get_vom_cost(PSY.get_discharge_variable_cost(get_operation_costs(t, units))),
     )
@@ -224,13 +224,13 @@ get_variable_cost_discharge(t::StorageTechnology, units::ConversionUnits) =
 """
 Get constant fixed OM costs from OperationalCost for a SupplyTechnology
 """
-get_fixed_cost(t::Technology, units::Union{ConversionUnits, FuelCurveUnits}) =
+get_fixed_cost(t::Technology, units::_UNIT_OPTIONS) =
     PSY.get_fixed(get_operation_costs(t, units))
 
 """
 Get constant fixed OM costs for storage charge from OperationalCost in a StorageTechnology
 """
-get_fixed_cost_charge(t::StorageTechnology, units::ConversionUnits) =
+get_fixed_cost_charge(t::StorageTechnology, units::_UNIT_OPTIONS) =
     PSY.get_proportional_term(
         PSY.get_value_curve(PSY.get_charge_variable_cost(get_operation_costs(t, units))),
     )
@@ -238,7 +238,7 @@ get_fixed_cost_charge(t::StorageTechnology, units::ConversionUnits) =
 """
 Get constant fixed OM costs for storage discharge from OperationalCost in a StorageTechnology
 """
-get_fixed_cost_discharge(t::StorageTechnology, units::ConversionUnits) =
+get_fixed_cost_discharge(t::StorageTechnology, units::_UNIT_OPTIONS) =
     PSY.get_proportional_term(
         PSY.get_value_curve(PSY.get_discharge_variable_cost(get_operation_costs(t, units))),
     )
