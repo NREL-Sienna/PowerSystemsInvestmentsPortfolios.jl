@@ -481,7 +481,7 @@ function deserialize_attributes(
         haskey(by_type, attribute_type) || continue
         for raw_attribute in pop!(by_type, attribute_type)
             po = OpenAPI.from_json(_openapi_wire_type(attribute_type), raw_attribute)
-            attribute = from_openapi(attribute_type, po, refs)
+            attribute = from_openapi(po, refs)
             if !haskey(mgr.data, attribute_type)
                 mgr.data[attribute_type] = Dict{Base.UUID, IS.SupplementalAttribute}()
             end
@@ -517,7 +517,7 @@ function deserialize_components!(portfolio::Portfolio, raw, refs::OpenAPIRefs)
             # dispatch here; declare it on the `UnionAll`.
             handle_deserialization_special_cases!(raw_component, psip_type)
             po = OpenAPI.from_json(_openapi_wire_type(psip_type), raw_component)
-            component = from_openapi(psip_type, po, refs)
+            component = from_openapi(po, refs)
             #TODO: skip_validation currently set to true, review the IS validation
             IS.add_component!(portfolio.data, component; skip_validation=true)
             # Registered after conversion, never before: a component cannot reference

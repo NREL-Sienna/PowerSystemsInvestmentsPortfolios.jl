@@ -56,8 +56,7 @@ set_internal!(value::TopologyMapping, val) = value.internal = val
 
 
 
-
-function from_openapi(::Type{ TopologyMapping }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.TopologyMapping, refs::OpenAPIRefs)
     return TopologyMapping(;
         id = po.id,
         buses = po.buses,

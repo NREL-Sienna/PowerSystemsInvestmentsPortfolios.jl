@@ -84,8 +84,7 @@ set_internal!(value::CarbonTax, val) = value.internal = val
 
 
 
-
-function from_openapi(::Type{ CarbonTax }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.CarbonTax, refs::OpenAPIRefs)
     return CarbonTax(;
         name = po.name,
         available = po.available,

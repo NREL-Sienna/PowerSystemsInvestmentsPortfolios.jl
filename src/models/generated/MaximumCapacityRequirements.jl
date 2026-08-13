@@ -84,8 +84,7 @@ set_internal!(value::MaximumCapacityRequirements, val) = value.internal = val
 
 
 
-
-function from_openapi(::Type{ MaximumCapacityRequirements }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.MaximumCapacityRequirements, refs::OpenAPIRefs)
     return MaximumCapacityRequirements(;
         name = po.name,
         available = po.available,

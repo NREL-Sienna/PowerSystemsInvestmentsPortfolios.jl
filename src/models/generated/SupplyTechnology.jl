@@ -251,12 +251,7 @@ set_ext!(value::SupplyTechnology, val) = value.ext = val
 set_internal!(value::SupplyTechnology, val) = value.internal = val
 
 
-const PRIMEMOVERS_FROM_STRING = Dict{String, PrimeMovers}(string(m) => m for m in instances(PrimeMovers))
-const THERMALFUELS_FROM_STRING = Dict{String, ThermalFuels}(string(m) => m for m in instances(ThermalFuels))
-const PRIMEMOVERS_TO_STRING = Dict{ PrimeMovers, String}(m => string(m) for m in instances(PrimeMovers))
-const THERMALFUELS_TO_STRING = Dict{ ThermalFuels, String}(m => string(m) for m in instances(ThermalFuels))
-
-function from_openapi(::Type{ SupplyTechnology }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.SupplyTechnology, refs::OpenAPIRefs)
     parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
     return SupplyTechnology{parameter}(;
         name = po.name,
@@ -264,11 +259,11 @@ function from_openapi(::Type{ SupplyTechnology }, po, refs::OpenAPIRefs)
         region = resolve_refs(refs, po.region),
         id = po.id,
         available = po.available,
-        prime_mover_type = PRIMEMOVERS_FROM_STRING[po.prime_mover_type],
-        fuel = [THERMALFUELS_FROM_STRING[v] for v in po.fuel],
-        co2 = Dict(THERMALFUELS_FROM_STRING[k] => v for (k, v) in po.co2),
-        cofire_start_limits = Dict(THERMALFUELS_FROM_STRING[k] => (min = v.min, max = v.max) for (k, v) in po.cofire_start_limits),
-        cofire_level_limits = Dict(THERMALFUELS_FROM_STRING[k] => (min = v.min, max = v.max) for (k, v) in po.cofire_level_limits),
+        prime_mover_type = PrimeMovers(po.prime_mover_type),
+        fuel = [ThermalFuels(v) for v in po.fuel],
+        co2 = Dict(ThermalFuels(k) => v for (k, v) in po.co2),
+        cofire_start_limits = Dict(ThermalFuels(k) => (min = v.min, max = v.max) for (k, v) in po.cofire_start_limits),
+        cofire_level_limits = Dict(ThermalFuels(k) => (min = v.min, max = v.max) for (k, v) in po.cofire_level_limits),
         capital_costs = convert_value_curve(po.capital_costs),
         operation_costs = convert_cost(po.operation_costs),
         unit_size = po.unit_size,
@@ -291,11 +286,11 @@ function to_openapi(value::SupplyTechnology{T}, refs::OpenAPIRefs) where {T <: P
         region = component_ids(refs, get_region(value)),
         id = get_id(value),
         available = get_available(value),
-        prime_mover_type = PRIMEMOVERS_TO_STRING[get_prime_mover_type(value)],
-        fuel = [THERMALFUELS_TO_STRING[v] for v in get_fuel(value)],
-        co2 = Dict(THERMALFUELS_TO_STRING[k] => v for (k, v) in get_co2(value, IS.NU)),
-        cofire_start_limits = Dict(THERMALFUELS_TO_STRING[k] => _minmax_po(v) for (k, v) in get_cofire_start_limits(value)),
-        cofire_level_limits = Dict(THERMALFUELS_TO_STRING[k] => _minmax_po(v) for (k, v) in get_cofire_level_limits(value)),
+        prime_mover_type = string(get_prime_mover_type(value)),
+        fuel = [string(v) for v in get_fuel(value)],
+        co2 = Dict(string(k) => v for (k, v) in get_co2(value, IS.NU)),
+        cofire_start_limits = Dict(string(k) => _minmax_po(v) for (k, v) in get_cofire_start_limits(value)),
+        cofire_level_limits = Dict(string(k) => _minmax_po(v) for (k, v) in get_cofire_level_limits(value)),
         capital_costs = convert_value_curve_to_openapi(get_capital_costs(value, IS.NU)),
         operation_costs = convert_cost_to_openapi(get_operation_costs(value, IS.NU)),
         unit_size = get_unit_size(value, IS.NU),

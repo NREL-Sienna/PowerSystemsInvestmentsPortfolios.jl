@@ -105,15 +105,8 @@ InfrastructureSystems.display_units_arg(::typeof({{accessor}}_unitful), ::{{unit
 {{{custom_code}}}
 {{/custom_code}}
 
-{{#openapi_enum_tables}}
-const {{const_name}} = Dict{String, {{{enum_type}}}}(string(m) => m for m in instances({{{enum_type}}}))
-{{/openapi_enum_tables}}
-{{#openapi_export_enum_tables}}
-const {{const_name}} = Dict{ {{{enum_type}}}, String}(m => string(m) for m in instances({{{enum_type}}}))
-{{/openapi_export_enum_tables}}
-
 {{#has_parametric}}
-function from_openapi(::Type{ {{struct_name}} }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.{{struct_name}}, refs::OpenAPIRefs)
     parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
     return {{struct_name}}{parameter}(;
         {{#openapi_kwargs}}
@@ -132,7 +125,7 @@ end
 {{/has_parametric}}
 
 {{^has_parametric}}
-function from_openapi(::Type{ {{struct_name}} }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.{{struct_name}}, refs::OpenAPIRefs)
     return {{struct_name}}(;
         {{#openapi_kwargs}}
         {{name}} = {{{expr}}},
@@ -221,9 +214,6 @@ function openapi_strip_nullable(data_type::AbstractString)
     return (String(m.captures[1]), true)
 end
 
-openapi_enum_table_name(bare) = uppercase(replace(bare, "." => "_")) * "_FROM_STRING"
-openapi_enum_table_name_export(bare) = uppercase(replace(bare, "." => "_")) * "_TO_STRING"
-
 """
 Classify one field's role in an OpenAPI converter, returning `(kind, bare, nullable)`
 with `kind` one of `:skip`, `:scalar`, `:compound`, `:reference`, `:reference_vector`,
@@ -273,21 +263,6 @@ function openapi_classify_field(struct_name, field)
             "cost, or nested struct declared in the generator's tables)",
         ),
     )
-end
-
-"""
-Record one enum's lookup table on `tables` the first time it is needed anywhere in the
-generation run. `defined` is threaded across every struct: two files each emitting
-`const THERMALFUELS_FROM_STRING` is a duplicate-`const` error at include time, long
-after generation itself looked successful.
-"""
-function openapi_register_enum_table!(tables, defined, const_name, enum_type)
-    if const_name in defined
-        return const_name
-    end
-    push!(defined, const_name)
-    push!(tables, Dict("const_name" => const_name, "enum_type" => enum_type))
-    return const_name
 end
 
 """
@@ -347,36 +322,27 @@ function openapi_export_getter_call(field)
 end
 
 """
-Build the `from_openapi` kwargs and the `<ENUM>_FROM_STRING` tables for one struct,
-storing them on `item` for the template. `defined_enum_tables` is the run-wide dedup set.
+Build the `from_openapi` kwargs for one struct, storing them on `item` for the template.
+Enums cross the wire as strings and are rebuilt inline with the enum type's own string
+constructor (`ThermalFuels(po.fuel)`), so there are no lookup tables to register.
 """
-function compute_openapi_converter!(item, defined_enum_tables)
+function compute_openapi_converter!(item)
     struct_name = item["struct_name"]
     kwargs = Vector{Dict{String, Any}}()
-    tables = Vector{Dict{String, Any}}()
 
     for field in item["properties"]
         kind, bare, nullable = openapi_classify_field(struct_name, field)
         kind == :skip && continue
         name = String(field["name"])
-        expr = openapi_import_expr(
-            struct_name,
-            name,
-            kind,
-            bare,
-            nullable,
-            tables,
-            defined_enum_tables,
-        )
+        expr = openapi_import_expr(struct_name, name, kind, bare, nullable)
         push!(kwargs, Dict("name" => name, "expr" => expr))
     end
 
     item["openapi_kwargs"] = kwargs
-    item["openapi_enum_tables"] = tables
     return item
 end
 
-function openapi_import_expr(struct_name, name, kind, bare, nullable, tables, defined)
+function openapi_import_expr(struct_name, name, kind, bare, nullable)
     openapi_check_nullable(struct_name, name, kind, nullable, "openapi_import_expr")
     if kind == :scalar
         return "po.$name"
@@ -396,39 +362,19 @@ function openapi_import_expr(struct_name, name, kind, bare, nullable, tables, de
         return "resolve_refs(refs, po.$name)"
     end
     if kind == :enum
-        table = openapi_register_enum_table!(
-            tables,
-            defined,
-            openapi_enum_table_name(bare),
-            bare,
-        )
-        return "$table[po.$name]"
+        return "$bare(po.$name)"
     end
     if kind == :enum_vector
-        table = openapi_register_enum_table!(
-            tables,
-            defined,
-            openapi_enum_table_name(bare),
-            bare,
-        )
-        return "[$table[v] for v in po.$name]"
+        return "[$bare(v) for v in po.$name]"
     end
     if kind == :enum_dict
-        table = openapi_register_enum_table!(
-            tables,
-            defined,
-            openapi_enum_table_name(bare),
-            bare,
-        )
-        return "Dict($table[k] => v for (k, v) in po.$name)"
+        return "Dict($bare(k) => v for (k, v) in po.$name)"
     end
     if kind == :enum_compound_dict
         key, value = bare
-        table =
-            openapi_register_enum_table!(tables, defined, openapi_enum_table_name(key), key)
         members = OPENAPI_COMPOUND_MEMBERS[value]
         body = "(" * join(("$m = v.$m" for m in members), ", ") * ")"
-        return "Dict($table[k] => $body for (k, v) in po.$name)"
+        return "Dict($key(k) => $body for (k, v) in po.$name)"
     end
     if kind == :curve
         if nullable
@@ -452,48 +398,29 @@ function openapi_import_expr(struct_name, name, kind, bare, nullable, tables, de
 end
 
 """
-Build the `to_openapi` kwargs and the `<ENUM>_TO_STRING` tables for one struct, storing
-them on `item` for the template. The mirror of [`compute_openapi_converter!`](@ref):
-same classification, same single pass, opposite direction.
+Build the `to_openapi` kwargs for one struct, storing them on `item` for the template.
+The mirror of [`compute_openapi_converter!`](@ref): same classification, same single
+pass, opposite direction. Enums cross the wire as strings via `string(get_x(value))`, so
+there are no lookup tables to register.
 """
-function compute_openapi_export_converter!(item, defined_enum_tables)
+function compute_openapi_export_converter!(item)
     struct_name = item["struct_name"]
     kwargs = Vector{Dict{String, Any}}()
-    tables = Vector{Dict{String, Any}}()
     parametric = get(item, "has_parametric", false)
 
     for field in item["properties"]
         kind, bare, nullable = openapi_classify_field(struct_name, field)
         kind == :skip && continue
         name = String(field["name"])
-        expr = openapi_export_expr(
-            struct_name,
-            field,
-            kind,
-            bare,
-            nullable,
-            parametric,
-            tables,
-            defined_enum_tables,
-        )
+        expr = openapi_export_expr(struct_name, field, kind, bare, nullable, parametric)
         push!(kwargs, Dict("name" => name, "expr" => expr))
     end
 
     item["openapi_export_kwargs"] = kwargs
-    item["openapi_export_enum_tables"] = tables
     return item
 end
 
-function openapi_export_expr(
-    struct_name,
-    field,
-    kind,
-    bare,
-    nullable,
-    parametric,
-    tables,
-    defined,
-)
+function openapi_export_expr(struct_name, field, kind, bare, nullable, parametric)
     name = String(field["name"])
     openapi_check_nullable(struct_name, name, kind, nullable, "openapi_export_expr")
     getter = openapi_export_getter_call(field)
@@ -530,42 +457,18 @@ function openapi_export_expr(
         return "component_ids(refs, $getter)"
     end
     if kind == :enum
-        table = openapi_register_enum_table!(
-            tables,
-            defined,
-            openapi_enum_table_name_export(bare),
-            bare,
-        )
-        return "$table[$getter]"
+        return "string($getter)"
     end
     if kind == :enum_vector
-        table = openapi_register_enum_table!(
-            tables,
-            defined,
-            openapi_enum_table_name_export(bare),
-            bare,
-        )
-        return "[$table[v] for v in $getter]"
+        return "[string(v) for v in $getter]"
     end
     if kind == :enum_dict
-        table = openapi_register_enum_table!(
-            tables,
-            defined,
-            openapi_enum_table_name_export(bare),
-            bare,
-        )
-        return "Dict($table[k] => v for (k, v) in $getter)"
+        return "Dict(string(k) => v for (k, v) in $getter)"
     end
     if kind == :enum_compound_dict
         key, value = bare
-        table = openapi_register_enum_table!(
-            tables,
-            defined,
-            openapi_enum_table_name_export(key),
-            key,
-        )
         ctor = OPENAPI_COMPOUND_CTORS[value].required
-        return "Dict($table[k] => $ctor(v) for (k, v) in $getter)"
+        return "Dict(string(k) => $ctor(v) for (k, v) in $getter)"
     end
     if kind == :curve
         if nullable
@@ -600,10 +503,6 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
     struct_names = Vector{String}()
     unique_accessor_functions = Set{String}()
     unique_setter_functions = Set{String}()
-    # Run-wide, not per-file: an enum's lookup table is emitted into whichever generated
-    # file needs it first, and every later file references that one binding.
-    defined_enum_tables = Set{String}()
-    defined_export_enum_tables = Set{String}()
 
     for input in data.data["components"]
         struct_name = input["name"]
@@ -756,8 +655,8 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
         item["needs_positional_constructor"] =
             item["has_internal"] && item["has_non_default_values"]
 
-        compute_openapi_converter!(item, defined_enum_tables)
-        compute_openapi_export_converter!(item, defined_export_enum_tables)
+        compute_openapi_converter!(item)
+        compute_openapi_export_converter!(item)
 
         filename = joinpath(directory, item["struct_name"] * ".jl")
 

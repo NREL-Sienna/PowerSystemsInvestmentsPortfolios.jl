@@ -56,8 +56,7 @@ set_internal!(value::RetrofitPotential, val) = value.internal = val
 
 
 
-
-function from_openapi(::Type{ RetrofitPotential }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.RetrofitPotential, refs::OpenAPIRefs)
     return RetrofitPotential(;
         id = po.id,
         eligible_generators = po.eligible_generators,

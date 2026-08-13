@@ -72,8 +72,7 @@ set_internal!(value::RetirementPotential, val) = value.internal = val
 
 
 
-
-function from_openapi(::Type{ RetirementPotential }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.RetirementPotential, refs::OpenAPIRefs)
     return RetirementPotential(;
         id = po.id,
         eligible_generators = po.eligible_generators,

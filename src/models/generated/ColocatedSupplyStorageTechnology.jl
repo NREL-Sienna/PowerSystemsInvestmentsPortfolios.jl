@@ -359,8 +359,7 @@ set_ext!(value::ColocatedSupplyStorageTechnology, val) = value.ext = val
 set_internal!(value::ColocatedSupplyStorageTechnology, val) = value.internal = val
 
 
-
-function from_openapi(::Type{ ColocatedSupplyStorageTechnology }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.ColocatedSupplyStorageTechnology, refs::OpenAPIRefs)
     parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
     return ColocatedSupplyStorageTechnology{parameter}(;
         name = po.name,

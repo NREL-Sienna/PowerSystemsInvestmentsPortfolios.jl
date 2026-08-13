@@ -64,8 +64,7 @@ set_internal!(value::HourlyMatching, val) = value.internal = val
 
 
 
-
-function from_openapi(::Type{ HourlyMatching }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.HourlyMatching, refs::OpenAPIRefs)
     return HourlyMatching(;
         name = po.name,
         id = po.id,

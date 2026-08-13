@@ -191,8 +191,7 @@ set_ext!(value::DemandSideTechnology, val) = value.ext = val
 set_internal!(value::DemandSideTechnology, val) = value.internal = val
 
 
-
-function from_openapi(::Type{ DemandSideTechnology }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.DemandSideTechnology, refs::OpenAPIRefs)
     parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
     return DemandSideTechnology{parameter}(;
         name = po.name,

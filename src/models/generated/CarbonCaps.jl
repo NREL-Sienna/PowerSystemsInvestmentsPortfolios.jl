@@ -96,8 +96,7 @@ set_internal!(value::CarbonCaps, val) = value.internal = val
 
 
 
-
-function from_openapi(::Type{ CarbonCaps }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.CarbonCaps, refs::OpenAPIRefs)
     return CarbonCaps(;
         name = po.name,
         available = po.available,

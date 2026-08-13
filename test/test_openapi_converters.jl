@@ -114,12 +114,12 @@ end
     po_zone = PSIP.to_openapi(zone, refs)
     @test po_zone.id == 1
     @test po_zone.name == "zone_a"
-    @test PSIP.get_name(PSIP.from_openapi(Zone, po_zone, refs)) == "zone_a"
+    @test PSIP.get_name(PSIP.from_openapi(po_zone, refs)) == "zone_a"
 
     # bus_type is an ACBusTypes enum: it crosses the wire as a string.
     po_node = PSIP.to_openapi(node, refs)
     @test po_node.bus_type == string(ACBusTypes.PQ)
-    @test PSIP.get_bus_type(PSIP.from_openapi(Node, po_node, refs)) == ACBusTypes.PQ
+    @test PSIP.get_bus_type(PSIP.from_openapi(po_node, refs)) == ACBusTypes.PQ
 end
 
 @testset "SupplyTechnology round trip through OpenAPI" begin
@@ -167,7 +167,7 @@ end
     # scalars are unscaled: PSIP stores natural units and the document states them
     @test po.unit_size == 100.0
 
-    back = PSIP.from_openapi(SupplyTechnology, po, refs)
+    back = PSIP.from_openapi(po, refs)
     @test PSIP.get_parameter_type(back) === ThermalStandard
     @test PSIP.get_name(back) == "cheap_thermal"
     @test PSIP.get_region(back) == [zone]
@@ -202,9 +202,7 @@ end
     po = PSIP.to_openapi(tech, refs)
     @test po.start_region == 1
     @test po.power_systems_type == "ACBranch"
-    @test PSIP.get_parameter_type(
-        PSIP.from_openapi(AggregateTransportTechnology, po, refs),
-    ) === ACBranch
+    @test PSIP.get_parameter_type(PSIP.from_openapi(po, refs)) === ACBranch
 end
 
 @testset "supplemental attribute round trip through OpenAPI" begin
@@ -214,8 +212,7 @@ end
     po = PSIP.to_openapi(attr, refs)
     @test po.id == 54
     @test po.existing_devices == ["gen_a", "gen_b"]
-    @test PSIP.get_existing_devices(PSIP.from_openapi(ExistingDevices, po, refs)) ==
-          ["gen_a", "gen_b"]
+    @test PSIP.get_existing_devices(PSIP.from_openapi(po, refs)) == ["gen_a", "gen_b"]
 end
 
 @testset "an unregistered reference errors rather than serializing garbage" begin
@@ -261,7 +258,7 @@ end
     @test po.storage_tech == string(StorageTech.OTHER_CHEM)
     @test po.efficiency.in == 1
 
-    back = PSIP.from_openapi(StorageTechnology, po, refs)
+    back = PSIP.from_openapi(po, refs)
     @test PSIP.get_parameter_type(back) === PSY.EnergyReservoirStorage
     @test isnothing(PSIP.get_unit_size_charge(back, NU))
     @test isnothing(PSIP.get_capacity_limits_charge(back, NU))
@@ -306,7 +303,9 @@ end
         JSON3.read(joinpath(BASE_DIR, "src", "descriptors", "SiennaInvestSchema.json"))
     for component in descriptor["components"]
         type = getproperty(PSIP, Symbol(component["name"]))
-        @test hasmethod(PSIP.from_openapi, Tuple{Type{type}, Any, PSIP.OpenAPIRefs})
+        # `from_openapi` now dispatches on the OpenAPI wire type, not the target PSIP type.
+        wire_type = PSIP._openapi_wire_type(type)
+        @test hasmethod(PSIP.from_openapi, Tuple{wire_type, PSIP.OpenAPIRefs})
         @test !isempty(methods(PSIP.to_openapi, (type, PSIP.OpenAPIRefs)))
         # `methods` matches by signature INTERSECTION, so the check above still passes when
         # the emitted `where` bound names the wrong PSY supertype — the resulting

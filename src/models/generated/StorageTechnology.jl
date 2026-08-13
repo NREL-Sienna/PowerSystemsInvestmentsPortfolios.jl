@@ -279,10 +279,7 @@ set_ext!(value::StorageTechnology, val) = value.ext = val
 set_internal!(value::StorageTechnology, val) = value.internal = val
 
 
-const STORAGETECH_FROM_STRING = Dict{String, StorageTech}(string(m) => m for m in instances(StorageTech))
-const STORAGETECH_TO_STRING = Dict{ StorageTech, String}(m => string(m) for m in instances(StorageTech))
-
-function from_openapi(::Type{ StorageTechnology }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.StorageTechnology, refs::OpenAPIRefs)
     parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
     return StorageTechnology{parameter}(;
         name = po.name,
@@ -290,8 +287,8 @@ function from_openapi(::Type{ StorageTechnology }, po, refs::OpenAPIRefs)
         id = po.id,
         available = po.available,
         power_systems_type = po.power_systems_type,
-        prime_mover_type = PRIMEMOVERS_FROM_STRING[po.prime_mover_type],
-        storage_tech = STORAGETECH_FROM_STRING[po.storage_tech],
+        prime_mover_type = PrimeMovers(po.prime_mover_type),
+        storage_tech = StorageTech(po.storage_tech),
         capital_costs_energy = convert_value_curve(po.capital_costs_energy),
         capital_costs_charge = _value_curve_optional(po.capital_costs_charge),
         capital_costs_discharge = convert_value_curve(po.capital_costs_discharge),
@@ -319,8 +316,8 @@ function to_openapi(value::StorageTechnology{T}, refs::OpenAPIRefs) where {T <: 
         id = get_id(value),
         available = get_available(value),
         power_systems_type = string(nameof(T)),
-        prime_mover_type = PRIMEMOVERS_TO_STRING[get_prime_mover_type(value)],
-        storage_tech = STORAGETECH_TO_STRING[get_storage_tech(value)],
+        prime_mover_type = string(get_prime_mover_type(value)),
+        storage_tech = string(get_storage_tech(value)),
         capital_costs_energy = convert_value_curve_to_openapi(get_capital_costs_energy(value, IS.NU)),
         capital_costs_charge = _value_curve_po_optional(get_capital_costs_charge(value, IS.NU)),
         capital_costs_discharge = convert_value_curve_to_openapi(get_capital_costs_discharge(value, IS.NU)),

@@ -56,8 +56,7 @@ set_internal!(value::Zone, val) = value.internal = val
 
 
 
-
-function from_openapi(::Type{ Zone }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.Zone, refs::OpenAPIRefs)
     return Zone(;
         name = po.name,
         id = po.id,

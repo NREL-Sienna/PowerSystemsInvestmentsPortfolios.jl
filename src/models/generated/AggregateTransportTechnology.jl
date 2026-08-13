@@ -147,8 +147,7 @@ set_ext!(value::AggregateTransportTechnology, val) = value.ext = val
 set_internal!(value::AggregateTransportTechnology, val) = value.internal = val
 
 
-
-function from_openapi(::Type{ AggregateTransportTechnology }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.AggregateTransportTechnology, refs::OpenAPIRefs)
     parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
     return AggregateTransportTechnology{parameter}(;
         name = po.name,

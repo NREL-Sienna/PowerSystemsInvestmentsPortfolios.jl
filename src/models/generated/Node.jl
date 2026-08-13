@@ -63,15 +63,12 @@ set_ext!(value::Node, val) = value.ext = val
 set_internal!(value::Node, val) = value.internal = val
 
 
-const ACBUSTYPES_FROM_STRING = Dict{String, ACBusTypes}(string(m) => m for m in instances(ACBusTypes))
-const ACBUSTYPES_TO_STRING = Dict{ ACBusTypes, String}(m => string(m) for m in instances(ACBusTypes))
 
-
-function from_openapi(::Type{ Node }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.Node, refs::OpenAPIRefs)
     return Node(;
         name = po.name,
         id = po.id,
-        bus_type = ACBUSTYPES_FROM_STRING[po.bus_type],
+        bus_type = ACBusTypes(po.bus_type),
     )
 end
 
@@ -79,6 +76,6 @@ function to_openapi(value::Node, refs::OpenAPIRefs)
     return PI.Node(;
         name = get_name(value),
         id = get_id(value),
-        bus_type = ACBUSTYPES_TO_STRING[get_bus_type(value)],
+        bus_type = string(get_bus_type(value)),
     )
 end

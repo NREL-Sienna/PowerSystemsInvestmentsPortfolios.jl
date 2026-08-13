@@ -80,8 +80,7 @@ set_internal!(value::EnergyShareRequirements, val) = value.internal = val
 
 
 
-
-function from_openapi(::Type{ EnergyShareRequirements }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.EnergyShareRequirements, refs::OpenAPIRefs)
     return EnergyShareRequirements(;
         name = po.name,
         id = po.id,

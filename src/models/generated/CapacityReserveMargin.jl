@@ -80,8 +80,7 @@ set_internal!(value::CapacityReserveMargin, val) = value.internal = val
 
 
 
-
-function from_openapi(::Type{ CapacityReserveMargin }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.CapacityReserveMargin, refs::OpenAPIRefs)
     return CapacityReserveMargin(;
         name = po.name,
         available = po.available,

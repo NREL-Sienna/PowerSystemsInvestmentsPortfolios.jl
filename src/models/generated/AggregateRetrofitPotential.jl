@@ -76,8 +76,7 @@ set_internal!(value::AggregateRetrofitPotential, val) = value.internal = val
 
 
 
-
-function from_openapi(::Type{ AggregateRetrofitPotential }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.AggregateRetrofitPotential, refs::OpenAPIRefs)
     return AggregateRetrofitPotential(;
         id = po.id,
         retrofit_id = po.retrofit_id,

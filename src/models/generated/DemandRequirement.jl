@@ -147,10 +147,7 @@ set_ext!(value::DemandRequirement, val) = value.ext = val
 set_internal!(value::DemandRequirement, val) = value.internal = val
 
 
-const PSY_LOADCONFORMITY_FROM_STRING = Dict{String, PSY.LoadConformity}(string(m) => m for m in instances(PSY.LoadConformity))
-const PSY_LOADCONFORMITY_TO_STRING = Dict{ PSY.LoadConformity, String}(m => string(m) for m in instances(PSY.LoadConformity))
-
-function from_openapi(::Type{ DemandRequirement }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.DemandRequirement, refs::OpenAPIRefs)
     parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
     return DemandRequirement{parameter}(;
         name = po.name,
@@ -160,7 +157,7 @@ function from_openapi(::Type{ DemandRequirement }, po, refs::OpenAPIRefs)
         new_demand_mw = po.new_demand_mw,
         new_construction_year = po.new_construction_year,
         growth_rate = po.growth_rate,
-        conformity = PSY_LOADCONFORMITY_FROM_STRING[po.conformity],
+        conformity = PSY.LoadConformity(po.conformity),
         value_of_lost_load = po.value_of_lost_load,
         unserved_demand_curve = convert_value_curve(po.unserved_demand_curve),
         region = resolve_refs(refs, po.region),
@@ -177,7 +174,7 @@ function to_openapi(value::DemandRequirement{T}, refs::OpenAPIRefs) where {T <: 
         new_demand_mw = get_new_demand_mw(value, IS.NU),
         new_construction_year = get_new_construction_year(value),
         growth_rate = get_growth_rate(value),
-        conformity = PSY_LOADCONFORMITY_TO_STRING[get_conformity(value)],
+        conformity = string(get_conformity(value)),
         value_of_lost_load = get_value_of_lost_load(value, IS.NU),
         unserved_demand_curve = convert_value_curve_to_openapi(get_unserved_demand_curve(value, IS.NU)),
         region = component_ids(refs, get_region(value)),

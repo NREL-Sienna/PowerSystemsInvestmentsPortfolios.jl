@@ -175,8 +175,7 @@ set_ext!(value::NodalACTransportTechnology, val) = value.ext = val
 set_internal!(value::NodalACTransportTechnology, val) = value.internal = val
 
 
-
-function from_openapi(::Type{ NodalACTransportTechnology }, po, refs::OpenAPIRefs)
+function from_openapi(po::PI.NodalACTransportTechnology, refs::OpenAPIRefs)
     parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
     return NodalACTransportTechnology{parameter}(;
         name = po.name,
