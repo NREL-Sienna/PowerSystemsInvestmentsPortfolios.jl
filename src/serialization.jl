@@ -281,6 +281,11 @@ function from_dict(
         description=description,
         parsed_kwargs...,
     )
+    # Original id→UUID the document recorded before this load mints anything. Restoring
+    # these onto the rebuilt components and attributes keeps supplemental-attribute
+    # associations — which key on those UUIDs — resolving after the round trip. Empty when
+    # the document carried no ledger, in which case the minted UUIDs stand.
+    doc_id_to_uuid = _document_id_to_uuid(portfolio)
     # One registry for the whole document: attributes and components share an id space, so
     # a collision between the two families is caught rather than silently overwritten.
     refs = OpenAPIRefs()
@@ -294,6 +299,7 @@ function from_dict(
         ),
         portfolio.data.time_series_manager,
         refs,
+        doc_id_to_uuid,
     )
     if raw["data_format_version"] != DATA_FORMAT_VERSION
         pre_deserialize_conversion!(raw, portfolio)
@@ -302,7 +308,7 @@ function from_dict(
     ext = get_ext(portfolio)
     ext["deserialization_in_progress"] = true
     try
-        deserialize_components!(portfolio, raw["data"], refs)
+        deserialize_components!(portfolio, raw["data"], refs, doc_id_to_uuid)
     finally
         pop!(ext, "deserialization_in_progress")
         isempty(ext) && clear_ext!(portfolio)
@@ -467,6 +473,7 @@ function deserialize_attributes(
     data::Dict,
     time_series_manager::IS.TimeSeriesManager,
     refs::OpenAPIRefs,
+    doc_id_to_uuid::Dict,
 )
     mgr = IS.SupplementalAttributeManager(
         IS.SupplementalAttributesByType(IS.SupplementalAttributesByType()),
@@ -482,6 +489,9 @@ function deserialize_attributes(
         for raw_attribute in pop!(by_type, attribute_type)
             po = OpenAPI.from_json(_openapi_wire_type(attribute_type), raw_attribute)
             attribute = from_openapi(po, refs)
+            # Restore the original UUID before keying `mgr.data`, so the attribute is stored
+            # under the same UUID its association records name.
+            _restore_document_uuid!(attribute, po.id, doc_id_to_uuid)
             if !haskey(mgr.data, attribute_type)
                 mgr.data[attribute_type] = Dict{Base.UUID, IS.SupplementalAttribute}()
             end
@@ -505,7 +515,12 @@ function deserialize_attributes(
     return mgr
 end
 
-function deserialize_components!(portfolio::Portfolio, raw, refs::OpenAPIRefs)
+function deserialize_components!(
+    portfolio::Portfolio,
+    raw,
+    refs::OpenAPIRefs,
+    doc_id_to_uuid::Dict,
+)
     # DOCUMENT_PLAN order is dependency order: regions and requirements land in `refs`
     # before the technologies whose references resolve against them.
     by_type = _group_by_serialized_type(raw["components"])
@@ -518,6 +533,9 @@ function deserialize_components!(portfolio::Portfolio, raw, refs::OpenAPIRefs)
             handle_deserialization_special_cases!(raw_component, psip_type)
             po = OpenAPI.from_json(_openapi_wire_type(psip_type), raw_component)
             component = from_openapi(po, refs)
+            # Restore the original UUID before `add_component!` registers it, so association
+            # records that name this component's UUID still resolve after the round trip.
+            _restore_document_uuid!(component, po.id, doc_id_to_uuid)
             #TODO: skip_validation currently set to true, review the IS validation
             IS.add_component!(portfolio.data, component; skip_validation=true)
             # Registered after conversion, never before: a component cannot reference
@@ -527,6 +545,25 @@ function deserialize_components!(portfolio::Portfolio, raw, refs::OpenAPIRefs)
     end
     _reject_unplanned_types(by_type, "component", "DOCUMENT_PLAN")
     return
+end
+
+"""
+Restore the document's original UUID onto a freshly converted component or supplemental
+attribute, keyed on its own document id.
+
+The OpenAPI payload carries no `internal`, so `from_openapi` mints a fresh UUID. Supplemental
+attribute association records are serialized against the *original* UUIDs, so without this
+restore the owner and attribute both get new UUIDs and no association row matches. A no-op
+when the document carried no ledger (`doc_id_to_uuid` has no entry for this id); the minted
+UUID then stands.
+"""
+function _restore_document_uuid!(obj, po_id, doc_id_to_uuid::Dict)
+    # The ledger keys ids as `string(Int(...))` ("10"), so match that: `po.id` can arrive as
+    # a `Float64` from the OpenAPI payload, and `string(10.0)` would be "10.0" — no match.
+    key = string(Int(po_id))
+    haskey(doc_id_to_uuid, key) || return nothing
+    IS.set_uuid!(IS.get_internal(obj), Base.UUID(doc_id_to_uuid[key]))
+    return nothing
 end
 
 """

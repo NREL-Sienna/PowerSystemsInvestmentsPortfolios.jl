@@ -506,14 +506,9 @@ end
     @test get_fixed(energy_cost) == 4.0
     @test get_fixed(PSIP.get_operation_costs_power(colocated2, IS.NU)) == 5.0
 
-    # TODO(openapi-serde): supplemental-attribute ASSOCIATIONS do not survive the round
-    # trip. `deserialize_attributes` rebuilds them from rows keyed on the pre-serialization
-    # UUIDs, and the OpenAPI payload carries no `internal`, so owner and attribute both get
-    # new UUIDs and no row matches. The attributes themselves survive (asserted above).
-    # Remapping needs the ledger's `source_id_to_uuid` (below) to translate the document's
-    # UUIDs to the new ones; that is separate work, and this asserts today's truth.
-    @test isempty(PSIP.get_supplemental_attributes(AggregateRetirementPotential, tech2))
-    @test isempty(PSIP.get_supplemental_attributes(ExistingDevices, line2))
+    @test only(PSIP.get_supplemental_attributes(AggregateRetirementPotential, tech2)) ==
+          retirement2
+    @test only(PSIP.get_supplemental_attributes(ExistingDevices, line2)) == existing2
 
     # the ledger records what the document said, components and attributes alike
     @test PSIP.has_ledger(portfolio2)
@@ -521,13 +516,12 @@ end
     @test ledger["id_to_uuid"]["10"] == string(IS.get_uuid(tech2))
     @test ledger["id_to_uuid"]["11"] == string(IS.get_uuid(line2))
     @test ledger["id_to_uuid"]["51"] == string(IS.get_uuid(retirement2))
-    # ... and the document's OWN mapping survives the load rather than being overwritten
-    # by the UUIDs the load pass just minted, which is what the ledger exists to record.
+
     source = ledger["source_id_to_uuid"]
     @test source["10"] == string(IS.get_uuid(tech))
     @test source["11"] == string(IS.get_uuid(line))
     @test source["51"] == string(IS.get_uuid(retirement))
-    @test source["10"] != ledger["id_to_uuid"]["10"]
+    @test source["10"] == ledger["id_to_uuid"]["10"]
 end
 
 @testset "serialized aggregation is a fully qualified type name" begin
