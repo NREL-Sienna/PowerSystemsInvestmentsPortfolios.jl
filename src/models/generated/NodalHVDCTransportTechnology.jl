@@ -161,7 +161,7 @@ function from_openapi(po::PI.NodalHVDCTransportTechnology, refs::OpenAPIRefs)
         capital_costs = convert_value_curve(po.capital_costs),
         line_loss = convert_value_curve(po.line_loss),
         requirements = resolve_refs(refs, po.requirements, Requirement),
-        financial_data = convert_financial_data(po.financial_data),
+        financial_data = convert_nested_data(po.financial_data),
     )
 end
 
@@ -178,6 +178,6 @@ function to_openapi(value::NodalHVDCTransportTechnology{T}, refs::OpenAPIRefs) w
         capital_costs = convert_value_curve_to_openapi(get_capital_costs(value, IS.NU)),
         line_loss = convert_value_curve_to_openapi(get_line_loss(value)),
         requirements = component_ids(refs, get_requirements(value)),
-        financial_data = convert_financial_data_to_openapi(get_financial_data(value)),
+        financial_data = convert_nested_data_to_openapi(get_financial_data(value)),
     )
 end

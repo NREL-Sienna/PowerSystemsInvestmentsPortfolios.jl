@@ -56,8 +56,8 @@ end
         return_on_equity=0.1,
         tax_rate=0.21,
     )
-    po = PSIP.convert_financial_data_to_openapi(fd)
-    round_tripped = PSIP.convert_financial_data(po)
+    po = PSIP.convert_nested_data_to_openapi(fd)
+    round_tripped = PSIP.convert_nested_data(po)
     # `TechnologyFinancialData`'s getters are not in the module's export list (pre-existing,
     # out of Task 3's scope), so they must be qualified here.
     @test PSIP.get_capital_recovery_period(round_tripped) == 20

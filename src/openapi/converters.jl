@@ -462,7 +462,7 @@ end
 
 # ── financial data ───────────────────────────────────────────────────────────
 
-function convert_financial_data(po::PC.TechnologyFinancialData)
+function convert_nested_data(po::PC.TechnologyFinancialData)
     return TechnologyFinancialData(;
         capital_recovery_period=po.capital_recovery_period,
         technology_base_year=po.technology_base_year,
@@ -473,14 +473,14 @@ function convert_financial_data(po::PC.TechnologyFinancialData)
     )
 end
 
-function convert_financial_data(po)
+function convert_nested_data(po)
     return error(
-        "convert_financial_data: no OpenAPI financial-data converter for " *
+        "convert_nested_data: no OpenAPI financial-data converter for " *
         "$(nameof(typeof(po))) — every financial data record must be converted, not skipped",
     )
 end
 
-function convert_financial_data_to_openapi(fd::TechnologyFinancialData)
+function convert_nested_data_to_openapi(fd::TechnologyFinancialData)
     return PC.TechnologyFinancialData(;
         capital_recovery_period=get_capital_recovery_period(fd),
         technology_base_year=get_technology_base_year(fd),
@@ -491,9 +491,9 @@ function convert_financial_data_to_openapi(fd::TechnologyFinancialData)
     )
 end
 
-function convert_financial_data_to_openapi(fd)
+function convert_nested_data_to_openapi(fd)
     return error(
-        "convert_financial_data_to_openapi: no OpenAPI financial-data converter for " *
+        "convert_nested_data_to_openapi: no OpenAPI financial-data converter for " *
         "$(nameof(typeof(fd))) — every financial data record must be converted, not skipped",
     )
 end

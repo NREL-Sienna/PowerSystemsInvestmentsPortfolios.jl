@@ -396,7 +396,7 @@ function openapi_import_expr(struct_name, name, kind, bare, nullable)
         return "convert_cost(po.$name)::$bare"
     end
     if kind == :nested
-        return "convert_financial_data(po.$name)"
+        return "convert_nested_data(po.$name)"
     end
     throw(
         DataFormatError(
@@ -435,9 +435,7 @@ function openapi_export_expr(struct_name, field, kind, bare, nullable, parametri
     openapi_check_nullable(struct_name, name, kind, nullable, "openapi_export_expr")
     getter = openapi_export_getter_call(field)
     if kind == :scalar
-        # The type parameter is the single carrier of the PSY type on a parametric
-        # struct; regenerating the string from `T` is what keeps the stored field and
-        # the parameter from drifting apart, as they could under the old serializer.
+        # Return parametric type for power_systems_type field
         if parametric && name == "power_systems_type"
             return "string(nameof(T))"
         end
@@ -490,7 +488,7 @@ function openapi_export_expr(struct_name, field, kind, bare, nullable, parametri
         return "convert_cost_to_openapi($getter)"
     end
     if kind == :nested
-        return "convert_financial_data_to_openapi($getter)"
+        return "convert_nested_data_to_openapi($getter)"
     end
     throw(
         DataFormatError(
@@ -594,17 +592,11 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
                         "needs_conversion" => get(param, "needs_conversion", false),
                         "conversion_unit" => conversion_unit,
                         "display_units" => get(param, "display_units", "NU"),
-                        # The units trait dispatches on the component's concrete
-                        # type, so parametric structs need the `Type{Name{T}} where`
-                        # form (`Type{Name}` is the UnionAll and never matches a
-                        # concrete `Name{...}`); concrete structs use the exact form.
                         "units_type_sig" => if haskey(item, "parametric")
                             "Type{$(item["struct_name"]){T}}"
                         else
                             "Type{$(item["struct_name"])}"
                         end,
-                        # The bound is substituted inside a literal `where {T <: …}`
-                        # template fragment (values get HTML-escaped; literals don't).
                         "units_bound" => get(item, "parametric", false),
                     ),
                 )
@@ -672,7 +664,7 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
 
         open(filename, "w") do io
             write(io, strip(MU.render(STRUCT_TEMPLATE, item)))
-            write(io, "\n\n")
+            write(io, "\n")
 
             push!(struct_names, item["struct_name"])
         end

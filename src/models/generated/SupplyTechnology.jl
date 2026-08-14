@@ -275,7 +275,7 @@ function from_openapi(po::PI.SupplyTechnology, refs::OpenAPIRefs)
         start_fuel_mmbtu_per_mw = po.start_fuel_mmbtu_per_mw,
         lifetime = po.lifetime,
         requirements = resolve_refs(refs, po.requirements, Requirement),
-        financial_data = convert_financial_data(po.financial_data),
+        financial_data = convert_nested_data(po.financial_data),
     )
 end
 
@@ -302,6 +302,6 @@ function to_openapi(value::SupplyTechnology{T}, refs::OpenAPIRefs) where {T <: P
         start_fuel_mmbtu_per_mw = get_start_fuel_mmbtu_per_mw(value, IS.NU),
         lifetime = get_lifetime(value, IS.NU),
         requirements = component_ids(refs, get_requirements(value)),
-        financial_data = convert_financial_data_to_openapi(get_financial_data(value)),
+        financial_data = convert_nested_data_to_openapi(get_financial_data(value)),
     )
 end
