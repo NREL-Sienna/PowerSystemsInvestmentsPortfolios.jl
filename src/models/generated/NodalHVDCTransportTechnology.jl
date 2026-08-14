@@ -154,13 +154,13 @@ function from_openapi(po::PI.NodalHVDCTransportTechnology, refs::OpenAPIRefs)
         id = po.id,
         available = po.available,
         power_systems_type = po.power_systems_type,
-        start_node = resolve_ref(refs, po.start_node),
-        end_node = resolve_ref(refs, po.end_node),
-        capacity_limits = (min = po.capacity_limits.min, max = po.capacity_limits.max),
+        start_node = resolve_ref(refs, po.start_node, RegionTopology),
+        end_node = resolve_ref(refs, po.end_node, RegionTopology),
+        capacity_limits = _minmax_from_po(po.capacity_limits),
         unit_size = po.unit_size,
         capital_costs = convert_value_curve(po.capital_costs),
         line_loss = convert_value_curve(po.line_loss),
-        requirements = resolve_refs(refs, po.requirements),
+        requirements = resolve_refs(refs, po.requirements, Requirement),
         financial_data = convert_financial_data(po.financial_data),
     )
 end

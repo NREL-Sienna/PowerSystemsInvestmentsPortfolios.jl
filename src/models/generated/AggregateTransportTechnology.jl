@@ -154,13 +154,13 @@ function from_openapi(po::PI.AggregateTransportTechnology, refs::OpenAPIRefs)
         id = po.id,
         available = po.available,
         power_systems_type = po.power_systems_type,
-        start_region = resolve_ref(refs, po.start_region),
-        end_region = resolve_ref(refs, po.end_region),
-        capacity_limits = (min = po.capacity_limits.min, max = po.capacity_limits.max),
+        start_region = resolve_ref(refs, po.start_region, RegionTopology),
+        end_region = resolve_ref(refs, po.end_region, RegionTopology),
+        capacity_limits = _minmax_from_po(po.capacity_limits),
         unit_size = po.unit_size,
         capital_costs = convert_value_curve(po.capital_costs),
         line_loss = po.line_loss,
-        requirements = resolve_refs(refs, po.requirements),
+        requirements = resolve_refs(refs, po.requirements, Requirement),
         financial_data = convert_financial_data(po.financial_data),
     )
 end

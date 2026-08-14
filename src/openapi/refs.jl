@@ -67,10 +67,31 @@ resolve_ref(::OpenAPIRefs, ::Nothing) = nothing
 resolve_ref(refs::OpenAPIRefs, id::Integer) = refs[id]
 
 """
+Resolve a reference whose type the descriptor already states, asserting it on the way out.
+
+`by_id` is a `Dict{Int, Any}` — it holds every converted type — so the 2-arg form above
+returns `Any` and hands the component constructor an untyped value. The assert costs one
+type check and turns a document that points a `Zone` field at a `Node` into a failure here,
+naming both types, rather than something deeper and less legible.
+"""
+resolve_ref(::OpenAPIRefs, ::Nothing, ::Type) = nothing
+resolve_ref(refs::OpenAPIRefs, id::Integer, ::Type{T}) where {T} = refs[id]::T
+
+"""
 Resolve a list of component references. An omitted list is an empty one.
 """
 resolve_refs(::OpenAPIRefs, ::Nothing) = []
 resolve_refs(refs::OpenAPIRefs, ids) = [refs[id] for id in ids]
+
+"""
+Resolve a list of references whose element type the descriptor states.
+
+The untyped form above builds a `Vector{Any}`, which the component constructor then has to
+convert element by element; this builds the `Vector{T}` the field already declares, so an
+omitted list is `T[]` rather than an `Any[]` that has to be re-typed on assignment.
+"""
+resolve_refs(::OpenAPIRefs, ::Nothing, ::Type{T}) where {T} = T[]
+resolve_refs(refs::OpenAPIRefs, ids, ::Type{T}) where {T} = T[refs[id]::T for id in ids]
 
 function component_id(refs::OpenAPIRefs, component)
     if !haskey(refs.id_by_component, component)

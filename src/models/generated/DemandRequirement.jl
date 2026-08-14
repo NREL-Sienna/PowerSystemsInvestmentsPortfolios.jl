@@ -160,8 +160,8 @@ function from_openapi(po::PI.DemandRequirement, refs::OpenAPIRefs)
         conformity = PSY.LoadConformity(po.conformity),
         value_of_lost_load = po.value_of_lost_load,
         unserved_demand_curve = convert_value_curve(po.unserved_demand_curve),
-        region = resolve_refs(refs, po.region),
-        requirements = resolve_refs(refs, po.requirements),
+        region = resolve_refs(refs, po.region, RegionTopology),
+        requirements = resolve_refs(refs, po.requirements, Requirement),
     )
 end
 

@@ -22,6 +22,27 @@
 # `convert_value_curve` for the `ValueCurve` fields nested inside a cost (`CostCurve.value_curve`,
 # `vom_cost`, ...), so there is exactly one implementation of the curve/function-data recursion.
 
+# ── compound extraction, called by generated from_openapi ────────────────────
+#
+# The generated OpenAPI models declare every `$ref`ed field as bare `Any`, so reading
+# `po.capacity_limits.min` inline is a dynamic `getproperty` chain that no annotation on
+# `po` can recover — the type is absent from the model's struct definition, not merely
+# unstated. Dispatching on the concrete `PC` struct once, here at the boundary, makes every
+# member access after it a concrete field load.
+#
+# One name per alias rather than the `_optional` pair the export side needs: absence is
+# dispatch on `::Nothing`, which also absorbs the `if isnothing(...)` guard the generator
+# used to wrap around every nullable compound.
+
+_minmax_from_po(x::PC.MinMax) = (min=x.min, max=x.max)
+_minmax_from_po(::Nothing) = nothing
+
+_updown_from_po(x::PC.UpDown) = (up=x.up, down=x.down)
+_updown_from_po(::Nothing) = nothing
+
+_inout_from_po(x::PC.InOut) = (in=x.in, out=x.out)
+_inout_from_po(::Nothing) = nothing
+
 # ── compound PO constructors, called by generated to_openapi ──────────────────
 
 _minmax_po(v) = PC.MinMax(; min=v.min, max=v.max)

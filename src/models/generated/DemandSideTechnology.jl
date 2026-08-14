@@ -198,7 +198,7 @@ function from_openapi(po::PI.DemandSideTechnology, refs::OpenAPIRefs)
         id = po.id,
         available = po.available,
         power_systems_type = po.power_systems_type,
-        region = resolve_refs(refs, po.region),
+        region = resolve_refs(refs, po.region, RegionTopology),
         technology_efficiency = po.technology_efficiency,
         price_per_unit = convert_value_curve(po.price_per_unit),
         min_power = po.min_power,
@@ -209,7 +209,7 @@ function from_openapi(po::PI.DemandSideTechnology, refs::OpenAPIRefs)
         max_demand_advance = po.max_demand_advance,
         demand_energy_efficiency = po.demand_energy_efficiency,
         shift_variable_cost = convert_value_curve(po.shift_variable_cost),
-        requirements = resolve_refs(refs, po.requirements),
+        requirements = resolve_refs(refs, po.requirements, Requirement),
     )
 end
 

@@ -176,6 +176,19 @@ const OPENAPI_COMPOUND_CTORS = Dict(
     "InOut" => (required="_inout_po", optional="_inout_po_optional"),
 )
 
+"""
+Import-direction extraction helper per compound alias (`src/openapi/converters.jl`).
+
+One name each, unlike [`OPENAPI_COMPOUND_CTORS`](@ref)'s required/optional pair: absence is
+dispatch on `::Nothing` in the helper, so nullability no longer changes the emitted
+expression.
+"""
+const OPENAPI_COMPOUND_EXTRACTORS = Dict(
+    "MinMax" => "_minmax_from_po",
+    "UpDown" => "_updown_from_po",
+    "InOut" => "_inout_from_po",
+)
+
 # PSY derives this from the descriptor's own struct names. That fails here: PSIP's
 # reference fields are typed with the ABSTRACT supertypes `RegionTopology` and
 # `Requirement`, which are never component names, so the set is declared instead.
@@ -348,18 +361,14 @@ function openapi_import_expr(struct_name, name, kind, bare, nullable)
         return "po.$name"
     end
     if kind == :compound
-        members = OPENAPI_COMPOUND_MEMBERS[bare]
-        body = "(" * join(("$m = po.$name.$m" for m in members), ", ") * ")"
-        if nullable
-            return openapi_nullable_wrap(name, body)
-        end
-        return body
+        # No nullable branch: the extractor's ::Nothing method is the guard.
+        return "$(OPENAPI_COMPOUND_EXTRACTORS[bare])(po.$name)"
     end
     if kind == :reference
-        return "resolve_ref(refs, po.$name)"
+        return "resolve_ref(refs, po.$name, $bare)"
     end
     if kind == :reference_vector
-        return "resolve_refs(refs, po.$name)"
+        return "resolve_refs(refs, po.$name, $bare)"
     end
     if kind == :enum
         return "$bare(po.$name)"
@@ -372,9 +381,8 @@ function openapi_import_expr(struct_name, name, kind, bare, nullable)
     end
     if kind == :enum_compound_dict
         key, value = bare
-        members = OPENAPI_COMPOUND_MEMBERS[value]
-        body = "(" * join(("$m = v.$m" for m in members), ", ") * ")"
-        return "Dict($key(k) => $body for (k, v) in po.$name)"
+        extractor = OPENAPI_COMPOUND_EXTRACTORS[value]
+        return "Dict($key(k) => $extractor(v) for (k, v) in po.$name)"
     end
     if kind == :curve
         if nullable
@@ -383,7 +391,9 @@ function openapi_import_expr(struct_name, name, kind, bare, nullable)
         return "convert_value_curve(po.$name)"
     end
     if kind == :cost
-        return "convert_cost(po.$name)"
+        # `convert_cost` returns one of many cost types and reads an `Any`-typed oneOf
+        # wrapper, so the call infers as `Any`. The descriptor states the field's type.
+        return "convert_cost(po.$name)::$bare"
     end
     if kind == :nested
         return "convert_financial_data(po.$name)"
@@ -542,7 +552,7 @@ function generate_invest_structs(directory, data::JSONSchema.Schema; print_resul
             param["name"] = values["name"]
             param["data_type"] = values["type"]
             param["comment"] = get(values, "description", "")
-            param["exlude_getter"] = get(values, "exclude_getter", false)
+            param["exclude_getter"] = get(values, "exclude_getter", false)
             param["conversion_unit"] = get(values, "conversion_unit", "nothing")
             param["needs_conversion"] = get(values, "needs_conversion", false)
 
