@@ -42,6 +42,7 @@ Manifest.toml
 .vscode
 *.h5
 docs/superpowers/
+.claude/plans/
 
 ################################################################################
 #                              Operating systems                               #

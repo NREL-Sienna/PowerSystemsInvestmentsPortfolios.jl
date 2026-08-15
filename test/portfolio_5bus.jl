@@ -1,6 +1,5 @@
 function build_portfolio()
     sys = build_system(PSITestSystems, "c_sys5_re")
-    set_units_base_system!(sys, "NATURAL_UNITS")
 
     ###################
     ###### Zones ######
@@ -81,7 +80,7 @@ function build_portfolio()
     t_th = SupplyTechnology{PSY.ThermalStandard}(;
         prime_mover_type=PrimeMovers.ST,
         capital_costs=LinearCurve(coal_igcc_capex * 1000.0),
-        id=1,
+        id=21,
         available=true,
         name="cheap_thermal",
         fuel=[ThermalFuels.COAL],
@@ -102,7 +101,7 @@ function build_portfolio()
     t_th_exp = SupplyTechnology{PSY.ThermalStandard}(;
         prime_mover_type=PrimeMovers.ST,
         capital_costs=LinearCurve(coal_new_capex * 1000.0),
-        id=2,
+        id=22,
         available=true,
         name="expensive_thermal",
         fuel=[ThermalFuels.COAL],
@@ -169,7 +168,7 @@ function build_portfolio()
     t_wind = SupplyTechnology{PSY.RenewableDispatch}(;
         prime_mover_type=PrimeMovers.WT,
         capital_costs=LinearCurve(wind_capex * 1000.0), # to $/MW
-        id=3,
+        id=23,
         available=true,
         name="wind",
         fuel=[ThermalFuels.OTHER],
@@ -230,7 +229,7 @@ function build_portfolio()
     t_pv1 = SupplyTechnology{PSY.RenewableDispatch}(;
         prime_mover_type=PrimeMovers.PVe,
         capital_costs=LinearCurve(pv_capex * 1000.0), # to $/MW
-        id=4,
+        id=24,
         available=true,
         name="PV1",
         fuel=[ThermalFuels.OTHER],
@@ -271,7 +270,7 @@ function build_portfolio()
     ######## Retirement, Retrofits, and Existing Capacity #######
     #############################################################
 
-    thermal = collect(IS.get_components(ThermalStandard, sys))
+    thermal = collect(get_components(ThermalStandard, sys))
 
     retro1 = AggregateRetrofitPotential(id=50, retrofit_id=1, retrofit_fraction=0.5)
 
@@ -423,7 +422,7 @@ function build_portfolio()
         line_loss=0.05,
         capital_costs=LinearCurve(5000.0),
         available=true,
-        power_systems_type="TransportTechnology",
+        power_systems_type=string(nameof(PSY.ACBranch)),
         id=11,
         financial_data=tech_financials,
     )
@@ -436,7 +435,7 @@ function build_portfolio()
         line_loss=0.05,
         capital_costs=LinearCurve(5000.0),
         available=true,
-        power_systems_type="TransportTechnology",
+        power_systems_type=string(nameof(PSY.ACBranch)),
         id=12,
         financial_data=tech_financials,
     )
@@ -445,7 +444,7 @@ function build_portfolio()
         name="test",
         id=13,
         available=true,
-        power_systems_type="Nodal",
+        power_systems_type=string(nameof(PSY.ACBranch)),
         capacity_limits=(min=0, max=900),
         capital_costs=LinearCurve(5000.0),
         start_node=n1,

@@ -79,11 +79,11 @@ function get_existing_capacity_mw(
             @error "Not all names in ExistingDevices matched generators in the base system"
         end
 
-        existing_capacity = with_units_base(get_base_system(p), "NATURAL_UNITS") do
-            sum(PSY.get_rating(t) for t in comp)
+        if isa(first(comp), PSY.TwoWindingTransformer)
+            return sum(PSY.get_rating(get_circuit(c), u"MW") for c in comp)
+        else
+            return sum(PSY.get_rating(c, u"MW") for c in comp)
         end
-
-        return existing_capacity
     else
         return 0.0
     end
@@ -116,11 +116,7 @@ function get_existing_capacity_mwh(p::Portfolio, t::StorageTechnology)
             @error "Not all names in ExistingDevices matched generators in the base system"
         end
 
-        existing_capacity = with_units_base(get_base_system(p), "NATURAL_UNITS") do
-            sum(PSY.get_storage_capacity(t) for t in comp)
-        end
-
-        return existing_capacity
+        return sum(PSY.get_storage_capacity(t, u"MW*h") for t in comp)
     else
         return 0.0
     end
@@ -158,11 +154,7 @@ function get_peak_demand_mw(p::Portfolio, t::DemandTechnology)
             @error "Not all names in ExistingDevices matched generators in the base system"
         end
 
-        existing_capacity = with_units_base(get_base_system(p), "NATURAL_UNITS") do
-            sum(PSY.get_max_active_power(t) for t in comp)
-        end
-
-        return existing_capacity
+        return sum(PSY.get_max_active_power(t, u"MW") for t in comp)
     else
         @warn "Demand technology has no existing loads attached, returning a peak demand of 0.0. If this technology is meant to represent existing demand, please attach an ExistingDevices supplemental attribute with the names of the corresponding loads in the base system."
         return 0.0
@@ -194,53 +186,60 @@ is_new(t::Technology) = !(IS.has_supplemental_attributes(ExistingDevices, t))
 """
 Get constant heat rate value from FuelCurve stored in a SupplyTechnology
 """
-get_heat_rate(t::SupplyTechnology) =
-    IS.get_proportional_term(IS.get_value_curve(PSY.get_variable(get_operation_costs(t))))
+get_heat_rate(t::SupplyTechnology, units::_UNIT_OPTIONS) = IS.get_proportional_term(
+    IS.get_value_curve(PSY.get_variable(get_operation_costs(t, units))),
+)
 
 """
 Get constant fuel cost from FuelCurve stored in a SupplyTechnology
 """
-get_fuel_cost(t::SupplyTechnology) =
-    IS.get_fuel_cost(PSY.get_variable(get_operation_costs(t)))
+get_fuel_cost(t::SupplyTechnology, units::_UNIT_OPTIONS) =
+    IS.get_fuel_cost(PSY.get_variable(get_operation_costs(t, units)))
 
 """
 Get constant variable OM costs from OperationalCost in a SupplyTechnology
 """
-get_variable_cost(t::SupplyTechnology) =
-    IS.get_proportional_term(IS.get_vom_cost(PSY.get_variable(get_operation_costs(t))))
+get_variable_cost(t::SupplyTechnology, units::_UNIT_OPTIONS) = IS.get_proportional_term(
+    IS.get_vom_cost(PSY.get_variable(get_operation_costs(t, units))),
+)
 
 """
 Get constant variable OM costs for storage charging from OperationalCost in a StorageTechnology
 """
-get_variable_cost_charge(t::StorageTechnology) = PSY.get_proportional_term(
-    PSY.get_vom_cost(PSY.get_charge_variable_cost(get_operation_costs(t))),
-)
+get_variable_cost_charge(t::StorageTechnology, units::_UNIT_OPTIONS) =
+    PSY.get_proportional_term(
+        PSY.get_vom_cost(PSY.get_charge_variable_cost(get_operation_costs(t, units))),
+    )
 
 """
 Get constant variable OM costs for storage discharging from OperationalCost in a StorageTechnology
 """
-get_variable_cost_discharge(t::StorageTechnology) = PSY.get_proportional_term(
-    PSY.get_vom_cost(PSY.get_discharge_variable_cost(get_operation_costs(t))),
-)
+get_variable_cost_discharge(t::StorageTechnology, units::_UNIT_OPTIONS) =
+    PSY.get_proportional_term(
+        PSY.get_vom_cost(PSY.get_discharge_variable_cost(get_operation_costs(t, units))),
+    )
 
 """
 Get constant fixed OM costs from OperationalCost for a SupplyTechnology
 """
-get_fixed_cost(t::Technology) = PSY.get_fixed(get_operation_costs(t))
+get_fixed_cost(t::Technology, units::_UNIT_OPTIONS) =
+    PSY.get_fixed(get_operation_costs(t, units))
 
 """
 Get constant fixed OM costs for storage charge from OperationalCost in a StorageTechnology
 """
-get_fixed_cost_charge(t::StorageTechnology) = PSY.get_proportional_term(
-    PSY.get_value_curve(PSY.get_charge_variable_cost(get_operation_costs(t))),
-)
+get_fixed_cost_charge(t::StorageTechnology, units::_UNIT_OPTIONS) =
+    PSY.get_proportional_term(
+        PSY.get_value_curve(PSY.get_charge_variable_cost(get_operation_costs(t, units))),
+    )
 
 """
 Get constant fixed OM costs for storage discharge from OperationalCost in a StorageTechnology
 """
-get_fixed_cost_discharge(t::StorageTechnology) = PSY.get_proportional_term(
-    PSY.get_value_curve(PSY.get_discharge_variable_cost(get_operation_costs(t))),
-)
+get_fixed_cost_discharge(t::StorageTechnology, units::_UNIT_OPTIONS) =
+    PSY.get_proportional_term(
+        PSY.get_value_curve(PSY.get_discharge_variable_cost(get_operation_costs(t, units))),
+    )
 
 """
 Get the base year for a DemandRequirement, which is the same as the base year for the portfolio it belongs to.

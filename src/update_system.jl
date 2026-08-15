@@ -98,20 +98,18 @@ function update_or_create_new_generator!(
     unit_name::String,
     capacity::Float64,
 )
-    # Set system units to natural units (MW, MVA) for capacity operations
-    PSY.set_units_base_system!(sys, "NATURAL_UNITS")
 
     # Check if a generator with the same name and type already exists
     gen = PSY.get_component(T, sys, unit_name)
 
     if !isnothing(gen)
         # Generator exists: increment its capacity
-        existing_cap = PSY.get_rating(gen)
+        existing_cap = PSY.get_rating(gen, u"MW")
         new_cap = existing_cap + capacity
-        set_rating!(gen, new_cap)
-        existing_min_power, existing_max_power = PSY.get_active_power_limits(gen)
+        set_rating!(gen, new_cap * MW)
+        existing_min_power, existing_max_power = PSY.get_active_power_limits(gen, u"MW")
         new_max_power = existing_max_power + capacity
-        new_limits = (min=existing_min_power, max=new_max_power)
+        new_limits = (min=existing_min_power * MW, max=new_max_power * MW)
         PSY.set_active_power_limits!(gen, new_limits)
         return
     else
@@ -125,7 +123,7 @@ function update_or_create_new_generator!(
 
         # Get technology specifications from the portfolio
         tech = get_technology(SupplyTechnology{T}, p, tech_name)
-        op_cost = get_operation_costs(tech)
+        op_cost = get_operation_costs(tech, IS.NU)
         prime_mover_type = get_prime_mover_type(tech)
         fuel = only(get_fuel(tech))
 
@@ -189,17 +187,14 @@ function update_or_create_new_generator!(
     unit_name::String,
     capacity::Float64,
 )
-    # Set system units to natural units (MW, MVA) for capacity operations
-    PSY.set_units_base_system!(sys, "NATURAL_UNITS")
-
     # Check if a generator with the same name and type already exists
     gen = PSY.get_component(T, sys, unit_name)
 
     if !isnothing(gen)
         # Generator exists: increment its capacity
-        existing_cap = PSY.get_rating(gen)
+        existing_cap = PSY.get_rating(gen, u"MW")
         new_cap = existing_cap + capacity
-        set_rating!(gen, new_cap)
+        set_rating!(gen, new_cap * MW)
         return
     else
         # Generator doesn't exist: create a new one
@@ -212,7 +207,7 @@ function update_or_create_new_generator!(
 
         # Get technology specifications from the portfolio
         tech = get_technology(SupplyTechnology{T}, p, tech_name)
-        op_cost = get_operation_costs(tech)
+        op_cost = get_operation_costs(tech, IS.NU)
         prime_mover_type = get_prime_mover_type(tech)
 
         # Create new renewable generator with specified parameters

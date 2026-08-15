@@ -1,3 +1,117 @@
+"""
+SQLite/DBInterface reader for the SiennaGridDB schema, staged here for later extraction
+into its own package. A submodule (not a flat include) so that boundary is explicit today:
+it declares its own imports rather than inheriting PSIP's ambient `using` statements, and
+it exports nothing — the only call site outside this file is the qualified
+`PowerSystemsInvestmentsPortfolios.DBParser.database_to_portfolio`.
+"""
+module DBParser
+
+# `@u_str` is a macro, so it must be imported by name rather than reached through a
+# qualified module path the way the function imports below are.
+using Unitful: @u_str
+
+import PowerSystems
+const PSY = PowerSystems
+import PowerSystems:
+    ACBus,
+    ACBranch,
+    Arc,
+    Area,
+    FuelCurve,
+    HydroGenerationCost,
+    HydroReservoir,
+    HydroReservoirCost,
+    HydroTurbine,
+    IncrementalCurve,
+    InputOutputCurve,
+    LinearFunctionData,
+    PiecewiseStepData,
+    RenewableGenerationCost,
+    SingleTimeSeries,
+    StorageCost,
+    ThermalGenerationCost,
+    ThermalFuels,
+    PrimeMovers,
+    StorageTech,
+    RenewableDispatch,
+    RenewableNonDispatch,
+    ACBusTypes,
+    add_component!,
+    get_arc,
+    get_area,
+    get_base_power,
+    get_base_voltage,
+    get_component,
+    get_components,
+    get_fixed,
+    get_from,
+    get_max_active_power,
+    get_rating,
+    get_time_series_array,
+    get_time_series_values,
+    get_to,
+    get_value_curve,
+    get_variable,
+    has_supplemental_attributes,
+    set_downstream_turbines!,
+    set_fixed!,
+    set_upstream_turbines!,
+    set_variable!
+
+import InfrastructureSystems
+const IS = InfrastructureSystems
+import InfrastructureSystems: InfrastructureSystemsInternal, CostCurve, LinearCurve
+
+import SQLite
+import DBInterface
+import Tables
+import TimeSeries
+import Dates
+import JSON3
+
+# PSIP's own public surface. `get_aggregation` is used below despite not being
+# exported by PSIP (finding, recorded for the extraction: see
+# .claude/plans/2026-08-06-psip-serde-strategy-port.md report) — everything
+# else here is genuinely public.
+import ..PowerSystemsInvestmentsPortfolios:
+    Portfolio,
+    Zone,
+    Node,
+    RegionTopology,
+    ExistingDevices,
+    TechnologyFinancialData,
+    SupplyTechnology,
+    StorageTechnology,
+    DemandRequirement,
+    NodalACTransportTechnology,
+    AggregateTransportTechnology,
+    add_technology!,
+    add_region!,
+    add_supplemental_attribute!,
+    add_time_series!,
+    set_capacity_limits!,
+    set_capital_costs!,
+    set_operation_costs!,
+    get_id,
+    get_name,
+    get_region,
+    get_fuel,
+    get_prime_mover_type,
+    get_fixed_cost,
+    get_variable_cost,
+    get_operation_costs,
+    get_base_year,
+    get_existing_capacity_mw,
+    get_existing_devices,
+    get_supplemental_attributes,
+    get_technologies,
+    is_new,
+    get_aggregation,
+    get_fuel_cost,
+    DEFAULT_AGGREGATION,
+    MMBtu,
+    USD
 
 """
 Set of queries to extract relevant data from the database. Need to be maintained to be consistent with the most recent version of the database
@@ -122,6 +236,12 @@ const DEFAULT_FINANCIAL_DATA = TechnologyFinancialData(;
     return_on_equity=0.1,
     tax_rate=0.257,
 )
+
+# RTS database was written in PSY5 and so some definitions have changed in PSY6,
+# such as Transformer2W to TwoWindingTransformer. The current parser will be deprecated
+# and replaced with the OpenAPI parsing so using this dictionary to temporarily resolve
+# type discrepancies.
+const PSY6_MAPPING = Dict("Transformer2W" => "TwoWindingTransformer")
 
 """
 The following function imports from the database and generates the structs for a portfolio.
@@ -521,7 +641,6 @@ function add_nodal_lines!(
                     IS.LOG_GROUP_SERIALIZATION,
                 ),
             ).name
-        @show rec.id
         transport = NodalACTransportTechnology{ACBranch}(;
             name=string(rec.arc_id) * "_newline",
             id=rec.id,
@@ -816,7 +935,7 @@ function add_generation_units!(
                 outflow=reservoir_attr["outflow"],
                 level_targets=get(reservoir_attr, "level_targets", nothing),
                 intake_elevation=reservoir_attr["intake_elevation"],
-                head_to_volume_factor=head_to_volume_factor,
+                head_to_volume_factor=head_to_volume_factor.function_data,
                 operation_cost=parse_operational_cost(reservoir_attr["operation_cost"]),
                 level_data_type=PSY.get_enum_value(
                     PSY.ReservoirDataType,
@@ -894,7 +1013,8 @@ function add_generation_units!(
 
             set_capacity_limits!(
                 technology,
-                (min=0, max=get_existing_capacity_mw(portfolio, technology)),
+                (min=0.0, max=get_existing_capacity_mw(portfolio, technology)),
+                u"MW",
             )
         end
     end
@@ -1166,14 +1286,14 @@ function add_system_lines!(
 
     tx_dict = Dict()
     for rec in IS.execute(stmts[:transmission_lines], nothing, IS.LOG_GROUP_SERIALIZATION)
-        component_type = getproperty(
-            PowerSystems,
-            Symbol(
-                first(
-                    IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
-                ).entity_type,
-            ),
-        )
+        comp_string =
+            first(
+                IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
+            ).entity_type
+        if haskey(PSY6_MAPPING, comp_string)
+            comp_string = PSY6_MAPPING[comp_string]
+        end
+        component_type = getproperty(PowerSystems, Symbol(comp_string))
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         # Determine area based on balancing topology if zonal
@@ -1221,21 +1341,11 @@ function add_system_lines!(
                 g=g,
             )
 
-        elseif component_type == PSY.Transformer2W
-            line = component_type(;
-                name=rec.name,
+        elseif component_type == PSY.TwoWindingTransformer
+            circuit = PSY.TransformerCircuit(;
+                arc=arc_dict[arc],
                 rating=rec.continuous_rating / get_base_power(portfolio.base_system),
                 base_power=component_attr["base_power"],
-                arc=arc_dict[arc],
-                primary_shunt=transform_natural_impedance_to_device_base(
-                    component_attr["primary_shunt"]["real"],
-                    arc_dict[arc],
-                    portfolio.base_system,
-                ),
-                reactive_power_flow=component_attr["reactive_power_flow"] /
-                                    get_base_power(portfolio.base_system),
-                active_power_flow=component_attr["active_power_flow"] /
-                                  get_base_power(portfolio.base_system),
                 available=component_attr["available"],
                 x=transform_natural_impedance_to_device_base(
                     component_attr["x"],
@@ -1244,6 +1354,20 @@ function add_system_lines!(
                 ),
                 r=transform_natural_impedance_to_device_base(
                     component_attr["r"],
+                    arc_dict[arc],
+                    portfolio.base_system,
+                ),
+                reactive_power_flow=component_attr["reactive_power_flow"] /
+                                    get_base_power(portfolio.base_system),
+                active_power_flow=component_attr["active_power_flow"] /
+                                  get_base_power(portfolio.base_system),
+            )
+
+            line = component_type(;
+                name=rec.name,
+                circuit=circuit,
+                magnetizing_shunt=transform_natural_impedance_to_device_base(
+                    component_attr["primary_shunt"]["real"],
                     arc_dict[arc],
                     portfolio.base_system,
                 ),
@@ -1314,7 +1438,8 @@ function add_system_lines!(
             add_supplemental_attribute!(portfolio, transport, existing)
             set_capacity_limits!(
                 transport,
-                (min=0, max=get_existing_capacity_mw(portfolio, transport)),
+                (min=0.0, max=get_existing_capacity_mw(portfolio, transport)),
+                u"MW",
             )
 
             new_transport = NodalACTransportTechnology{component_type}(;
@@ -1431,22 +1556,27 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                     start_up=0.0,
                     shut_down=0.0,
                 )
-                set_operation_costs!(tech, opex)
-                set_capital_costs!(tech, capex)
+                set_operation_costs!(
+                    tech,
+                    opex,
+                    (energy_unit=u"MW" * u"hr", fuel_unit=MMBtu, currency_unit=USD),
+                )
+                set_capital_costs!(tech, capex, (x_unit=u"MW", y_unit=USD))
             else
                 capex = LinearCurve(cost_data["capcost"] * 1000.0)
                 opex = RenewableGenerationCost(
                     variable=CostCurve(LinearCurve(0.0), LinearCurve(cost_data["vom"])),
                 )
-                set_operation_costs!(tech, opex)
-                set_capital_costs!(tech, capex)
+                set_operation_costs!(tech, opex, (x_unit=u"MW" * u"hr", y_unit=USD))
+                set_capital_costs!(tech, capex, (x_unit=u"MW", y_unit=USD))
             end
         elseif !is_new(tech)
-            ops = get_operation_costs(tech)
             if haskey(cost_data, "fuel_price")
-                fixed = get_fixed_cost(tech)
-                vom = get_variable_cost(tech)
-                if get_variable_cost(tech) == 0.0
+                units = (energy_unit=u"MW" * u"hr", fuel_unit=MMBtu, currency_unit=USD)
+                ops = get_operation_costs(tech, units)
+                fixed = get_fixed_cost(tech, units)
+                vom = get_variable_cost(tech, units)
+                if vom == 0.0
                     vom = LinearCurve(cost_data["vom"])
                 end
                 if get_fixed(ops) == 0.0
@@ -1456,13 +1586,17 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                     ops,
                     FuelCurve(
                         get_value_curve(get_variable(ops)),
-                        get_fuel_cost(tech),
+                        get_fuel_cost(tech, units),
                         IS.get_startup_fuel_offtake(get_variable(ops)),
                         vom,
                     ),
                 )
                 set_fixed!(ops, fixed)
-                set_operation_costs!(tech, ops)
+                set_operation_costs!(
+                    tech,
+                    ops,
+                    (energy_unit=u"MW" * u"hr", fuel_unit=MMBtu, currency_unit=USD),
+                )
             end
         end
 
@@ -1483,7 +1617,7 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                 )
                 ts_array =
                     get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
-                    get_rating(unit)
+                    get_rating(unit, u"MW")
             else
                 #If technology does not have existing capacity associated with it,
                 #select a similar technology from the base system to get required timeseries
@@ -1498,7 +1632,7 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                 )
                 ts_array =
                     get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
-                    get_rating(unit)
+                    get_rating(unit, u"MW")
             end
             ts = SingleTimeSeries("capacity_factor", ts_array)
             add_time_series!(portfolio, tech, ts)
@@ -1515,10 +1649,10 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                 portfolio.base_system,
             ),
         )
-        if get_max_active_power(unit) != 0
+        if get_max_active_power(unit, u"MW") != 0
             ts_array =
                 get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
-                get_max_active_power(unit)
+                get_max_active_power(unit, u"MW")
         else
             ts_array = get_time_series_array(SingleTimeSeries, unit, "max_active_power")
         end
@@ -1682,3 +1816,5 @@ function deserialize_timeseries!(sys::PowerSystems.System, db, attributes)
         end
     end
 end
+
+end # module DBParser

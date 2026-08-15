@@ -1,3 +1,5 @@
+isdefined(Base, :__precompile__) && __precompile__()
+
 module PowerSystemsInvestmentsPortfolios
 
 import InfrastructureSystems
@@ -25,6 +27,7 @@ import InfrastructureSystems:
 
 # Using PowerSystems in order to support deserializing with PSY parametric typing
 using PowerSystems
+import PowerSystems: ThermalFuels, PrimeMovers, StorageTech, ACBusTypes
 
 import JSONSchema
 import JSON3
@@ -36,9 +39,15 @@ import TimeSeries
 import Dates
 import DataStructures: OrderedDict, SortedDict
 import OpenAPI
+import PowerCoreOpenAPIModels
+import PowerInvestmentsOpenAPIModels
+const PC = PowerCoreOpenAPIModels
+const PI = PowerInvestmentsOpenAPIModels
 import StringEncodings
 import HDF5
 import Tables
+import Unitful
+using Unitful: @dimension, @u_str, @refunit, @unit, Quantity, Units, uconvert, ustrip, unit
 
 export Portfolio
 export Requirement
@@ -118,10 +127,6 @@ export add_region!
 export add_requirement!
 export add_time_series!
 export clear_time_series!
-export read_json_data
-export generate_invest_structs
-export generate_structs
-export database_to_portfolio
 export add_supplemental_attribute!
 export remove_supplemental_attribute!
 export get_supplemental_attribute
@@ -131,7 +136,8 @@ export from_json
 export MinMax
 export InOut
 export UpDown
-export set_units_base_system!
+export from_openapi
+export to_openapi
 
 export show_region_topology_table
 
@@ -154,19 +160,13 @@ const PSY = PowerSystems
 const IS = InfrastructureSystems
 const MU = IS.Mustache
 
-##### Imports #####
-
-import PowerSystems: ThermalFuels, PrimeMovers, StorageTech, ACBusTypes
-
-##### Exports #####
+export USD, MMBtu, tonne, Mt, ustrip, uconvert, @u_str
+export POWER, IMPEDANCE, ADMITTANCE, VOLTAGE, CURRENT, INV_TIME, OPS_TIME, ENERGY
+export natural_unit, ConversionUnits, FuelCurveUnits
 
 export ThermalFuels
 export PrimeMovers
 export StorageTech
-
-#submodule for OpenAPI structs 
-include("models/generated/open_api_models/src/APIServer.jl")
-using .APIServer
 
 include("definitions.jl")
 
@@ -175,25 +175,41 @@ include("models/technologies.jl")
 include("models/regions.jl")
 include("models/financial_data/financial_data.jl")
 include("models/financial_data/TechnologyFinancialData.jl")
+include("openapi/refs.jl")
+include("openapi/converters.jl")
 include("models/generated/includes.jl")
 include("investment_schedule.jl")
 
+include("units/types.jl")
+include("units/conversions.jl")
+include("units/function_conversions.jl")
+
 include("portfolio.jl")
+include("openapi/document.jl")
+include("openapi/ledger.jl")
 include("validation.jl")
 include("time_mapping.jl")
 include("serialization.jl")
-include("generate_structs.jl")
+include("utils/getters.jl")
 include("db_parser.jl")
+include("utils/generate_structs.jl")
 include("utils/print.jl")
 @static if pkgversion(PrettyTables).major == 2
     include("utils/print_pt_v2.jl")
 else
     include("utils/print_pt_v3.jl")
 end
-include("utils/getters.jl")
 include("update_system.jl")
 
 using DocStringExtensions
+
+const localunits = Unitful.basefactors
+const localpromotion = copy(Unitful.promotion)
+function __init__()
+    merge!(Unitful.basefactors, localunits)
+    merge!(Unitful.promotion, localpromotion)
+    Unitful.register(PowerSystemsInvestmentsPortfolios)
+end
 
 @template (FUNCTIONS, METHODS) = """
                                  $(TYPEDSIGNATURES)

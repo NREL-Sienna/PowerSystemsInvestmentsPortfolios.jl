@@ -6,59 +6,66 @@ This file is auto-generated. Do not edit.
 
 """
     mutable struct ExistingDevices <: IS.SupplementalAttribute
-        internal::InfrastructureSystemsInternal
         id::Int64
         existing_devices::Vector{String}
         ext::Dict
+        internal::InfrastructureSystemsInternal
     end
 
 Supplemental attributed used to map technologies in a portfolio to the existing system. For example, contains a list of existing generators that correspond to a SupplyTechnology.
 
 # Arguments
-- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 - `id::Int64`: ID for individual component
 - `existing_devices::Vector{String}`: (default: `Vector()`) List of individual existing devices to map to a specific technology in the portfolio
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
+- `internal::InfrastructureSystemsInternal`: (default: `InfrastructureSystemsInternal()`) (**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference
 """
 mutable struct ExistingDevices <: IS.SupplementalAttribute
-    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-    internal::InfrastructureSystemsInternal
     "ID for individual component"
     id::Int64
     "List of individual existing devices to map to a specific technology in the portfolio"
     existing_devices::Vector{String}
     "Optional dictionary to provide additional data"
     ext::Dict
+    "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+    internal::InfrastructureSystemsInternal
 end
 
 
-function ExistingDevices(; internal=InfrastructureSystemsInternal(), id, existing_devices=Vector(), ext=Dict(), )
-    ExistingDevices(internal, id, existing_devices, ext, )
+function ExistingDevices(; id, existing_devices=Vector(), ext=Dict(), internal=InfrastructureSystemsInternal(), )
+    ExistingDevices(id, existing_devices, ext, internal, )
 end
 
-"""Get [`ExistingDevices`](@ref) `internal`."""
-get_internal(value::ExistingDevices) = value.internal
 """Get [`ExistingDevices`](@ref) `id`."""
 get_id(value::ExistingDevices) = value.id
 """Get [`ExistingDevices`](@ref) `existing_devices`."""
 get_existing_devices(value::ExistingDevices) = value.existing_devices
 """Get [`ExistingDevices`](@ref) `ext`."""
 get_ext(value::ExistingDevices) = value.ext
+"""Get [`ExistingDevices`](@ref) `internal`."""
+get_internal(value::ExistingDevices) = value.internal
 
-"""Set [`ExistingDevices`](@ref) `internal`."""
-set_internal!(value::ExistingDevices, val) = value.internal = val
 """Set [`ExistingDevices`](@ref) `id`."""
 set_id!(value::ExistingDevices, val) = value.id = val
 """Set [`ExistingDevices`](@ref) `existing_devices`."""
 set_existing_devices!(value::ExistingDevices, val) = value.existing_devices = val
 """Set [`ExistingDevices`](@ref) `ext`."""
 set_ext!(value::ExistingDevices, val) = value.ext = val
+"""Set [`ExistingDevices`](@ref) `internal`."""
+set_internal!(value::ExistingDevices, val) = value.internal = val
 
-function serialize_openapi_struct(technology::ExistingDevices, vals...)
-    base_struct = APIServer.ExistingDevices(; vals...)
-    return base_struct
+
+
+function from_openapi(po::PI.ExistingDevices, refs::OpenAPIRefs)
+    return ExistingDevices(;
+        id = po.id,
+        existing_devices = po.existing_devices,
+    )
 end
 
-function deserialize_openapi_struct(::Type{<:ExistingDevices}, vals::Dict)
-    return IS.deserialize_struct(APIServer.ExistingDevices, vals)
+function to_openapi(value::ExistingDevices, refs::OpenAPIRefs)
+    return PI.ExistingDevices(;
+        id = get_id(value),
+        existing_devices = get_existing_devices(value),
+    )
 end

@@ -20,7 +20,6 @@ import PowerSystemsInvestmentsPortfolios: add_time_series!
 import PowerSystems: get_name
 
 sys = build_system(PSITestSystems, "c_sys5_re")
-set_units_base_system!(sys, "NATURAL_UNITS")
 
 portfolio = Portfolio(sys; financial_data=PortfolioFinancialData(2025, 0.07, 0.05, 0.03))
 

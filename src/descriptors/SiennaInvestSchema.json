@@ -1,1661 +1,1865 @@
 {
-    "openapi": "3.1.0",  
-    "description": "A data model for code generation",
-    "info": {
-        "title": "PorfolioData",
-        "version": "0.0.1"
-    },
-    "paths": {
-        "supply_technologies": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/SupplyTechnology"
-            }
+  "openapi": "3.1.0",
+  "description": "A data model for code generation",
+  "info": {
+    "title": "PorfolioData",
+    "version": "0.0.1"
+  },
+  "components": [
+    {
+      "name": "Zone",
+      "type": "object",
+      "required": [
+        "name",
+        "id"
+      ],
+      "docstring": "A unit of spatial aggregation for zonal capacity expansion models. Used to define locations for supply, demand, transport, and storage technologies and relevant policy requirements.",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "Name of region"
         },
-        "RetirementPotentials": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/RetirementPotential"
-            }
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "A unique zone identification number"
         },
-        "AggregateRetirementPotentials": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/AggregateRetirementPotential"
-            }
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
         },
-        "RetrofitPotentials": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/RetrofitPotential"
-            }
-        },
-        "AggregateRetrofitPotentials": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/AggregateRetrofitPotential"
-            }
-        },
-        "ExistingDevices": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/ExistingDevices"
-            }
-        },
-        "TopologyMapping": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/TopologyMapping"
-            }
-        },
-        "StorageTechnologies": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/StorageTechnology"
-            }
-        },
-        "DemandSideTechnologies": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/DemandSideTechnology"
-            }
-        },
-        "NodalHVDCTransportTechnologies": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/NodalHVDCTransportTechnology"
-            }
-        },
-        "NodalACTransportTechnologies": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/NodalACTransportTechnology"
-            }
-        },
-        "AggregateTransportTechnologies": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/AggregateTransportTechnology"
-            }
-        },
-        "DemandRequirements": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/DemandRequirement"
-            }
-        },
-        "CarbonCaps": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/CarbonCaps"
-            }
-        },
-        "CarbonTax": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/CarbonTax"
-            }
-        },
-        "CapacityReserveMargin": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/CapacityReserveMargin"
-            }
-        },
-        "MinimumCapacityRequirements": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/MinimumCapacityRequirements"
-            }
-        },
-        "MaximumCapacityRequirements": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/MaximumCapacityRequirements"
-            }
-        },
-        "EnergyShareRequirements": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/EnergyShareRequirements"
-            }
-        },
-        "HourlyMatching": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/HourlyMatching"
-            }
-        },
-        "ColocatedSupplyStorageTechnology": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/ColocatedSupplyStorageTechnology"
-            }
-        },
-        "Zone": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/Zone"
-            }
-        },
-        "Node": {
-            "type": "array",
-            "items": {
-                "$ref": "#/components/schemas/Node"
-            }
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
         }
+      ],
+      "supertype": "RegionTopology"
     },
-    "components": {
-      "schemas": {
-        "SupplyTechnology": {
-            "type": "object",
-            "required": [
-                "name",
-                "id",
-                "power_systems_type",
-                "financial_data"
-            ],
-            "docstring": "Candidate generation technology for a region. Can represent either a thermal or renewable generation technology",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "The technology name"
-                },
-                "power_systems_type": {
-                    "type": "String",
-                    "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
-                },
-                "region": {
-                    "type": "Vector{RegionTopology}",
-                    "description": "Location where technology operates. Can be a zone or node.",
-                    "default": "Vector()"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual technology"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)",
-                    "default": "True"
-                },
-                "prime_mover_type": {
-                    "type": "PrimeMovers",
-                    "enum": [
-                        "PrimeMovers.BT",
-                        "PrimeMovers.CA",
-                        "PrimeMovers.CC",
-                        "PrimeMovers.CS",
-                        "PrimeMovers.CT",
-                        "PrimeMovers.FC",
-                        "PrimeMovers.GT",
-                        "PrimeMovers.HA",
-                        "PrimeMovers.HB",
-                        "PrimeMovers.HK",
-                        "PrimeMovers.HY",
-                        "PrimeMovers.IC",
-                        "PrimeMovers.OT",
-                        "PrimeMovers.ST",
-                        "PrimeMovers.PVe",
-                        "PrimeMovers.WT",
-                        "PrimeMovers.WS"
-                    ],
-                    "default": "PrimeMovers.OT",
-                    "description": "Prime mover for generator"
-                },
-                "fuel": {
-                    "type": "Vector{ThermalFuels}",
-                    "enum": [
-                        "ThermalFuels.COAL",
-                        "ThermalFuels.WASTE_COAL",
-                        "ThermalFuels.DISTILLATE_FUEL_OIL",
-                        "ThermalFuels.WASTE_OIL",
-                        "ThermalFuels.PETROLEUM_COKE",
-                        "ThermalFuels.RESIDUAL_FUEL_OIL",
-                        "ThermalFuels.NATURAL_GAS",
-                        "ThermalFuels.OTHER_GAS",
-                        "ThermalFuels.NUCLEAR",
-                        "ThermalFuels.AG_BIPRODUCT",
-                        "ThermalFuels.MUNICIPAL_WASTE",
-                        "ThermalFuels.WOOD_WASTE",
-                        "ThermalFuels.GEOTHERMAL",
-                        "ThermalFuels.OTHER"
-                    ],
-                    "default": "[ThermalFuels.OTHER]",
-                    "description": "Fuel type according to IEA"
-                },
-                "co2": {
-                    "type": "Dict{ThermalFuels, Float64}",
-                    "description": "Carbon Intensity of fuel",
-                    "default": "Dict()"
-                },
-                "cofire_start_limits": {
-                    "type": "Dict{ThermalFuels, MinMax}",
-                    "description": "Minimum and maximum blending level (%) of each fuel during start-up process for multi-fuel generator",
-                    "default": "Dict()"
-                },
-                "cofire_level_limits": {
-                    "type": "Dict{ThermalFuels, MinMax}",
-                    "description": "Minimum and maximum blending level (%) of each fuel during normal generation process for multi-fuel generator",
-                    "default": "Dict()"
-                },
-                "capital_costs": {
-                    "type": "PSY.ValueCurve",
-                    "description": "Capital costs for investing in a technology. (USD/MW)",
-                    "default": "LinearCurve(0.0)"
-                },
-                "operation_costs": {
-                    "type": "PSY.OperationalCost",
-                    "description": "Fixed and variable O&M costs for a technology",
-                    "default": "ThermalGenerationCost(nothing)"
-                },
-                "unit_size": {
-                    "type": "Float64",
-                    "description": "Used for discrete investment decisions. Size of each unit being built (MW)",
-                    "default": "0.0"
-                },
-                "capacity_limits": {
-                    "type": "MinMax",
-                    "description": "Minimum and maximum allowable installed capacity for a technology (MW)",
-                    "default": "(min=0, max=1e8)"
-                },
-                "outage_factor": {
-                    "type": "Float64",
-                    "description": "Derating factor to account for planned or forced outages of a technology. Fraction of hours in a year where technology is unavailable.",
-                    "default": "1.0"
-                },
-                "min_generation_fraction": {
-                    "type": "Float64",
-                    "description": "Minimum generation as a fraction of total capacity (MW)",
-                    "default": "0.0"
-                },
-                "ramp_limits": {
-                    "type": "UpDown",
-                    "description": "Maximum decrease and increase in output between operation periods. Fraction of nameplate capacity per hour",
-                    "default": "(up=1.0, down=1.0)"
-                },
-                "time_limits": {
-                    "type": "UpDown",
-                    "description": "Minimum amount of time a resource has to stay in the committed or shutdown state (hours).",
-                    "default": "(up=1.0, down=1.0)"
-                },
-                "start_fuel_mmbtu_per_mw": {
-                    "type": "Float64",
-                    "description": "Startup fuel use per MW of nameplate capacity of each generator (MMBtu/MW per start)",
-                    "default": "0.0"
-                },
-                "lifetime": {
-                    "type": "Int",
-                    "description": "Maximum number of years a technology can be active once installed (years)",
-                    "default": "100"
-                },
-                "financial_data": {
-                    "type": "TechnologyFinancialData",
-                    "description": "Struct containing relevant financial information for a technology"
-                },
-                "requirements": {
-                    "type": "Vector{Requirement}",
-                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
-                    "default": "Vector()"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"ResourceTechnology",
-            "parametric":"PSY.Generator"
+    {
+      "name": "Node",
+      "type": "object",
+      "required": [
+        "name",
+        "id"
+      ],
+      "docstring": "A unit of spatial aggregation for nodal capacity expansion models. Used to define locations for supply, demand, transport, and storage technologies and relevant policy requirements.",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "Name of region"
         },
-        "RetirementPotential": {
-            "type": "object",
-            "required": [
-                "id"
-            ],
-            "docstring": "Supplemental attribute used to define what existing generators are eligible for retirement for a SupplyTechnology",
-            "properties": {
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual component"
-                },
-                "eligible_generators": {
-                    "type": "Vector{String}",
-                    "description": "Names of individual generation units mapped to a technology that are eligible for retirement",
-                    "default": "Vector()"
-                },
-                "planned_retirement_year": {
-                    "type": "Dict{String, Int64}",
-                    "description": "Optional dictionary to indicate the year in which the forced/planned retirement will occur",
-                    "default": "Dict{String, Int64}()"
-                },
-                "build_year": {
-                    "type": "Dict{String, Int64}",
-                    "description": "Optional dictionary to indicate the year in which existing generators in the base system were built",
-                    "default": "Dict{String, Int64}()"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"IS.SupplementalAttribute"
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "A unique node identification number"
         },
-        "AggregateRetirementPotential": {
-            "type": "object",
-            "required": [
-                "id"
-            ],
-            "docstring": "Supplemental attribute used to define a total amount of existing capacity that can be retired for a technology",
-            "properties": {
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual component"
-                },
-                "retirement_potential": {
-                    "type": "Float64",
-                    "description": "Amount of pre-existing capacity for a technology that is eligible for retirement",
-                    "default": "0.0"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"IS.SupplementalAttribute"
+        {
+          "name": "bus_type",
+          "type": "ACBusTypes",
+          "default": "ACBusTypes.PQ",
+          "description": "AC Bus Type for a node"
         },
-        "RetrofitPotential": {
-            "type": "object",
-            "required": [
-                "id"
-            ],
-            "docstring": "Supplemental attribute used to define what existing generators are eligible for retrofit for a SupplyTechnology",
-            "properties": {
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual component"
-                },
-                "eligible_generators": {
-                    "type": "Vector{String}",
-                    "description": "Names of individual generation units mapped to this technology that can be retrofitted",
-                    "default": "Vector()"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"IS.SupplementalAttribute"
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
         },
-        "AggregateRetrofitPotential": {
-            "type": "object",
-            "required": [
-                "id"
-            ],
-            "docstring": "Supplemental attribute used to define a total amount of capacity that can be retrofit for a SupplyTechnology",
-            "properties": {
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual component"
-                },
-                "retrofit_id": {
-                    "type": "Int64",
-                    "description": "Unique identifier to group retrofittable source technologies with retrofit options inside the same zone.",
-                    "default": "0"
-                },
-                "retrofit_potential": {
-                    "type": "Float64",
-                    "description": "Amount of existing capacity for technology that can be retrofitted",
-                    "default": "0.0"
-                },
-                "retrofit_fraction": {
-                    "type": "Float64",
-                    "description": "Fraction of existing capacity that is eligible for retrofits. Alternative to retrofit_potential",
-                    "default": "0.0"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"IS.SupplementalAttribute"
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "RegionTopology"
+    },
+    {
+      "name": "SupplyTechnology",
+      "type": "object",
+      "required": [
+        "name",
+        "id",
+        "power_systems_type",
+        "financial_data"
+      ],
+      "docstring": "Candidate generation technology for a region. Can represent either a thermal or renewable generation technology",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "The technology name"
         },
-        "ExistingDevices": {
-            "type": "object",
-            "required": [
-                "id"
-            ],
-            "docstring": "Supplemental attributed used to map technologies in a portfolio to the existing system. For example, contains a list of existing generators that correspond to a SupplyTechnology.",
-            "properties": {
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual component"
-                },
-                "existing_devices": {
-                    "type": "Vector{String}",
-                    "description": "List of individual existing devices to map to a specific technology in the portfolio",
-                    "default": "Vector()"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"IS.SupplementalAttribute"
+        {
+          "name": "power_systems_type",
+          "type": "String",
+          "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
         },
-        "TopologyMapping": {
-            "type": "object",
-            "required": [
-                "id"
-            ],
-            "docstring": "Supplemental attributed used to store mapping between the PSIP Zone and the associated buses in the base system.",
-            "properties": {
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual component"
-                },
-                "buses": {
-                    "type": "Vector{String}",
-                    "description": "List of buses in the base system that are associated with a zone",
-                    "default": "Vector()"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"IS.SupplementalAttribute"
+        {
+          "name": "region",
+          "type": "Vector{RegionTopology}",
+          "description": "Location where technology operates. Can be a zone or node.",
+          "default": "Vector()"
         },
-        "StorageTechnology": {
-            "type": "object",
-            "required": [
-                "name",
-                "id",
-                "available",
-                "power_systems_type",
-                "storage_tech",
-                "financial_data"
-            ],
-            "docstring": "Candidate storage technology in a region.",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "The technology name"
-                },
-                "region": {
-                    "type": "Vector{RegionTopology}",
-                    "description": "Location where technology is operated",
-                    "default": "Vector()"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual storage technology"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-                },
-                "power_systems_type": {
-                    "type": "String",
-                    "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
-                },
-                "prime_mover_type": {
-                    "type": "PrimeMovers",
-                    "enum": [
-                        "PrimeMovers.BT",
-                        "PrimeMovers.CA",
-                        "PrimeMovers.CC",
-                        "PrimeMovers.CS",
-                        "PrimeMovers.CT",
-                        "PrimeMovers.FC",
-                        "PrimeMovers.GT",
-                        "PrimeMovers.HA",
-                        "PrimeMovers.HB",
-                        "PrimeMovers.HK",
-                        "PrimeMovers.HY",
-                        "PrimeMovers.IC",
-                        "PrimeMovers.OT",
-                        "PrimeMovers.ST",
-                        "PrimeMovers.PVe",
-                        "PrimeMovers.WT",
-                        "PrimeMovers.WS"
-                    ],
-                    "default": "PrimeMovers.OT",
-                    "description": "Prime mover for generator"
-                },
-                "storage_tech": {
-                    "type": "StorageTech",
-                    "enum": [
-                        "StorageTech.PTES",
-                        "StorageTech.LIB",
-                        "StorageTech.LAB",
-                        "StorageTech.FLWB",
-                        "StorageTech.SIB",
-                        "StorageTech.ZIB",
-                        "StorageTech.HGS",
-                        "StorageTech.LAES",
-                        "StorageTech.OTHER_CHEM",
-                        "StorageTech.OTHER_MECH",
-                        "StorageTech.OTHER_THERM"
-                    ],
-                    "description": "Storage Technology Type"
-                },
-                "capital_costs_energy": {
-                    "type": "PSY.ValueCurve",
-                    "description": "Capital costs for investing in a technology. (USD/MWh)",
-                    "default": "LinearCurve(0.0)"
-                },
-                "capital_costs_charge": {
-                    "type": "Union{Nothing, PSY.ValueCurve}",
-                    "description": "Capital costs for investing in a technology. (USD/MW)",
-                    "default": "nothing"
-                },
-                "capital_costs_discharge": {
-                    "type": "PSY.ValueCurve",
-                    "description": "Capital costs for investing in a technology. (USD/MW)",
-                    "default": "LinearCurve(0.0)"
-                },
-                "operation_costs": {
-                    "type": "PSY.OperationalCost",
-                    "description": "Fixed and variable O&M costs for a technology",
-                    "default": "StorageCost(nothing)"
-                },
-                "min_discharge_fraction": {
-                    "type": "Float64",
-                    "description": "Minimum discharge as a fraction of total discharge capacity",
-                    "default": "0.0"
-                },
-                "unit_size_charge": {
-                    "type": "Union{Nothing, Float64}",
-                    "description": "Used for discrete investment decisions. Unit size of charging capacity (MW)",
-                    "default": "nothing"
-                },
-                "unit_size_discharge": {
-                    "type": "Float64",
-                    "description": "Used for discrete investment decisions. Size of each unit of discharging capacity being built (MW)",
-                    "default": "0.0"
-                },
-                "unit_size_energy": {
-                    "type": "Float64",
-                    "description": "Used for discrete investment decisions. Size of each unit being built (MWh)",
-                    "default": "0.0"
-                },
-                "capacity_limits_charge": {
-                    "type": "Union{Nothing, MinMax}",
-                    "description": "allowable installed power capacity for a storage technology (MW)",
-                    "default": "nothing"
-                },
-                "capacity_limits_discharge": {
-                    "type": "MinMax",
-                    "description": "allowable installed power capacity for a storage technology (MW)",
-                    "default": "(min=0,max=1e8)"
-                },
-                "capacity_limits_energy": {
-                    "type": "MinMax",
-                    "description": "allowable installed energy capacity for a storage technology (MWh)",
-                    "default": "(min=0,max=1e8)"
-                },
-                "duration_limits": {
-                    "type": "MinMax",
-                    "description": "Minimum and maximum duration limits (energy to discharge capacity ratio) for a storage technology (hours)",
-                    "default": "(min=0,max=1000.0)"
-                },
-                "efficiency": {
-                    "type": "InOut",
-                    "description": "Efficiency of charging storage, fraction of total charge (in) and discharge (out) capacity",
-                    "default": "(in=1, out=1)"
-                },
-                "losses": {
-                    "type": "Float64",
-                    "description": "Self-discharge of storage (fraction of energy stored per hour)",
-                    "default": "0.00"
-                },
-                "lifetime": {
-                    "type": "Int",
-                    "description": "Maximum number of years a technology can be active once installed (years)",
-                    "default": "100"
-                },
-                "financial_data": {
-                    "type": "TechnologyFinancialData",
-                    "description": "Struct containing relevant financial information for a technology"
-                },
-                "requirements": {
-                    "type": "Vector{Requirement}",
-                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
-                    "default": "Vector()"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"ResourceTechnology",
-            "parametric":"PSY.Storage"
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual technology"
         },
-        "DemandSideTechnology": {
-            "type": "object",
-            "required": [
-                "name",
-                "id",
-                "available",
-                "power_systems_type"
-            ],
-            "docstring": "Represents demand side technologies such as electric vehicles or hydrogen electrolyzers.",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "The technology name"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for demand side technology"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-                },
-                "power_systems_type": {
-                    "type": "String",
-                    "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
-                },
-                "region": {
-                    "type": "Vector{RegionTopology}",
-                    "description": "Location where technology is operated",
-                    "default": "Vector()"
-                },
-                "technology_efficiency": {
-                    "type": "Float64",
-                    "description": "MWh of electricity per unit of output. Ex: MWh per ton of hydrogen for electrolyzers",
-                    "default": "0.0"
-                },
-                "price_per_unit": {
-                    "type": "PSY.ValueCurve",
-                    "description": "Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers",
-                    "default": "LinearCurve(0.0)"
-                },
-                "min_power": {
-                    "type": "Float64",
-                    "description": "Minimum operation of demandside unit as a fraction of peak demand",
-                    "default": "0.0"
-                },
-                "peak_demand_mw": {
-                    "type": "Float64",
-                    "description": "Peak demand value in MW",
-                    "default": "0.0"
-                },
-                "curtailment_cost": {
-                    "type": "PSY.ValueCurve", 
-                    "description": "Energy cost of curtailed demand, USD per Mwh",
-                    "default": "LinearCurve(0.0)"
-                },
-                "max_demand_curtailment": {
-                    "type": "Float64", 
-                    "description": "Maximum fraction of demand that can be curtailed",
-                    "default": "0.0"
-                },
-                "max_demand_delay": {
-                    "type": "Float64",
-                    "description": "Maximum number of hours that demand can be deferred or delayed (hours).",
-                    "default": "0.0"
-                },
-                "max_demand_advance": {
-                    "type": "Float64",
-                    "description": "Maximum number of hours that demand can be scheduled in advance of the original schedule (hours).",
-                    "default": "0.0"
-                },
-                "demand_energy_efficiency": {
-                    "type": "Float64",
-                    "description": "Energy efficiency associated with time shifting demand. Represents energy losses due to time shifting",
-                    "default": "0.0"
-                },
-                "shift_variable_cost": {
-                    "type": "PSY.ValueCurve",
-                    "description": "Variable operation and maintenance costs associated with flexible demand deferral/advancement",
-                    "default": "LinearCurve(0.0)"
-                },
-                "requirements": {
-                    "type": "Vector{Requirement}",
-                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
-                    "default": "Vector()"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"DemandTechnology",
-            "parametric":"PSY.StaticInjection"
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)",
+          "default": "true"
         },
-        "NodalHVDCTransportTechnology": {
-            "type": "object",
-            "required": [
-                "name",
-                "id",
-                "available",
-                "power_systems_type",
-                "start_node",
-                "end_node",
-                "financial_data"
-            ],
-            "docstring": "A nodal representation of candidate HVDC transmission lines between two regions.",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "Name"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "Numerical Index for HVDC lines"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-                },
-                "power_systems_type": {
-                    "type": "String",
-                    "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
-                },
-                "start_node": {
-                    "type": "RegionTopology",
-                    "description": "Start node for transport technology"
-                },
-                "end_node": {
-                    "type": "RegionTopology",
-                    "description": "End node for transport technology"
-                },
-                "capacity_limits": {
-                    "type": "MinMax",
-                    "description": "Allowable capacity for a transmission line (MW)",
-                    "default": "(min=0, max=1e8)"
-                },
-                "unit_size": {
-                    "type": "Float64",
-                    "description": "Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)",
-                    "default": "1"
-                },
-                "capital_costs": {
-                    "type": "PSY.ValueCurve",
-                    "description": "Cost of adding new capacity to the nodal transmission line. (USD/MW)",
-                    "default": "LinearCurve(0.0)"
-                },
-                "line_loss": {
-                    "type": "Union{IS.LinearCurve, IS.PiecewiseIncrementalCurve}",
-                    "description": "Loss model coefficients. It accepts a linear model with a constant loss and a proportional loss rate. All terms are defined as fraction of installed nameplate capacity It also accepts a Piecewise loss, with N segments to specify different proportional losses for different segments.",
-                    "default": "LinearCurve(0.0)"
-                },
-                "financial_data": {
-                    "type": "TechnologyFinancialData",
-                    "description": "Struct containing relevant financial information for a technology"
-                },
-                "requirements": {
-                    "type": "Vector{Requirement}",
-                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
-                    "default": "Vector()"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"TransmissionTechnology",
-            "parametric":"PSY.Device"
+        {
+          "name": "prime_mover_type",
+          "type": "PrimeMovers",
+          "default": "PrimeMovers.OT",
+          "description": "Prime mover technology according to EIA 923."
         },
-        "AggregateTransportTechnology": {
-          "type": "object",
-          "required": [
-              "name",
-              "id",
-              "available",
-              "power_systems_type",
-              "start_region",
-              "end_region",
-              "financial_data"
+        {
+          "name": "fuel",
+          "type": "Vector{ThermalFuels}",
+          "default": "[ThermalFuels.OTHER]",
+          "description": "Prime mover fuel according to EIA 923."
+        },
+        {
+          "name": "co2",
+          "type": "Dict{ThermalFuels, Float64}",
+          "description": "Carbon Intensity of fuel for generator, units of tons CO2 per MMBTU of fuel. Units: t/MMBtu.",
+          "default": "Dict()",
+          "needs_conversion": true,
+          "conversion_unit": ":t_per_mmbtu"
+        },
+        {
+          "name": "cofire_start_limits",
+          "type": "Dict{ThermalFuels, MinMax}",
+          "description": "Minimum and maximum blending level (%) of each fuel during start-up process for multi-fuel generator",
+          "default": "Dict()"
+        },
+        {
+          "name": "cofire_level_limits",
+          "type": "Dict{ThermalFuels, MinMax}",
+          "description": "Minimum and maximum blending level (%) of each fuel during normal generation process for multi-fuel generator",
+          "default": "Dict()"
+        },
+        {
+          "name": "capital_costs",
+          "type": "PSY.ValueCurve",
+          "description": "Capital costs for investing in a technology. (USD/MW)",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
+        },
+        {
+          "name": "operation_costs",
+          "type": "PSY.OperationalCost",
+          "description": "Fixed and variable O&M costs for a technology",
+          "default": "ThermalGenerationCost(nothing)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
+        },
+        {
+          "name": "unit_size",
+          "type": "Float64",
+          "description": "Used for discrete investment decisions. Size of each unit being built (MW)",
+          "default": "0.0",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "capacity_limits",
+          "type": "MinMax",
+          "description": "Minimum and maximum allowable installed capacity for a technology (MW)",
+          "default": "(min=0, max=1e8)",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "outage_factor",
+          "type": "Float64",
+          "description": "Derating factor to account for planned or forced outages of a technology. Fraction of hours in a year where technology is unavailable.",
+          "default": "1.0"
+        },
+        {
+          "name": "min_generation_fraction",
+          "type": "Float64",
+          "description": "Minimum generation as a fraction of total capacity",
+          "default": "0.0"
+        },
+        {
+          "name": "ramp_limits",
+          "type": "UpDown",
+          "description": "Maximum decrease and increase in output between operation periods. Fraction of nameplate capacity per hour",
+          "default": "(up=1.0, down=1.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":mw_per_min"
+        },
+        {
+          "name": "time_limits",
+          "type": "UpDown",
+          "description": "Minimum amount of time a resource has to stay in the committed or shutdown state (minutes). Units: min.",
+          "default": "(up=60.0, down=60.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":min"
+        },
+        {
+          "name": "start_fuel_mmbtu_per_mw",
+          "type": "Float64",
+          "description": "Startup fuel use per MW of nameplate capacity of each generator (MMBTU/MW per start)",
+          "default": "0.0",
+          "needs_conversion": true,
+          "conversion_unit": ":mmbtu_per_mw"
+        },
+        {
+          "name": "lifetime",
+          "type": "Int",
+          "description": "Maximum number of years a technology can be active once installed (years)",
+          "default": "100",
+          "needs_conversion": true,
+          "conversion_unit": ":yr"
+        },
+        {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+          "default": "Vector()"
+        },
+        {
+          "name": "financial_data",
+          "type": "TechnologyFinancialData",
+          "description": "Struct containing relevant financial information for a technology"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "ResourceTechnology",
+      "parametric": "PSY.Generator"
+    },
+    {
+      "name": "RetirementPotential",
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "docstring": "Supplemental attribute used to define what existing generators are eligible for retirement for a SupplyTechnology",
+      "properties": [
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual component"
+        },
+        {
+          "name": "eligible_generators",
+          "type": "Vector{String}",
+          "description": "Names of individual generation units mapped to a technology that are eligible for retirement",
+          "default": "Vector()"
+        },
+        {
+          "name": "planned_retirement_year",
+          "type": "Dict{String, Int64}",
+          "description": "Optional dictionary to indicate the year in which the forced/planned retirement will occur",
+          "default": "Dict{String, Int64}()"
+        },
+        {
+          "name": "build_year",
+          "type": "Dict{String, Int64}",
+          "description": "Optional dictionary to indicate the year in which existing generators in the base system were built",
+          "default": "Dict{String, Int64}()"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "IS.SupplementalAttribute"
+    },
+    {
+      "name": "AggregateRetirementPotential",
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "docstring": "Supplemental attribute used to define a total amount of existing capacity that can be retired for a technology",
+      "properties": [
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual component"
+        },
+        {
+          "name": "retirement_potential",
+          "type": "Float64",
+          "description": "Amount of pre-existing capacity for a technology that is eligible for retirement (MW). Units: MW.",
+          "default": "0.0",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "IS.SupplementalAttribute"
+    },
+    {
+      "name": "RetrofitPotential",
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "docstring": "Supplemental attribute used to define what existing generators are eligible for retrofit for a SupplyTechnology",
+      "properties": [
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual component"
+        },
+        {
+          "name": "eligible_generators",
+          "type": "Vector{String}",
+          "description": "Names of individual generation units mapped to this technology that can be retrofitted",
+          "default": "Vector()"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "IS.SupplementalAttribute"
+    },
+    {
+      "name": "AggregateRetrofitPotential",
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "docstring": "Supplemental attribute used to define a total amount of capacity that can be retrofit for a SupplyTechnology",
+      "properties": [
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual component"
+        },
+        {
+          "name": "retrofit_id",
+          "type": "Int64",
+          "description": "Unique identifier to group retrofittable source technologies with retrofit options inside the same zone.",
+          "default": "0"
+        },
+        {
+          "name": "retrofit_potential",
+          "type": "Float64",
+          "description": "Amount of existing capacity for technology that can be retrofitted",
+          "default": "0.0",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "retrofit_fraction",
+          "type": "Float64",
+          "description": "Fraction of existing capacity that is eligible for retrofits. Alternative to retrofit_potential",
+          "default": "0.0"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "IS.SupplementalAttribute"
+    },
+    {
+      "name": "ExistingDevices",
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "docstring": "Supplemental attributed used to map technologies in a portfolio to the existing system. For example, contains a list of existing generators that correspond to a SupplyTechnology.",
+      "properties": [
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual component"
+        },
+        {
+          "name": "existing_devices",
+          "type": "Vector{String}",
+          "description": "List of individual existing devices to map to a specific technology in the portfolio",
+          "default": "Vector()"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "IS.SupplementalAttribute"
+    },
+    {
+      "name": "TopologyMapping",
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "docstring": "Supplemental attributed used to store mapping between the PSIP Zone and the associated buses in the base system.",
+      "properties": [
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual component"
+        },
+        {
+          "name": "buses",
+          "type": "Vector{String}",
+          "description": "List of buses in the base system that are associated with a zone",
+          "default": "Vector()"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "IS.SupplementalAttribute"
+    },
+    {
+      "name": "StorageTechnology",
+      "type": "object",
+      "required": [
+        "name",
+        "id",
+        "available",
+        "power_systems_type",
+        "storage_tech",
+        "financial_data"
+      ],
+      "docstring": "Candidate storage technology in a region.",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "The technology name"
+        },
+        {
+          "name": "region",
+          "type": "Vector{RegionTopology}",
+          "description": "Location where technology is operated",
+          "default": "Vector()"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual storage technology"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+        },
+        {
+          "name": "power_systems_type",
+          "type": "String",
+          "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
+        },
+        {
+          "name": "prime_mover_type",
+          "type": "PrimeMovers",
+          "enum": [
+            "PrimeMovers.BT",
+            "PrimeMovers.CA",
+            "PrimeMovers.CC",
+            "PrimeMovers.CS",
+            "PrimeMovers.CT",
+            "PrimeMovers.FC",
+            "PrimeMovers.GT",
+            "PrimeMovers.HA",
+            "PrimeMovers.HB",
+            "PrimeMovers.HK",
+            "PrimeMovers.HY",
+            "PrimeMovers.IC",
+            "PrimeMovers.OT",
+            "PrimeMovers.ST",
+            "PrimeMovers.PVe",
+            "PrimeMovers.WT",
+            "PrimeMovers.WS"
           ],
-          "docstring": "An aggregated representation of a transmission interchange between two regions.",
-          "properties": {
-              "name": {
-                  "type": "String",
-                  "description": "Name"
-              },
-              "id": {
-                  "type": "Int64",
-                  "description": "Numerical Index for AC transport technologies"
-              },
-              "available": {
-                  "type": "Bool",
-                  "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-              },
-              "power_systems_type": {
-                  "type": "String",
-                  "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
-              },
-              "start_region": {
-                  "type": "RegionTopology",
-                  "description": "Start region for transport technology"
-              },
-              "end_region": {
-                  "type": "RegionTopology",
-                  "description": "End region for transport technology"
-              },
-              "capacity_limits": {
-                  "type": "MinMax",
-                  "description": "Allowable capacity for a transmission line (MW)",
-                  "default": "(min=0, max=1e8)"
-              },
-              "unit_size": {
-                  "type": "Float64",
-                  "description": "Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)",
-                  "default": "1"
-              },
-              "capital_costs": {
-                  "type": "PSY.ValueCurve",
-                  "description": "Cost of adding new capacity to the nodal transmission line. (USD/MW)",
-                  "default": "LinearCurve(0.0)"
-              },
-              "line_loss": {
-                  "type": "Float64",
-                  "description": "Transmission loss for each transport technology (%)",
-                  "default": "0.0"
-              },
-              "financial_data": {
-                "type": "TechnologyFinancialData",
-                "description": "Struct containing relevant financial information for a technology"
-              },
-              "requirements": {
-                    "type": "Vector{Requirement}",
-                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
-                    "default": "Vector()"
-              },
-              "ext": {
-                  "type": "Dict",
-                  "default": "Dict()",
-                  "description": "Optional dictionary to provide additional data"
-              },
-              "internal": {
-                  "type": "InfrastructureSystemsInternal",
-                  "default": "InfrastructureSystemsInternal()",
-                  "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-              }
-          },
-          "supertype":"TransmissionTechnology",
-          "parametric":"PSY.Device"
+          "default": "PrimeMovers.OT",
+          "description": "Prime mover technology according to EIA 923."
         },
-        "NodalACTransportTechnology": {
-            "type": "object",
-            "required": [
-                "name",
-                "id",
-                "available",
-                "power_systems_type",
-                "start_node",
-                "end_node",
-                "financial_data"
-            ],
-            "docstring": "Nodal representation of candidate AC transmission lines between two regions.",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "Name"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "Numerical Index for AC transport technologies"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-                },
-                "power_systems_type": {
-                    "type": "String",
-                    "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
-                },
-                "start_node": {
-                    "type": "Node",
-                    "description": "Start node for transport technology"
-                },
-                "end_node": {
-                    "type": "Node",
-                    "description": "End node for transport technology"
-                },
-                "capacity_limits": {
-                    "type": "MinMax",
-                    "description": "Allowable capacity for a transmission line (MW)",
-                    "default": "(min=0, max=1e8)"
-                },
-                "unit_size": {
-                    "type": "Float64",
-                    "description": "Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)",
-                    "default": "1.0"
-                },
-                "capital_costs": {
-                    "type": "PSY.ValueCurve",
-                    "description": "Cost of adding new capacity to the nodal transmission line (USD/MW).",
-                    "default": "LinearCurve(0.0)"
-                },
-                "resistance": {
-                    "type": "Float64",
-                    "description": "Technology resistance in Ohms",
-                    "default": "1.0"
-                },
-                "voltage": {
-                    "type": "Float64",
-                    "description": "Voltage rating of transmission line (kV)",
-                    "default": "230.0"
-                },
-                "reactance": {
-                    "type": "Float64",
-                    "description": "Series reactance for a line (ohms)",
-                    "default": "1.0"
-                },
-                "financial_data": {
-                  "type": "TechnologyFinancialData",
-                  "description": "Struct containing relevant financial information for a technology"
-                },
-                "requirements": {
-                    "type": "Vector{Requirement}",
-                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
-                    "default": "Vector()"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"TransmissionTechnology",
-            "parametric":"PSY.Device"
+        {
+          "name": "storage_tech",
+          "type": "StorageTech",
+          "description": "Storage Technology Complementary to EIA 923.",
+          "default": "StorageTech.OTHER_CHEM"
         },
-        "DemandRequirement": {
-            "type": "object",
-            "required": [
-                "name",
-                "id",
-                "power_systems_type",
-                "value_of_lost_load"
-            ],
-            "docstring": "Demand requirements for a region.",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "The technology name"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)",
-                    "default": "true"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual demand requirement"
-                },
-                "power_systems_type": {
-                    "type": "String",
-                    "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
-                },
-                "new_demand_mw": {
-                    "type": "Float64",
-                    "description": "The value of the peak demand to be used for new DemandRequirements.",
-                    "default": "0.0"
-                },
-                "new_construction_year": {
-                    "type": "Int64",
-                    "description": "The year in which the new demand requirement will be installed. Should only be used for new demand requirements.",
-                    "default": "2020"
-                },
-                "growth_rate": {
-                    "type": "Float64",
-                    "description": "The annual growth rate of the demand requirement, used to scale present-day loads into future projections. Should only be used for conforming loads",
-                    "default": "0.0"
-                },
-                "conformity": {
-                    "type": "PSY.LoadConformity",
-                    "description": "Indicator of how the demand requirement should conform to the load profile of existing technologies in the system. Should only be used for new demand requirements.",
-                    "default": "PSY.LoadConformity.UNDEFINED"
-                },
-                "value_of_lost_load": {
-                    "type": "Float64",
-                    "description": "Value of unserved load (USD/MWh)"
-                },
-                "unserved_demand_curve": {
-                    "type": "PSY.ValueCurve",
-                    "description": "Piecewise curve to scale the cost of unserved load based on the value of lost load",
-                    "default": "LinearCurve(0.0)"
-                },
-                "region": {
-                    "type": "Vector{RegionTopology}",
-                    "description": "Zone or node where the demand requirement is located",
-                    "default": "Vector()"
-                },
-                "requirements": {
-                    "type": "Vector{Requirement}",
-                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
-                    "default": "Vector()"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"DemandTechnology",
-            "parametric":"PSY.StaticInjection"
+        {
+          "name": "capital_costs_energy",
+          "type": "PSY.ValueCurve",
+          "description": "Capital costs for investing in a technology. (USD/MWh)",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
         },
-        "CarbonCaps": {
-            "type": "object",
-            "required": [
-                "name",
-                "available",
-                "id"
-            ],
-            "docstring": "Defines limits to the amount of carbon produced. Can be defined either by the total amount of carbon produced (tons CO2) or by the carbon intensity of the portfolio (tons CO2 per MWh of electricity)",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "The requirement name"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual policy"
-                },
-                "max_tons_mwh": {
-                    "type": "Float64",
-                    "description": "Emission limit in terms of rate (tCO2/MWh)",
-                    "default": "1.0"
-                },
-                "target_year": {
-                    "type": "Int64",
-                    "description": "Year in which carbon cap will be applied",
-                    "default": "2050"
-                },
-                "max_mtons": {
-                    "type": "Float64",
-                    "description": "Emission limit in absolute values (million tCO2)",
-                    "default": "1e8"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"Requirement"
+        {
+          "name": "capital_costs_charge",
+          "type": "Union{Nothing, PSY.ValueCurve}",
+          "description": "Capital costs for investing in a technology. (USD/MW)",
+          "default": "nothing",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
         },
-        "CarbonTax": {
-            "type": "object",
-            "required": [
-                "name",
-                "available",
-                "id"
-            ],
-            "docstring":"Policy requirement that defines an additional cost penalty per ton of CO2 produced in the target in the eligible regions",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "The requirement name"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual policy"
-                },
-                "target_year": {
-                    "type": "Int64",
-                    "description": "Year in which carbon tax will be applied",
-                    "default": "2050"
-                },
-                "tax_dollars_per_ton": {
-                    "type": "Float64",
-                    "description": "Cost penalty per ton of CO2 emitted by technologies in the eligible regions during the target year (USD/tCO2)",
-                    "default": "0.0"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"Requirement"
+        {
+          "name": "capital_costs_discharge",
+          "type": "PSY.ValueCurve",
+          "description": "Capital costs for investing in a technology. (USD/MW)",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
         },
-        "CapacityReserveMargin": {
-            "type": "object",
-            "required": [
-                "name",
-                "available",
-                "id"
-            ],
-            "docstring": "Policy requirement to enforce a minimum capacity reserve margin, such that (total_capacity - peak_demand)/peak_demand >= capacity_reserve_fraction",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "The requirement name"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual policy"
-                },
-                "target_year": {
-                    "type": "Int64",
-                    "description": "Year in which capacity reserve margin will be applied",
-                    "default": "2050"
-                },
-                "capacity_reserve_fraction": {
-                    "type": "Float64",
-                    "description": "Capacity reserve requirements, represented as a fraction of peak demand in a region",
-                    "default": "0.0"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"Requirement"
+        {
+          "name": "operation_costs",
+          "type": "PSY.StorageCost",
+          "description": "Fixed and variable O&M costs for a technology",
+          "default": "StorageCost(nothing)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
         },
-        "MinimumCapacityRequirements": {
-            "type": "object",
-            "required": [
-                "name",
-                "available",
-                "id"
-            ],
-            "docstring": "Policy requirement that the total capacity of all technologies in `eligible_technologies` in the target year is greater than or equal to the specific minimum in MW",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "The requirement name"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual policy"
-                },
-                "min_capacity_mw": {
-                    "type": "Float64",
-                    "description": "Minimum total capacity across all eligible resources (MW)",
-                    "default": "0.0"
-                },
-                "target_year": {
-                    "type": "Int64",
-                    "description": "Year in which the capacity requirement will be applied",
-                    "default": "2050"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"Requirement"
+        {
+          "name": "min_discharge_fraction",
+          "type": "Float64",
+          "description": "Minimum discharge as a fraction of total discharge capacity",
+          "default": "0.0"
         },
-        "EnergyShareRequirements": {
-            "type": "object",
-            "required": [
-                "name",
-                "available",
-                "id"
-            ],
-            "docstring": "Policy requirement that the total generation of `eligible_technologies` must be greater than or equal to a pre-determined fraction of the total demand in eligible zones, such that `sum(P)_eligible_technologies >= total_fraction * sum(D)_eligible_regions`",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "The policy name"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual policy"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-                },
-                "target_year": {
-                    "type": "Int64",
-                    "description": "Year in which the energy share requirement will be applied",
-                    "default": "2050"
-                },
-                "generation_fraction_requirement": {
-                    "type": "Float64",
-                    "description": "Fraction of total annual demand across all eligible zones that needs to be met by eligible resources.",
-                    "default": "0.0"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"Requirement"
+        {
+          "name": "unit_size_charge",
+          "type": "Union{Nothing, Float64}",
+          "description": "Used for discrete investment decisions. Unit size of charging capacity (MW)",
+          "default": "nothing",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
         },
-        "HourlyMatching": {
-            "type": "object",
-            "required": [
-                "name",
-                "available",
-                "id"
-            ],
-            "docstring": "Policy requirement that all DemandSideTechnologies in `qualified_demand` must have their demand met by an equal amount of electricity generation from `qualified_supply` at all hours, such that: `sum(P)_qualified_supply >= sum(D)_qualified_demand`",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "The policy name"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual policy"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"Requirement"
+        {
+          "name": "unit_size_discharge",
+          "type": "Float64",
+          "description": "Used for discrete investment decisions. Size of each unit of discharging capacity being built (MW)",
+          "default": "0.0",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
         },
-        "MaximumCapacityRequirements": {
-            "type": "object",
-            "required": [
-                "name",
-                "available",
-                "id"
-            ],
-            "docstring": "Policy requirement that the total capacity of all technologies in `eligible_resources` in the target year is less than the specified limit in MW",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "The technology name"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual policy"
-                },
-                "max_capacity_mw": {
-                    "type": "Float64",
-                    "description": "Maximum total capacity across all eligible resources (MW)",
-                    "default": "0.0"
-                },
-                "target_year": {
-                    "type": "Int64",
-                    "description": "Year in which the capacity requirement will be applied",
-                    "default": "2050"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"Requirement"
+        {
+          "name": "unit_size_energy",
+          "type": "Float64",
+          "description": "Used for discrete investment decisions. Size of each unit being built (MWh)",
+          "default": "0.0",
+          "needs_conversion": true,
+          "conversion_unit": ":mwh"
         },
-        "Zone": {
-            "type": "object",
-            "required": [
-                "name",
-                "id"
-            ],
-            "docstring": "A unit of spatial aggregation for zonal capacity expansion models. Used to define locations for supply, demand, transport, and storage technologies and relevant policy requirements.",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "Name of region"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "A unique zone identification number"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"RegionTopology"
+        {
+          "name": "capacity_limits_charge",
+          "type": "Union{Nothing, MinMax}",
+          "description": "allowable installed power capacity for a storage technology (MW)",
+          "default": "nothing",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
         },
-        "Node": {
-            "type": "object",
-            "required": [
-                "name",
-                "id"
-            ],
-            "docstring": "A unit of spatial aggregation for nodal capacity expansion models. Used to define locations for supply, demand, transport, and storage technologies and relevant policy requirements.",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "Name of region"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "A unique node identification number"
-                },
-                "bus_type": {
-                    "type": "ACBusTypes",
-                    "enum": [
-                        "ACBusTypes.PQ",
-                        "ACBusTypes.PV",
-                        "ACBusTypes.REF",
-                        "ACBusTypes.ISOLATED",
-                        "ACBusTypes.SLACK"
-                    ],
-                    "default": "ACBusTypes.PQ",
-                    "description": "AC Bus Type for a node"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"RegionTopology"
+        {
+          "name": "capacity_limits_discharge",
+          "type": "MinMax",
+          "description": "allowable installed power capacity for a storage technology (MW)",
+          "default": "(min=0,max=1e8)",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
         },
-        "ColocatedSupplyStorageTechnology": {
-            "type": "object",
-            "required": [
-                "name",
-                "id",
-                "power_systems_type",
-                "financial_data",
-                "capital_costs_inverter",
-                "operation_costs_inverter",
-                "inverter_efficiency",
-                "inverter_supply_ratio"
-            ],
-            "docstring":"Supply Technology that supports a StorageTechnology co-located with wind and solar generation",
-            "properties": {
-                "name": {
-                    "type": "String",
-                    "description": "The technology name"
-                },
-                "power_systems_type": {
-                    "type": "String",
-                    "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
-                },
-                "region": {
-                    "type": "Vector{RegionTopology}",
-                    "description": "Zone where tech operates in",
-                    "default": "Vector()"
-                },
-                "id": {
-                    "type": "Int64",
-                    "description": "ID for individual generator"
-                },
-                "available": {
-                    "type": "Bool",
-                    "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)",
-                    "default": "True"
-                },
-                "capital_costs_solar": {
-                    "type": "PSY.ValueCurve",
-                    "description": "Capital costs for investing in a technology. (USD/MW)",
-                    "default": "LinearCurve(0.0)"
-                },
-                "operation_costs_solar": {
-                    "type": "PSY.OperationalCost",
-                    "description": "Fixed and variable O&M costs for a technology",
-                    "default": "ThermalGenerationCost(nothing)"
-                },
-                "capacity_limits_solar": {
-                    "type": "MinMax",
-                    "description": "Maximum allowable installed capacity for a technology (MW)",
-                    "default": "(min=0, max=1e8)"
-                },
-                "lifetime_solar": {
-                    "type": "Int",
-                    "description": "Maximum number of years a technology can be active once installed (years)",
-                    "default": "100"
-                },
-                "capital_costs_wind": {
-                    "type": "PSY.ValueCurve",
-                    "description": "Capital costs for investing in a technology. (USD/MW)",
-                    "default": "LinearCurve(0.0)"
-                },
-                "operation_costs_wind": {
-                    "type": "PSY.OperationalCost",
-                    "description": "Fixed and variable O&M costs for a technology",
-                    "default": "ThermalGenerationCost(nothing)"
-                },
-                "capacity_limits_wind": {
-                    "type": "MinMax",
-                    "description": "Maximum allowable installed capacity for a technology (MW)",
-                    "default": "(min=0, max=1e8)"
-                },
-                "lifetime_wind": {
-                    "type": "Int",
-                    "description": "Maximum number of years a technology can be active once installed (years)",
-                    "default": "100"
-                },
-                "capital_costs_energy": {
-                    "type": "PSY.ValueCurve",
-                    "description": "Capital costs for investing in a storage technology's energy capacity. (USD/MWh)",
-                    "default": "LinearCurve(0.0)"
-                },
-                "capital_costs_power": {
-                    "type": "PSY.ValueCurve",
-                    "description": "Capital costs for investing in a storage technology's charge/discharge capacity. (USD/MW)",
-                    "default": "LinearCurve(0.0)"
-                },
-                "operation_costs_energy": {
-                    "type": "PSY.OperationalCost",
-                    "description": "Fixed and variable O&M costs for a storage technology",
-                    "default": "StorageCost(nothing)"
-                },
-                "operation_costs_power": {
-                    "type": "PSY.OperationalCost",
-                    "description": "Fixed and variable O&M costs for a storage technology",
-                    "default": "StorageCost(nothing)"
-                },
-                "capacity_power_limits": {
-                    "type": "MinMax",
-                    "description": "allowable installed power capacity for a storage technology (MW)",
-                    "default": "(min=0,max=1e8)"
-                },
-                "capacity_energy_limits": {
-                    "type": "MinMax",
-                    "description": "allowable installed energy capacity for a storage technology (MWh)",
-                    "default": "(min=0,max=1e8)"
-                },
-                "duration_limits": {
-                    "type": "MinMax",
-                    "description": "Minimum required durattion for a storage technology (hours)",
-                    "default": "(min=0,max=1000)"
-                },
-                "efficiency_storage": {
-                    "type": "InOut",
-                    "description": "Efficiency of charging storage (fraction of total charge (in) and discharge (out) capacity",
-                    "default": "(in=1, out=1)"
-                },
-                "losses_storage": {
-                    "type": "Float64",
-                    "description": "Power loss (fraction of stored energy per hour)",
-                    "default": "0.0"
-                },
-                "lifetime_storage": {
-                    "type": "Int",
-                    "description": "Maximum number of years a technology can be active once installed (years)",
-                    "default": "100"
-                },
-                "financial_data": {
-                    "type": "TechnologyFinancialData",
-                    "description": "Struct containing relevant financial information for a technology"
-                },
-                "max_inverter_capacity": {
-                    "type": "Float64",
-                    "description": "Limit on inverter capacity (MW)",
-                    "default": "1e8"
-                },
-                "min_inverter_capacity": {
-                    "type": "Float64",
-                    "description": "Minimum inverter capacity (MW)",
-                    "default": "1e8"
-                },
-                "capital_costs_inverter": {
-                    "type": "PSY.ValueCurve",
-                    "description": "Capitals costs for investing in inverter capacity (USD/MW)"
-                },
-                "operation_costs_inverter": {
-                    "type": "PSY.OperationalCost",
-                    "description": "Operational costs for using inverter in co-located systems"
-                },
-                "inverter_efficiency": {
-                    "type": "Float64",
-                    "description": "Efficiency of AC to DC conversion of inverter"
-                },
-                "inverter_supply_ratio": {
-                    "type": "Float64",
-                    "description": "Ratio of generation capacity to grid connection capacity"
-                },
-                "requirements": {
-                    "type": "Vector{Requirement}",
-                    "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
-                    "default": "Vector()"
-                },
-                "ext": {
-                    "type": "Dict",
-                    "default": "Dict()",
-                    "description": "Optional dictionary to provide additional data"
-                },
-                "internal": {
-                    "type": "InfrastructureSystemsInternal",
-                    "default": "InfrastructureSystemsInternal()",
-                    "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
-                }
-            },
-            "supertype":"ResourceTechnology",
-            "parametric":"PSY.Generator"
+        {
+          "name": "capacity_limits_energy",
+          "type": "MinMax",
+          "description": "allowable installed energy capacity for a storage technology (MWh)",
+          "default": "(min=0,max=1e8)",
+          "needs_conversion": true,
+          "conversion_unit": ":mwh"
+        },
+        {
+          "name": "duration_limits",
+          "type": "MinMax",
+          "description": "Minimum and maximum duration limits (energy to discharge capacity ratio) for a storage technology (minutes). Units: min.",
+          "default": "(min=0,max=60000.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":min"
+        },
+        {
+          "name": "efficiency",
+          "type": "InOut",
+          "description": "Efficiency of charging storage, fraction of total charge (in) and discharge (out) capacity",
+          "default": "(in=1, out=1)"
+        },
+        {
+          "name": "losses",
+          "type": "Float64",
+          "description": "Self-discharge of storage (fraction of energy stored per hour)",
+          "default": "0.0"
+        },
+        {
+          "name": "lifetime",
+          "type": "Int",
+          "description": "Maximum number of years a technology can be active once installed (years)",
+          "default": "100",
+          "needs_conversion": true,
+          "conversion_unit": ":yr"
+        },
+        {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+          "default": "Vector()"
+        },
+        {
+          "name": "financial_data",
+          "type": "TechnologyFinancialData",
+          "description": "Struct containing relevant financial information for a technology"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
         }
-      }
+      ],
+      "supertype": "ResourceTechnology",
+      "parametric": "PSY.Storage"
+    },
+    {
+      "name": "DemandSideTechnology",
+      "type": "object",
+      "required": [
+        "name",
+        "id",
+        "available",
+        "power_systems_type"
+      ],
+      "docstring": "Represents demand side technologies such as electric vehicles or hydrogen electrolyzers.",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "The technology name"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for demand side technology"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+        },
+        {
+          "name": "power_systems_type",
+          "type": "String",
+          "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
+        },
+        {
+          "name": "region",
+          "type": "Vector{RegionTopology}",
+          "description": "Location where technology is operated",
+          "default": "Vector()"
+        },
+        {
+          "name": "technology_efficiency",
+          "type": "Float64",
+          "description": "MWh of electricity per unit of output. Ex: MWh per ton of hydrogen for electrolyzers",
+          "default": "0.0"
+        },
+        {
+          "name": "price_per_unit",
+          "type": "PSY.ValueCurve",
+          "description": "Price or value per unit of output. Ex: USD per ton of hydrogen for electrolyzers. Units: USD/t.",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_t"
+        },
+        {
+          "name": "min_power",
+          "type": "Float64",
+          "description": "Minimum operation of demandside unit as a fraction of peak demand",
+          "default": "0.0"
+        },
+        {
+          "name": "peak_demand_mw",
+          "type": "Float64",
+          "description": "Peak demand value in MW",
+          "default": "0.0",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "curtailment_cost",
+          "type": "PSY.ValueCurve",
+          "description": "Energy cost of curtailed demand, USD per Mwh",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
+        },
+        {
+          "name": "max_demand_curtailment",
+          "type": "Float64",
+          "description": "Maximum fraction of demand that can be curtailed",
+          "default": "0.0"
+        },
+        {
+          "name": "max_demand_delay",
+          "type": "Float64",
+          "description": "Maximum number of minutes that demand can be deferred or delayed (minutes). Units: min.",
+          "default": "0.0",
+          "needs_conversion": true,
+          "conversion_unit": ":min"
+        },
+        {
+          "name": "max_demand_advance",
+          "type": "Float64",
+          "description": "Maximum number of minutes that demand can be scheduled in advance of the original schedule (minutes). Units: min.",
+          "default": "0.0",
+          "needs_conversion": true,
+          "conversion_unit": ":min"
+        },
+        {
+          "name": "demand_energy_efficiency",
+          "type": "Float64",
+          "description": "Energy efficiency associated with time shifting demand. Represents energy losses due to time shifting",
+          "default": "0.0"
+        },
+        {
+          "name": "shift_variable_cost",
+          "type": "PSY.ValueCurve",
+          "description": "Variable operation and maintenance costs associated with flexible demand deferral/advancement",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
+        },
+        {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+          "default": "Vector()"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "DemandTechnology",
+      "parametric": "PSY.StaticInjection"
+    },
+    {
+      "name": "NodalHVDCTransportTechnology",
+      "type": "object",
+      "required": [
+        "name",
+        "id",
+        "available",
+        "power_systems_type",
+        "start_node",
+        "end_node",
+        "financial_data"
+      ],
+      "docstring": "A nodal representation of candidate HVDC transmission lines between two regions.",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "Name"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "Numerical Index for HVDC lines"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+        },
+        {
+          "name": "power_systems_type",
+          "type": "String",
+          "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
+        },
+        {
+          "name": "start_node",
+          "type": "RegionTopology",
+          "description": "Start node for transport technology"
+        },
+        {
+          "name": "end_node",
+          "type": "RegionTopology",
+          "description": "End node for transport technology"
+        },
+        {
+          "name": "capacity_limits",
+          "type": "MinMax",
+          "description": "Allowable capacity for a transmission line (MW)",
+          "default": "(min=0, max=1e8)",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "unit_size",
+          "type": "Float64",
+          "description": "Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)",
+          "default": "1",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "capital_costs",
+          "type": "PSY.ValueCurve",
+          "description": "Cost of adding new capacity to the nodal transmission line. (USD/MW)",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
+        },
+        {
+          "name": "line_loss",
+          "type": "Union{IS.LinearCurve, IS.PiecewiseIncrementalCurve}",
+          "description": "Loss model coefficients. It accepts a linear model with a constant loss and a proportional loss rate. All terms are defined as fraction of installed nameplate capacity It also accepts a Piecewise loss, with N segments to specify different proportional losses for different segments.",
+          "default": "LinearCurve(0.0)"
+        },
+        {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+          "default": "Vector()"
+        },
+        {
+          "name": "financial_data",
+          "type": "TechnologyFinancialData",
+          "description": "Struct containing relevant financial information for a technology"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "TransmissionTechnology",
+      "parametric": "PSY.Device"
+    },
+    {
+      "name": "AggregateTransportTechnology",
+      "type": "object",
+      "required": [
+        "name",
+        "id",
+        "available",
+        "power_systems_type",
+        "start_region",
+        "end_region",
+        "financial_data"
+      ],
+      "docstring": "An aggregated representation of a transmission interchange between two regions.",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "Name"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "Numerical Index for AC transport technologies"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+        },
+        {
+          "name": "power_systems_type",
+          "type": "String",
+          "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
+        },
+        {
+          "name": "start_region",
+          "type": "RegionTopology",
+          "description": "Start region for transport technology"
+        },
+        {
+          "name": "end_region",
+          "type": "RegionTopology",
+          "description": "End region for transport technology"
+        },
+        {
+          "name": "capacity_limits",
+          "type": "MinMax",
+          "description": "Allowable capacity for a transmission line (MW)",
+          "default": "(min=0, max=1e8)",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "unit_size",
+          "type": "Float64",
+          "description": "Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)",
+          "default": "1",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "capital_costs",
+          "type": "PSY.ValueCurve",
+          "description": "Cost of adding new capacity to the nodal transmission line. (USD/MW)",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
+        },
+        {
+          "name": "line_loss",
+          "type": "Float64",
+          "description": "Transmission loss for each transport technology (%)",
+          "default": "0.0"
+        },
+        {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+          "default": "Vector()"
+        },
+        {
+          "name": "financial_data",
+          "type": "TechnologyFinancialData",
+          "description": "Struct containing relevant financial information for a technology"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "TransmissionTechnology",
+      "parametric": "PSY.Device"
+    },
+    {
+      "name": "NodalACTransportTechnology",
+      "type": "object",
+      "required": [
+        "name",
+        "id",
+        "available",
+        "power_systems_type",
+        "start_node",
+        "end_node",
+        "financial_data"
+      ],
+      "docstring": "Nodal representation of candidate AC transmission lines between two regions.",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "Name"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "Numerical Index for AC transport technologies"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+        },
+        {
+          "name": "power_systems_type",
+          "type": "String",
+          "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
+        },
+        {
+          "name": "start_node",
+          "type": "Node",
+          "description": "Start node for transport technology"
+        },
+        {
+          "name": "end_node",
+          "type": "Node",
+          "description": "End node for transport technology"
+        },
+        {
+          "name": "capacity_limits",
+          "type": "MinMax",
+          "description": "Allowable capacity for a transmission line (MW)",
+          "default": "(min=0, max=1e8)",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "unit_size",
+          "type": "Float64",
+          "description": "Used for integer investment decisions. Represents the rating capacity of individual new lines (MW)",
+          "default": "1.0",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "capital_costs",
+          "type": "PSY.ValueCurve",
+          "description": "Cost of adding new capacity to the nodal transmission line (USD/MW).",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
+        },
+        {
+          "name": "resistance",
+          "type": "Float64",
+          "description": "Technology resistance in Ohms",
+          "default": "1.0",
+          "needs_conversion": true,
+          "conversion_unit": ":ohm"
+        },
+        {
+          "name": "voltage",
+          "type": "Float64",
+          "description": "Voltage rating of transmission line (kV)",
+          "default": "230.0",
+          "needs_conversion": true,
+          "conversion_unit": ":kv"
+        },
+        {
+          "name": "reactance",
+          "type": "Float64",
+          "description": "Series reactance for a line (ohms)",
+          "default": "1.0",
+          "needs_conversion": true,
+          "conversion_unit": ":ohm"
+        },
+        {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+          "default": "Vector()"
+        },
+        {
+          "name": "financial_data",
+          "type": "TechnologyFinancialData",
+          "description": "Struct containing relevant financial information for a technology"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "TransmissionTechnology",
+      "parametric": "PSY.Device"
+    },
+    {
+      "name": "DemandRequirement",
+      "type": "object",
+      "required": [
+        "name",
+        "id",
+        "power_systems_type",
+        "value_of_lost_load"
+      ],
+      "docstring": "Demand requirements for a region.",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "The technology name"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)",
+          "default": "true"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual demand requirement"
+        },
+        {
+          "name": "power_systems_type",
+          "type": "String",
+          "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
+        },
+        {
+          "name": "new_demand_mw",
+          "type": "Float64",
+          "description": "The value of the peak demand to be used for new DemandRequirements (MW).",
+          "default": "0.0",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "new_construction_year",
+          "type": "Int64",
+          "description": "The year in which the new demand requirement will be installed. Should only be used for new demand requirements.",
+          "default": "2020"
+        },
+        {
+          "name": "growth_rate",
+          "type": "Float64",
+          "description": "The annual growth rate of the demand requirement, used to scale present-day loads into future projections. Should only be used for conforming loads",
+          "default": "0.0"
+        },
+        {
+          "name": "conformity",
+          "type": "PSY.LoadConformity",
+          "description": "Indicator of how the demand requirement should conform to the load profile of existing technologies in the system. Should only be used for new demand requirements.",
+          "default": "PSY.LoadConformity.UNDEFINED"
+        },
+        {
+          "name": "value_of_lost_load",
+          "type": "Float64",
+          "description": "Value of unserved load (USD/MWh)",
+          "default": "1e8",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh_scalar"
+        },
+        {
+          "name": "unserved_demand_curve",
+          "type": "PSY.ValueCurve",
+          "description": "Piecewise curve to scale the cost of unserved load based on the value of lost load",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
+        },
+        {
+          "name": "region",
+          "type": "Vector{RegionTopology}",
+          "description": "Zone or node where the demand requirement is located",
+          "default": "Vector()"
+        },
+        {
+          "name": "requirements",
+          "type": "Vector{Requirement}",
+          "description": "List of requirements (i.e. reserve margin, capacity requirements, energy share requirements) that are associated with a technology",
+          "default": "Vector()"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "DemandTechnology",
+      "parametric": "PSY.StaticInjection"
+    },
+    {
+      "name": "CarbonCaps",
+      "type": "object",
+      "required": [
+        "name",
+        "available",
+        "id"
+      ],
+      "docstring": "Defines limits to the amount of carbon produced. Can be defined either by the total amount of carbon produced (tons CO2) or by the carbon intensity of the portfolio (tons CO2 per MWh of electricity)",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "The requirement name"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual policy"
+        },
+        {
+          "name": "max_tons_mwh",
+          "type": "Float64",
+          "description": "Emission limit in terms of rate. Units: Mt/MWh.",
+          "default": "1e-6",
+          "needs_conversion": true,
+          "conversion_unit": ":mt_per_mwh"
+        },
+        {
+          "name": "target_year",
+          "type": "Int64",
+          "description": "Year in which carbon cap will be applied",
+          "default": "2050"
+        },
+        {
+          "name": "max_mtons",
+          "type": "Float64",
+          "description": "Emission limit in absolute values (million tonnes). Units: Mt.",
+          "default": "1e8",
+          "needs_conversion": true,
+          "conversion_unit": ":mt"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "Requirement"
+    },
+    {
+      "name": "CarbonTax",
+      "type": "object",
+      "required": [
+        "name",
+        "available",
+        "id"
+      ],
+      "docstring": "Policy requirement that defines an additional cost penalty per ton of CO2 produced in the target in the eligible regions",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "The requirement name"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual policy"
+        },
+        {
+          "name": "target_year",
+          "type": "Int64",
+          "description": "Year in which carbon tax will be applied",
+          "default": "2050"
+        },
+        {
+          "name": "tax_dollars_per_ton",
+          "type": "Float64",
+          "description": "Cost penalty per ton of CO2 emitted by technologies in the eligible regions during the target year (USD/tCO2)",
+          "default": "0.0",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_t"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "Requirement"
+    },
+    {
+      "name": "CapacityReserveMargin",
+      "type": "object",
+      "required": [
+        "name",
+        "available",
+        "id"
+      ],
+      "docstring": "Policy requirement to enforce a minimum capacity reserve margin, such that (total_capacity - peak_demand)/peak_demand >= capacity_reserve_fraction",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "The requirement name"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual policy"
+        },
+        {
+          "name": "target_year",
+          "type": "Int64",
+          "description": "Year in which capacity reserve margin will be applied",
+          "default": "2050"
+        },
+        {
+          "name": "capacity_reserve_fraction",
+          "type": "Float64",
+          "description": "Capacity reserve requirements, represented as a fraction of peak demand in a region",
+          "default": "0.0"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "Requirement"
+    },
+    {
+      "name": "MinimumCapacityRequirements",
+      "type": "object",
+      "required": [
+        "name",
+        "available",
+        "id"
+      ],
+      "docstring": "Policy requirement that the total capacity of all technologies in `eligible_technologies` in the target year is greater than or equal to the specific minimum in MW",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "The requirement name"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual policy"
+        },
+        {
+          "name": "min_capacity_mw",
+          "type": "Float64",
+          "description": "Minimum total capacity across all eligible resources (MW)",
+          "default": "0.0",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "target_year",
+          "type": "Int64",
+          "description": "Year in which the capacity requirement will be applied",
+          "default": "2050"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "Requirement"
+    },
+    {
+      "name": "EnergyShareRequirements",
+      "type": "object",
+      "required": [
+        "name",
+        "available",
+        "id"
+      ],
+      "docstring": "Policy requirement that the total generation of `eligible_technologies` must be greater than or equal to a pre-determined fraction of the total demand in eligible zones, such that `sum(P)_eligible_technologies >= total_fraction * sum(D)_eligible_regions`",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "The policy name"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual policy"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+        },
+        {
+          "name": "target_year",
+          "type": "Int64",
+          "description": "Year in which the energy share requirement will be applied",
+          "default": "2050"
+        },
+        {
+          "name": "generation_fraction_requirement",
+          "type": "Float64",
+          "description": "Fraction of total annual demand across all eligible zones that needs to be met by eligible resources.",
+          "default": "0.0"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "Requirement"
+    },
+    {
+      "name": "HourlyMatching",
+      "type": "object",
+      "required": [
+        "name",
+        "available",
+        "id"
+      ],
+      "docstring": "Policy requirement that all DemandSideTechnologies in `qualified_demand` must have their demand met by an equal amount of electricity generation from `qualified_supply` at all hours, such that: `sum(P)_qualified_supply >= sum(D)_qualified_demand`",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "The policy name"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual policy"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "Requirement"
+    },
+    {
+      "name": "MaximumCapacityRequirements",
+      "type": "object",
+      "required": [
+        "name",
+        "available",
+        "id"
+      ],
+      "docstring": "Policy requirement that the total capacity of all technologies in `eligible_resources` in the target year is less than the specified limit in MW",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "The technology name"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual policy"
+        },
+        {
+          "name": "max_capacity_mw",
+          "type": "Float64",
+          "description": "Maximum total capacity across all eligible resources (MW)",
+          "default": "0.0",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "target_year",
+          "type": "Int64",
+          "description": "Year in which the capacity requirement will be applied",
+          "default": "2050"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "Requirement"
+    },
+    {
+      "name": "ColocatedSupplyStorageTechnology",
+      "type": "object",
+      "required": [
+        "name",
+        "id",
+        "power_systems_type",
+        "financial_data",
+        "capital_costs_inverter",
+        "operation_costs_inverter",
+        "inverter_efficiency",
+        "inverter_supply_ratio"
+      ],
+      "docstring": "Supply Technology that supports a StorageTechnology co-located with wind and solar generation",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "The technology name"
+        },
+        {
+          "name": "power_systems_type",
+          "type": "String",
+          "description": "Corresponding type in PowerSystems.jl to be used in PCM modeling"
+        },
+        {
+          "name": "region",
+          "type": "Vector{RegionTopology}",
+          "description": "Zone where tech operates in",
+          "default": "Vector()"
+        },
+        {
+          "name": "id",
+          "type": "Int64",
+          "description": "ID for individual generator"
+        },
+        {
+          "name": "available",
+          "type": "Bool",
+          "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)",
+          "default": "true"
+        },
+        {
+          "name": "capital_costs_solar",
+          "type": "PSY.ValueCurve",
+          "description": "Capital costs for investing in a technology. (USD/MW)",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
+        },
+        {
+          "name": "operation_costs_solar",
+          "type": "PSY.RenewableGenerationCost",
+          "description": "Fixed and variable O&M costs for a technology",
+          "default": "RenewableGenerationCost(nothing)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
+        },
+        {
+          "name": "capacity_limits_solar",
+          "type": "MinMax",
+          "description": "Maximum allowable installed capacity for a technology (MW)",
+          "default": "(min=0, max=1e8)",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "lifetime_solar",
+          "type": "Int",
+          "description": "Maximum number of years a technology can be active once installed (years)",
+          "default": "100",
+          "needs_conversion": true,
+          "conversion_unit": ":yr"
+        },
+        {
+          "name": "capital_costs_wind",
+          "type": "PSY.ValueCurve",
+          "description": "Capital costs for investing in a technology. (USD/MW)",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
+        },
+        {
+          "name": "operation_costs_wind",
+          "type": "PSY.RenewableGenerationCost",
+          "description": "Fixed and variable O&M costs for a technology",
+          "default": "RenewableGenerationCost(nothing)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
+        },
+        {
+          "name": "capacity_limits_wind",
+          "type": "MinMax",
+          "description": "Maximum allowable installed capacity for a technology (MW)",
+          "default": "(min=0, max=1e8)",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "lifetime_wind",
+          "type": "Int",
+          "description": "Maximum number of years a technology can be active once installed (years)",
+          "default": "100",
+          "needs_conversion": true,
+          "conversion_unit": ":yr"
+        },
+        {
+          "name": "capital_costs_energy",
+          "type": "PSY.ValueCurve",
+          "description": "Capital costs for investing in a storage technology's energy capacity. (USD/MWh)",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
+        },
+        {
+          "name": "capital_costs_power",
+          "type": "PSY.ValueCurve",
+          "description": "Capital costs for investing in a storage technology's charge/discharge capacity. (USD/MW)",
+          "default": "LinearCurve(0.0)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
+        },
+        {
+          "name": "operation_costs_energy",
+          "type": "PSY.StorageCost",
+          "description": "Fixed and variable O&M costs for a storage technology",
+          "default": "StorageCost(nothing)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
+        },
+        {
+          "name": "operation_costs_power",
+          "type": "PSY.StorageCost",
+          "description": "Fixed and variable O&M costs for the storage power component. Units: USD/MWh.",
+          "default": "StorageCost(nothing)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
+        },
+        {
+          "name": "capacity_power_limits",
+          "type": "MinMax",
+          "description": "allowable installed power capacity for a storage technology (MW)",
+          "default": "(min=0,max=1e8)",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "capacity_energy_limits",
+          "type": "MinMax",
+          "description": "allowable installed energy capacity for a storage technology (MWh)",
+          "default": "(min=0,max=1e8)",
+          "needs_conversion": true,
+          "conversion_unit": ":mwh"
+        },
+        {
+          "name": "duration_limits",
+          "type": "MinMax",
+          "description": "Minimum and maximum duration limits for the storage component (minutes). Units: min.",
+          "default": "(min=0,max=60000)",
+          "needs_conversion": true,
+          "conversion_unit": ":min"
+        },
+        {
+          "name": "efficiency_storage",
+          "type": "InOut",
+          "description": "Efficiency of charging storage (fraction of total charge (in) and discharge (out) capacity",
+          "default": "(in=1, out=1)"
+        },
+        {
+          "name": "losses_storage",
+          "type": "Float64",
+          "description": "Power loss (fraction of stored energy per hour)",
+          "default": "0.0"
+        },
+        {
+          "name": "lifetime_storage",
+          "type": "Int",
+          "description": "Maximum number of years a technology can be active once installed (years)",
+          "default": "100",
+          "needs_conversion": true,
+          "conversion_unit": ":yr"
+        },
+        {
+          "name": "financial_data",
+          "type": "TechnologyFinancialData",
+          "description": "Struct containing relevant financial information for a technology"
+        },
+        {
+          "name": "max_inverter_capacity",
+          "type": "Float64",
+          "description": "Limit on inverter capacity (MW)",
+          "default": "1e8",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "min_inverter_capacity",
+          "type": "Float64",
+          "description": "Minimum inverter capacity (MW)",
+          "default": "1e8",
+          "needs_conversion": true,
+          "conversion_unit": ":mw"
+        },
+        {
+          "name": "capital_costs_inverter",
+          "type": "PSY.ValueCurve",
+          "description": "Capitals costs for investing in inverter capacity (USD/MW)",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mw"
+        },
+        {
+          "name": "operation_costs_inverter",
+          "type": "IS.ProductionVariableCostCurve",
+          "description": "Operational costs for using inverter in co-located systems",
+          "needs_conversion": true,
+          "conversion_unit": ":usd_per_mwh"
+        },
+        {
+          "name": "inverter_efficiency",
+          "type": "Float64",
+          "description": "Efficiency of AC to DC conversion of inverter"
+        },
+        {
+          "name": "inverter_supply_ratio",
+          "type": "Float64",
+          "description": "Ratio of generation capacity to grid connection capacity"
+        },
+        {
+          "name": "ext",
+          "type": "Dict",
+          "default": "Dict()",
+          "description": "Optional dictionary to provide additional data"
+        },
+        {
+          "name": "internal",
+          "type": "InfrastructureSystemsInternal",
+          "default": "InfrastructureSystemsInternal()",
+          "description": "(**Do not modify.**) PowerSystemsInvestmentsPortfolios.jl internal reference"
+        }
+      ],
+      "supertype": "ResourceTechnology",
+      "parametric": "PSY.Generator"
     }
-  }
+  ]
+}

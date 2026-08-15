@@ -1,3 +1,7 @@
+# TODO(openapi-serde): every testset here needs build_portfolio(), which cannot run
+# until PowerSystemCaseBuilder is psy6-compatible. Verified instead by
+# test_openapi_converters.jl, which builds components inline.
+
 @testset "Test serialization of technologies" begin
     portfolio = build_portfolio()
     portfolio2 = validate_serialization(portfolio; time_series_read_only=true)
@@ -57,7 +61,7 @@ end
     gen = SupplyTechnology{ThermalStandard}(;
         name="gen1",
         region=[zone],
-        id=1,
+        id=2,
         available=true,
         financial_data=TechnologyFinancialData(;
             capital_recovery_period=30,
@@ -67,7 +71,7 @@ end
             return_on_equity=0.1,
             tax_rate=0.257,
         ),
-        power_systems_type="test",
+        power_systems_type=string(nameof(ThermalStandard)),
         operation_costs=ThermalGenerationCost(;
             variable=zero(CostCurve),
             fixed=0.0,
@@ -145,6 +149,38 @@ end
             end
         end
     end
+end
+
+@testset "serialization edge cases" begin
+    # --- unsupported file extension throws DataFormatError ---
+    @test_throws IS.DataFormatError Portfolio("not_a_portfolio.txt")
+
+    portfolio = build_portfolio()
+
+    # --- to_json of a lone technology raises: references need the portfolio's id registry ---
+    tech = first(get_technologies(SupplyTechnology, portfolio))
+    @test_logs(
+        (:error, r"Failed to serialize"),
+        min_level = Logging.Error,
+        @test_throws(ErrorException, PSIP.to_json(tech; pretty=true)),
+    )
+
+    # --- pretty-printed to_json of the portfolio returns non-empty output ---
+    pretty_bytes = PSIP.to_json(portfolio; pretty=true)
+    @test !isempty(pretty_bytes)
+    plain_bytes = PSIP.to_json(portfolio; pretty=false)
+    @test !isempty(plain_bytes)
+
+    test_dir = mktempdir()
+    path = joinpath(test_dir, "edge_portfolio.json")
+
+    # --- to_json with user_data writes metadata (covers user_data branch) ---
+    PSIP.to_json(portfolio, path; user_data=Dict("scenario" => "edge"), force=true)
+    @test isfile(path)
+    mfile = joinpath(test_dir, "edge_portfolio_metadata.json")
+    @test isfile(mfile)
+    meta = JSON3.read(read(mfile, String))
+    @test meta["user_data"]["scenario"] == "edge"
 end
 
 @testset "Test deserialization of component dependency order" begin

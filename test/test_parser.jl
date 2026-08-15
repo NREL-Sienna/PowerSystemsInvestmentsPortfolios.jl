@@ -1,7 +1,13 @@
 @testset "Test parser" begin
     db_path = joinpath(DATA_DIR, "RTS_inputs/rts_psy5.sqlite")
-    portfolio =
-        database_to_portfolio(db_path, 0.07, 0.03, 0.03, 2025; aggregation=PSY.ACBus)
+    portfolio = PSIP.DBParser.database_to_portfolio(
+        db_path,
+        0.07,
+        0.03,
+        0.03,
+        2025;
+        aggregation=PSY.ACBus,
+    )
     base_system = get_base_system(portfolio)
 
     @test isa(portfolio, PSIP.Portfolio)
@@ -12,7 +18,7 @@
     @test length(collect(get_components(ACBus, base_system))) == 73
     @test length(collect(get_components(Arc, base_system))) == 109
     @test length(collect(get_components(Line, base_system))) == 105
-    @test length(collect(get_components(Transformer2W, base_system))) == 15
+    @test length(collect(get_components(TwoWindingTransformer, base_system))) == 15
     @test length(collect(get_components(PowerLoad, base_system))) == 73
     @test length(collect(get_components(ThermalStandard, base_system))) == 73
     @test length(collect(get_components(RenewableDispatch, base_system))) == 30
