@@ -318,6 +318,19 @@ Set the base system of the portfolio.
 set_base_system!(val::Portfolio, system::PSY.System) = val.base_system = system
 
 """
+Adopt a component's own `id` field as the identity `IS.SystemData` stores it under.
+
+A PSIP component carries `id::Int64` as a domain field, and that id is what an OpenAPI
+document and the supplemental-attribute association rows in the time series store both name.
+Letting the container assign a sequential id instead would give one object two identities, and
+a round trip through either record would resolve against the wrong one.
+"""
+function _adopt_domain_id!(obj)
+    IS.set_id!(obj, Int(get_id(obj)))
+    return obj
+end
+
+"""
 Add a technology to the portfolio.
 
 Throws ArgumentError if the technology's name is already stored for its concrete type.
@@ -359,7 +372,7 @@ function add_technology!(
 
     IS.add_component!(
         portfolio.data,
-        technology;
+        _adopt_domain_id!(technology);
         allow_existing_time_series=deserialization_in_progress,
         skip_validation=skip_validation,
         kwargs...,
@@ -454,10 +467,7 @@ end
 
 # These are helper functions for debugging problems.
 # Searches components linearly, and so is slow compared to the other get_component functions
-get_technology(portfolio::Portfolio, uuid::Base.UUID) =
-    IS.get_component(portfolio.data, uuid)
-get_technology(portfolio::Portfolio, uuid::String) =
-    IS.get_component(portfolio.data, Base.UUID(uuid))
+get_technology(portfolio::Portfolio, id::Int) = IS.get_component(portfolio.data, id)
 
 function _get_technologies_by_name(
     abstract_types,
@@ -814,7 +824,7 @@ function add_region!(
     skip_validation = _validate_or_skip!(portfolio, zone, skip_validation)
     IS.add_component!(
         portfolio.data,
-        zone;
+        _adopt_domain_id!(zone);
         allow_existing_time_series=deserialization_in_progress,
         skip_validation=skip_validation,
         kwargs...,
@@ -866,7 +876,7 @@ function add_requirement!(portfolio::Portfolio, req::Requirement)
     #return PSY.add_service!(portfolio.data, req)
     #skip_validation = false
     #skip_validation = _validate_or_skip!(sys, service, skip_validation)
-    return IS.add_component!(portfolio.data, req, skip_validation=false)
+    return IS.add_component!(portfolio.data, _adopt_domain_id!(req), skip_validation=false)
 end
 
 """
@@ -930,7 +940,7 @@ function add_supplemental_attribute!(
     component::IS.InfrastructureSystemsComponent,
     attribute::IS.SupplementalAttribute,
 )
-    return IS.add_supplemental_attribute!(p.data, component, attribute)
+    return IS.add_supplemental_attribute!(p.data, component, _adopt_domain_id!(attribute))
 end
 
 """
@@ -956,12 +966,12 @@ function remove_supplemental_attributes!(
 end
 
 """
-Return the supplemental attribute with the given uuid.
+Return the supplemental attribute with the given id.
 
 Throws ArgumentError if the attribute is not stored.
 """
-function get_supplemental_attribute(p::Portfolio, uuid::Base.UUID)
-    return IS.get_supplemental_attribute(p.data, uuid)
+function get_supplemental_attribute(p::Portfolio, id::Int)
+    return IS.get_supplemental_attribute(p.data, id)
 end
 
 """

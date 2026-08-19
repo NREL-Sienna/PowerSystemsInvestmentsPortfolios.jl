@@ -32,20 +32,10 @@ Pass the path to the `.json` file (with or without the `.json` extension) to the
 portfolio = Portfolio("data/my_portfolio.json")
 ```
 
-## Load with fresh UUIDs
-
-When you need to load a portfolio and then modify it — for example, to merge it with another portfolio or use it as a template — load it with new UUIDs so that component identifiers do not collide:
-
-```julia
-portfolio = Portfolio("data/my_portfolio.json"; assign_new_uuids=true)
-```
-
-This replaces every component UUID with a freshly generated value while leaving all other data intact.
-
 ## What is stored
 
   - **Component data** — all technologies, requirements, regions, and their field values
-  - **Time series** — stored in HDF5 format; large arrays are not embedded in JSON
+  - **Time series** — stored alongside the JSON in the time series store; large arrays are not embedded in JSON
   - **Metadata** — portfolio name, description, and user-defined key-value pairs
   - **Validation rules** — field-level constraints used when components are loaded back
 

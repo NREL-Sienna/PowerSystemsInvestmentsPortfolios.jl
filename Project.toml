@@ -9,7 +9,6 @@ DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
-HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 InfrastructureSystems = "2cd47ed4-ca9b-11e9-27f2-ab636a7671f1"
 JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
@@ -18,6 +17,7 @@ Mustache = "ffc61752-8dc7-55ee-8c37-f3e9cdd09e70"
 OpenAPI = "d5e62ea6-ddf3-4d43-8e4c-ad5e6c8bfd7d"
 PowerCoreOpenAPIModels = "b7b40286-e793-417d-a9a0-b1583e4da1cb"
 PowerInvestmentsOpenAPIModels = "33cb4396-f4d9-4f59-8585-787ebb56cb1b"
+PowerOperationsOpenAPIModels = "a372b6d7-45a2-44c2-8199-6a724b72e8ff"
 PowerSystems = "bcd98974-b02a-5e2f-9ee0-a103f5c450dd"
 PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
 SQLite = "0aa819cd-b072-5ff4-a722-6bc24af294d9"
@@ -29,12 +29,15 @@ URIs = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [sources]
-InfrastructureSystems = {url = "https://github.com/Sienna-Platform/InfrastructureSystems.jl.git", rev = "IS4"}
-PowerSystems = {url = "https://github.com/Sienna-Platform/PowerSystems.jl.git", rev = "psy6"}
-# Sibling-checkout paths, not a git rev: the generated models are not yet released.
-# Switch to a tagged rev before merge.
-PowerCoreOpenAPIModels = {path = "../PowerOpenAPIModels/PowerCoreOpenAPIModels.jl"}
-PowerInvestmentsOpenAPIModels = {path = "../PowerOpenAPIModels/PowerInvestmentsOpenAPIModels.jl"}
+InfrastructureSystems = {url = "https://github.com/Sienna-Platform/InfrastructureSystems.jl", rev = "feat/infrastore-integration"}
+PowerSystems = {url = "https://github.com/Sienna-Platform/PowerSystems.jl", rev = "feat/infrastore-integration"}
+# Pinned by rev, not by sibling path: the sibling checkout carries in-progress schema
+# renames ahead of the PowerSystems rev above, and the two must agree.
+# PowerOperationsOpenAPIModels is unused here — PSY's own [sources] are ignored once PSY
+# is a dependency rather than the root project, so PSIP pins it for Pkg to resolve.
+PowerCoreOpenAPIModels = {url = "https://github.com/Sienna-Platform/PowerOpenAPIModels.git", rev = "feat/infrastore-integration", subdir = "PowerCoreOpenAPIModels.jl"}
+PowerOperationsOpenAPIModels = {url = "https://github.com/Sienna-Platform/PowerOpenAPIModels.git", rev = "feat/infrastore-integration", subdir = "PowerOperationsOpenAPIModels.jl"}
+PowerInvestmentsOpenAPIModels = {url = "https://github.com/Sienna-Platform/PowerOpenAPIModels.git", rev = "feat/infrastore-integration", subdir = "PowerInvestmentsOpenAPIModels.jl"}
 
 [compat]
 DBInterface = "2.6"
@@ -42,7 +45,6 @@ DataFrames = "1.6"
 DataStructures = "^0.19"
 Dates = "^1.6"
 DocStringExtensions = "~0.9"
-HDF5 = "0.17"
 HTTP = "1.10"
 InfrastructureSystems = "^3.1"
 JSON3 = "1.14"
@@ -51,6 +53,7 @@ Mustache = "1"
 OpenAPI = "0.2"
 PowerCoreOpenAPIModels = "0.1"
 PowerInvestmentsOpenAPIModels = "0.1"
+PowerOperationsOpenAPIModels = "0.1"
 PowerSystems = "^5.3"
 PrettyTables = "2, 3"
 SQLite = "1.6.1"

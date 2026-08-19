@@ -35,7 +35,7 @@ function has_requirement(technology::Technology, requirement::Requirement)
         return false
     end
     for _requirement in get_requirements(technology)
-        if IS.get_uuid(_requirement) == IS.get_uuid(requirement)
+        if get_id(_requirement) == get_id(requirement)
             return true
         end
     end

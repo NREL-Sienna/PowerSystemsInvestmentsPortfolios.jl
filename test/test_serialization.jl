@@ -1,7 +1,3 @@
-# TODO(openapi-serde): every testset here needs build_portfolio(), which cannot run
-# until PowerSystemCaseBuilder is psy6-compatible. Verified instead by
-# test_openapi_converters.jl, which builds components inline.
-
 @testset "Test serialization of technologies" begin
     portfolio = build_portfolio()
     portfolio2 = validate_serialization(portfolio; time_series_read_only=true)

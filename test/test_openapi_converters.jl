@@ -266,36 +266,17 @@ end
     @test PSIP.get_storage_tech(back) == StorageTech.OTHER_CHEM
 end
 
-@testset "OpenAPI ledger round trips ids to UUIDs through Portfolio ext" begin
-    # `Portfolio(100.0)` is not a valid constructor — the single-positional-arg overload
-    # binds `100.0` to `aggregation`, which is typed `Type{<:...}` on the struct and
-    # errors. `Portfolio()` builds the same empty in-memory portfolio without touching
-    # disk or PowerSystemCaseBuilder.
-    portfolio = Portfolio()
-    zone = Zone(name="zone_a", id=1)
-    PSIP.add_region!(portfolio, zone)
-
-    @test !PSIP.has_ledger(portfolio)
-    @test_throws ErrorException PSIP.load_ledger(portfolio)
-
-    refs = PSIP._build_export_refs(portfolio)
-    @test PSIP.component_id(refs, zone) == 1
-
-    PSIP.store_ledger!(portfolio, refs)
-    @test PSIP.has_ledger(portfolio)
-    ledger = PSIP.load_ledger(portfolio)
-    @test ledger["id_to_uuid"]["1"] == string(IS.get_uuid(zone))
-end
-
-@testset "duplicate component ids are rejected when building export refs" begin
-    # Two regions sharing an id never reach `_build_export_refs`: `add_region!` already
-    # enforces region-id uniqueness via `_validate_unique_region_id`
-    # (src/validation.jl:307). That check is scoped to `RegionTopology`, so a region and a
-    # requirement sharing an id is the case `OpenAPIRefs.setindex!` alone must catch.
+@testset "duplicate component ids are rejected on addition" begin
+    # A component's `id` is the identity `IS.SystemData` stores it under, so a region and a
+    # requirement sharing one collide when the second is attached — before any document is
+    # built. `_validate_unique_region_id` (src/validation.jl) only covers `RegionTopology`,
+    # so this cross-family case is the container's check.
     portfolio = Portfolio()
     PSIP.add_region!(portfolio, Zone(name="zone_a", id=1))
-    PSIP.add_requirement!(portfolio, CarbonTax(name="tax", id=1, available=true))
-    @test_throws ErrorException PSIP._build_export_refs(portfolio)
+    @test_throws ArgumentError PSIP.add_requirement!(
+        portfolio,
+        CarbonTax(name="tax", id=1, available=true),
+    )
 end
 
 @testset "every generated type has both OpenAPI converters" begin
@@ -510,18 +491,11 @@ end
           retirement2
     @test only(PSIP.get_supplemental_attributes(ExistingDevices, line2)) == existing2
 
-    # the ledger records what the document said, components and attributes alike
-    @test PSIP.has_ledger(portfolio2)
-    ledger = PSIP.load_ledger(portfolio2)
-    @test ledger["id_to_uuid"]["10"] == string(IS.get_uuid(tech2))
-    @test ledger["id_to_uuid"]["11"] == string(IS.get_uuid(line2))
-    @test ledger["id_to_uuid"]["51"] == string(IS.get_uuid(retirement2))
-
-    source = ledger["source_id_to_uuid"]
-    @test source["10"] == string(IS.get_uuid(tech))
-    @test source["11"] == string(IS.get_uuid(line))
-    @test source["51"] == string(IS.get_uuid(retirement))
-    @test source["10"] == ledger["id_to_uuid"]["10"]
+    # The document id IS the component's id after the round trip, components and attributes
+    # alike, so the reloaded objects carry the same identity the document stated.
+    @test IS.get_id(tech2) == 10
+    @test IS.get_id(line2) == 11
+    @test IS.get_id(retirement2) == 51
 end
 
 @testset "serialized aggregation is a fully qualified type name" begin

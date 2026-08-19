@@ -253,8 +253,9 @@ capacity, accounting for resource availability (e.g., solar irradiance, wind spe
 # Notes
 
   - The time series is named "max_active_power" to comply with PowerSystems conventions
-  - The scaling_factor_multiplier uses `get_max_active_power` to scale the capacity factors
-    by the generator's maximum power rating
+  - The values are stored as capacity factors, declared as per unit on the generator's own
+    base (`IS.DU`) scaling to active power. Nothing rescales them on read; a consumer that
+    wants MW multiplies by the generator's max active power itself
   - A deep copy of the time series array is made to avoid unintended data sharing
 """
 function add_renewable_timeseries!(
@@ -271,7 +272,8 @@ function add_renewable_timeseries!(
     renewable_ts = PSY.SingleTimeSeries(;
         name="max_active_power",                      # Standard PowerSystems time series name
         data=ts_array,                                 # Capacity factor time series data
-        scaling_factor_multiplier=PSY.get_max_active_power,  # Scales by generator's max power
+        unit_system=IS.DU,                             # Values are per unit on the generator's base
+        quantity_kind="active_power",                  # ...of active power
     )
 
     # Add the time series to the generator in the system

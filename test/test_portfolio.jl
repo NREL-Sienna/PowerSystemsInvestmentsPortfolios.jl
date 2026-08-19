@@ -3,7 +3,7 @@
 
     technologies = collect(get_technologies(SupplyTechnology, p_5bus))
     technology = get_technology(SupplyTechnology, p_5bus, PSIP.get_name(technologies[1]))
-    @test IS.get_uuid(technology) == IS.get_uuid(technologies[1])
+    @test IS.get_id(technology) == IS.get_id(technologies[1])
     @test_throws(IS.ArgumentError, add_technology!(p_5bus, technology))
     @test get_available_technology(
         SupplyTechnology,
@@ -18,7 +18,7 @@
     technologies2 =
         get_technologies_by_name(SupplyTechnology, p_5bus, PSIP.get_name(technologies[1]))
     @test length(technologies2) == 1
-    @test IS.get_uuid(technologies2[1]) == IS.get_uuid(technologies[1])
+    @test IS.get_id(technologies2[1]) == IS.get_id(technologies[1])
     @test has_time_series(technologies2[1])
 
     @test isnothing(get_technology(SupplyTechnology, p_5bus, "not-a-name"))
@@ -183,10 +183,8 @@ end
     @test PSIP.is_attached(thermal, port)
     @test PSIP.is_attached(typeof(thermal), thermal_name, port)
 
-    # UUID-based lookups
-    uuid = IS.get_uuid(thermal)
-    @test PSIP.get_technology(port, uuid) === thermal
-    @test PSIP.get_technology(port, string(uuid)) === thermal
+    # id-based lookup
+    @test PSIP.get_technology(port, IS.get_id(thermal)) === thermal
 
     # throw_if_not_attached should throw once removed
     PSIP.remove_technology!(port, thermal)
@@ -278,8 +276,7 @@ end
     attrs_on_port = PSIP.get_supplemental_attributes(TopologyMapping, port)
     @test length(attrs_on_port) >= 1
 
-    attr_uuid = IS.get_uuid(attr)
-    @test PSIP.get_supplemental_attribute(port, attr_uuid) === attr
+    @test PSIP.get_supplemental_attribute(port, IS.get_id(attr)) === attr
 
     PSIP.remove_supplemental_attribute!(port, zone, attr)
     @test isempty(PSIP.get_supplemental_attributes(TopologyMapping, zone))
