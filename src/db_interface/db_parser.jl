@@ -1,15 +1,8 @@
 """
-`DBParser` — the SiennaGridDB SQLite ⇄ Portfolio / base-`System` bridge, built on this
-package's present OpenAPI converters (`to_openapi`/`from_openapi` + `OpenAPIRefs`) and
-PowerSystems' matching converters for the base system.
+`DBParser` — the SiennaGridDB SQLite ⇄ Portfolio / base-`System` bridge.
+Uses OpenAPI converters (`to_openapi`/`from_openapi` + `OpenAPIRefs`) from PSIP
+and PSY to populate a SQLite database using the SiennaGridDB schema.
 
-A submodule (not a flat include) so the boundary stays explicit and this code can later be
-extracted into its own package. It exports nothing — the entry points
-(`portfolio2db!`/`db2portfolio`/`sys2db!`/`db2sys`/`db2openapi_json`/`system2openapi_json`)
-are called module-qualified, `PowerSystemsInvestmentsPortfolios.DBParser.portfolio2db!(...)`.
-
-Replaces the former hand-written `DBParser` (the `QUERIES`/`DB_TO_OPENAPI_FIELDS` parser),
-which has been removed.
 """
 module DBParser
 

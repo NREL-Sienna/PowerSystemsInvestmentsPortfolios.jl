@@ -6,6 +6,7 @@ using DataStructures
 using PowerSystems
 using PowerSystemsInvestmentsPortfolios
 import PowerSystemsInvestmentsPortfolios as PSIP
+import PowerSystemsInvestmentsPortfolios.DBParser as DBP
 using PowerSystemCaseBuilder
 using Statistics
 import InfrastructureSystems as IS

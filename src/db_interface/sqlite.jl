@@ -23,11 +23,6 @@ function get_row_field(
         if col_str == "fuel" && table_name == "thermal_generators"
             return val
         end
-        # Route through OpenAPI.to_json, not JSON3.write: a `oneOf` field (ValueCurve,
-        # OperationalCost, …) or a compound holding one must have its discriminator stamped
-        # and wrappers unwrapped, which JSON3 does not do — the raw form fails `OpenAPI.from_json`
-        # on import (`KeyError` on the missing discriminator). Also lowers APIModels nested in
-        # Dict/Vector columns (e.g. `cofire_start_limits::Dict{String,MinMax}`).
         return OpenAPI.to_json(val)
     end
 
@@ -101,7 +96,7 @@ function get_row(
 )
     return tuple(
         (
-            col_name == :fuel ? c.fuel_type :
+            col_name == :fuel ? c.fuel :
             get_row_field(c, table_name, col_name, db_to_openapi_fields) for
             (col_name, col_type) in zip(schema.names, schema.types)
         )...,

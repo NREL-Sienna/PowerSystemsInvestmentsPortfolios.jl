@@ -155,7 +155,7 @@ function transform_associations!(sys::Union{PSY.System, Portfolio}, associations
     associations[!, "scaling_factor_multiplier"] =
         map(associations[!, "scaling_factor_multiplier"]) do val
             val === nothing && return nothing
-            d = IS.JSON3.read(val, Dict{String, Any})
+            d = JSON3.read(val, Dict{String, Any})
             meta = d["__metadata__"]
             return "$(meta["module"]).$(meta["function"])"
         end
@@ -275,7 +275,7 @@ function deserialize_metadata(row)
         elseif field == :time_series_uuid
             data[field] = Base.UUID(val)
         elseif field == :features
-            features_array = IS.JSON3.read(val, Array)
+            features_array = JSON3.read(val, Array)
             features_dict = Dict{String, Union{Bool, Int, String}}()
             for obj in features_array
                 length(obj) != 1 && error("Invalid features: $obj")

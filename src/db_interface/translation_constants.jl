@@ -1,7 +1,6 @@
-# NOTE: ThermalStandard uses "fuel_type" but ThermalMultiStart uses "fuel" in OpenAPI schemas.
-# This inconsistency means we can't add a simple mapping here. The migration handles this
-# by checking both the table column and the fuel_type attribute.
-
+# Maps an OpenAPI transport-struct field name to its SQLite column name, only where the two
+# differ. `arcs.from_id`/`to_id` are NOT listed: the current `PO.Arc` fields are already named
+# `from_id`/`to_id` (identical to the columns), so no remapping is needed there.
 const OPENAPI_FIELDS_TO_DB = Dict(
     ("transmission_lines", "arc") => "arc_id",
     ("thermal_generators", "bus") => "balancing_topology",
@@ -9,8 +8,6 @@ const OPENAPI_FIELDS_TO_DB = Dict(
     ("hydro_generators", "bus") => "balancing_topology",
     ("storage_units", "bus") => "balancing_topology",
     ("loads", "bus") => "balancing_topology",
-    ("arcs", "from") => "from_id",
-    ("arcs", "to") => "to_id",
     ("transmission_lines", "rating") => "continuous_rating",
 )
 
@@ -22,8 +19,8 @@ const DB_TO_OPENAPI_FIELDS = Dict((s[1], t) => s[2] for (s, t) in OPENAPI_FIELDS
 const TYPE_TO_TABLE_LIST = [
     # ── Base PSY system (PowerOperationsOpenAPIModels) ──
     PO.Area => "planning_regions",
-    PO.LoadZone => "balancing_topologies", # Assuming LoadZone maps to balancing topologies
-    PO.ACBus => "balancing_topologies", # Assuming ACBus maps to balancing topologies
+    PO.LoadZone => "balancing_topologies", 
+    PO.ACBus => "balancing_topologies", 
     PO.Arc => "arcs",
     PO.AreaInterchange => "transmission_interchanges",
     PO.Line => "transmission_lines",

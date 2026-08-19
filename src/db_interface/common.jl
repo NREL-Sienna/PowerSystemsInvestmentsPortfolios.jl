@@ -1,7 +1,6 @@
 # Hand-written helpers shared by the SQLite db_interface (sqlite.jl, time_series.jl).
 #
 # `OpenAPIRefs` provides bidirectional id⇄component resolution in one object:
-#
 #   * export : register each component under its id, then `to_openapi(c, refs[, unit])` reads
 #              the id back via `component_id(refs, c)` and resolves references to ids.
 #   * import : `from_openapi(po, refs[, unit])` resolves reference ids to components, then the
@@ -12,9 +11,9 @@
 #   * PSIP's `OpenAPIRefs()`               (src/openapi/refs.jl) — portfolio types → `PI.*`
 #   * `PSY.OpenAPIRefs(unit_system, base)` (PowerSystems)        — base system   → `PO.*`
 #
-# What `OpenAPIRefs` does NOT carry, and these helpers add, is the id⇄UUID view the relational
-# schema needs: association rows and time-series-owner rows key on integer entity ids, while
-# IS's own association/metadata records key on UUIDs.
+# These helpers add a id⇄UUID view the relational schema needs: association rows
+# and time-series-owner rows key on integer entity ids, while IS's own 
+# association/metadata records key on UUIDs.
 
 """
     _db_uuid_to_id(refs) -> Dict{Base.UUID, Int}
