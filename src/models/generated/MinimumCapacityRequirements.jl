@@ -8,7 +8,6 @@ This file is auto-generated. Do not edit.
     mutable struct MinimumCapacityRequirements <: Requirement
         name::String
         available::Bool
-        id::Int64
         min_capacity_mw::Float64
         target_year::Int64
         ext::Dict
@@ -20,7 +19,6 @@ Policy requirement that the total capacity of all technologies in `eligible_tech
 # Arguments
 - `name::String`: The requirement name
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
-- `id::Int64`: ID for individual policy
 - `min_capacity_mw::Float64`: (default: `0.0`) Minimum total capacity across all eligible resources (MW)
 - `target_year::Int64`: (default: `2050`) Year in which the capacity requirement will be applied
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
@@ -31,8 +29,6 @@ mutable struct MinimumCapacityRequirements <: Requirement
     name::String
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
-    "ID for individual policy"
-    id::Int64
     "Minimum total capacity across all eligible resources (MW)"
     min_capacity_mw::Float64
     "Year in which the capacity requirement will be applied"
@@ -44,16 +40,14 @@ mutable struct MinimumCapacityRequirements <: Requirement
 end
 
 
-function MinimumCapacityRequirements(; name, available, id, min_capacity_mw=0.0, target_year=2050, ext=Dict(), internal=InfrastructureSystemsInternal(), )
-    MinimumCapacityRequirements(name, available, id, min_capacity_mw, target_year, ext, internal, )
+function MinimumCapacityRequirements(; name, available, min_capacity_mw=0.0, target_year=2050, ext=Dict(), internal=InfrastructureSystemsInternal(), )
+    MinimumCapacityRequirements(name, available, min_capacity_mw, target_year, ext, internal, )
 end
 
 """Get [`MinimumCapacityRequirements`](@ref) `name`."""
 get_name(value::MinimumCapacityRequirements) = value.name
 """Get [`MinimumCapacityRequirements`](@ref) `available`."""
 get_available(value::MinimumCapacityRequirements) = value.available
-"""Get [`MinimumCapacityRequirements`](@ref) `id`."""
-get_id(value::MinimumCapacityRequirements) = value.id
 """Get [`MinimumCapacityRequirements`](@ref) `min_capacity_mw` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_min_capacity_mw_unitful`](@ref)."""
 get_min_capacity_mw(value::MinimumCapacityRequirements, units) = InfrastructureSystems._strip_units(get_value(value, Val(:min_capacity_mw), Val(:mw), units))
 """Get [`MinimumCapacityRequirements`](@ref) `min_capacity_mw` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_min_capacity_mw`](@ref)."""
@@ -71,8 +65,6 @@ get_internal(value::MinimumCapacityRequirements) = value.internal
 set_name!(value::MinimumCapacityRequirements, val) = value.name = val
 """Set [`MinimumCapacityRequirements`](@ref) `available`."""
 set_available!(value::MinimumCapacityRequirements, val) = value.available = val
-"""Set [`MinimumCapacityRequirements`](@ref) `id`."""
-set_id!(value::MinimumCapacityRequirements, val) = value.id = val
 """Set [`MinimumCapacityRequirements`](@ref) `min_capacity_mw`."""
 set_min_capacity_mw!(value::MinimumCapacityRequirements, val, unit) = value.min_capacity_mw = set_value(value, Val(:min_capacity_mw), val, unit, Val(:mw))
 """Set [`MinimumCapacityRequirements`](@ref) `target_year`."""
@@ -88,7 +80,6 @@ function from_openapi(po::PI.MinimumCapacityRequirements, refs::OpenAPIRefs)
     return MinimumCapacityRequirements(;
         name = po.name,
         available = po.available,
-        id = po.id,
         min_capacity_mw = po.min_capacity_mw,
         target_year = po.target_year,
     )
@@ -96,9 +87,9 @@ end
 
 function to_openapi(value::MinimumCapacityRequirements, refs::OpenAPIRefs)
     return PI.MinimumCapacityRequirements(;
+        id = get_id(value),
         name = get_name(value),
         available = get_available(value),
-        id = get_id(value),
         min_capacity_mw = get_min_capacity_mw(value, IS.NU),
         target_year = get_target_year(value),
     )

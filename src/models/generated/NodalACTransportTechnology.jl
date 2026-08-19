@@ -7,7 +7,6 @@ This file is auto-generated. Do not edit.
 """
     mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
         name::String
-        id::Int64
         available::Bool
         power_systems_type::String
         start_node::Node
@@ -28,7 +27,6 @@ Nodal representation of candidate AC transmission lines between two regions.
 
 # Arguments
 - `name::String`: Name
-- `id::Int64`: Numerical Index for AC transport technologies
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `start_node::Node`: Start node for transport technology
@@ -47,8 +45,6 @@ Nodal representation of candidate AC transmission lines between two regions.
 mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
     "Name"
     name::String
-    "Numerical Index for AC transport technologies"
-    id::Int64
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Corresponding type in PowerSystems.jl to be used in PCM modeling"
@@ -80,14 +76,12 @@ mutable struct NodalACTransportTechnology{T <: PSY.Device} <: TransmissionTechno
 end
 
 
-function NodalACTransportTechnology{T}(; name, id, available, power_systems_type, start_node, end_node, capacity_limits=(min=0, max=1e8), unit_size=1.0, capital_costs=LinearCurve(0.0), resistance=1.0, voltage=230.0, reactance=1.0, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Device
-    NodalACTransportTechnology{T}(name, id, available, power_systems_type, start_node, end_node, capacity_limits, unit_size, capital_costs, resistance, voltage, reactance, requirements, financial_data, ext, internal, )
+function NodalACTransportTechnology{T}(; name, available, power_systems_type, start_node, end_node, capacity_limits=(min=0, max=1e8), unit_size=1.0, capital_costs=LinearCurve(0.0), resistance=1.0, voltage=230.0, reactance=1.0, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Device
+    NodalACTransportTechnology{T}(name, available, power_systems_type, start_node, end_node, capacity_limits, unit_size, capital_costs, resistance, voltage, reactance, requirements, financial_data, ext, internal, )
 end
 
 """Get [`NodalACTransportTechnology`](@ref) `name`."""
 get_name(value::NodalACTransportTechnology) = value.name
-"""Get [`NodalACTransportTechnology`](@ref) `id`."""
-get_id(value::NodalACTransportTechnology) = value.id
 """Get [`NodalACTransportTechnology`](@ref) `available`."""
 get_available(value::NodalACTransportTechnology) = value.available
 """Get [`NodalACTransportTechnology`](@ref) `power_systems_type`."""
@@ -143,8 +137,6 @@ get_internal(value::NodalACTransportTechnology) = value.internal
 
 """Set [`NodalACTransportTechnology`](@ref) `name`."""
 set_name!(value::NodalACTransportTechnology, val) = value.name = val
-"""Set [`NodalACTransportTechnology`](@ref) `id`."""
-set_id!(value::NodalACTransportTechnology, val) = value.id = val
 """Set [`NodalACTransportTechnology`](@ref) `available`."""
 set_available!(value::NodalACTransportTechnology, val) = value.available = val
 """Set [`NodalACTransportTechnology`](@ref) `power_systems_type`."""
@@ -179,7 +171,6 @@ function from_openapi(po::PI.NodalACTransportTechnology, refs::OpenAPIRefs)
     parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
     return NodalACTransportTechnology{parameter}(;
         name = po.name,
-        id = po.id,
         available = po.available,
         power_systems_type = po.power_systems_type,
         start_node = resolve_ref(refs, po.start_node, Node),
@@ -197,8 +188,8 @@ end
 
 function to_openapi(value::NodalACTransportTechnology{T}, refs::OpenAPIRefs) where {T <: PSY.Device}
     return PI.NodalACTransportTechnology(;
-        name = get_name(value),
         id = get_id(value),
+        name = get_name(value),
         available = get_available(value),
         power_systems_type = string(nameof(T)),
         start_node = component_id(refs, get_start_node(value)),

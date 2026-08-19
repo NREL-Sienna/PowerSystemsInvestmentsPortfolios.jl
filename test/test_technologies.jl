@@ -25,13 +25,13 @@
         tax_rate=0.21,
     )
 
-    zone_a = Zone(name="zone_a", id=1)
-    zone_b = Zone(name="zone_b", id=2)
-    node_a = Node(name="node_a", id=11)
-    node_b = Node(name="node_b", id=12)
+    zone_a = Zone(name="zone_a")
+    zone_b = Zone(name="zone_b")
+    node_a = Node(name="node_a")
+    node_b = Node(name="node_b")
 
-    req_a = CarbonTax(name="req_a", id=801, available=true)
-    req_b = CarbonCaps(name="req_b", id=802, available=true)
+    req_a = CarbonTax(name="req_a", available=true)
+    req_b = CarbonCaps(name="req_b", available=true)
 
     # Zone: name, internal, id, ext
     zone_internal = IS.InfrastructureSystemsInternal()
@@ -61,7 +61,6 @@
 
     supply = SupplyTechnology{PSY.ThermalStandard}(
         name="supply",
-        id=10,
         financial_data=tech_financial_data,
         power_systems_type="ThermalStandard",
         operation_costs=thermal_cost,
@@ -90,7 +89,6 @@
     PSIP.set_capital_costs!(supply, supply_capital, IS.NU)
     PSIP.set_lifetime!(supply, 35, IS.NU)
     PSIP.set_name!(supply, "supply_updated")
-    PSIP.set_id!(supply, 110)
     PSIP.set_available!(supply, false)
     PSIP.set_co2!(supply, supply_co2, tonne / MMBtu)
     PSIP.set_cofire_start_limits!(supply, supply_cofire_start)
@@ -101,6 +99,7 @@
     PSIP.set_power_systems_type!(supply, "ThermalStandardUpdated")
     PSIP.set_cofire_level_limits!(supply, supply_cofire_level)
     PSIP.set_internal!(supply, supply_internal)
+    PSIP.set_id!(supply, 110)
     PSIP.set_ext!(supply, supply_ext)
     PSIP.set_region!(supply, supply_regions)
     PSIP.set_min_generation_fraction!(supply, 0.15)
@@ -136,7 +135,6 @@
 
     storage = StorageTechnology{PSY.EnergyReservoirStorage}(
         name="storage",
-        id=20,
         storage_tech=StorageTech.LIB,
         financial_data=tech_financial_data,
         operation_costs=storage_cost,
@@ -157,7 +155,6 @@
     PSIP.set_prime_mover_type!(storage, PrimeMovers.BT)
     PSIP.set_lifetime!(storage, 28, IS.NU)
     PSIP.set_name!(storage, "storage_updated")
-    PSIP.set_id!(storage, 120)
     PSIP.set_available!(storage, false)
     PSIP.set_min_discharge_fraction!(storage, 0.12)
     PSIP.set_capacity_limits_charge!(storage, (min=3.0, max=400.0), IS.NU)
@@ -169,6 +166,7 @@
     PSIP.set_operation_costs!(storage, storage_cost, IS.NU)
     PSIP.set_power_systems_type!(storage, "EnergyReservoirStorageUpdated")
     PSIP.set_internal!(storage, storage_internal)
+    PSIP.set_id!(storage, 120)
     PSIP.set_ext!(storage, storage_ext)
     PSIP.set_region!(storage, storage_regions)
     PSIP.set_capacity_limits_energy!(storage, (min=10.0, max=1000.0), IS.NU)
@@ -217,7 +215,6 @@
 
     demand_requirement = DemandRequirement{PSY.PowerLoad}(
         name="demand_requirement",
-        id=30,
         power_systems_type="PowerLoad",
         value_of_lost_load=1000.0,
         available=true,
@@ -232,13 +229,13 @@
     # DemandRequirement: all fields
     PSIP.set_requirements!(demand_requirement, demand_req_requirements)
     PSIP.set_name!(demand_requirement, "demand_requirement_updated")
-    PSIP.set_id!(demand_requirement, 130)
     PSIP.set_available!(demand_requirement, false)
     PSIP.set_conformity!(demand_requirement, PSY.LoadConformity.NON_CONFORMING)
     PSIP.set_growth_rate!(demand_requirement, 0.03)
     PSIP.set_power_systems_type!(demand_requirement, "PowerLoadUpdated")
     PSIP.set_value_of_lost_load!(demand_requirement, 1200.0, IS.NU)
     PSIP.set_internal!(demand_requirement, demand_req_internal)
+    PSIP.set_id!(demand_requirement, 130)
     PSIP.set_ext!(demand_requirement, demand_req_ext)
     PSIP.set_region!(demand_requirement, demand_req_regions)
     PSIP.set_unserved_demand_curve!(demand_requirement, demand_req_curve, IS.NU)
@@ -262,7 +259,6 @@
 
     demand_side = DemandSideTechnology{PSY.PowerLoad}(
         name="demand_side",
-        id=40,
         power_systems_type="PowerLoad",
         available=true,
         region=[zone_a],
@@ -279,7 +275,6 @@
     PSIP.set_requirements!(demand_side, demand_side_requirements)
     PSIP.set_price_per_unit!(demand_side, demand_side_price, IS.NU)
     PSIP.set_name!(demand_side, "demand_side_updated")
-    PSIP.set_id!(demand_side, 140)
     PSIP.set_available!(demand_side, false)
     PSIP.set_shift_variable_cost!(demand_side, demand_side_shift_cost, IS.NU)
     PSIP.set_curtailment_cost!(demand_side, demand_side_curtailment, IS.NU)
@@ -290,6 +285,7 @@
     PSIP.set_max_demand_delay!(demand_side, 8.0, IS.NU)
     PSIP.set_power_systems_type!(demand_side, "PowerLoadUpdated")
     PSIP.set_internal!(demand_side, demand_side_internal)
+    PSIP.set_id!(demand_side, 140)
     PSIP.set_ext!(demand_side, demand_side_ext)
     PSIP.set_region!(demand_side, demand_side_regions)
     PSIP.set_min_power!(demand_side, 0.1)
@@ -316,7 +312,6 @@
 
     aggregate_transport = AggregateTransportTechnology{PSY.ACBranch}(
         name="aggregate_transport",
-        id=50,
         start_region=zone_a,
         end_region=zone_b,
         financial_data=tech_financial_data,
@@ -333,11 +328,11 @@
     PSIP.set_start_region!(aggregate_transport, zone_b)
     PSIP.set_capital_costs!(aggregate_transport, aggregate_capital, IS.NU)
     PSIP.set_name!(aggregate_transport, "aggregate_transport_updated")
-    PSIP.set_id!(aggregate_transport, 150)
     PSIP.set_end_region!(aggregate_transport, node_a)
     PSIP.set_financial_data!(aggregate_transport, tech_financial_data)
     PSIP.set_power_systems_type!(aggregate_transport, "ACBranchUpdated")
     PSIP.set_internal!(aggregate_transport, aggregate_internal)
+    PSIP.set_id!(aggregate_transport, 150)
     PSIP.set_ext!(aggregate_transport, aggregate_ext)
     PSIP.set_unit_size!(aggregate_transport, 3.0, IS.NU)
     PSIP.set_available!(aggregate_transport, false)
@@ -361,7 +356,6 @@
 
     nodal_ac_transport = NodalACTransportTechnology{PSY.ACBranch}(
         name="nodal_ac_transport",
-        id=60,
         start_node=node_a,
         end_node=node_b,
         financial_data=tech_financial_data,
@@ -378,11 +372,11 @@
     PSIP.set_capital_costs!(nodal_ac_transport, nodal_ac_capital, IS.NU)
     PSIP.set_name!(nodal_ac_transport, "nodal_ac_transport_updated")
     PSIP.set_end_node!(nodal_ac_transport, node_a)
-    PSIP.set_id!(nodal_ac_transport, 160)
     PSIP.set_financial_data!(nodal_ac_transport, tech_financial_data)
     PSIP.set_start_node!(nodal_ac_transport, node_b)
     PSIP.set_power_systems_type!(nodal_ac_transport, "ACBranchUpdated")
     PSIP.set_internal!(nodal_ac_transport, nodal_ac_internal)
+    PSIP.set_id!(nodal_ac_transport, 160)
     PSIP.set_ext!(nodal_ac_transport, nodal_ac_ext)
     PSIP.set_available!(nodal_ac_transport, false)
     PSIP.set_reactance!(nodal_ac_transport, 2.5, IS.NU)
@@ -410,7 +404,6 @@
 
     nodal_hvdc_transport = NodalHVDCTransportTechnology{PSY.ACBranch}(
         name="nodal_hvdc_transport",
-        id=70,
         start_node=node_a,
         end_node=node_b,
         financial_data=tech_financial_data,
@@ -428,11 +421,11 @@
     PSIP.set_capital_costs!(nodal_hvdc_transport, nodal_hvdc_capital, IS.NU)
     PSIP.set_name!(nodal_hvdc_transport, "nodal_hvdc_transport_updated")
     PSIP.set_end_node!(nodal_hvdc_transport, zone_b)
-    PSIP.set_id!(nodal_hvdc_transport, 170)
     PSIP.set_financial_data!(nodal_hvdc_transport, tech_financial_data)
     PSIP.set_start_node!(nodal_hvdc_transport, node_b)
     PSIP.set_power_systems_type!(nodal_hvdc_transport, "HVDCUpdated")
     PSIP.set_internal!(nodal_hvdc_transport, nodal_hvdc_internal)
+    PSIP.set_id!(nodal_hvdc_transport, 170)
     PSIP.set_ext!(nodal_hvdc_transport, nodal_hvdc_ext)
     PSIP.set_available!(nodal_hvdc_transport, false)
     PSIP.set_unit_size!(nodal_hvdc_transport, 5.0, IS.NU)
@@ -456,7 +449,6 @@
 
     colocated_supply_storage = ColocatedSupplyStorageTechnology{PSY.RenewableDispatch}(
         name="colocated_supply_storage",
-        id=80,
         financial_data=tech_financial_data,
         power_systems_type="RenewableDispatch",
         operation_costs_power=storage_cost,
@@ -516,7 +508,6 @@
     )
     PSIP.set_duration_limits!(colocated_supply_storage, (min=2.0, max=10.0), IS.NU)
     PSIP.set_min_inverter_capacity!(colocated_supply_storage, 15.0, IS.NU)
-    PSIP.set_id!(colocated_supply_storage, 180)
     PSIP.set_operation_costs_energy!(colocated_supply_storage, colocated_energy_cost, IS.NU)
     PSIP.set_capital_costs_energy!(
         colocated_supply_storage,
@@ -534,6 +525,7 @@
     PSIP.set_power_systems_type!(colocated_supply_storage, "RenewableDispatchUpdated")
     PSIP.set_capacity_limits_solar!(colocated_supply_storage, (min=12.0, max=950.0), IS.NU)
     PSIP.set_internal!(colocated_supply_storage, colocated_internal)
+    PSIP.set_id!(colocated_supply_storage, 180)
     PSIP.set_operation_costs_wind!(colocated_supply_storage, colocated_wind_cost, IS.NU)
     PSIP.set_efficiency_storage!(colocated_supply_storage, (in=0.95, out=0.9))
     PSIP.set_ext!(colocated_supply_storage, colocated_ext)

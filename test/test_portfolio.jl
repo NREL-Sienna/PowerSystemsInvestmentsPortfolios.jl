@@ -215,8 +215,8 @@ end
 @testset "Test region and requirement APIs" begin
     port = Portfolio()
 
-    zone = Zone(name="zone_test", id=1)
-    node = Node(name="node_test", id=2)
+    zone = Zone(name="zone_test")
+    node = Node(name="node_test")
     PSIP.add_region!(port, zone)
     PSIP.add_region!(port, node)
 
@@ -225,7 +225,7 @@ end
     @test PSIP.get_region(Zone, port, "zone_test") === zone
     @test PSIP.get_region(Node, port, "node_test") === node
 
-    req = CarbonTax(name="req_test", id=3, available=true)
+    req = CarbonTax(name="req_test", available=true)
     PSIP.add_requirement!(port, req)
     @test PSIP.get_requirement(CarbonTax, port, "req_test") === req
     @test length(collect(PSIP.get_requirements(CarbonTax, port))) == 1
@@ -235,7 +235,7 @@ end
 @testset "Test contributing technologies" begin
     port = build_portfolio()
     tech = first(get_technologies(SupplyTechnology{ThermalStandard}, port))
-    req = CarbonTax(name="req_contrib", id=777, available=true)
+    req = CarbonTax(name="req_contrib", available=true)
     set_requirements!(tech, [req])
 
     contributors = PSIP.get_contributing_technologies(port, req)
@@ -266,7 +266,7 @@ end
     port = build_portfolio()
     zone = first(get_regions(Zone, port))
 
-    attr = TopologyMapping(id=56, buses=["b1", "b2"])
+    attr = TopologyMapping(buses=["b1", "b2"])
     PSIP.add_supplemental_attribute!(port, zone, attr)
 
     attrs_on_component = PSIP.get_supplemental_attributes(TopologyMapping, zone)
@@ -281,7 +281,7 @@ end
     PSIP.remove_supplemental_attribute!(port, zone, attr)
     @test isempty(PSIP.get_supplemental_attributes(TopologyMapping, zone))
 
-    attr3 = TopologyMapping(id=57, buses=["b4"])
+    attr3 = TopologyMapping(buses=["b4"])
     PSIP.add_supplemental_attribute!(port, zone, attr3)
     PSIP.remove_supplemental_attributes!(TopologyMapping, port)
     @test isempty(PSIP.get_supplemental_attributes(TopologyMapping, port))

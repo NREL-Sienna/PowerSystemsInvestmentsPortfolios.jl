@@ -8,7 +8,6 @@ This file is auto-generated. Do not edit.
     mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
         name::String
         region::Vector{RegionTopology}
-        id::Int64
         available::Bool
         power_systems_type::String
         prime_mover_type::PrimeMovers
@@ -39,7 +38,6 @@ Candidate storage technology in a region.
 # Arguments
 - `name::String`: The technology name
 - `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology is operated
-- `id::Int64`: ID for individual storage technology
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover technology according to EIA 923.
@@ -69,8 +67,6 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
     name::String
     "Location where technology is operated"
     region::Vector{RegionTopology}
-    "ID for individual storage technology"
-    id::Int64
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Corresponding type in PowerSystems.jl to be used in PCM modeling"
@@ -120,16 +116,14 @@ mutable struct StorageTechnology{T <: PSY.Storage} <: ResourceTechnology
 end
 
 
-function StorageTechnology{T}(; name, region=Vector(), id, available, power_systems_type, prime_mover_type=PrimeMovers.OT, storage_tech=StorageTech.OTHER_CHEM, capital_costs_energy=LinearCurve(0.0), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), operation_costs=StorageCost(nothing), min_discharge_fraction=0.0, unit_size_charge=nothing, unit_size_discharge=0.0, unit_size_energy=0.0, capacity_limits_charge=nothing, capacity_limits_discharge=(min=0,max=1e8), capacity_limits_energy=(min=0,max=1e8), duration_limits=(min=0,max=60000.0), efficiency=(in=1, out=1), losses=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Storage
-    StorageTechnology{T}(name, region, id, available, power_systems_type, prime_mover_type, storage_tech, capital_costs_energy, capital_costs_charge, capital_costs_discharge, operation_costs, min_discharge_fraction, unit_size_charge, unit_size_discharge, unit_size_energy, capacity_limits_charge, capacity_limits_discharge, capacity_limits_energy, duration_limits, efficiency, losses, lifetime, requirements, financial_data, ext, internal, )
+function StorageTechnology{T}(; name, region=Vector(), available, power_systems_type, prime_mover_type=PrimeMovers.OT, storage_tech=StorageTech.OTHER_CHEM, capital_costs_energy=LinearCurve(0.0), capital_costs_charge=nothing, capital_costs_discharge=LinearCurve(0.0), operation_costs=StorageCost(nothing), min_discharge_fraction=0.0, unit_size_charge=nothing, unit_size_discharge=0.0, unit_size_energy=0.0, capacity_limits_charge=nothing, capacity_limits_discharge=(min=0,max=1e8), capacity_limits_energy=(min=0,max=1e8), duration_limits=(min=0,max=60000.0), efficiency=(in=1, out=1), losses=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Storage
+    StorageTechnology{T}(name, region, available, power_systems_type, prime_mover_type, storage_tech, capital_costs_energy, capital_costs_charge, capital_costs_discharge, operation_costs, min_discharge_fraction, unit_size_charge, unit_size_discharge, unit_size_energy, capacity_limits_charge, capacity_limits_discharge, capacity_limits_energy, duration_limits, efficiency, losses, lifetime, requirements, financial_data, ext, internal, )
 end
 
 """Get [`StorageTechnology`](@ref) `name`."""
 get_name(value::StorageTechnology) = value.name
 """Get [`StorageTechnology`](@ref) `region`."""
 get_region(value::StorageTechnology) = value.region
-"""Get [`StorageTechnology`](@ref) `id`."""
-get_id(value::StorageTechnology) = value.id
 """Get [`StorageTechnology`](@ref) `available`."""
 get_available(value::StorageTechnology) = value.available
 """Get [`StorageTechnology`](@ref) `power_systems_type`."""
@@ -229,8 +223,6 @@ get_internal(value::StorageTechnology) = value.internal
 set_name!(value::StorageTechnology, val) = value.name = val
 """Set [`StorageTechnology`](@ref) `region`."""
 set_region!(value::StorageTechnology, val) = value.region = val
-"""Set [`StorageTechnology`](@ref) `id`."""
-set_id!(value::StorageTechnology, val) = value.id = val
 """Set [`StorageTechnology`](@ref) `available`."""
 set_available!(value::StorageTechnology, val) = value.available = val
 """Set [`StorageTechnology`](@ref) `power_systems_type`."""
@@ -284,7 +276,6 @@ function from_openapi(po::PI.StorageTechnology, refs::OpenAPIRefs)
     return StorageTechnology{parameter}(;
         name = po.name,
         region = resolve_refs(refs, po.region, RegionTopology),
-        id = po.id,
         available = po.available,
         power_systems_type = po.power_systems_type,
         prime_mover_type = PrimeMovers(po.prime_mover_type),
@@ -311,9 +302,9 @@ end
 
 function to_openapi(value::StorageTechnology{T}, refs::OpenAPIRefs) where {T <: PSY.Storage}
     return PI.StorageTechnology(;
+        id = get_id(value),
         name = get_name(value),
         region = component_ids(refs, get_region(value)),
-        id = get_id(value),
         available = get_available(value),
         power_systems_type = string(nameof(T)),
         prime_mover_type = string(get_prime_mover_type(value)),

@@ -8,7 +8,6 @@ This file is auto-generated. Do not edit.
     mutable struct CarbonCaps <: Requirement
         name::String
         available::Bool
-        id::Int64
         max_tons_mwh::Float64
         target_year::Int64
         max_mtons::Float64
@@ -21,7 +20,6 @@ Defines limits to the amount of carbon produced. Can be defined either by the to
 # Arguments
 - `name::String`: The requirement name
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
-- `id::Int64`: ID for individual policy
 - `max_tons_mwh::Float64`: (default: `1e-6`) Emission limit in terms of rate. Units: Mt/MWh.
 - `target_year::Int64`: (default: `2050`) Year in which carbon cap will be applied
 - `max_mtons::Float64`: (default: `1e8`) Emission limit in absolute values (million tonnes). Units: Mt.
@@ -33,8 +31,6 @@ mutable struct CarbonCaps <: Requirement
     name::String
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
-    "ID for individual policy"
-    id::Int64
     "Emission limit in terms of rate. Units: Mt/MWh."
     max_tons_mwh::Float64
     "Year in which carbon cap will be applied"
@@ -48,16 +44,14 @@ mutable struct CarbonCaps <: Requirement
 end
 
 
-function CarbonCaps(; name, available, id, max_tons_mwh=1e-6, target_year=2050, max_mtons=1e8, ext=Dict(), internal=InfrastructureSystemsInternal(), )
-    CarbonCaps(name, available, id, max_tons_mwh, target_year, max_mtons, ext, internal, )
+function CarbonCaps(; name, available, max_tons_mwh=1e-6, target_year=2050, max_mtons=1e8, ext=Dict(), internal=InfrastructureSystemsInternal(), )
+    CarbonCaps(name, available, max_tons_mwh, target_year, max_mtons, ext, internal, )
 end
 
 """Get [`CarbonCaps`](@ref) `name`."""
 get_name(value::CarbonCaps) = value.name
 """Get [`CarbonCaps`](@ref) `available`."""
 get_available(value::CarbonCaps) = value.available
-"""Get [`CarbonCaps`](@ref) `id`."""
-get_id(value::CarbonCaps) = value.id
 """Get [`CarbonCaps`](@ref) `max_tons_mwh` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_max_tons_mwh_unitful`](@ref)."""
 get_max_tons_mwh(value::CarbonCaps, units) = InfrastructureSystems._strip_units(get_value(value, Val(:max_tons_mwh), Val(:mt_per_mwh), units))
 """Get [`CarbonCaps`](@ref) `max_tons_mwh` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_max_tons_mwh`](@ref)."""
@@ -81,8 +75,6 @@ get_internal(value::CarbonCaps) = value.internal
 set_name!(value::CarbonCaps, val) = value.name = val
 """Set [`CarbonCaps`](@ref) `available`."""
 set_available!(value::CarbonCaps, val) = value.available = val
-"""Set [`CarbonCaps`](@ref) `id`."""
-set_id!(value::CarbonCaps, val) = value.id = val
 """Set [`CarbonCaps`](@ref) `max_tons_mwh`."""
 set_max_tons_mwh!(value::CarbonCaps, val, unit) = value.max_tons_mwh = set_value(value, Val(:max_tons_mwh), val, unit, Val(:mt_per_mwh))
 """Set [`CarbonCaps`](@ref) `target_year`."""
@@ -100,7 +92,6 @@ function from_openapi(po::PI.CarbonCaps, refs::OpenAPIRefs)
     return CarbonCaps(;
         name = po.name,
         available = po.available,
-        id = po.id,
         max_tons_mwh = po.max_tons_mwh,
         target_year = po.target_year,
         max_mtons = po.max_mtons,
@@ -109,9 +100,9 @@ end
 
 function to_openapi(value::CarbonCaps, refs::OpenAPIRefs)
     return PI.CarbonCaps(;
+        id = get_id(value),
         name = get_name(value),
         available = get_available(value),
-        id = get_id(value),
         max_tons_mwh = get_max_tons_mwh(value, IS.NU),
         target_year = get_target_year(value),
         max_mtons = get_max_mtons(value, IS.NU),

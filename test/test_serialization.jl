@@ -47,7 +47,7 @@ end
     name = "my_portfolio"
     description = "test"
     port = Portfolio(; financial_data=financial_data, name=name, description=description)
-    zone = Zone(; name="zone1", id=1)
+    zone = Zone(; name="zone1")
     base_sys = get_base_system(port)
     test_bus = ACBus(nothing)
     set_bustype!(test_bus, ACBusTypes.REF)
@@ -57,7 +57,6 @@ end
     gen = SupplyTechnology{ThermalStandard}(;
         name="gen1",
         region=[zone],
-        id=2,
         available=true,
         financial_data=TechnologyFinancialData(;
             capital_recovery_period=30,

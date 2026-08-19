@@ -268,8 +268,9 @@ function from_dict(
         description=description,
         parsed_kwargs...,
     )
-    # One registry for the whole document: attributes and components share an id space, so
-    # a collision between the two families is caught rather than silently overwritten.
+    # The cross-reference registry for the whole document. Only components are referenced
+    # (technologies point at regions and requirements), so only components are registered;
+    # attributes resolve nothing and share an independent id stream, so they stay out of it.
     refs = OpenAPIRefs()
     deserialize_attributes!(
         portfolio,
@@ -444,9 +445,14 @@ function deserialize_attributes!(portfolio::Portfolio, data::Dict, refs::OpenAPI
         for raw_attribute in pop!(by_type, attribute_type)
             po = OpenAPI.from_json(_openapi_wire_type(attribute_type), raw_attribute)
             attribute = from_openapi(po, refs)
-            # The document id IS the attribute's own `id` field, and `_adopt_domain_id!`
-            # makes it the stored identity, which the store's association rows name.
-            id = get_id(_adopt_domain_id!(attribute))
+            # The wire carries the document id in `po.id`. Stamp it onto the attribute's
+            # internal identity so it becomes the stored id the store's association rows
+            # name; without it the attribute would be silently lost on reload. Attributes
+            # are never the target of a cross-reference, so they are not registered in
+            # `refs` — and must not be, since an attribute may legitimately share a numeric
+            # id with a component (the two families have independent id streams).
+            IS.set_id!(attribute, Int(po.id))
+            id = get_id(attribute)
             if !haskey(mgr.data, attribute_type)
                 mgr.data[attribute_type] = Dict{Int, IS.SupplementalAttribute}()
             end
@@ -458,7 +464,6 @@ function deserialize_attributes!(portfolio::Portfolio, data::Dict, refs::OpenAPI
             end
             mgr.data[attribute_type][id] = attribute
             IS.set_shared_system_references!(attribute, shared_references)
-            refs[id] = attribute
         end
     end
     _reject_unplanned_types(
@@ -482,12 +487,13 @@ function deserialize_components!(portfolio::Portfolio, raw, refs::OpenAPIRefs)
             handle_deserialization_special_cases!(raw_component, psip_type)
             po = OpenAPI.from_json(_openapi_wire_type(psip_type), raw_component)
             component = from_openapi(po, refs)
+            # The wire carries the document id in `po.id`; `from_openapi` does not read it
+            # because id is no longer a struct field. Stamp it onto the component's internal
+            # identity before adding so `IS.add_component!` keeps it (rather than assigning a
+            # fresh sequential id) and the document's references resolve against it.
+            IS.set_id!(component, Int(po.id))
             #TODO: skip_validation currently set to true, review the IS validation
-            IS.add_component!(
-                portfolio.data,
-                _adopt_domain_id!(component);
-                skip_validation=true,
-            )
+            IS.add_component!(portfolio.data, component; skip_validation=true)
             # Registered after conversion, never before: a component cannot reference
             # itself, and registering first would mask a DOCUMENT_PLAN ordering bug.
             refs[get_id(component)] = component

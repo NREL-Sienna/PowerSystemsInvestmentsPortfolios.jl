@@ -5,13 +5,13 @@ function build_portfolio()
     ###### Zones ######
     ###################
 
-    z1 = Zone(name="Zone_1", id=1)
+    z1 = Zone(name="Zone_1")
 
-    z2 = Zone(name="Zone_2", id=2)
+    z2 = Zone(name="Zone_2")
 
-    n1 = Node(name="node1", id=3)
+    n1 = Node(name="node1")
 
-    n2 = Node(name="node2", id=4)
+    n2 = Node(name="node2")
 
     ###################
     ### Time Series ###
@@ -80,7 +80,6 @@ function build_portfolio()
     t_th = SupplyTechnology{PSY.ThermalStandard}(;
         prime_mover_type=PrimeMovers.ST,
         capital_costs=LinearCurve(coal_igcc_capex * 1000.0),
-        id=21,
         available=true,
         name="cheap_thermal",
         fuel=[ThermalFuels.COAL],
@@ -101,7 +100,6 @@ function build_portfolio()
     t_th_exp = SupplyTechnology{PSY.ThermalStandard}(;
         prime_mover_type=PrimeMovers.ST,
         capital_costs=LinearCurve(coal_new_capex * 1000.0),
-        id=22,
         available=true,
         name="expensive_thermal",
         fuel=[ThermalFuels.COAL],
@@ -168,7 +166,6 @@ function build_portfolio()
     t_wind = SupplyTechnology{PSY.RenewableDispatch}(;
         prime_mover_type=PrimeMovers.WT,
         capital_costs=LinearCurve(wind_capex * 1000.0), # to $/MW
-        id=23,
         available=true,
         name="wind",
         fuel=[ThermalFuels.OTHER],
@@ -229,7 +226,6 @@ function build_portfolio()
     t_pv1 = SupplyTechnology{PSY.RenewableDispatch}(;
         prime_mover_type=PrimeMovers.PVe,
         capital_costs=LinearCurve(pv_capex * 1000.0), # to $/MW
-        id=24,
         available=true,
         name="PV1",
         fuel=[ThermalFuels.OTHER],
@@ -249,7 +245,6 @@ function build_portfolio()
     t_pv2 = SupplyTechnology{PSY.RenewableDispatch}(;
         prime_mover_type=PrimeMovers.PVe,
         capital_costs=LinearCurve(pv_capex * 1000.0), # to $/MW
-        id=5,
         available=true,
         name="PV2",
         fuel=[ThermalFuels.OTHER],
@@ -272,23 +267,17 @@ function build_portfolio()
 
     thermal = collect(get_components(ThermalStandard, sys))
 
-    retro1 = AggregateRetrofitPotential(id=50, retrofit_id=1, retrofit_fraction=0.5)
+    retro1 = AggregateRetrofitPotential(retrofit_id=1, retrofit_fraction=0.5)
 
-    retire1 = AggregateRetirementPotential(id=51, retirement_potential=100.0)
+    retire1 = AggregateRetirementPotential(retirement_potential=100.0)
 
-    retro2 = RetrofitPotential(
-        id=52,
-        eligible_generators=[PSY.get_name(t) for t in thermal[1:3]],
-    )
+    retro2 = RetrofitPotential(eligible_generators=[PSY.get_name(t) for t in thermal[1:3]])
 
-    retire2 = RetirementPotential(
-        id=53,
-        eligible_generators=[PSY.get_name(t) for t in thermal[4:5]],
-    )
+    retire2 =
+        RetirementPotential(eligible_generators=[PSY.get_name(t) for t in thermal[4:5]])
 
-    existing =
-        ExistingDevices(id=54, existing_devices=[PSY.get_name(t) for t in thermal[1:3]])
-    existing2 = ExistingDevices(id=55, existing_devices=["Solitude", "dummy name", "Alta"])
+    existing = ExistingDevices(existing_devices=[PSY.get_name(t) for t in thermal[1:3]])
+    existing2 = ExistingDevices(existing_devices=["Solitude", "dummy name", "Alta"])
 
     ########################
     ######## Storage #######
@@ -297,7 +286,6 @@ function build_portfolio()
     stor_kwh_capex = 745.25 #$/kW
     t_stor = StorageTechnology{PSY.EnergyReservoirStorage}(;
         name="test_storage",
-        id=6,
         region=[z1],
         storage_tech=StorageTech.LIB,
         capacity_limits_discharge=(0.0, 300.0),
@@ -358,7 +346,6 @@ function build_portfolio()
     t_demand_b = DemandRequirement{PSY.PowerLoad}(
         #load_growth=0.05,
         name="demand_b",
-        id=7,
         available=true,
         power_systems_type="PowerLoad",
         region=[z1],
@@ -380,7 +367,6 @@ function build_portfolio()
     t_demand_c = DemandRequirement{PSY.PowerLoad}(
         #load_growth=0.05,
         name="demand_c",
-        id=8,
         available=true,
         power_systems_type="PowerLoad",
         region=[z1],
@@ -395,7 +381,6 @@ function build_portfolio()
 
     t_demand_d = DemandRequirement{PSY.PowerLoad}(
         name="demand_d",
-        id=9,
         available=true,
         power_systems_type="PowerLoad",
         region=[z2],
@@ -406,7 +391,6 @@ function build_portfolio()
         name="test_demand",
         available=true,
         power_systems_type="PowerLoad",
-        id=10,
         region=[z1],
     )
 
@@ -423,7 +407,6 @@ function build_portfolio()
         capital_costs=LinearCurve(5000.0),
         available=true,
         power_systems_type=string(nameof(PSY.ACBranch)),
-        id=11,
         financial_data=tech_financials,
     )
 
@@ -436,13 +419,11 @@ function build_portfolio()
         capital_costs=LinearCurve(5000.0),
         available=true,
         power_systems_type=string(nameof(PSY.ACBranch)),
-        id=12,
         financial_data=tech_financials,
     )
 
     acline = NodalACTransportTechnology{PSY.ACBranch}(
         name="test",
-        id=13,
         available=true,
         power_systems_type=string(nameof(PSY.ACBranch)),
         capacity_limits=(min=0, max=900),
@@ -466,28 +447,19 @@ function build_portfolio()
     ##### Requirements #####
     ########################
 
-    carbon_tax = CarbonTax(; name="test_tax", id=14, available=true, target_year=2030)
-    carbon_cap = CarbonCaps(; name="test_cap", id=15, available=true, target_year=2030)
+    carbon_tax = CarbonTax(; name="test_tax", available=true, target_year=2030)
+    carbon_cap = CarbonCaps(; name="test_cap", available=true, target_year=2030)
 
-    crm = CapacityReserveMargin(; name="test_crm", id=16, available=true, target_year=2030)
+    crm = CapacityReserveMargin(; name="test_crm", available=true, target_year=2030)
 
-    matching = HourlyMatching(; name="hourly_matching", id=17, available=true)
-    max_req = MaximumCapacityRequirements(;
-        name="test_max",
-        id=18,
-        available=true,
-        target_year=2030,
-    )
-    min_req = MinimumCapacityRequirements(;
-        name="test_min",
-        id=19,
-        available=true,
-        target_year=2030,
-    )
+    matching = HourlyMatching(; name="hourly_matching", available=true)
+    max_req =
+        MaximumCapacityRequirements(; name="test_max", available=true, target_year=2030)
+    min_req =
+        MinimumCapacityRequirements(; name="test_min", available=true, target_year=2030)
 
     esr = EnergyShareRequirements(;
         name="test_esr",
-        id=20,
         available=true,
         generation_fraction_requirement=0.5,
     )

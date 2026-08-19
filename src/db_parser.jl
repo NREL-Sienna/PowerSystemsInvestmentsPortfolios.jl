@@ -562,7 +562,8 @@ end
 
 function add_zones!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, stmts::Dict)
     for rec in DBInterface.execute(stmts[:zones])
-        z = Zone(; name=rec.name, id=rec.id)
+        z = Zone(; name=rec.name)
+        IS.set_id!(z, rec.id)
         add_region!(p, z)
     end
 end
@@ -573,7 +574,8 @@ function add_nodes!(
     stmts::Dict,
 )
     for rec in DBInterface.execute(stmts[:balancing_topologies])
-        z = Node(; name=rec.name, id=rec.id)
+        z = Node(; name=rec.name)
+        IS.set_id!(z, rec.id)
         add_region!(portfolio, z)
     end
 end
@@ -627,7 +629,6 @@ function add_aggregate_lines!(
         area_from_id = parse(Int64, rec.area_from)
         t = AggregateTransportTechnology{ACBranch}(;
             name=string(rec.rowid),
-            id=next_id!(ids),
             available=component_attr["available"],
             base_power=100.0,
             power_systems_type=string(nameof(ACBranch)),
@@ -649,6 +650,7 @@ function add_aggregate_lines!(
             capacity_limits=(min=0.0, max=max(rec.max_flow_from, rec.max_flow_to)),
             capital_costs=LinearCurve(1e5),
         )
+        IS.set_id!(t, next_id!(ids))
         add_technology!(portfolio, t)
     end
 end
@@ -668,7 +670,6 @@ function add_nodal_lines!(
             first(DBInterface.execute(stmts[:topology_from_arc], [arc.to_id])).name
         transport = NodalACTransportTechnology{ACBranch}(;
             name=string(rec.arc_id) * "_newline",
-            id=rec.id,
             available=true,
             power_systems_type=string(nameof(ACBranch)),
             financial_data=DEFAULT_FINANCIAL_DATA,
@@ -679,6 +680,7 @@ function add_nodal_lines!(
             capital_costs=LinearCurve(1e5),
             unit_size=component_attr["unit_size"],
         )
+        IS.set_id!(transport, rec.id)
         add_technology!(portfolio, transport)
     end
 end
@@ -705,7 +707,6 @@ function add_technologies!(
         if rec.prime_mover == "STORAGE"
             technology = StorageTechnology{parametric}(;
                 name=rec.prime_mover * string(rec.id),
-                id=next_id!(ids),
                 capital_costs_discharge=LinearCurve(0.0),
                 prime_mover_type=get(PRIME_MOVER_MAPPING, rec.prime_mover, PrimeMovers.OT),
                 storage_tech=get(STORAGE_MAPPING, rec.fuel, StorageTech.OTHER_THERM),
@@ -715,13 +716,13 @@ function add_technologies!(
                 power_systems_type=string(nameof(parametric)),
                 operation_costs=StorageCost(),
             )
+            IS.set_id!(technology, next_id!(ids))
         elseif rec.prime_mover in ["HYDRO", "ROR", "SYNC_COND"]
             @warn "Technologies of type $(rec.prime_mover) are not currently supported in portfolios. Skipping de-serialization."
             continue
         else
             technology = SupplyTechnology{parametric}(;
                 name=rec.prime_mover * string(rec.id),
-                id=next_id!(ids),
                 capital_costs=LinearCurve(0.0),
                 prime_mover_type=get(PRIME_MOVER_MAPPING, rec.prime_mover, PrimeMovers.OT),
                 fuel=[get(FUEL_MAPPING, rec.fuel, ThermalFuels.OTHER)],
@@ -737,6 +738,7 @@ function add_technologies!(
                     shut_down=0.0,
                 ),
             )
+            IS.set_id!(technology, next_id!(ids))
         end
         add_technology!(portfolio, technology)
     end
@@ -991,7 +993,6 @@ function add_generation_units!(
             end
             technology = SupplyTechnology{component_type}(;
                 name=rec.name,
-                id=rec.id,
                 capital_costs=LinearCurve(0.0),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
                 fuel=[fuel],
@@ -1005,8 +1006,10 @@ function add_generation_units!(
                 capacity_limits=(min=0, max=rec.rating),
                 co2=Dict(fuel => 0.0),
             )
+            IS.set_id!(technology, rec.id)
             add_technology!(portfolio, technology)
-            existing = ExistingDevices(id=rec.id, existing_devices=[rec.name])
+            existing = ExistingDevices(existing_devices=[rec.name])
+            IS.set_id!(existing, rec.id)
             add_supplemental_attribute!(portfolio, technology, existing)
 
             set_capacity_limits!(
@@ -1101,7 +1104,6 @@ function add_storage_units!(
         end
         storage = StorageTechnology{component_type}(;
             name=rec.name,
-            id=rec.id,
             capital_costs_discharge=LinearCurve(0.0),
             capital_costs_energy=LinearCurve(0.0),
             prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
@@ -1114,8 +1116,10 @@ function add_storage_units!(
             capacity_limits_discharge=(min=0, max=rec.rating),
             capacity_limits_energy=(min=0, max=component_attr["storage_capacity"]),
         )
+        IS.set_id!(storage, rec.id)
         add_technology!(portfolio, storage)
-        existing = ExistingDevices(id=rec.id, existing_devices=[rec.name])
+        existing = ExistingDevices(existing_devices=[rec.name])
+        IS.set_id!(existing, rec.id)
         add_supplemental_attribute!(portfolio, storage, existing)
     end
 end
@@ -1143,7 +1147,6 @@ function add_demand_requirements!(
 
         demand = DemandRequirement{component_type}(;
             name=rec.name,
-            id=rec.id,
             new_demand_mw=component_attr["active_power"], #TODO: Change to "max_active_power" later when DB is fixed
             region=collect(
                 IS.get_components(x -> get_id(x) == area, RegionTopology, portfolio.data),
@@ -1151,6 +1154,7 @@ function add_demand_requirements!(
             value_of_lost_load=1e8, #TODO: Assign a default value to this field
             power_systems_type=string(nameof(component_type)),
         )
+        IS.set_id!(demand, rec.id)
         add_technology!(portfolio, demand)
     end
 end
@@ -1345,7 +1349,6 @@ function add_system_lines!(
 
             transport = NodalACTransportTechnology{component_type}(;
                 name=rec.name,
-                id=rec.id,
                 available=true,
                 power_systems_type=string(nameof(component_type)),
                 financial_data=DEFAULT_FINANCIAL_DATA,
@@ -1362,8 +1365,10 @@ function add_system_lines!(
                 ),
                 capital_costs=LinearCurve(1e5),
             )
+            IS.set_id!(transport, rec.id)
             add_technology!(portfolio, transport)
-            existing = ExistingDevices(; id=rec.id, existing_devices=[rec.name])
+            existing = ExistingDevices(; existing_devices=[rec.name])
+            IS.set_id!(existing, rec.id)
             add_supplemental_attribute!(portfolio, transport, existing)
             set_capacity_limits!(
                 transport,
@@ -1373,7 +1378,6 @@ function add_system_lines!(
 
             new_transport = NodalACTransportTechnology{component_type}(;
                 name=rec.name * "_new",
-                id=next_id!(ids),
                 available=true,
                 power_systems_type=string(nameof(component_type)),
                 financial_data=DEFAULT_FINANCIAL_DATA,
@@ -1390,6 +1394,7 @@ function add_system_lines!(
                 ),
                 capital_costs=LinearCurve(1e5),
             )
+            IS.set_id!(new_transport, next_id!(ids))
             add_technology!(portfolio, new_transport)
         end
     end
@@ -1400,7 +1405,6 @@ function add_system_lines!(
             area_list = collect(areas)
             transport = AggregateTransportTechnology{ACBranch}(;
                 name=string(area_list[1]) * "_" * string(area_list[2]),
-                id=id,
                 available=true,
                 power_systems_type=string(nameof(ACBranch)),
                 financial_data=DEFAULT_FINANCIAL_DATA,
@@ -1408,9 +1412,11 @@ function add_system_lines!(
                 end_region=get_region(Zone, portfolio, area_list[2]),
                 capital_costs=LinearCurve(1e5),
             )
+            IS.set_id!(transport, id)
             id += 1
             add_technology!(portfolio, transport)
-            existing = ExistingDevices(id=id, existing_devices=lines)
+            existing = ExistingDevices(existing_devices=lines)
+            IS.set_id!(existing, id)
             add_supplemental_attribute!(portfolio, transport, existing)
             id += 1
         end

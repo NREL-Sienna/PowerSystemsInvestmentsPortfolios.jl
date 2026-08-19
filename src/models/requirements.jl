@@ -14,5 +14,7 @@ expansion decisions. Examples include:
 """
 abstract type Requirement <: PSY.Service end
 
+get_id(val::Requirement) = IS.get_id(val)
+set_id!(val::Requirement, id) = IS.set_id!(val, id)
 supports_time_series(::Requirement) = true
 supports_supplemental_attributes(::Requirement) = true

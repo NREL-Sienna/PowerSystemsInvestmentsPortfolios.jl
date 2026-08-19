@@ -99,9 +99,15 @@ The reference targets every technology round trip needs, pre-registered.
 """
 function _refs_fixture()
     refs = PSIP.OpenAPIRefs()
-    zone = Zone(name="zone_a", id=1)
-    node = Node(name="node_a", id=2)
-    req = CarbonTax(name="tax", id=3, available=true)
+    zone = Zone(name="zone_a")
+    node = Node(name="node_a")
+    req = CarbonTax(name="tax", available=true)
+    # Identity now lives in `internal` (assigned by the container on add). These fixtures
+    # never add to a portfolio, so stamp the ids the document walk would have assigned; the
+    # registry keys and the objects' own `get_id` must agree.
+    IS.set_id!(zone, 1)
+    IS.set_id!(node, 2)
+    IS.set_id!(req, 3)
     refs[1] = zone
     refs[2] = node
     refs[3] = req
@@ -126,7 +132,6 @@ end
     refs, zone, _, req = _refs_fixture()
     tech = SupplyTechnology{ThermalStandard}(;
         name="cheap_thermal",
-        id=10,
         available=true,
         power_systems_type="ThermalStandard",
         region=[zone],
@@ -183,7 +188,6 @@ end
     refs, zone, _, _ = _refs_fixture()
     tech = AggregateTransportTechnology{ACBranch}(;
         name="test_branch",
-        id=40,
         available=true,
         power_systems_type="ACBranch",
         start_region=zone,
@@ -207,7 +211,8 @@ end
 
 @testset "supplemental attribute round trip through OpenAPI" begin
     refs = PSIP.OpenAPIRefs()
-    attr = ExistingDevices(id=54, existing_devices=["gen_a", "gen_b"])
+    attr = ExistingDevices(existing_devices=["gen_a", "gen_b"])
+    IS.set_id!(attr, 54)
     refs[54] = attr
     po = PSIP.to_openapi(attr, refs)
     @test po.id == 54
@@ -217,10 +222,9 @@ end
 
 @testset "an unregistered reference errors rather than serializing garbage" begin
     refs = PSIP.OpenAPIRefs()
-    orphan = Zone(name="orphan", id=77)
+    orphan = Zone(name="orphan")
     tech = DemandRequirement{PowerLoad}(;
         name="demand",
-        id=78,
         power_systems_type="PowerLoad",
         value_of_lost_load=1e5,
         region=[orphan],
@@ -236,7 +240,6 @@ end
     refs, zone, _, _ = _refs_fixture()
     tech = StorageTechnology{PSY.EnergyReservoirStorage}(;
         name="battery",
-        id=20,
         available=true,
         power_systems_type="EnergyReservoirStorage",
         region=[zone],
@@ -272,11 +275,13 @@ end
     # built. `_validate_unique_region_id` (src/validation.jl) only covers `RegionTopology`,
     # so this cross-family case is the container's check.
     portfolio = Portfolio()
-    PSIP.add_region!(portfolio, Zone(name="zone_a", id=1))
-    @test_throws ArgumentError PSIP.add_requirement!(
-        portfolio,
-        CarbonTax(name="tax", id=1, available=true),
-    )
+    PSIP.add_region!(portfolio, Zone(name="zone_a"))
+    id = PSIP.get_id(PSIP.get_region(Zone, portfolio, "zone_a"))
+
+    tax = CarbonTax(name="tax", available=true)
+    IS.set_id!(tax, id)
+
+    @test_throws ArgumentError PSIP.add_requirement!(portfolio, tax)
 end
 
 @testset "every generated type has both OpenAPI converters" begin
@@ -317,7 +322,6 @@ end
     )
     supply = SupplyTechnology{ThermalStandard}(;
         name="default_available_supply",
-        id=90,
         power_systems_type="ThermalStandard",
         financial_data=financials,
     )
@@ -325,7 +329,6 @@ end
 
     colocated = ColocatedSupplyStorageTechnology{RenewableDispatch}(;
         name="default_available_colocated",
-        id=91,
         power_systems_type="RenewableDispatch",
         financial_data=financials,
         capital_costs_inverter=LinearCurve(1000.0),
@@ -340,9 +343,12 @@ end
     # Financial data is not optional on the read-back path: `from_dict` indexes into the
     # serialized `financial_data` object, so an empty `Portfolio()` cannot round trip.
     portfolio = Portfolio(2024, 0.07, 0.025, 0.05)
-    zone = Zone(name="zone_a", id=1)
-    zone_b = Zone(name="zone_b", id=2)
-    req = CarbonTax(name="tax", id=3, available=true)
+    zone = Zone(name="zone_a")
+    zone_b = Zone(name="zone_b")
+    req = CarbonTax(name="tax", available=true)
+    IS.set_id!(zone, 1)
+    IS.set_id!(zone_b, 2)
+    IS.set_id!(req, 3)
     PSIP.add_region!(portfolio, zone)
     PSIP.add_region!(portfolio, zone_b)
     PSIP.add_requirement!(portfolio, req)
@@ -356,7 +362,6 @@ end
     )
     tech = SupplyTechnology{ThermalStandard}(;
         name="cheap_thermal",
-        id=10,
         available=true,
         power_systems_type="ThermalStandard",
         region=[zone],
@@ -369,13 +374,13 @@ end
         cofire_level_limits=Dict(ThermalFuels.NATURAL_GAS => (min=0.0, max=1.0)),
         financial_data=financial_data,
     )
+    IS.set_id!(tech, 10)
     PSIP.add_technology!(portfolio, tech)
 
     # A transmission technology exercises the scalar `component_id`/`resolve_ref` path;
     # `SupplyTechnology` above only covers the `component_ids`/`resolve_refs` list form.
     line = AggregateTransportTechnology{PSY.ACBranch}(;
         name="test_branch",
-        id=11,
         available=true,
         power_systems_type="ACBranch",
         start_region=zone,
@@ -385,6 +390,7 @@ end
         capital_costs=LinearCurve(5000.0),
         financial_data=financial_data,
     )
+    IS.set_id!(line, 11)
     PSIP.add_technology!(portfolio, line)
 
     # The only technology whose `operation_costs_*` fields span all three cost shapes the
@@ -393,7 +399,6 @@ end
     # read back at all while the descriptor typed the inverter field `PSY.OperationalCost`.
     colocated = ColocatedSupplyStorageTechnology{PSY.RenewableDispatch}(;
         name="colo",
-        id=12,
         available=true,
         power_systems_type="RenewableDispatch",
         region=[zone],
@@ -412,10 +417,13 @@ end
         inverter_efficiency=0.96,
         inverter_supply_ratio=1.0,
     )
+    IS.set_id!(colocated, 12)
     PSIP.add_technology!(portfolio, colocated)
 
-    retirement = AggregateRetirementPotential(id=51, retirement_potential=100.0)
-    existing = ExistingDevices(id=54, existing_devices=["Solitude", "Alta"])
+    retirement = AggregateRetirementPotential(retirement_potential=100.0)
+    existing = ExistingDevices(existing_devices=["Solitude", "Alta"])
+    IS.set_id!(retirement, 51)
+    IS.set_id!(existing, 54)
     PSIP.add_supplemental_attribute!(portfolio, tech, retirement)
     PSIP.add_supplemental_attribute!(portfolio, line, existing)
 
@@ -517,7 +525,7 @@ end
             aggregation;
             financial_data=PortfolioFinancialData(2024, 0.07, 0.025, 0.05),
         )
-        PSIP.add_region!(portfolio, Zone(name="zone_a", id=1))
+        PSIP.add_region!(portfolio, Zone(name="zone_a"))
         path = joinpath(mktempdir(), "portfolio.json")
         PSIP.to_json(portfolio, path; force=true)
 
@@ -528,7 +536,7 @@ end
 end
 
 @testset "serializing a lone component names the supported entry point" begin
-    zone = Zone(name="orphan", id=1)
+    zone = Zone(name="orphan")
     # @test_logs captures the intentional `@error` from to_json so the harness
     # LogEventTracker does not count it as a real error.
     err = @test_logs(

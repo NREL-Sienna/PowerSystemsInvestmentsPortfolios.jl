@@ -17,6 +17,8 @@ abstract type TransmissionTechnology <: Technology end
 abstract type DemandTechnology <: Technology end
 
 get_name(val::Technology) = val.name
+get_id(val::Technology) = IS.get_id(val)
+set_id!(val::Technology, id) = IS.set_id!(val, id)
 get_available(val::Technology) = val.available
 get_power_systems_type(val::Technology) = val.power_systems_type
 get_internal(val::Technology) = val.internal

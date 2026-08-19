@@ -9,7 +9,6 @@ tech_financials() = TechnologyFinancialData(;
 
 supply() = SupplyTechnology{PSY.ThermalStandard}(;
     name="supply",
-    id=1,
     available=true,
     power_systems_type=string(PSY.ThermalStandard),
     financial_data=tech_financials(),
@@ -25,7 +24,6 @@ supply() = SupplyTechnology{PSY.ThermalStandard}(;
 
 storage() = StorageTechnology{PSY.EnergyReservoirStorage}(;
     name="storage",
-    id=2,
     available=true,
     power_systems_type=string(PSY.EnergyReservoirStorage),
     financial_data=tech_financials(),
@@ -45,11 +43,10 @@ storage() = StorageTechnology{PSY.EnergyReservoirStorage}(;
 
 agg_transport() = AggregateTransportTechnology{PSY.ACBranch}(;
     name="agg",
-    id=3,
     available=true,
     power_systems_type=string(PSY.Line),
-    start_region=Zone(; name="z1", id=201),
-    end_region=Zone(; name="z2", id=202),
+    start_region=Zone(; name="z1"),
+    end_region=Zone(; name="z2"),
     financial_data=tech_financials(),
     capacity_limits=(min=0.0, max=800.0),
     unit_size=40.0,
@@ -58,11 +55,10 @@ agg_transport() = AggregateTransportTechnology{PSY.ACBranch}(;
 
 acline() = NodalACTransportTechnology{PSY.ACBranch}(;
     name="ac",
-    id=4,
     available=true,
     power_systems_type=string(PSY.Line),
-    start_node=Node(; name="n1", id=101),
-    end_node=Node(; name="n2", id=102),
+    start_node=Node(; name="n1"),
+    end_node=Node(; name="n2"),
     financial_data=tech_financials(),
     capacity_limits=(min=0.0, max=600.0),
     unit_size=50.0,
@@ -74,11 +70,10 @@ acline() = NodalACTransportTechnology{PSY.ACBranch}(;
 
 hvdc() = NodalHVDCTransportTechnology{PSY.ACBranch}(;
     name="hvdc",
-    id=5,
     available=true,
     power_systems_type=string(PSY.Line),
-    start_node=Node(; name="n3", id=103),
-    end_node=Node(; name="n4", id=104),
+    start_node=Node(; name="n3"),
+    end_node=Node(; name="n4"),
     financial_data=tech_financials(),
     capacity_limits=(min=0.0, max=700.0),
     unit_size=60.0,
@@ -87,7 +82,6 @@ hvdc() = NodalHVDCTransportTechnology{PSY.ACBranch}(;
 
 demand_req() = DemandRequirement{PSY.PowerLoad}(;
     name="dreq",
-    id=6,
     available=true,
     power_systems_type=string(PSY.PowerLoad),
     new_demand_mw=300.0,
@@ -97,7 +91,6 @@ demand_req() = DemandRequirement{PSY.PowerLoad}(;
 
 demand_side() = DemandSideTechnology{PSY.PowerLoad}(;
     name="demand_side",
-    id=7,
     available=true,
     power_systems_type=string(PSY.PowerLoad),
     peak_demand_mw=250.0,
@@ -111,41 +104,25 @@ demand_side() = DemandSideTechnology{PSY.PowerLoad}(;
 )
 
 retro() = AggregateRetrofitPotential(;
-    id=9,
     retrofit_id=1,
     retrofit_potential=150.0,
     retrofit_fraction=0.5,
 )
 
-carbon_caps() = CarbonCaps(;
-    name="carbon_caps",
-    available=true,
-    id=8,
-    max_tons_mwh=2.0e-6,
-    max_mtons=50.0,
-)
+carbon_caps() =
+    CarbonCaps(; name="carbon_caps", available=true, max_tons_mwh=2.0e-6, max_mtons=50.0)
 
-carbon_tax() =
-    CarbonTax(; name="carbon_tax", available=true, id=9, tax_dollars_per_ton=50.0)
+carbon_tax() = CarbonTax(; name="carbon_tax", available=true, tax_dollars_per_ton=50.0)
 
-max_capacity_req() = MaximumCapacityRequirements(;
-    name="max_cap",
-    available=true,
-    id=10,
-    max_capacity_mw=400.0,
-)
+max_capacity_req() =
+    MaximumCapacityRequirements(; name="max_cap", available=true, max_capacity_mw=400.0)
 
-min_capacity_req() = MinimumCapacityRequirements(;
-    name="min_cap",
-    available=true,
-    id=11,
-    min_capacity_mw=100.0,
-)
+min_capacity_req() =
+    MinimumCapacityRequirements(; name="min_cap", available=true, min_capacity_mw=100.0)
 
 colocated() = ColocatedSupplyStorageTechnology{PSY.ThermalStandard}(;
     name="colocated",
     power_systems_type=string(PSY.ThermalStandard),
-    id=12,
     available=true,
     financial_data=tech_financials(),
     capital_costs_solar=LinearCurve(1000.0),
@@ -832,7 +809,7 @@ end
 @testset "AggregateRetirementPotential getters/setters" begin
     # newly wired conversion; SiennaSchemas declares x-unit MW, but PSIP never
     # marked this field `needs_conversion` before this branch.
-    t = AggregateRetirementPotential(id=10, retirement_potential=100.0)
+    t = AggregateRetirementPotential(retirement_potential=100.0)
     check_scalar(
         u -> PSIP.get_retirement_potential(t, u),
         (v, u) -> PSIP.set_retirement_potential!(t, v, u),

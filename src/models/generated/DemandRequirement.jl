@@ -8,7 +8,6 @@ This file is auto-generated. Do not edit.
     mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
         name::String
         available::Bool
-        id::Int64
         power_systems_type::String
         new_demand_mw::Float64
         new_construction_year::Int64
@@ -27,7 +26,6 @@ Demand requirements for a region.
 # Arguments
 - `name::String`: The technology name
 - `available::Bool`: (default: `true`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
-- `id::Int64`: ID for individual demand requirement
 - `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `new_demand_mw::Float64`: (default: `0.0`) The value of the peak demand to be used for new DemandRequirements (MW).
 - `new_construction_year::Int64`: (default: `2020`) The year in which the new demand requirement will be installed. Should only be used for new demand requirements.
@@ -45,8 +43,6 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
     name::String
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
-    "ID for individual demand requirement"
-    id::Int64
     "Corresponding type in PowerSystems.jl to be used in PCM modeling"
     power_systems_type::String
     "The value of the peak demand to be used for new DemandRequirements (MW)."
@@ -72,16 +68,14 @@ mutable struct DemandRequirement{T <: PSY.StaticInjection} <: DemandTechnology
 end
 
 
-function DemandRequirement{T}(; name, available=true, id, power_systems_type, new_demand_mw=0.0, new_construction_year=2020, growth_rate=0.0, conformity=PSY.LoadConformity.UNDEFINED, value_of_lost_load=1e8, unserved_demand_curve=LinearCurve(0.0), region=Vector(), requirements=Vector(), ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.StaticInjection
-    DemandRequirement{T}(name, available, id, power_systems_type, new_demand_mw, new_construction_year, growth_rate, conformity, value_of_lost_load, unserved_demand_curve, region, requirements, ext, internal, )
+function DemandRequirement{T}(; name, available=true, power_systems_type, new_demand_mw=0.0, new_construction_year=2020, growth_rate=0.0, conformity=PSY.LoadConformity.UNDEFINED, value_of_lost_load=1e8, unserved_demand_curve=LinearCurve(0.0), region=Vector(), requirements=Vector(), ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.StaticInjection
+    DemandRequirement{T}(name, available, power_systems_type, new_demand_mw, new_construction_year, growth_rate, conformity, value_of_lost_load, unserved_demand_curve, region, requirements, ext, internal, )
 end
 
 """Get [`DemandRequirement`](@ref) `name`."""
 get_name(value::DemandRequirement) = value.name
 """Get [`DemandRequirement`](@ref) `available`."""
 get_available(value::DemandRequirement) = value.available
-"""Get [`DemandRequirement`](@ref) `id`."""
-get_id(value::DemandRequirement) = value.id
 """Get [`DemandRequirement`](@ref) `power_systems_type`."""
 get_power_systems_type(value::DemandRequirement) = value.power_systems_type
 """Get [`DemandRequirement`](@ref) `new_demand_mw` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_new_demand_mw_unitful`](@ref)."""
@@ -121,8 +115,6 @@ get_internal(value::DemandRequirement) = value.internal
 set_name!(value::DemandRequirement, val) = value.name = val
 """Set [`DemandRequirement`](@ref) `available`."""
 set_available!(value::DemandRequirement, val) = value.available = val
-"""Set [`DemandRequirement`](@ref) `id`."""
-set_id!(value::DemandRequirement, val) = value.id = val
 """Set [`DemandRequirement`](@ref) `power_systems_type`."""
 set_power_systems_type!(value::DemandRequirement, val) = value.power_systems_type = val
 """Set [`DemandRequirement`](@ref) `new_demand_mw`."""
@@ -152,7 +144,6 @@ function from_openapi(po::PI.DemandRequirement, refs::OpenAPIRefs)
     return DemandRequirement{parameter}(;
         name = po.name,
         available = po.available,
-        id = po.id,
         power_systems_type = po.power_systems_type,
         new_demand_mw = po.new_demand_mw,
         new_construction_year = po.new_construction_year,
@@ -167,9 +158,9 @@ end
 
 function to_openapi(value::DemandRequirement{T}, refs::OpenAPIRefs) where {T <: PSY.StaticInjection}
     return PI.DemandRequirement(;
+        id = get_id(value),
         name = get_name(value),
         available = get_available(value),
-        id = get_id(value),
         power_systems_type = string(nameof(T)),
         new_demand_mw = get_new_demand_mw(value, IS.NU),
         new_construction_year = get_new_construction_year(value),

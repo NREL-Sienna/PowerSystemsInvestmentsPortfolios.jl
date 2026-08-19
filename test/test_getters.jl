@@ -223,7 +223,6 @@ end
     )
     colocated = ColocatedSupplyStorageTechnology{PSY.RenewableDispatch}(;
         name="colo_edge",
-        id=999,
         financial_data=tech_fd,
         power_systems_type="RenewableDispatch",
         operation_costs_power=sc,
@@ -244,7 +243,7 @@ end
     PSIP.add_supplemental_attribute!(
         p_5bus,
         thermal,
-        ExistingDevices(id=60, existing_devices=["extra"]),
+        ExistingDevices(existing_devices=["extra"]),
     )
     @test get_existing_capacity_mw(p_5bus, thermal) == 0.0   # >1 attr
 
@@ -253,7 +252,7 @@ end
     PSIP.add_supplemental_attribute!(
         p_5bus,
         wind,
-        ExistingDevices(id=61, existing_devices=String[]),
+        ExistingDevices(existing_devices=String[]),
     )
     @test get_existing_capacity_mw(p_5bus, wind) == 0.0
 
@@ -262,12 +261,12 @@ end
     PSIP.add_supplemental_attribute!(
         p_5bus,
         storage,
-        ExistingDevices(id=62, existing_devices=["a"]),
+        ExistingDevices(existing_devices=["a"]),
     )
     PSIP.add_supplemental_attribute!(
         p_5bus,
         storage,
-        ExistingDevices(id=63, existing_devices=["b"]),
+        ExistingDevices(existing_devices=["b"]),
     )
     @test get_existing_capacity_mwh(p_5bus, storage) == 0.0
 
@@ -276,7 +275,7 @@ end
     PSIP.add_supplemental_attribute!(
         p_5bus,
         demand_b,
-        ExistingDevices(id=64, existing_devices=load_names),
+        ExistingDevices(existing_devices=load_names),
     )
     peak = get_peak_demand_mw(p_5bus, demand_b)
     @test peak isa Float64
@@ -291,12 +290,12 @@ end
     PSIP.add_supplemental_attribute!(
         p_5bus,
         demand_c,
-        ExistingDevices(id=65, existing_devices=["x"]),
+        ExistingDevices(existing_devices=["x"]),
     )
     PSIP.add_supplemental_attribute!(
         p_5bus,
         demand_c,
-        ExistingDevices(id=66, existing_devices=["y"]),
+        ExistingDevices(existing_devices=["y"]),
     )
     @test get_peak_demand_mw(p_5bus, demand_c) == 0.0
 
@@ -305,7 +304,7 @@ end
     PSIP.add_supplemental_attribute!(
         p_5bus,
         demand_d,
-        ExistingDevices(id=67, existing_devices=String[]),
+        ExistingDevices(existing_devices=String[]),
     )
     @test get_peak_demand_mw(p_5bus, demand_d) == 0.0
     PSIP.set_conformity!(demand_d, PSY.LoadConformity.NON_CONFORMING)

@@ -418,6 +418,11 @@ function compute_openapi_export_converter!(item)
     kwargs = Vector{Dict{String, Any}}()
     parametric = get(item, "has_parametric", false)
 
+    # `id` is not a descriptor field — it is the object's own identity, now stored in
+    # `internal` and read back by `get_id`. It is prepended directly rather than discovered
+    # by iterating `item["fields"]`. Reference fields still resolve through `refs`, but an
+    # object's own id no longer needs the reflexive registry lookup.
+    push!(kwargs, Dict("name" => "id", "expr" => "get_id(value)"))
     for field in item["properties"]
         kind, bare, nullable = openapi_classify_field(struct_name, field)
         kind == :skip && continue
