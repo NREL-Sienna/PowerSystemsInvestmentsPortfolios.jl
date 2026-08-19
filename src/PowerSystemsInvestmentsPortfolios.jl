@@ -41,8 +41,10 @@ import DataStructures: OrderedDict, SortedDict
 import OpenAPI
 import PowerCoreOpenAPIModels
 import PowerInvestmentsOpenAPIModels
+import PowerOperationsOpenAPIModels
 const PC = PowerCoreOpenAPIModels
 const PI = PowerInvestmentsOpenAPIModels
+const PO = PowerOperationsOpenAPIModels
 import StringEncodings
 import HDF5
 import Tables
@@ -192,6 +194,11 @@ include("time_mapping.jl")
 include("serialization.jl")
 include("utils/getters.jl")
 include("db_parser.jl")
+include("db_interface/db_definition.jl")
+include("db_interface/translation_constants.jl")
+include("db_interface/common.jl")
+include("db_interface/sqlite.jl")
+include("db_interface/time_series.jl")
 include("utils/generate_structs.jl")
 include("utils/print.jl")
 @static if pkgversion(PrettyTables).major == 2

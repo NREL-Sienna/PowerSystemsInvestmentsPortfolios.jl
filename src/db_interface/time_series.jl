@@ -50,7 +50,6 @@ function get_uuid_mapping(sys::PSY.System)
         """,
     )
 
-    # Create a mapping from original time_series_uuid to new unique UUIDs for duplicates
     uuid_count = Dict{String, Int64}()
     uuid_mapping = Dict{String, Base.UUID}()
 
@@ -58,8 +57,7 @@ function get_uuid_mapping(sys::PSY.System)
         uuid = row.time_series_uuid
 
         if haskey(uuid_count, uuid)
-            # Duplicate found, assign a new UUID
-            new_uuid = UUIDs.uuid4()
+            new_uuid = Base.UUIDs.uuid4()
             uuid_count[uuid] += 1
             uuid_mapping[row.metadata_uuid] = new_uuid
         else
@@ -103,9 +101,6 @@ function get_time_series_from_metadata_uuid(
     )
 end
 
-"""
-Writes time series as rows (time_series_uuid, timestamp, value)
-"""
 function serialize_timeseries_data!(
     db,
     ts::PSY.SingleTimeSeries,
@@ -124,20 +119,14 @@ function serialize_timeseries_data!(
     end
 end
 
-"""
-Writes time series as rows (time_series_uuid, timestamp, value)
-"""
 function serialize_timeseries_data!(
     db,
     ts::PSY.DeterministicSingleTimeSeries,
     time_series_uuid::Base.UUID,
 )
-    serialize_time_series_data(db, ts.single_time_series, time_series_uuid)
+    serialize_timeseries_data!(db, ts.single_time_series, time_series_uuid)
 end
 
-"""
-Iterate through all metadata objects and serialize timeseries
-"""
 function serialize_all_timeseries_data!(db, sys::Union{PSY.System, Portfolio})
     time_series_uuid_to_metadata_uuids = get_example_metadata_uuids(sys)
 
@@ -147,22 +136,22 @@ function serialize_all_timeseries_data!(db, sys::Union{PSY.System, Portfolio})
     end
 end
 
-function transform_associations!(
-    sys::Union{PSY.System, Portfolio},
-    associations,
-    ids::IDGenerator,
-)
-
-    # Determine number of associations in the base system to offset IDs from portfolio
-    if isa(sys, Portfolio)
-        all_counts = PSY.get_time_series_counts(get_base_system(sys))
-        counts = all_counts.components_with_time_series
+function transform_associations!(sys::Union{PSY.System, Portfolio}, associations, refs)
+    # Keep id disjointness when serializing portfolio TS after base-system TS: portfolio
+    # association ids must be offset past every base-system `time_series_associations` row
+    # (that table's id is a shared INTEGER PRIMARY KEY). The offset is the base ROW count —
+    # NOT `components_with_time_series`, which undercounts any component owning more than one
+    # time series and would let portfolio ids collide with base ids.
+    counts = if isa(sys, Portfolio)
+        base_store = get_base_system(sys).data.time_series_manager.metadata_store
+        result =
+            IS.sql(base_store, "SELECT COUNT(*) AS n FROM time_series_associations")
+        Int(first(Tables.rows(result)).n)
     else
-        counts = 0
+        0
     end
 
     associations = PSY.DataFrames.coalesce.(associations, nothing)
-    # Convert IS's JSON-encoded scaling_factor_multiplier to dot-encoded string
     associations[!, "scaling_factor_multiplier"] =
         map(associations[!, "scaling_factor_multiplier"]) do val
             val === nothing && return nothing
@@ -170,12 +159,24 @@ function transform_associations!(
             meta = d["__metadata__"]
             return "$(meta["module"]).$(meta["function"])"
         end
-    associations.id .+= counts
-    deserializable_string(x) = haskey(TYPE_NAMES, x)
 
-    associations = associations[deserializable_string.(associations[!, "owner_type"]), :]
-    associations[!, "owner_id"] =
-        map(owner_uuid -> getid!(ids, Base.UUID(owner_uuid)), associations[!, "owner_uuid"])
+    type_names = isa(sys, Portfolio) ? PSIP_TYPE_NAMES : PSY_TYPE_NAMES
+    associations = associations[haskey.(Ref(type_names), associations[!, "owner_type"]), :]
+    associations.id .+= counts
+
+    uuid_to_id = _db_uuid_to_id(refs)
+    owner_ids = Vector{Union{Missing, Int}}(missing, size(associations, 1))
+    keep = falses(size(associations, 1))
+    for (i, owner_uuid) in enumerate(associations[!, "owner_uuid"])
+        uuid = Base.UUID(owner_uuid)
+        if haskey(uuid_to_id, uuid)
+            owner_ids[i] = Int(uuid_to_id[uuid])
+            keep[i] = true
+        end
+    end
+    associations = associations[keep, :]
+    associations[!, "owner_id"] = owner_ids[keep]
+
     PSY.DataFrames.select!(
         associations,
         Symbol.(collect(TABLE_SCHEMAS["time_series_associations"].names)),
@@ -183,17 +184,13 @@ function transform_associations!(
     return associations
 end
 
-function serialize_timeseries_associations!(
-    db,
-    sys::Union{PSY.System, Portfolio},
-    ids::IDGenerator,
-)
+function serialize_timeseries_associations!(db, sys::Union{PSY.System, Portfolio}, refs)
     associations = IS.sql(
         sys.data.time_series_manager.metadata_store,
         """SELECT $(join(INFRASYS_TS_SCHEMA.names, ", "))
 FROM time_series_associations;""",
     )
-    associations = transform_associations!(sys, associations, ids)
+    associations = transform_associations!(sys, associations, refs)
 
     statement = DBInterface.prepare(
         db,
@@ -206,10 +203,10 @@ VALUES ($(join(repeat("?", length(TABLE_SCHEMAS["time_series_associations"].name
     end
 end
 
-function serialize_timeseries!(db, sys::Union{PSY.System, Portfolio}, ids::IDGenerator)
+function serialize_timeseries!(db, sys::Union{PSY.System, Portfolio}, refs)
     DBInterface.transaction(db) do
         serialize_all_timeseries_data!(db, sys)
-        serialize_timeseries_associations!(db, sys, ids)
+        serialize_timeseries_associations!(db, sys, refs)
     end
 end
 
@@ -247,7 +244,6 @@ function deserialize_time_series_row!(sys, db, row)
     end
 end
 
-# TODO: STOLEN FROM IS. This should be made an IS functions.
 function deserialize_metadata(row)
     exclude_keys = Set((:metadata_uuid, :owner_uuid, :time_series_type))
     time_series_type = IS.TIME_SERIES_STRING_TO_TYPE[row.time_series_type]
@@ -258,7 +254,6 @@ function deserialize_metadata(row)
             IS.InfrastructureSystemsInternal(; uuid=Base.UUID(row.metadata_uuid)),
     )
     if time_series_type <: IS.Forecast
-        # Special case because the table column does not match the field name.
         data[:count] = row.window_count
     end
     if time_series_type <: IS.AbstractDeterministic
@@ -326,24 +321,21 @@ end
 function deserialize_time_series_from_metadata!(
     sys::Union{PSY.System, Portfolio},
     db,
-    resolver::Resolver,
+    refs,
     metadata,
     row,
 )
     time_array = deserialize_timedata(db, metadata, row.time_series_uuid)
     ts = IS.time_series_metadata_to_data(metadata)(metadata, time_array)
-    IS.add_time_series!(sys.data, resolve_owner(resolver, row.owner_id), ts)
+    IS.add_time_series!(sys.data, _db_resolve_owner(refs, Int(row.owner_id)), ts)
 end
 
-function deserialize_timeseries!(sys::Union{PSY.System, Portfolio}, db, resolver::Resolver)
+function deserialize_timeseries!(sys::Union{PSY.System, Portfolio}, db, refs)
     DBInterface.transaction(db) do
-        # For each time_series_uuid, we'll pick a "real" metadata_uuid (so no DeterministicSingleTimeSeries),
-        # then we will deserialize and add them to the system. Finally, we'll go through and add_metadata!
-        # for all others.
         serialized_metadata = Set{String}()
         for row in get_example_metadata(db, sys)
             metadata = deserialize_metadata(row)
-            deserialize_time_series_from_metadata!(sys, db, resolver, metadata, row)
+            deserialize_time_series_from_metadata!(sys, db, refs, metadata, row)
             push!(serialized_metadata, row.metadata_uuid)
         end
 
@@ -353,7 +345,7 @@ function deserialize_timeseries!(sys::Union{PSY.System, Portfolio}, db, resolver
                 db,
                 "SELECT * FROM time_series_associations WHERE $clause",
             )
-        elseif isa(sys, Portfolio)
+        else
             clause = _owner_type_in_clause(PSIP_TYPE_NAMES)
             associations = DBInterface.execute(
                 db,
@@ -366,7 +358,7 @@ function deserialize_timeseries!(sys::Union{PSY.System, Portfolio}, db, resolver
             if in(row.metadata_uuid, serialized_metadata)
                 continue
             end
-            component = resolve_owner(resolver, row.owner_id)
+            component = _db_resolve_owner(refs, Int(row.owner_id))
             IS.add_metadata!(
                 sys.data.time_series_manager.metadata_store,
                 component,
@@ -376,21 +368,9 @@ function deserialize_timeseries!(sys::Union{PSY.System, Portfolio}, db, resolver
     end
 end
 
-"""
-Export time series from the database as a JSON-compatible dictionary.
-
-Returns a Dict with:
-
-  - `"associations"`: Vector of association metadata dicts
-  - `"data"` (optional): Dict mapping time_series_uuid to Vector{Float64} of values
-
-The `"data"` field is only included when `include_data=true`. When time series
-values are stored externally (e.g., in an HDF5 file), omit it.
-"""
 function export_time_series_dict(db; include_data::Bool=false)
     ts_output = Dict{String, Any}()
 
-    # Export associations
     association_cols = TABLE_SCHEMAS["time_series_associations"].names
     stmt = DBInterface.prepare(
         db,
@@ -405,7 +385,7 @@ function export_time_series_dict(db; include_data::Bool=false)
             val = ismissing(val) ? nothing : val
             key = string(col)
             if key in JSON_COLUMNS && val isa String
-                val = JSON.parse(val)
+                val = JSON3.read(val, Any)
             end
             assoc[key] = val
         end
@@ -413,7 +393,6 @@ function export_time_series_dict(db; include_data::Bool=false)
     end
     ts_output["associations"] = ts_associations
 
-    # Optionally export raw time series values
     if include_data
         data_stmt = DBInterface.prepare(
             db,
