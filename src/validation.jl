@@ -325,8 +325,7 @@ function _validate_unique_references(
     references,
     reference_type::AbstractString,
 )
-    uuids = IS.get_uuid.(references)
-    if !allunique(uuids)
+    if !allunique(get_id.(references))
         @error(
             "Technology contains duplicate $reference_type references",
             technology = get_name(technology),

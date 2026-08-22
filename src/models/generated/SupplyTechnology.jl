@@ -9,7 +9,6 @@ This file is auto-generated. Do not edit.
         name::String
         power_systems_type::String
         region::Vector{RegionTopology}
-        id::Int64
         available::Bool
         prime_mover_type::PrimeMovers
         fuel::Vector{ThermalFuels}
@@ -38,7 +37,6 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `name::String`: The technology name
 - `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology operates. Can be a zone or node.
-- `id::Int64`: ID for individual technology
 - `available::Bool`: (default: `true`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `prime_mover_type::PrimeMovers`: (default: `PrimeMovers.OT`) Prime mover technology according to EIA 923.
 - `fuel::Vector{ThermalFuels}`: (default: `[ThermalFuels.OTHER]`) Prime mover fuel according to EIA 923.
@@ -67,8 +65,6 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
     power_systems_type::String
     "Location where technology operates. Can be a zone or node."
     region::Vector{RegionTopology}
-    "ID for individual technology"
-    id::Int64
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Prime mover technology according to EIA 923."
@@ -112,8 +108,8 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
 end
 
 
-function SupplyTechnology{T}(; name, power_systems_type, region=Vector(), id, available=true, prime_mover_type=PrimeMovers.OT, fuel=[ThermalFuels.OTHER], co2=Dict(), cofire_start_limits=Dict(), cofire_level_limits=Dict(), capital_costs=LinearCurve(0.0), operation_costs=ThermalGenerationCost(nothing), unit_size=0.0, capacity_limits=(min=0, max=1e8), outage_factor=1.0, min_generation_fraction=0.0, ramp_limits=(up=1.0, down=1.0), time_limits=(up=60.0, down=60.0), start_fuel_mmbtu_per_mw=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
-    SupplyTechnology{T}(name, power_systems_type, region, id, available, prime_mover_type, fuel, co2, cofire_start_limits, cofire_level_limits, capital_costs, operation_costs, unit_size, capacity_limits, outage_factor, min_generation_fraction, ramp_limits, time_limits, start_fuel_mmbtu_per_mw, lifetime, requirements, financial_data, ext, internal, )
+function SupplyTechnology{T}(; name, power_systems_type, region=Vector(), available=true, prime_mover_type=PrimeMovers.OT, fuel=[ThermalFuels.OTHER], co2=Dict(), cofire_start_limits=Dict(), cofire_level_limits=Dict(), capital_costs=LinearCurve(0.0), operation_costs=ThermalGenerationCost(nothing), unit_size=0.0, capacity_limits=(min=0, max=1e8), outage_factor=1.0, min_generation_fraction=0.0, ramp_limits=(up=1.0, down=1.0), time_limits=(up=60.0, down=60.0), start_fuel_mmbtu_per_mw=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
+    SupplyTechnology{T}(name, power_systems_type, region, available, prime_mover_type, fuel, co2, cofire_start_limits, cofire_level_limits, capital_costs, operation_costs, unit_size, capacity_limits, outage_factor, min_generation_fraction, ramp_limits, time_limits, start_fuel_mmbtu_per_mw, lifetime, requirements, financial_data, ext, internal, )
 end
 
 """Get [`SupplyTechnology`](@ref) `name`."""
@@ -122,8 +118,6 @@ get_name(value::SupplyTechnology) = value.name
 get_power_systems_type(value::SupplyTechnology) = value.power_systems_type
 """Get [`SupplyTechnology`](@ref) `region`."""
 get_region(value::SupplyTechnology) = value.region
-"""Get [`SupplyTechnology`](@ref) `id`."""
-get_id(value::SupplyTechnology) = value.id
 """Get [`SupplyTechnology`](@ref) `available`."""
 get_available(value::SupplyTechnology) = value.available
 """Get [`SupplyTechnology`](@ref) `prime_mover_type`."""
@@ -207,8 +201,6 @@ set_name!(value::SupplyTechnology, val) = value.name = val
 set_power_systems_type!(value::SupplyTechnology, val) = value.power_systems_type = val
 """Set [`SupplyTechnology`](@ref) `region`."""
 set_region!(value::SupplyTechnology, val) = value.region = val
-"""Set [`SupplyTechnology`](@ref) `id`."""
-set_id!(value::SupplyTechnology, val) = value.id = val
 """Set [`SupplyTechnology`](@ref) `available`."""
 set_available!(value::SupplyTechnology, val) = value.available = val
 """Set [`SupplyTechnology`](@ref) `prime_mover_type`."""
@@ -257,7 +249,6 @@ function from_openapi(po::PI.SupplyTechnology, refs::OpenAPIRefs)
         name = po.name,
         power_systems_type = po.power_systems_type,
         region = resolve_refs(refs, po.region, RegionTopology),
-        id = po.id,
         available = po.available,
         prime_mover_type = PrimeMovers(po.prime_mover_type),
         fuel = [ThermalFuels(v) for v in po.fuel],
@@ -281,10 +272,10 @@ end
 
 function to_openapi(value::SupplyTechnology{T}, refs::OpenAPIRefs) where {T <: PSY.Generator}
     return PI.SupplyTechnology(;
+        id = get_id(value),
         name = get_name(value),
         power_systems_type = string(nameof(T)),
         region = component_ids(refs, get_region(value)),
-        id = get_id(value),
         available = get_available(value),
         prime_mover_type = string(get_prime_mover_type(value)),
         fuel = [string(v) for v in get_fuel(value)],

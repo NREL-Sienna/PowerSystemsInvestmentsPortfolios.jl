@@ -454,10 +454,7 @@ end
 
 # These are helper functions for debugging problems.
 # Searches components linearly, and so is slow compared to the other get_component functions
-get_technology(portfolio::Portfolio, uuid::Base.UUID) =
-    IS.get_component(portfolio.data, uuid)
-get_technology(portfolio::Portfolio, uuid::String) =
-    IS.get_component(portfolio.data, Base.UUID(uuid))
+get_technology(portfolio::Portfolio, id::Int) = IS.get_component(portfolio.data, id)
 
 function _get_technologies_by_name(
     abstract_types,
@@ -921,6 +918,9 @@ end
 ######### Supplemental Attributes #########
 ###########################################
 
+get_id(val::IS.SupplementalAttribute) = IS.get_id(val)
+set_id!(val::IS.SupplementalAttribute, id) = IS.set_id!(val, id)
+
 """
 Add a supplemental attribute to a technology. The attribute may already be attached to a
 different component.
@@ -956,12 +956,12 @@ function remove_supplemental_attributes!(
 end
 
 """
-Return the supplemental attribute with the given uuid.
+Return the supplemental attribute with the given id.
 
 Throws ArgumentError if the attribute is not stored.
 """
-function get_supplemental_attribute(p::Portfolio, uuid::Base.UUID)
-    return IS.get_supplemental_attribute(p.data, uuid)
+function get_supplemental_attribute(p::Portfolio, id::Int)
+    return IS.get_supplemental_attribute(p.data, id)
 end
 
 """

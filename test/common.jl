@@ -2,7 +2,6 @@ function validate_serialization(
     port::Portfolio;
     time_series_read_only=false,
     runchecks=nothing,
-    assign_new_uuids=false,
 )
     test_dir = mktempdir()
     orig_dir = pwd()

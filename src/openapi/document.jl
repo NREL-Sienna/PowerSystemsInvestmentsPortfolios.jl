@@ -30,3 +30,13 @@ const SUPPLEMENTAL_ATTRIBUTE_PLAN = [
     (ExistingDevices, "ExistingDevices"),
     (TopologyMapping, "TopologyMapping"),
 ]
+
+function _build_export_refs(portfolio::Portfolio)
+    refs = OpenAPIRefs()
+    for (psip_type, _key) in DOCUMENT_PLAN
+        for component in IS.get_components(psip_type, portfolio.data)
+            refs[get_id(component)] = component
+        end
+    end
+    return refs
+end

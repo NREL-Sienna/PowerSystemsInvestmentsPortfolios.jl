@@ -1,6 +1,6 @@
 @testset "Storage validation" begin
     port = Portfolio()
-    attached_region = Zone(; name="attached_region", id=1)
+    attached_region = Zone(; name="attached_region")
     add_region!(port, attached_region)
 
     financial_data = TechnologyFinancialData(;
@@ -21,7 +21,6 @@
     valid_storage = StorageTechnology{PSY.EnergyReservoirStorage}(;
         storage_defaults...,
         name="valid_storage",
-        id=5,
         region=RegionTopology[attached_region],
     )
     add_technology!(port, valid_storage)
@@ -30,7 +29,6 @@
     invalid_duration = StorageTechnology{PSY.EnergyReservoirStorage}(;
         storage_defaults...,
         name="invalid_duration",
-        id=2,
         region=RegionTopology[attached_region],
         duration_limits=(min=4.0, max=2.0),
     )
@@ -41,11 +39,10 @@
     )
     @test isnothing(get_technology(typeof(invalid_duration), port, "invalid_duration"))
 
-    detached_region = Zone(; name="detached_region", id=2)
+    detached_region = Zone(; name="detached_region")
     invalid_region = StorageTechnology{PSY.EnergyReservoirStorage}(;
         storage_defaults...,
         name="invalid_region",
-        id=3,
         region=RegionTopology[detached_region],
     )
     @test_logs(
@@ -58,7 +55,6 @@
     skipped_invalid = StorageTechnology{PSY.EnergyReservoirStorage}(;
         storage_defaults...,
         name="skipped_invalid",
-        id=4,
         region=RegionTopology[attached_region],
         duration_limits=(min=4.0, max=2.0),
     )
@@ -117,7 +113,7 @@ end
 
 @testset "Colocated supply-storage validation" begin
     port = Portfolio()
-    attached_region = Zone(; name="colocated_region", id=20)
+    attached_region = Zone(; name="colocated_region")
     add_region!(port, attached_region)
 
     financial_data = TechnologyFinancialData(;
@@ -130,7 +126,6 @@ end
     )
     colocated = ColocatedSupplyStorageTechnology{PSY.RenewableDispatch}(;
         name="valid_colocated",
-        id=21,
         operation_costs_inverter=CostCurve(LinearCurve(0.0)),
         financial_data,
         inverter_efficiency=0.96,
@@ -163,15 +158,14 @@ end
 
 @testset "Demand region validation" begin
     port = Portfolio()
-    attached_region = Zone(; name="demand_region", id=10)
-    second_region = Zone(; name="second_demand_region", id=11)
+    attached_region = Zone(; name="demand_region")
+    second_region = Zone(; name="second_demand_region")
     add_region!(port, attached_region)
     add_region!(port, second_region)
 
     valid_demand = DemandRequirement{PSY.PowerLoad}(;
         available=true,
         name="valid_demand",
-        id=13,
         power_systems_type="PowerLoad",
         value_of_lost_load=1000.0,
         region=RegionTopology[attached_region, second_region],
@@ -182,7 +176,6 @@ end
     duplicate_region_demand = DemandRequirement{PSY.PowerLoad}(;
         available=true,
         name="duplicate_region_demand",
-        id=11,
         power_systems_type="PowerLoad",
         value_of_lost_load=1000.0,
         region=RegionTopology[attached_region, attached_region],
@@ -199,7 +192,6 @@ end
     invalid_demand = DemandRequirement{PSY.PowerLoad}(;
         available=true,
         name="invalid_demand",
-        id=12,
         power_systems_type="PowerLoad",
         value_of_lost_load=1000.0,
         region=RegionTopology[],
@@ -214,10 +206,12 @@ end
 
 @testset "Region ID uniqueness" begin
     port = Portfolio()
-    attached_region = Zone(; name="attached_region", id=101)
+    attached_region = Zone(; name="attached_region")
+    IS.set_id!(attached_region, 101)
     add_region!(port, attached_region)
 
-    duplicate_region_id = Node(; name="duplicate_region_id", id=101)
+    duplicate_region_id = Node(; name="duplicate_region_id")
+    IS.set_id!(duplicate_region_id, 101)
     @test_logs(
         (:error, r"Region ID is already attached to the portfolio"),
         min_level = Logging.Error,
@@ -228,10 +222,10 @@ end
 
 @testset "Transport validation" begin
     port = Portfolio()
-    start_zone = Zone(; name="start_zone", id=101)
-    end_zone = Zone(; name="end_zone", id=102)
-    start_node = Node(; name="start_node", id=201)
-    end_node = Node(; name="end_node", id=202)
+    start_zone = Zone(; name="start_zone")
+    end_zone = Zone(; name="end_zone")
+    start_node = Node(; name="start_node")
+    end_node = Node(; name="end_node")
     foreach(
         region -> add_region!(port, region),
         (start_zone, end_zone, start_node, end_node),
@@ -250,7 +244,6 @@ end
     valid_transport = AggregateTransportTechnology{PSY.ACBranch}(;
         transport_defaults...,
         name="valid_transport",
-        id=301,
         start_region=start_zone,
         end_region=end_zone,
         capacity_limits=(min=0.0, max=100.0),
@@ -264,7 +257,6 @@ end
     invalid_capacity = AggregateTransportTechnology{PSY.ACBranch}(;
         transport_defaults...,
         name="invalid_capacity",
-        id=302,
         start_region=start_zone,
         end_region=end_zone,
         capacity_limits=(min=100.0, max=50.0),
@@ -278,7 +270,6 @@ end
     invalid_unit_size = NodalACTransportTechnology{PSY.ACBranch}(;
         transport_defaults...,
         name="invalid_unit_size",
-        id=303,
         start_node,
         end_node,
         unit_size=0.0,
@@ -292,7 +283,6 @@ end
     invalid_line_loss = AggregateTransportTechnology{PSY.ACBranch}(;
         transport_defaults...,
         name="invalid_line_loss",
-        id=304,
         start_region=start_zone,
         end_region=end_zone,
         line_loss=1.1,
@@ -303,11 +293,10 @@ end
         @test_throws(IS.InvalidValue, add_technology!(port, invalid_line_loss)),
     )
 
-    detached_node = Node(; name="detached_node", id=203)
+    detached_node = Node(; name="detached_node")
     invalid_endpoint = NodalHVDCTransportTechnology{PSY.ACBranch}(;
         transport_defaults...,
         name="invalid_endpoint",
-        id=305,
         start_node,
         end_node=detached_node,
     )

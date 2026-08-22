@@ -44,7 +44,6 @@ import PowerInvestmentsOpenAPIModels
 const PC = PowerCoreOpenAPIModels
 const PI = PowerInvestmentsOpenAPIModels
 import StringEncodings
-import HDF5
 import Tables
 import Unitful
 using Unitful: @dimension, @u_str, @refunit, @unit, Quantity, Units, uconvert, ustrip, unit
@@ -186,7 +185,6 @@ include("units/function_conversions.jl")
 
 include("portfolio.jl")
 include("openapi/document.jl")
-include("openapi/ledger.jl")
 include("validation.jl")
 include("time_mapping.jl")
 include("serialization.jl")

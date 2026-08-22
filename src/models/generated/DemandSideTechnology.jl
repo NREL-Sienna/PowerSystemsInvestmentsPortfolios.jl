@@ -7,7 +7,6 @@ This file is auto-generated. Do not edit.
 """
     mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnology
         name::String
-        id::Int64
         available::Bool
         power_systems_type::String
         region::Vector{RegionTopology}
@@ -30,7 +29,6 @@ Represents demand side technologies such as electric vehicles or hydrogen electr
 
 # Arguments
 - `name::String`: The technology name
-- `id::Int64`: ID for demand side technology
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `region::Vector{RegionTopology}`: (default: `Vector()`) Location where technology is operated
@@ -51,8 +49,6 @@ Represents demand side technologies such as electric vehicles or hydrogen electr
 mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnology
     "The technology name"
     name::String
-    "ID for demand side technology"
-    id::Int64
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Corresponding type in PowerSystems.jl to be used in PCM modeling"
@@ -88,14 +84,12 @@ mutable struct DemandSideTechnology{T <: PSY.StaticInjection} <: DemandTechnolog
 end
 
 
-function DemandSideTechnology{T}(; name, id, available, power_systems_type, region=Vector(), technology_efficiency=0.0, price_per_unit=LinearCurve(0.0), min_power=0.0, peak_demand_mw=0.0, curtailment_cost=LinearCurve(0.0), max_demand_curtailment=0.0, max_demand_delay=0.0, max_demand_advance=0.0, demand_energy_efficiency=0.0, shift_variable_cost=LinearCurve(0.0), requirements=Vector(), ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.StaticInjection
-    DemandSideTechnology{T}(name, id, available, power_systems_type, region, technology_efficiency, price_per_unit, min_power, peak_demand_mw, curtailment_cost, max_demand_curtailment, max_demand_delay, max_demand_advance, demand_energy_efficiency, shift_variable_cost, requirements, ext, internal, )
+function DemandSideTechnology{T}(; name, available, power_systems_type, region=Vector(), technology_efficiency=0.0, price_per_unit=LinearCurve(0.0), min_power=0.0, peak_demand_mw=0.0, curtailment_cost=LinearCurve(0.0), max_demand_curtailment=0.0, max_demand_delay=0.0, max_demand_advance=0.0, demand_energy_efficiency=0.0, shift_variable_cost=LinearCurve(0.0), requirements=Vector(), ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.StaticInjection
+    DemandSideTechnology{T}(name, available, power_systems_type, region, technology_efficiency, price_per_unit, min_power, peak_demand_mw, curtailment_cost, max_demand_curtailment, max_demand_delay, max_demand_advance, demand_energy_efficiency, shift_variable_cost, requirements, ext, internal, )
 end
 
 """Get [`DemandSideTechnology`](@ref) `name`."""
 get_name(value::DemandSideTechnology) = value.name
-"""Get [`DemandSideTechnology`](@ref) `id`."""
-get_id(value::DemandSideTechnology) = value.id
 """Get [`DemandSideTechnology`](@ref) `available`."""
 get_available(value::DemandSideTechnology) = value.available
 """Get [`DemandSideTechnology`](@ref) `power_systems_type`."""
@@ -155,8 +149,6 @@ get_internal(value::DemandSideTechnology) = value.internal
 
 """Set [`DemandSideTechnology`](@ref) `name`."""
 set_name!(value::DemandSideTechnology, val) = value.name = val
-"""Set [`DemandSideTechnology`](@ref) `id`."""
-set_id!(value::DemandSideTechnology, val) = value.id = val
 """Set [`DemandSideTechnology`](@ref) `available`."""
 set_available!(value::DemandSideTechnology, val) = value.available = val
 """Set [`DemandSideTechnology`](@ref) `power_systems_type`."""
@@ -195,7 +187,6 @@ function from_openapi(po::PI.DemandSideTechnology, refs::OpenAPIRefs)
     parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
     return DemandSideTechnology{parameter}(;
         name = po.name,
-        id = po.id,
         available = po.available,
         power_systems_type = po.power_systems_type,
         region = resolve_refs(refs, po.region, RegionTopology),
@@ -215,8 +206,8 @@ end
 
 function to_openapi(value::DemandSideTechnology{T}, refs::OpenAPIRefs) where {T <: PSY.StaticInjection}
     return PI.DemandSideTechnology(;
-        name = get_name(value),
         id = get_id(value),
+        name = get_name(value),
         available = get_available(value),
         power_systems_type = string(nameof(T)),
         region = component_ids(refs, get_region(value)),

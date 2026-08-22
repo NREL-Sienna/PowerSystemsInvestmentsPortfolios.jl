@@ -61,7 +61,6 @@ export get_financial_data
 export get_fuel
 export get_generation_fraction_requirement
 export get_growth_rate
-export get_id
 export get_inverter_efficiency
 export get_inverter_supply_ratio
 export get_lifetime
@@ -162,7 +161,6 @@ export set_financial_data!
 export set_fuel!
 export set_generation_fraction_requirement!
 export set_growth_rate!
-export set_id!
 export set_inverter_efficiency!
 export set_inverter_supply_ratio!
 export set_lifetime!

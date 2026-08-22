@@ -7,7 +7,6 @@ This file is auto-generated. Do not edit.
 """
     mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
         name::String
-        id::Int64
         available::Bool
         power_systems_type::String
         start_region::RegionTopology
@@ -26,7 +25,6 @@ An aggregated representation of a transmission interchange between two regions.
 
 # Arguments
 - `name::String`: Name
-- `id::Int64`: Numerical Index for AC transport technologies
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `start_region::RegionTopology`: Start region for transport technology
@@ -43,8 +41,6 @@ An aggregated representation of a transmission interchange between two regions.
 mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTechnology
     "Name"
     name::String
-    "Numerical Index for AC transport technologies"
-    id::Int64
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Corresponding type in PowerSystems.jl to be used in PCM modeling"
@@ -72,14 +68,12 @@ mutable struct AggregateTransportTechnology{T <: PSY.Device} <: TransmissionTech
 end
 
 
-function AggregateTransportTechnology{T}(; name, id, available, power_systems_type, start_region, end_region, capacity_limits=(min=0, max=1e8), unit_size=1, capital_costs=LinearCurve(0.0), line_loss=0.0, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Device
-    AggregateTransportTechnology{T}(name, id, available, power_systems_type, start_region, end_region, capacity_limits, unit_size, capital_costs, line_loss, requirements, financial_data, ext, internal, )
+function AggregateTransportTechnology{T}(; name, available, power_systems_type, start_region, end_region, capacity_limits=(min=0, max=1e8), unit_size=1, capital_costs=LinearCurve(0.0), line_loss=0.0, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Device
+    AggregateTransportTechnology{T}(name, available, power_systems_type, start_region, end_region, capacity_limits, unit_size, capital_costs, line_loss, requirements, financial_data, ext, internal, )
 end
 
 """Get [`AggregateTransportTechnology`](@ref) `name`."""
 get_name(value::AggregateTransportTechnology) = value.name
-"""Get [`AggregateTransportTechnology`](@ref) `id`."""
-get_id(value::AggregateTransportTechnology) = value.id
 """Get [`AggregateTransportTechnology`](@ref) `available`."""
 get_available(value::AggregateTransportTechnology) = value.available
 """Get [`AggregateTransportTechnology`](@ref) `power_systems_type`."""
@@ -119,8 +113,6 @@ get_internal(value::AggregateTransportTechnology) = value.internal
 
 """Set [`AggregateTransportTechnology`](@ref) `name`."""
 set_name!(value::AggregateTransportTechnology, val) = value.name = val
-"""Set [`AggregateTransportTechnology`](@ref) `id`."""
-set_id!(value::AggregateTransportTechnology, val) = value.id = val
 """Set [`AggregateTransportTechnology`](@ref) `available`."""
 set_available!(value::AggregateTransportTechnology, val) = value.available = val
 """Set [`AggregateTransportTechnology`](@ref) `power_systems_type`."""
@@ -151,7 +143,6 @@ function from_openapi(po::PI.AggregateTransportTechnology, refs::OpenAPIRefs)
     parameter = getproperty(PowerSystems, Symbol(po.power_systems_type))
     return AggregateTransportTechnology{parameter}(;
         name = po.name,
-        id = po.id,
         available = po.available,
         power_systems_type = po.power_systems_type,
         start_region = resolve_ref(refs, po.start_region, RegionTopology),
@@ -167,8 +158,8 @@ end
 
 function to_openapi(value::AggregateTransportTechnology{T}, refs::OpenAPIRefs) where {T <: PSY.Device}
     return PI.AggregateTransportTechnology(;
-        name = get_name(value),
         id = get_id(value),
+        name = get_name(value),
         available = get_available(value),
         power_systems_type = string(nameof(T)),
         start_region = component_id(refs, get_start_region(value)),

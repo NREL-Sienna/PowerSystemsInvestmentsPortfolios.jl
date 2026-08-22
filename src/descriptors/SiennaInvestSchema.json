@@ -10,8 +10,7 @@
       "name": "Zone",
       "type": "object",
       "required": [
-        "name",
-        "id"
+        "name"
       ],
       "docstring": "A unit of spatial aggregation for zonal capacity expansion models. Used to define locations for supply, demand, transport, and storage technologies and relevant policy requirements.",
       "properties": [
@@ -19,11 +18,6 @@
           "name": "name",
           "type": "String",
           "description": "Name of region"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "A unique zone identification number"
         },
         {
           "name": "ext",
@@ -44,8 +38,7 @@
       "name": "Node",
       "type": "object",
       "required": [
-        "name",
-        "id"
+        "name"
       ],
       "docstring": "A unit of spatial aggregation for nodal capacity expansion models. Used to define locations for supply, demand, transport, and storage technologies and relevant policy requirements.",
       "properties": [
@@ -53,11 +46,6 @@
           "name": "name",
           "type": "String",
           "description": "Name of region"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "A unique node identification number"
         },
         {
           "name": "bus_type",
@@ -85,7 +73,6 @@
       "type": "object",
       "required": [
         "name",
-        "id",
         "power_systems_type",
         "financial_data"
       ],
@@ -106,11 +93,6 @@
           "type": "Vector{RegionTopology}",
           "description": "Location where technology operates. Can be a zone or node.",
           "default": "Vector()"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual technology"
         },
         {
           "name": "available",
@@ -257,15 +239,9 @@
       "name": "RetirementPotential",
       "type": "object",
       "required": [
-        "id"
       ],
       "docstring": "Supplemental attribute used to define what existing generators are eligible for retirement for a SupplyTechnology",
       "properties": [
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual component"
-        },
         {
           "name": "eligible_generators",
           "type": "Vector{String}",
@@ -303,15 +279,9 @@
       "name": "AggregateRetirementPotential",
       "type": "object",
       "required": [
-        "id"
       ],
       "docstring": "Supplemental attribute used to define a total amount of existing capacity that can be retired for a technology",
       "properties": [
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual component"
-        },
         {
           "name": "retirement_potential",
           "type": "Float64",
@@ -339,15 +309,9 @@
       "name": "RetrofitPotential",
       "type": "object",
       "required": [
-        "id"
       ],
       "docstring": "Supplemental attribute used to define what existing generators are eligible for retrofit for a SupplyTechnology",
       "properties": [
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual component"
-        },
         {
           "name": "eligible_generators",
           "type": "Vector{String}",
@@ -373,15 +337,9 @@
       "name": "AggregateRetrofitPotential",
       "type": "object",
       "required": [
-        "id"
       ],
       "docstring": "Supplemental attribute used to define a total amount of capacity that can be retrofit for a SupplyTechnology",
       "properties": [
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual component"
-        },
         {
           "name": "retrofit_id",
           "type": "Int64",
@@ -421,15 +379,9 @@
       "name": "ExistingDevices",
       "type": "object",
       "required": [
-        "id"
       ],
       "docstring": "Supplemental attributed used to map technologies in a portfolio to the existing system. For example, contains a list of existing generators that correspond to a SupplyTechnology.",
       "properties": [
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual component"
-        },
         {
           "name": "existing_devices",
           "type": "Vector{String}",
@@ -455,15 +407,9 @@
       "name": "TopologyMapping",
       "type": "object",
       "required": [
-        "id"
       ],
       "docstring": "Supplemental attributed used to store mapping between the PSIP Zone and the associated buses in the base system.",
       "properties": [
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual component"
-        },
         {
           "name": "buses",
           "type": "Vector{String}",
@@ -490,7 +436,6 @@
       "type": "object",
       "required": [
         "name",
-        "id",
         "available",
         "power_systems_type",
         "storage_tech",
@@ -508,11 +453,6 @@
           "type": "Vector{RegionTopology}",
           "description": "Location where technology is operated",
           "default": "Vector()"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual storage technology"
         },
         {
           "name": "available",
@@ -701,7 +641,6 @@
       "type": "object",
       "required": [
         "name",
-        "id",
         "available",
         "power_systems_type"
       ],
@@ -711,11 +650,6 @@
           "name": "name",
           "type": "String",
           "description": "The technology name"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for demand side technology"
         },
         {
           "name": "available",
@@ -832,7 +766,6 @@
       "type": "object",
       "required": [
         "name",
-        "id",
         "available",
         "power_systems_type",
         "start_node",
@@ -845,11 +778,6 @@
           "name": "name",
           "type": "String",
           "description": "Name"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "Numerical Index for HVDC lines"
         },
         {
           "name": "available",
@@ -933,7 +861,6 @@
       "type": "object",
       "required": [
         "name",
-        "id",
         "available",
         "power_systems_type",
         "start_region",
@@ -946,11 +873,6 @@
           "name": "name",
           "type": "String",
           "description": "Name"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "Numerical Index for AC transport technologies"
         },
         {
           "name": "available",
@@ -1034,7 +956,6 @@
       "type": "object",
       "required": [
         "name",
-        "id",
         "available",
         "power_systems_type",
         "start_node",
@@ -1047,11 +968,6 @@
           "name": "name",
           "type": "String",
           "description": "Name"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "Numerical Index for AC transport technologies"
         },
         {
           "name": "available",
@@ -1153,7 +1069,6 @@
       "type": "object",
       "required": [
         "name",
-        "id",
         "power_systems_type",
         "value_of_lost_load"
       ],
@@ -1169,11 +1084,6 @@
           "type": "Bool",
           "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)",
           "default": "true"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual demand requirement"
         },
         {
           "name": "power_systems_type",
@@ -1255,8 +1165,7 @@
       "type": "object",
       "required": [
         "name",
-        "available",
-        "id"
+        "available"
       ],
       "docstring": "Defines limits to the amount of carbon produced. Can be defined either by the total amount of carbon produced (tons CO2) or by the carbon intensity of the portfolio (tons CO2 per MWh of electricity)",
       "properties": [
@@ -1269,11 +1178,6 @@
           "name": "available",
           "type": "Bool",
           "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual policy"
         },
         {
           "name": "max_tons_mwh",
@@ -1317,8 +1221,7 @@
       "type": "object",
       "required": [
         "name",
-        "available",
-        "id"
+        "available"
       ],
       "docstring": "Policy requirement that defines an additional cost penalty per ton of CO2 produced in the target in the eligible regions",
       "properties": [
@@ -1331,11 +1234,6 @@
           "name": "available",
           "type": "Bool",
           "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual policy"
         },
         {
           "name": "target_year",
@@ -1371,8 +1269,7 @@
       "type": "object",
       "required": [
         "name",
-        "available",
-        "id"
+        "available"
       ],
       "docstring": "Policy requirement to enforce a minimum capacity reserve margin, such that (total_capacity - peak_demand)/peak_demand >= capacity_reserve_fraction",
       "properties": [
@@ -1385,11 +1282,6 @@
           "name": "available",
           "type": "Bool",
           "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual policy"
         },
         {
           "name": "target_year",
@@ -1423,8 +1315,7 @@
       "type": "object",
       "required": [
         "name",
-        "available",
-        "id"
+        "available"
       ],
       "docstring": "Policy requirement that the total capacity of all technologies in `eligible_technologies` in the target year is greater than or equal to the specific minimum in MW",
       "properties": [
@@ -1437,11 +1328,6 @@
           "name": "available",
           "type": "Bool",
           "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual policy"
         },
         {
           "name": "min_capacity_mw",
@@ -1477,8 +1363,7 @@
       "type": "object",
       "required": [
         "name",
-        "available",
-        "id"
+        "available"
       ],
       "docstring": "Policy requirement that the total generation of `eligible_technologies` must be greater than or equal to a pre-determined fraction of the total demand in eligible zones, such that `sum(P)_eligible_technologies >= total_fraction * sum(D)_eligible_regions`",
       "properties": [
@@ -1486,11 +1371,6 @@
           "name": "name",
           "type": "String",
           "description": "The policy name"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual policy"
         },
         {
           "name": "available",
@@ -1529,8 +1409,7 @@
       "type": "object",
       "required": [
         "name",
-        "available",
-        "id"
+        "available"
       ],
       "docstring": "Policy requirement that all DemandSideTechnologies in `qualified_demand` must have their demand met by an equal amount of electricity generation from `qualified_supply` at all hours, such that: `sum(P)_qualified_supply >= sum(D)_qualified_demand`",
       "properties": [
@@ -1538,11 +1417,6 @@
           "name": "name",
           "type": "String",
           "description": "The policy name"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual policy"
         },
         {
           "name": "available",
@@ -1569,8 +1443,7 @@
       "type": "object",
       "required": [
         "name",
-        "available",
-        "id"
+        "available"
       ],
       "docstring": "Policy requirement that the total capacity of all technologies in `eligible_resources` in the target year is less than the specified limit in MW",
       "properties": [
@@ -1583,11 +1456,6 @@
           "name": "available",
           "type": "Bool",
           "description": "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual policy"
         },
         {
           "name": "max_capacity_mw",
@@ -1623,7 +1491,6 @@
       "type": "object",
       "required": [
         "name",
-        "id",
         "power_systems_type",
         "financial_data",
         "capital_costs_inverter",
@@ -1648,11 +1515,6 @@
           "type": "Vector{RegionTopology}",
           "description": "Zone where tech operates in",
           "default": "Vector()"
-        },
-        {
-          "name": "id",
-          "type": "Int64",
-          "description": "ID for individual generator"
         },
         {
           "name": "available",

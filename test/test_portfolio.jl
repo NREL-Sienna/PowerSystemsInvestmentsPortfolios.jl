@@ -3,7 +3,7 @@
 
     technologies = collect(get_technologies(SupplyTechnology, p_5bus))
     technology = get_technology(SupplyTechnology, p_5bus, PSIP.get_name(technologies[1]))
-    @test IS.get_uuid(technology) == IS.get_uuid(technologies[1])
+    @test IS.get_id(technology) == IS.get_id(technologies[1])
     @test_throws(IS.ArgumentError, add_technology!(p_5bus, technology))
     @test get_available_technology(
         SupplyTechnology,
@@ -18,7 +18,7 @@
     technologies2 =
         get_technologies_by_name(SupplyTechnology, p_5bus, PSIP.get_name(technologies[1]))
     @test length(technologies2) == 1
-    @test IS.get_uuid(technologies2[1]) == IS.get_uuid(technologies[1])
+    @test IS.get_id(technologies2[1]) == IS.get_id(technologies[1])
     @test has_time_series(technologies2[1])
 
     @test isnothing(get_technology(SupplyTechnology, p_5bus, "not-a-name"))
@@ -183,10 +183,8 @@ end
     @test PSIP.is_attached(thermal, port)
     @test PSIP.is_attached(typeof(thermal), thermal_name, port)
 
-    # UUID-based lookups
-    uuid = IS.get_uuid(thermal)
-    @test PSIP.get_technology(port, uuid) === thermal
-    @test PSIP.get_technology(port, string(uuid)) === thermal
+    # id-based lookup
+    @test PSIP.get_technology(port, IS.get_id(thermal)) === thermal
 
     # throw_if_not_attached should throw once removed
     PSIP.remove_technology!(port, thermal)
@@ -217,8 +215,8 @@ end
 @testset "Test region and requirement APIs" begin
     port = Portfolio()
 
-    zone = Zone(name="zone_test", id=1)
-    node = Node(name="node_test", id=2)
+    zone = Zone(name="zone_test")
+    node = Node(name="node_test")
     PSIP.add_region!(port, zone)
     PSIP.add_region!(port, node)
 
@@ -227,7 +225,7 @@ end
     @test PSIP.get_region(Zone, port, "zone_test") === zone
     @test PSIP.get_region(Node, port, "node_test") === node
 
-    req = CarbonTax(name="req_test", id=3, available=true)
+    req = CarbonTax(name="req_test", available=true)
     PSIP.add_requirement!(port, req)
     @test PSIP.get_requirement(CarbonTax, port, "req_test") === req
     @test length(collect(PSIP.get_requirements(CarbonTax, port))) == 1
@@ -237,7 +235,7 @@ end
 @testset "Test contributing technologies" begin
     port = build_portfolio()
     tech = first(get_technologies(SupplyTechnology{ThermalStandard}, port))
-    req = CarbonTax(name="req_contrib", id=777, available=true)
+    req = CarbonTax(name="req_contrib", available=true)
     set_requirements!(tech, [req])
 
     contributors = PSIP.get_contributing_technologies(port, req)
@@ -268,7 +266,7 @@ end
     port = build_portfolio()
     zone = first(get_regions(Zone, port))
 
-    attr = TopologyMapping(id=56, buses=["b1", "b2"])
+    attr = TopologyMapping(buses=["b1", "b2"])
     PSIP.add_supplemental_attribute!(port, zone, attr)
 
     attrs_on_component = PSIP.get_supplemental_attributes(TopologyMapping, zone)
@@ -278,13 +276,12 @@ end
     attrs_on_port = PSIP.get_supplemental_attributes(TopologyMapping, port)
     @test length(attrs_on_port) >= 1
 
-    attr_uuid = IS.get_uuid(attr)
-    @test PSIP.get_supplemental_attribute(port, attr_uuid) === attr
+    @test PSIP.get_supplemental_attribute(port, IS.get_id(attr)) === attr
 
     PSIP.remove_supplemental_attribute!(port, zone, attr)
     @test isempty(PSIP.get_supplemental_attributes(TopologyMapping, zone))
 
-    attr3 = TopologyMapping(id=57, buses=["b4"])
+    attr3 = TopologyMapping(buses=["b4"])
     PSIP.add_supplemental_attribute!(port, zone, attr3)
     PSIP.remove_supplemental_attributes!(TopologyMapping, port)
     @test isempty(PSIP.get_supplemental_attributes(TopologyMapping, port))

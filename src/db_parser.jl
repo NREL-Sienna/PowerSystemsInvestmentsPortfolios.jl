@@ -114,6 +114,19 @@ import ..PowerSystemsInvestmentsPortfolios:
     USD
 
 """
+The physical quantity a `scaling_factor_multiplier` accessor's normalized values scale to.
+
+Matches PowerTableDataParser's map of the same name so a profile means the same thing however
+it reached a system.
+"""
+const MULTIPLIER_QUANTITY_KINDS = Dict(
+    "get_max_active_power" => "active_power",
+    "get_max_reactive_power" => "reactive_power",
+    "get_requirement" => "active_power",
+    "get_rating" => "apparent_power",
+)
+
+"""
 Set of queries to extract relevant data from the database. Need to be maintained to be consistent with the most recent version of the database
 """
 #TODO: Support scenario handling
@@ -288,6 +301,10 @@ function database_to_structs(db_path::AbstractString, portfolio::Portfolio)
     stmts = prepare_statements(db)
 
     attributes = get_entity_attributes(db)
+    # DB entity id -> the base-system component parsed from it. The time series rows name
+    # their owner by that id, and it is the only cross-reference the schema offers.
+    owners = Dict{Int64, Any}()
+    ids = id_allocator(db)
 
     # Add zones and lines, shouldn't add both aggregate lines and nodal lines to the same DB
     # User can provide a desired aggregation level and then we can select based on that
@@ -297,20 +314,20 @@ function database_to_structs(db_path::AbstractString, portfolio::Portfolio)
         add_nodal_lines!(portfolio, attributes, stmts)
     else
         add_zones!(portfolio, attributes, stmts)
-        add_aggregate_lines!(portfolio, attributes, stmts)
+        add_aggregate_lines!(portfolio, attributes, stmts, ids)
     end
 
-    add_technologies!(portfolio, attributes, stmts)
+    add_technologies!(portfolio, attributes, stmts, ids)
     add_demand_requirements!(portfolio, attributes, stmts)
     add_demand_technologies!(portfolio, attributes, stmts)
 
-    add_buses!(portfolio, attributes, stmts)
-    add_system_lines!(portfolio, attributes, stmts)
-    add_generation_units!(portfolio, attributes, stmts)
-    add_storage_units!(portfolio, attributes, stmts)
-    add_loads!(portfolio, attributes, stmts)
+    add_buses!(portfolio, attributes, stmts, owners)
+    add_system_lines!(portfolio, attributes, stmts, owners, ids)
+    add_generation_units!(portfolio, attributes, stmts, owners)
+    add_storage_units!(portfolio, attributes, stmts, owners)
+    add_loads!(portfolio, attributes, stmts, owners)
 
-    deserialize_timeseries!(portfolio.base_system, db, attributes)
+    deserialize_timeseries!(portfolio.base_system, db, owners)
     deserialize_portfolio_timeseries!(portfolio, stmts)
 
     return portfolio
@@ -516,9 +533,37 @@ function parse_operational_cost(ops_cost::Dict{String, Any})
     return operational_cost
 end
 
+"""
+Mint portfolio component ids that cannot collide with an `entities` id.
+
+A portfolio stores every component under its own `id`, and those ids must be unique across
+every type in it. Most tables key their rows by an `entities` id, which is unique already;
+`supply_technologies` and `transmission_interchanges` number their rows table-locally, and the
+candidate ("_new") transport technologies have no row of their own at all. Those draw from this
+counter, seeded past the entity space so the two families cannot meet.
+"""
+mutable struct IdAllocator
+    next_id::Int
+end
+
+"""
+Seed an [`IdAllocator`](@ref) past every id the database's `entities` table uses.
+"""
+function id_allocator(db)
+    row = first(DBInterface.execute(db, "SELECT MAX(id) AS max_id FROM entities"))
+    return IdAllocator(Int(row.max_id) + 1)
+end
+
+function next_id!(allocator::IdAllocator)
+    id = allocator.next_id
+    allocator.next_id += 1
+    return id
+end
+
 function add_zones!(p::Portfolio, attributes::Dict{Int64, Dict{String, Any}}, stmts::Dict)
-    for rec in IS.execute(stmts[:zones], nothing, IS.LOG_GROUP_SERIALIZATION)
-        z = Zone(; name=rec.name, id=rec.id)
+    for rec in DBInterface.execute(stmts[:zones])
+        z = Zone(; name=rec.name)
+        IS.set_id!(z, rec.id)
         add_region!(p, z)
     end
 end
@@ -528,8 +573,9 @@ function add_nodes!(
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
 )
-    for rec in IS.execute(stmts[:balancing_topologies], nothing, IS.LOG_GROUP_SERIALIZATION)
-        z = Node(; name=rec.name, id=rec.id)
+    for rec in DBInterface.execute(stmts[:balancing_topologies])
+        z = Node(; name=rec.name)
+        IS.set_id!(z, rec.id)
         add_region!(portfolio, z)
     end
 end
@@ -538,8 +584,9 @@ function add_buses!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
+    owners::Dict{Int64, Any},
 )
-    for rec in IS.execute(stmts[:zones], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in DBInterface.execute(stmts[:zones])
         component_attr = get(attributes, rec.id, Dict{String, Any}())
         area = Area(;
             name=rec.name,
@@ -547,17 +594,12 @@ function add_buses!(
             peak_active_power=component_attr["peak_active_power"],
             peak_reactive_power=component_attr["peak_reactive_power"],
         )
-        if haskey(component_attr, "uuid")
-            IS.set_uuid!(IS.get_internal(area), Base.UUID(component_attr["uuid"]))
-        else
-            warn("UUID for component named $(rec.name) not found in database")
-        end
         PSY.add_component!(portfolio.base_system, area)
+        owners[rec.id] = area
     end
-    for rec in IS.execute(stmts[:balancing_topologies], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in DBInterface.execute(stmts[:balancing_topologies])
         component_attr = get(attributes, rec.id, Dict{String, Any}())
-        area_name =
-            first(IS.execute(stmts[:zone], [rec.area], IS.LOG_GROUP_SERIALIZATION)).name
+        area_name = first(DBInterface.execute(stmts[:zone], [rec.area])).name
         bus = PSY.ACBus(;
             name=rec.name,
             number=rec.id,
@@ -570,12 +612,8 @@ function add_buses!(
             base_voltage=component_attr["base_voltage"],
             load_zone=nothing,
         )
-        if haskey(component_attr, "uuid")
-            IS.set_uuid!(IS.get_internal(bus), Base.UUID(component_attr["uuid"]))
-        else
-            warn("UUID for component named $(rec.name) not found in database")
-        end
         PSY.add_component!(portfolio.base_system, bus)
+        owners[rec.id] = bus
     end
 end
 
@@ -583,14 +621,14 @@ function add_aggregate_lines!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
+    ids::IdAllocator,
 )
-    for rec in IS.execute(stmts[:aggregate_lines], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in DBInterface.execute(stmts[:aggregate_lines])
         component_attr = get(attributes, rec.id, Dict{String, Any}())
         area_to_id = parse(Int64, rec.area_to)
         area_from_id = parse(Int64, rec.area_from)
         t = AggregateTransportTechnology{ACBranch}(;
             name=string(rec.rowid),
-            id=rec.rowid,
             available=component_attr["available"],
             base_power=100.0,
             power_systems_type=string(nameof(ACBranch)),
@@ -612,6 +650,7 @@ function add_aggregate_lines!(
             capacity_limits=(min=0.0, max=max(rec.max_flow_from, rec.max_flow_to)),
             capital_costs=LinearCurve(1e5),
         )
+        IS.set_id!(t, next_id!(ids))
         add_technology!(portfolio, t)
     end
 end
@@ -622,28 +661,15 @@ function add_nodal_lines!(
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
 )
-    for rec in IS.execute(stmts[:new_lines], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in DBInterface.execute(stmts[:new_lines])
         component_attr = get(attributes, rec.id, Dict{String, Any}())
-        arc = first(IS.execute(stmts[:arc], [rec.arc_id], IS.LOG_GROUP_SERIALIZATION))
+        arc = first(DBInterface.execute(stmts[:arc], [rec.arc_id]))
         balancing_topology_from =
-            first(
-                IS.execute(
-                    stmts[:topology_from_arc],
-                    [arc.from_id],
-                    IS.LOG_GROUP_SERIALIZATION,
-                ),
-            ).name
+            first(DBInterface.execute(stmts[:topology_from_arc], [arc.from_id])).name
         balancing_topology_to =
-            first(
-                IS.execute(
-                    stmts[:topology_from_arc],
-                    [arc.to_id],
-                    IS.LOG_GROUP_SERIALIZATION,
-                ),
-            ).name
+            first(DBInterface.execute(stmts[:topology_from_arc], [arc.to_id])).name
         transport = NodalACTransportTechnology{ACBranch}(;
             name=string(rec.arc_id) * "_newline",
-            id=rec.id,
             available=true,
             power_systems_type=string(nameof(ACBranch)),
             financial_data=DEFAULT_FINANCIAL_DATA,
@@ -654,6 +680,7 @@ function add_nodal_lines!(
             capital_costs=LinearCurve(1e5),
             unit_size=component_attr["unit_size"],
         )
+        IS.set_id!(transport, rec.id)
         add_technology!(portfolio, transport)
     end
 end
@@ -662,25 +689,16 @@ function add_technologies!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
+    ids::IdAllocator,
 )
-    for rec in IS.execute(stmts[:technologies], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in DBInterface.execute(stmts[:technologies])
         parametric = get(PRIME_MOVER_TO_PARAMETRIC, rec.prime_mover, PSY.ThermalStandard)
 
         if get_aggregation(portfolio) == PSY.ACBus
-            area_id =
-                first(
-                    IS.execute(
-                        stmts[:zone_for_technology],
-                        [rec.area],
-                        IS.LOG_GROUP_SERIALIZATION,
-                    ),
-                ).id
+            area_id = first(DBInterface.execute(stmts[:zone_for_technology], [rec.area])).id
             regions = [
-                get_region(Node, portfolio, row.name) for row in IS.execute(
-                    stmts[:area_to_topology],
-                    [area_id],
-                    IS.LOG_GROUP_SERIALIZATION,
-                )
+                get_region(Node, portfolio, row.name) for
+                row in DBInterface.execute(stmts[:area_to_topology], [area_id])
             ]
         else
             regions = [get_region(Zone, portfolio, rec.area)]
@@ -689,7 +707,6 @@ function add_technologies!(
         if rec.prime_mover == "STORAGE"
             technology = StorageTechnology{parametric}(;
                 name=rec.prime_mover * string(rec.id),
-                id=rec.id,
                 capital_costs_discharge=LinearCurve(0.0),
                 prime_mover_type=get(PRIME_MOVER_MAPPING, rec.prime_mover, PrimeMovers.OT),
                 storage_tech=get(STORAGE_MAPPING, rec.fuel, StorageTech.OTHER_THERM),
@@ -699,13 +716,13 @@ function add_technologies!(
                 power_systems_type=string(nameof(parametric)),
                 operation_costs=StorageCost(),
             )
+            IS.set_id!(technology, next_id!(ids))
         elseif rec.prime_mover in ["HYDRO", "ROR", "SYNC_COND"]
             @warn "Technologies of type $(rec.prime_mover) are not currently supported in portfolios. Skipping de-serialization."
             continue
         else
             technology = SupplyTechnology{parametric}(;
                 name=rec.prime_mover * string(rec.id),
-                id=rec.id,
                 capital_costs=LinearCurve(0.0),
                 prime_mover_type=get(PRIME_MOVER_MAPPING, rec.prime_mover, PrimeMovers.OT),
                 fuel=[get(FUEL_MAPPING, rec.fuel, ThermalFuels.OTHER)],
@@ -721,6 +738,7 @@ function add_technologies!(
                     shut_down=0.0,
                 ),
             )
+            IS.set_id!(technology, next_id!(ids))
         end
         add_technology!(portfolio, technology)
     end
@@ -730,27 +748,20 @@ function add_generation_units!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
+    owners::Dict{Int64, Any},
 )
-    for rec in IS.execute(stmts[:generation_units], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in DBInterface.execute(stmts[:generation_units])
         downstream = true
 
         component_type = getproperty(
             PowerSystems,
-            Symbol(
-                first(
-                    IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
-                ).entity_type,
-            ),
+            Symbol(first(DBInterface.execute(stmts[:entity_type], [rec.id])).entity_type),
         )
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         bus_name =
             first(
-                IS.execute(
-                    stmts[:topology_for_unit],
-                    [rec.balancing_topology],
-                    IS.LOG_GROUP_SERIALIZATION,
-                ),
+                DBInterface.execute(stmts[:topology_for_unit], [rec.balancing_topology]),
             ).name
 
         if component_type == PSY.ThermalStandard
@@ -905,9 +916,7 @@ function add_generation_units!(
                 efficiency=component_attr["efficiency"],
             )
             # find the correct reservoir ID associated with this turbine
-            reservoir_link = first(
-                IS.execute(stmts[:reservoir], [rec.id, rec.id], IS.LOG_GROUP_SERIALIZATION),
-            )
+            reservoir_link = first(DBInterface.execute(stmts[:reservoir], [rec.id, rec.id]))
             if reservoir_link.source_id !== rec.id
                 reservoir_id = reservoir_link.source_id
                 downstream = true
@@ -944,25 +953,17 @@ function add_generation_units!(
             )
         end
         if component_type == PSY.HydroTurbine
-            if haskey(component_attr, "uuid")
-                IS.set_uuid!(IS.get_internal(turbine), Base.UUID(component_attr["uuid"]))
-            else
-                warn("UUID for component named $(rec.name) not found in database")
-            end
             add_component!(portfolio.base_system, reservoir)
             add_component!(portfolio.base_system, turbine)
+            owners[rec.id] = turbine
             if downstream
                 PSY.set_downstream_turbines!(reservoir, [turbine])
             else
                 PSY.set_upstream_turbines!(reservoir, [turbine])
             end
         else
-            if haskey(component_attr, "uuid")
-                IS.set_uuid!(IS.get_internal(generator), Base.UUID(component_attr["uuid"]))
-            else
-                warn("UUID for component named $(rec.name) not found in database")
-            end
             add_component!(portfolio.base_system, generator)
+            owners[rec.id] = generator
         end
         if component_type in
            [PSY.ThermalStandard, PSY.RenewableDispatch, PSY.RenewableNonDispatch]
@@ -971,10 +972,9 @@ function add_generation_units!(
             else
                 area_id =
                     first(
-                        IS.execute(
+                        DBInterface.execute(
                             stmts[:topology_to_area],
                             [rec.balancing_topology],
-                            IS.LOG_GROUP_SERIALIZATION,
                         ),
                     ).area
                 regions = collect(
@@ -993,7 +993,6 @@ function add_generation_units!(
             end
             technology = SupplyTechnology{component_type}(;
                 name=rec.name,
-                id=rec.id,
                 capital_costs=LinearCurve(0.0),
                 prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
                 fuel=[fuel],
@@ -1007,8 +1006,10 @@ function add_generation_units!(
                 capacity_limits=(min=0, max=rec.rating),
                 co2=Dict(fuel => 0.0),
             )
+            IS.set_id!(technology, rec.id)
             add_technology!(portfolio, technology)
-            existing = ExistingDevices(id=rec.id, existing_devices=[rec.name])
+            existing = ExistingDevices(existing_devices=[rec.name])
+            IS.set_id!(existing, rec.id)
             add_supplemental_attribute!(portfolio, technology, existing)
 
             set_capacity_limits!(
@@ -1024,15 +1025,12 @@ function add_storage_units!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
+    owners::Dict{Int64, Any},
 )
-    for rec in IS.execute(stmts[:storage_units], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in DBInterface.execute(stmts[:storage_units])
         component_type = getproperty(
             PowerSystems,
-            Symbol(
-                first(
-                    IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
-                ).entity_type,
-            ),
+            Symbol(first(DBInterface.execute(stmts[:entity_type], [rec.id])).entity_type),
         )
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
@@ -1056,11 +1054,7 @@ function add_storage_units!(
         # Get name of bus
         bus_name =
             first(
-                IS.execute(
-                    stmts[:topology_for_unit],
-                    [rec.balancing_topology],
-                    IS.LOG_GROUP_SERIALIZATION,
-                ),
+                DBInterface.execute(stmts[:topology_for_unit], [rec.balancing_topology]),
             ).name
 
         ops_cost = parse_operational_cost(component_attr["operation_cost"])
@@ -1090,23 +1084,15 @@ function add_storage_units!(
             efficiency=(in=rec.efficiency_up, out=rec.efficiency_down),
             operation_cost=ops_cost,
         )
-        if haskey(component_attr, "uuid")
-            IS.set_uuid!(IS.get_internal(storage_unit), Base.UUID(component_attr["uuid"]))
-        else
-            warn("UUID for component named $(rec.name) not found in database")
-        end
         add_component!(portfolio.base_system, storage_unit)
+        owners[rec.id] = storage_unit
 
         if get_aggregation(portfolio) == PSY.ACBus
             regions = [get_region(Node, portfolio, bus_name)]
         else
             area_id =
                 first(
-                    IS.execute(
-                        stmts[:topology_to_area],
-                        [rec.balancing_topology],
-                        IS.LOG_GROUP_SERIALIZATION,
-                    ),
+                    DBInterface.execute(stmts[:topology_to_area], [rec.balancing_topology]),
                 ).area
             regions = collect(
                 IS.get_components(
@@ -1118,7 +1104,6 @@ function add_storage_units!(
         end
         storage = StorageTechnology{component_type}(;
             name=rec.name,
-            id=rec.id,
             capital_costs_discharge=LinearCurve(0.0),
             capital_costs_energy=LinearCurve(0.0),
             prime_mover_type=PSY.get_enum_value(PSY.PrimeMovers, rec.prime_mover),
@@ -1131,8 +1116,10 @@ function add_storage_units!(
             capacity_limits_discharge=(min=0, max=rec.rating),
             capacity_limits_energy=(min=0, max=component_attr["storage_capacity"]),
         )
+        IS.set_id!(storage, rec.id)
         add_technology!(portfolio, storage)
-        existing = ExistingDevices(id=rec.id, existing_devices=[rec.name])
+        existing = ExistingDevices(existing_devices=[rec.name])
+        IS.set_id!(existing, rec.id)
         add_supplemental_attribute!(portfolio, storage, existing)
     end
 end
@@ -1142,14 +1129,10 @@ function add_demand_requirements!(
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
 )
-    for rec in IS.execute(stmts[:demand_requirements], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in DBInterface.execute(stmts[:demand_requirements])
         component_type = getproperty(
             PowerSystems,
-            Symbol(
-                first(
-                    IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
-                ).entity_type,
-            ),
+            Symbol(first(DBInterface.execute(stmts[:entity_type], [rec.id])).entity_type),
         )
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
@@ -1158,17 +1141,12 @@ function add_demand_requirements!(
         else
             area =
                 first(
-                    IS.execute(
-                        stmts[:topology_to_area],
-                        [rec.balancing_topology],
-                        IS.LOG_GROUP_SERIALIZATION,
-                    ),
+                    DBInterface.execute(stmts[:topology_to_area], [rec.balancing_topology]),
                 ).area
         end
 
         demand = DemandRequirement{component_type}(;
             name=rec.name,
-            id=rec.id,
             new_demand_mw=component_attr["active_power"], #TODO: Change to "max_active_power" later when DB is fixed
             region=collect(
                 IS.get_components(x -> get_id(x) == area, RegionTopology, portfolio.data),
@@ -1176,6 +1154,7 @@ function add_demand_requirements!(
             value_of_lost_load=1e8, #TODO: Assign a default value to this field
             power_systems_type=string(nameof(component_type)),
         )
+        IS.set_id!(demand, rec.id)
         add_technology!(portfolio, demand)
     end
 end
@@ -1184,26 +1163,19 @@ function add_loads!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
+    owners::Dict{Int64, Any},
 )
-    for rec in IS.execute(stmts[:demand_requirements], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in DBInterface.execute(stmts[:demand_requirements])
         component_type = getproperty(
             PowerSystems,
-            Symbol(
-                first(
-                    IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
-                ).entity_type,
-            ),
+            Symbol(first(DBInterface.execute(stmts[:entity_type], [rec.id])).entity_type),
         )
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         # Determine area based on balancing topology if zonal
         bus_name =
             first(
-                IS.execute(
-                    stmts[:topology_for_unit],
-                    [rec.balancing_topology],
-                    IS.LOG_GROUP_SERIALIZATION,
-                ),
+                DBInterface.execute(stmts[:topology_for_unit], [rec.balancing_topology]),
             ).name
 
         load = component_type(;
@@ -1216,12 +1188,8 @@ function add_loads!(
             active_power=component_attr["active_power"] / rec.base_power,
             available=component_attr["available"],
         )
-        if haskey(component_attr, "uuid")
-            IS.set_uuid!(IS.get_internal(load), Base.UUID(component_attr["uuid"]))
-        else
-            warn("UUID for component named $(rec.name) not found in database")
-        end
         add_component!(portfolio.base_system, load)
+        owners[rec.id] = load
     end
 end
 
@@ -1251,45 +1219,26 @@ function add_system_lines!(
     portfolio::Portfolio,
     attributes::Dict{Int64, Dict{String, Any}},
     stmts::Dict,
+    owners::Dict{Int64, Any},
+    ids::IdAllocator,
 )
     arc_dict = Dict()
-    for rec in IS.execute(stmts[:arcs], nothing, IS.LOG_GROUP_SERIALIZATION)
+    for rec in DBInterface.execute(stmts[:arcs])
         component_attr = get(attributes, rec.id, Dict{String, Any}())
-        from_bus =
-            first(
-                IS.execute(
-                    stmts[:topology_from_arc],
-                    [rec.from_id],
-                    IS.LOG_GROUP_SERIALIZATION,
-                ),
-            ).name
-        to_bus =
-            first(
-                IS.execute(
-                    stmts[:topology_from_arc],
-                    [rec.to_id],
-                    IS.LOG_GROUP_SERIALIZATION,
-                ),
-            ).name
+        from_bus = first(DBInterface.execute(stmts[:topology_from_arc], [rec.from_id])).name
+        to_bus = first(DBInterface.execute(stmts[:topology_from_arc], [rec.to_id])).name
         arc = Arc(;
             from=PSY.get_component(ACBus, portfolio.base_system, from_bus),
             to=PSY.get_component(ACBus, portfolio.base_system, to_bus),
         )
-        if haskey(component_attr, "uuid")
-            IS.set_uuid!(IS.get_internal(arc), Base.UUID(component_attr["uuid"]))
-        else
-            warn("UUID for component named $(rec.name) not found in database")
-        end
         add_component!(portfolio.base_system, arc)
         arc_dict[rec.id] = arc
+        owners[rec.id] = arc
     end
 
     tx_dict = Dict()
-    for rec in IS.execute(stmts[:transmission_lines], nothing, IS.LOG_GROUP_SERIALIZATION)
-        comp_string =
-            first(
-                IS.execute(stmts[:entity_type], [rec.id], IS.LOG_GROUP_SERIALIZATION),
-            ).entity_type
+    for rec in DBInterface.execute(stmts[:transmission_lines])
+        comp_string = first(DBInterface.execute(stmts[:entity_type], [rec.id])).entity_type
         if haskey(PSY6_MAPPING, comp_string)
             comp_string = PSY6_MAPPING[comp_string]
         end
@@ -1297,7 +1246,7 @@ function add_system_lines!(
         component_attr = get(attributes, rec.id, Dict{String, Any}())
 
         # Determine area based on balancing topology if zonal
-        arc = first(IS.execute(stmts[:arc], [rec.arc_id], IS.LOG_GROUP_SERIALIZATION)).id
+        arc = first(DBInterface.execute(stmts[:arc], [rec.arc_id])).id
 
         if component_type == PSY.Line
             b = (
@@ -1373,12 +1322,8 @@ function add_system_lines!(
                 ),
             )
         end
-        if haskey(component_attr, "uuid")
-            IS.set_uuid!(IS.get_internal(line), Base.UUID(component_attr["uuid"]))
-        else
-            warn("UUID for component named $(rec.name) not found in database")
-        end
         add_component!(portfolio.base_system, line)
+        owners[rec.id] = line
 
         #If Line is between areas, add to dictionary
         from_area = PSY.get_name(get_area(get_from(get_arc(line))))
@@ -1396,27 +1341,14 @@ function add_system_lines!(
         #Also new candidates lines for each connection
         if get_aggregation(portfolio) == PSY.ACBus
             component_attr = get(attributes, rec.id, Dict{String, Any}())
-            arc = first(IS.execute(stmts[:arc], [rec.arc_id], IS.LOG_GROUP_SERIALIZATION))
+            arc = first(DBInterface.execute(stmts[:arc], [rec.arc_id]))
             balancing_topology_from =
-                first(
-                    IS.execute(
-                        stmts[:topology_from_arc],
-                        [arc.from_id],
-                        IS.LOG_GROUP_SERIALIZATION,
-                    ),
-                ).name
+                first(DBInterface.execute(stmts[:topology_from_arc], [arc.from_id])).name
             balancing_topology_to =
-                first(
-                    IS.execute(
-                        stmts[:topology_from_arc],
-                        [arc.to_id],
-                        IS.LOG_GROUP_SERIALIZATION,
-                    ),
-                ).name
+                first(DBInterface.execute(stmts[:topology_from_arc], [arc.to_id])).name
 
             transport = NodalACTransportTechnology{component_type}(;
                 name=rec.name,
-                id=rec.id,
                 available=true,
                 power_systems_type=string(nameof(component_type)),
                 financial_data=DEFAULT_FINANCIAL_DATA,
@@ -1433,8 +1365,10 @@ function add_system_lines!(
                 ),
                 capital_costs=LinearCurve(1e5),
             )
+            IS.set_id!(transport, rec.id)
             add_technology!(portfolio, transport)
-            existing = ExistingDevices(; id=rec.id, existing_devices=[rec.name])
+            existing = ExistingDevices(; existing_devices=[rec.name])
+            IS.set_id!(existing, rec.id)
             add_supplemental_attribute!(portfolio, transport, existing)
             set_capacity_limits!(
                 transport,
@@ -1444,7 +1378,6 @@ function add_system_lines!(
 
             new_transport = NodalACTransportTechnology{component_type}(;
                 name=rec.name * "_new",
-                id=rec.id,
                 available=true,
                 power_systems_type=string(nameof(component_type)),
                 financial_data=DEFAULT_FINANCIAL_DATA,
@@ -1461,6 +1394,7 @@ function add_system_lines!(
                 ),
                 capital_costs=LinearCurve(1e5),
             )
+            IS.set_id!(new_transport, next_id!(ids))
             add_technology!(portfolio, new_transport)
         end
     end
@@ -1471,7 +1405,6 @@ function add_system_lines!(
             area_list = collect(areas)
             transport = AggregateTransportTechnology{ACBranch}(;
                 name=string(area_list[1]) * "_" * string(area_list[2]),
-                id=id,
                 available=true,
                 power_systems_type=string(nameof(ACBranch)),
                 financial_data=DEFAULT_FINANCIAL_DATA,
@@ -1479,9 +1412,11 @@ function add_system_lines!(
                 end_region=get_region(Zone, portfolio, area_list[2]),
                 capital_costs=LinearCurve(1e5),
             )
+            IS.set_id!(transport, id)
             id += 1
             add_technology!(portfolio, transport)
-            existing = ExistingDevices(id=id, existing_devices=lines)
+            existing = ExistingDevices(existing_devices=lines)
+            IS.set_id!(existing, id)
             add_supplemental_attribute!(portfolio, transport, existing)
             id += 1
         end
@@ -1503,23 +1438,18 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
         ts_type = get(PRIME_MOVER_TO_TIMESERIES, [prime_mover, fuel], nothing)
         cost_data = Dict()
         if !isnothing(ts_type)
-            for ts_association in IS.execute(
-                stmts[:investment_timeseries],
-                [ts_type],
-                IS.LOG_GROUP_SERIALIZATION,
-            )
+            for ts_association in
+                DBInterface.execute(stmts[:investment_timeseries], [ts_type])
                 timestamps = [
-                    Dates.DateTime(row.idx, 1, 1) for row in IS.execute(
+                    Dates.DateTime(row.idx, 1, 1) for row in DBInterface.execute(
                         stmts[:ts_data],
                         [ts_association.time_series_uuid],
-                        IS.LOG_GROUP_SERIALIZATION,
                     )
                 ]
                 values = [
-                    row.value for row in IS.execute(
+                    row.value for row in DBInterface.execute(
                         stmts[:ts_data],
                         [ts_association.time_series_uuid],
-                        IS.LOG_GROUP_SERIALIZATION,
                     )
                 ]
                 ts_data = TimeSeries.TimeArray(timestamps, values)
@@ -1615,9 +1545,7 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                         portfolio.base_system,
                     ),
                 )
-                ts_array =
-                    get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
-                    get_rating(unit, u"MW")
+                ts_array = get_time_series_array(SingleTimeSeries, unit, "max_active_power")
             else
                 #If technology does not have existing capacity associated with it,
                 #select a similar technology from the base system to get required timeseries
@@ -1630,11 +1558,15 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                         portfolio.base_system,
                     ),
                 )
-                ts_array =
-                    get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
-                    get_rating(unit, u"MW")
+                ts_array = get_time_series_array(SingleTimeSeries, unit, "max_active_power")
             end
-            ts = SingleTimeSeries("capacity_factor", ts_array)
+            # Per unit on the unit's own base, as the source profile was declared.
+            ts = SingleTimeSeries(
+                "capacity_factor",
+                ts_array;
+                unit_system=IS.DU,
+                quantity_kind="active_power",
+            )
             add_time_series!(portfolio, tech, ts)
         end
     end
@@ -1649,24 +1581,57 @@ function deserialize_portfolio_timeseries!(portfolio::Portfolio, stmts::Dict)
                 portfolio.base_system,
             ),
         )
-        if get_max_active_power(unit, u"MW") != 0
-            ts_array =
-                get_time_series_array(SingleTimeSeries, unit, "max_active_power") ./
-                get_max_active_power(unit, u"MW")
-        else
-            ts_array = get_time_series_array(SingleTimeSeries, unit, "max_active_power")
-        end
-        ts = SingleTimeSeries("demand", ts_array)
+        ts_array = get_time_series_array(SingleTimeSeries, unit, "max_active_power")
+        ts = SingleTimeSeries(
+            "demand",
+            ts_array;
+            unit_system=IS.DU,
+            quantity_kind="active_power",
+        )
         add_time_series!(portfolio, demand, ts)
     end
 end
 
 #############################################################################
-# Code below is ported from SiennaGridDB. Can remove this and call these
-# functions directly once there is an official release of SiennaGridDB
+# Readers for SiennaGridDB's time series tables. The SQL and the column names below are
+# that schema — an external input format — not a copy of any InfrastructureSystems internal.
 #############################################################################
 
-function deserialize_timedata(db, sts_meta::IS.SingleTimeSeriesMetadata, time_series_uuid)
+"""
+`unit_system` / `quantity_kind` / `units` for a series the database normalized against an
+accessor on its owner.
+
+The `scaling_factor_multiplier` column holds a serialized function reference; every read used
+to multiply the stored values by it. Nothing rescales on retrieval now, so the declaration
+carries that meaning instead: `IS.DU` says the values are per unit on the owner's own base,
+and `quantity_kind` names the quantity they scale to. A per-unit basis is not a units label,
+so `units` stays `nothing`.
+
+Errors on a multiplier with no mapping rather than leaving the quantity unstated: the values
+are per unit either way, and a consumer that cannot tell what of is stuck.
+"""
+function normalized_series_declaration(raw_multiplier)
+    if ismissing(raw_multiplier) || isnothing(raw_multiplier)
+        return (unit_system=nothing, quantity_kind=nothing, units=nothing)
+    end
+    accessor = JSON3.read(raw_multiplier, Dict{String, Any})["__metadata__"]["function"]
+    if !haskey(MULTIPLIER_QUANTITY_KINDS, accessor)
+        error(
+            "unmapped scaling_factor_multiplier=$accessor in time_series_associations; it " *
+            "names no physical quantity for the normalized values to scale to",
+        )
+    end
+    return (
+        unit_system=IS.DU,
+        quantity_kind=MULTIPLIER_QUANTITY_KINDS[accessor],
+        units=nothing,
+    )
+end
+
+"""
+The values of one `static_time_series` array, in index order.
+"""
+function read_static_time_series(db, time_series_uuid)
     stmt = DBInterface.prepare(
         db,
         """
@@ -1677,144 +1642,64 @@ function deserialize_timedata(db, sts_meta::IS.SingleTimeSeriesMetadata, time_se
         """,
     )
     rows = DBInterface.execute(stmt, (string(time_series_uuid),))
-    column_table = Tables.columntable(rows)
-    timestamps =
-        range(sts_meta.initial_timestamp; length=sts_meta.length, step=sts_meta.resolution)
-    return PowerSystems.TimeSeries.TimeArray(timestamps, column_table.value)
+    return Tables.columntable(rows).value
 end
 
-function deserialize_timedata(_, ts::IS.DeterministicMetadata, _)
-    error("Cannot deserialize deterministic timeseries $ts")
-end
+"""
+Build the time series one `time_series_associations` row describes.
 
-function deserialize_time_series_row!(sys, db, row)
-    metadata = deserialize_metadata(row)
-    component_attr = get(attributes, row.owner_id, Dict{String, Any}())
-    owner_uuid = component_attr["uuid"]
-    if isa(metadata, IS.DeterministicMetadata) &&
-       metadata.time_series_type <: IS.DeterministicSingleTimeSeries
-        component = PowerSystems.get_component(sys, owner_uuid)
-        IS.add_metadata!(sys.data.time_series_manager.metadata_store, component, metadata)
-    else
-        time_array = deserialize_timedata(db, metadata, row.time_series_uuid)
-        ts = IS.time_series_metadata_to_data(metadata)(metadata, time_array)
-        PowerSystems.add_time_series!(sys, PowerSystems.get_component(sys, owner_uuid), ts)
+Only `SingleTimeSeries` is read: a forecast row states a horizon and an interval that the
+static array alone cannot reproduce, so it is refused rather than silently flattened.
+"""
+function deserialize_time_series(db, row)
+    if row.time_series_type != "SingleTimeSeries"
+        error(
+            "time_series_associations row $(row.metadata_uuid) declares " *
+            "time_series_type=$(row.time_series_type); only SingleTimeSeries is supported",
+        )
     end
-end
-
-# TODO: STOLEN FROM InfrastructureSystems. This should be made an IS functions.
-function deserialize_metadata(row)
-    exclude_keys = Set((:metadata_uuid, :owner_uuid, :time_series_type))
-    time_series_type = IS.TIME_SERIES_STRING_TO_TYPE[row.time_series_type]
-    metadata_type = IS.time_series_data_to_metadata(time_series_type)
-    fields = Set(fieldnames(metadata_type))
-    data = Dict{Symbol, Any}(
-        :internal =>
-            IS.InfrastructureSystemsInternal(; uuid=Base.UUID(row.metadata_uuid)),
+    values = read_static_time_series(db, row.time_series_uuid)
+    if length(values) != row.length
+        error(
+            "time series $(row.name) declares length=$(row.length) but its " *
+            "static_time_series array holds $(length(values)) values",
+        )
+    end
+    declaration = normalized_series_declaration(row.scaling_factor_multiplier)
+    return SingleTimeSeries(
+        row.name,
+        Dates.DateTime(row.initial_timestamp),
+        IS.from_iso_8601(row.resolution),
+        values;
+        units=declaration.units,
+        quantity_kind=declaration.quantity_kind,
+        unit_system=declaration.unit_system,
     )
-    if time_series_type <: IS.Forecast
-        # Special case because the table column does not match the field name.
-        data[:count] = row.window_count
-    end
-    if time_series_type <: IS.AbstractDeterministic
-        data[:time_series_type] = time_series_type
-    end
-    for field in keys(row)
-        if !in(field, fields) || field in exclude_keys
-            continue
-        end
-        val = getproperty(row, field)
-        if field == :initial_timestamp
-            data[field] = Dates.DateTime(val)
-        elseif field == :resolution
-            data[field] = IS.from_iso_8601(val)
-        elseif field == :horizon || field == :interval
-            if !ismissing(val)
-                data[field] = IS.from_iso_8601(val)
-            end
-        elseif field == :time_series_uuid
-            data[field] = Base.UUID(val)
-        elseif field == :features
-            features_array = JSON3.read(val, Array)
-            features_dict = Dict{String, Union{Bool, Int, String}}()
-            for obj in features_array
-                length(obj) != 1 && error("Invalid features: $obj")
-                key = first(keys(obj))
-                key in keys(features_dict) && error("Duplicate features: $key")
-                features_dict[key] = obj[key]
-            end
-            data[field] = features_dict
-        elseif field == :scaling_factor_multiplier
-            if !ismissing(val)
-                val2 = JSON3.read(val, Dict{String, Any})
-                data[field] = IS.deserialize(Function, val2)
-            end
-        else
-            data[field] = val
-        end
-    end
-    metadata = metadata_type(; data...)
-    return metadata
 end
 
-function get_example_metadata(db)
-    time_series_uuid_rows = DBInterface.execute(
-        db,
-        "SELECT * FROM time_series_associations WHERE time_series_type != 'DeterministicSingleTimeSeries' GROUP BY time_series_uuid",
-    )
-    return time_series_uuid_rows
-end
+"""
+Attach every component-owned time series in the database to its owner in `sys`.
 
-function deserialize_time_series_from_metadata!(
-    sys::PowerSystems.System,
-    db,
-    metadata,
-    row,
-    owner_uuid,
-)
-    time_array = deserialize_timedata(db, metadata, row.time_series_uuid)
-    ts = IS.time_series_metadata_to_data(metadata)(metadata, time_array)
-    component = PowerSystems.get_component(sys, owner_uuid)
-    PowerSystems.add_time_series!(sys, PowerSystems.get_component(sys, owner_uuid), ts)
-    if PSY.get_name(component) == "122_HYDRO_4"
-        PSY.get_name(component),
-        maximum(get_time_series_values(SingleTimeSeries, component, ts.name))
-    end
-end
-
-function deserialize_timeseries!(sys::PowerSystems.System, db, attributes)
-    DBInterface.transaction(db) do
-        # For each time_series_uuid, we'll pick a "real" metadata_uuid (so no DeterministicSingleTimeSeries),
-        # then we will deserialize and add them to the system. Finally, we'll go through and add_metadata!
-        # for all others.
-        serialized_metadata = Set{String}()
-        for row in get_example_metadata(db)
-            if row.owner_category == "Component" #Including this to skip over the temporary investment timeseries
-                component_attr = get(attributes, row.owner_id, Dict{String, Any}())
-                owner_uuid = component_attr["uuid"]
-                metadata = deserialize_metadata(row)
-                deserialize_time_series_from_metadata!(sys, db, metadata, row, owner_uuid)
-                push!(serialized_metadata, row.metadata_uuid)
-            end
+`owners` maps a database entity id to the component parsed from it. Rows in another
+`owner_category` are the technology cost profiles, which belong to the portfolio rather than
+the base system; [`deserialize_portfolio_timeseries!`](@ref) reads those.
+"""
+function deserialize_timeseries!(sys::PowerSystems.System, db, owners::Dict{Int64, Any})
+    for row in DBInterface.execute(db, "SELECT * FROM time_series_associations")
+        row.owner_category == "Component" || continue
+        if !haskey(owners, row.owner_id)
+            error(
+                "time series $(row.name) names owner_id=$(row.owner_id), which no parsed " *
+                "component claims",
+            )
         end
-        associations = DBInterface.execute(db, "SELECT * FROM time_series_associations")
-        for row in associations
-            if row.owner_category == "Component"
-                component_attr = get(attributes, row.owner_id, Dict{String, Any}())
-                owner_uuid = component_attr["uuid"]
-                metadata = deserialize_metadata(row)
-                if in(row.metadata_uuid, serialized_metadata)
-                    continue
-                end
-                component = PowerSystems.get_component(sys, owner_uuid)
-                IS.add_metadata!(
-                    sys.data.time_series_manager.metadata_store,
-                    component,
-                    metadata,
-                )
-            end
-        end
+        PowerSystems.add_time_series!(
+            sys,
+            owners[row.owner_id],
+            deserialize_time_series(db, row),
+        )
     end
+    return
 end
 
 end # module DBParser

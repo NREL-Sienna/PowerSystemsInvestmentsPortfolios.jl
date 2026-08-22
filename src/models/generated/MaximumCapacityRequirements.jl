@@ -8,7 +8,6 @@ This file is auto-generated. Do not edit.
     mutable struct MaximumCapacityRequirements <: Requirement
         name::String
         available::Bool
-        id::Int64
         max_capacity_mw::Float64
         target_year::Int64
         ext::Dict
@@ -20,7 +19,6 @@ Policy requirement that the total capacity of all technologies in `eligible_reso
 # Arguments
 - `name::String`: The technology name
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
-- `id::Int64`: ID for individual policy
 - `max_capacity_mw::Float64`: (default: `0.0`) Maximum total capacity across all eligible resources (MW)
 - `target_year::Int64`: (default: `2050`) Year in which the capacity requirement will be applied
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
@@ -31,8 +29,6 @@ mutable struct MaximumCapacityRequirements <: Requirement
     name::String
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
-    "ID for individual policy"
-    id::Int64
     "Maximum total capacity across all eligible resources (MW)"
     max_capacity_mw::Float64
     "Year in which the capacity requirement will be applied"
@@ -44,16 +40,14 @@ mutable struct MaximumCapacityRequirements <: Requirement
 end
 
 
-function MaximumCapacityRequirements(; name, available, id, max_capacity_mw=0.0, target_year=2050, ext=Dict(), internal=InfrastructureSystemsInternal(), )
-    MaximumCapacityRequirements(name, available, id, max_capacity_mw, target_year, ext, internal, )
+function MaximumCapacityRequirements(; name, available, max_capacity_mw=0.0, target_year=2050, ext=Dict(), internal=InfrastructureSystemsInternal(), )
+    MaximumCapacityRequirements(name, available, max_capacity_mw, target_year, ext, internal, )
 end
 
 """Get [`MaximumCapacityRequirements`](@ref) `name`."""
 get_name(value::MaximumCapacityRequirements) = value.name
 """Get [`MaximumCapacityRequirements`](@ref) `available`."""
 get_available(value::MaximumCapacityRequirements) = value.available
-"""Get [`MaximumCapacityRequirements`](@ref) `id`."""
-get_id(value::MaximumCapacityRequirements) = value.id
 """Get [`MaximumCapacityRequirements`](@ref) `max_capacity_mw` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_max_capacity_mw_unitful`](@ref)."""
 get_max_capacity_mw(value::MaximumCapacityRequirements, units) = InfrastructureSystems._strip_units(get_value(value, Val(:max_capacity_mw), Val(:mw), units))
 """Get [`MaximumCapacityRequirements`](@ref) `max_capacity_mw` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_max_capacity_mw`](@ref)."""
@@ -71,8 +65,6 @@ get_internal(value::MaximumCapacityRequirements) = value.internal
 set_name!(value::MaximumCapacityRequirements, val) = value.name = val
 """Set [`MaximumCapacityRequirements`](@ref) `available`."""
 set_available!(value::MaximumCapacityRequirements, val) = value.available = val
-"""Set [`MaximumCapacityRequirements`](@ref) `id`."""
-set_id!(value::MaximumCapacityRequirements, val) = value.id = val
 """Set [`MaximumCapacityRequirements`](@ref) `max_capacity_mw`."""
 set_max_capacity_mw!(value::MaximumCapacityRequirements, val, unit) = value.max_capacity_mw = set_value(value, Val(:max_capacity_mw), val, unit, Val(:mw))
 """Set [`MaximumCapacityRequirements`](@ref) `target_year`."""
@@ -88,7 +80,6 @@ function from_openapi(po::PI.MaximumCapacityRequirements, refs::OpenAPIRefs)
     return MaximumCapacityRequirements(;
         name = po.name,
         available = po.available,
-        id = po.id,
         max_capacity_mw = po.max_capacity_mw,
         target_year = po.target_year,
     )
@@ -96,9 +87,9 @@ end
 
 function to_openapi(value::MaximumCapacityRequirements, refs::OpenAPIRefs)
     return PI.MaximumCapacityRequirements(;
+        id = get_id(value),
         name = get_name(value),
         available = get_available(value),
-        id = get_id(value),
         max_capacity_mw = get_max_capacity_mw(value, IS.NU),
         target_year = get_target_year(value),
     )

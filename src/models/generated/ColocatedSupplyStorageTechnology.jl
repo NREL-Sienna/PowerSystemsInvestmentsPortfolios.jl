@@ -9,7 +9,6 @@ This file is auto-generated. Do not edit.
         name::String
         power_systems_type::String
         region::Vector{RegionTopology}
-        id::Int64
         available::Bool
         capital_costs_solar::PSY.ValueCurve
         operation_costs_solar::PSY.RenewableGenerationCost
@@ -46,7 +45,6 @@ Supply Technology that supports a StorageTechnology co-located with wind and sol
 - `name::String`: The technology name
 - `power_systems_type::String`: Corresponding type in PowerSystems.jl to be used in PCM modeling
 - `region::Vector{RegionTopology}`: (default: `Vector()`) Zone where tech operates in
-- `id::Int64`: ID for individual generator
 - `available::Bool`: (default: `true`) Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `capital_costs_solar::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
 - `operation_costs_solar::PSY.RenewableGenerationCost`: (default: `RenewableGenerationCost(nothing)`) Fixed and variable O&M costs for a technology
@@ -83,8 +81,6 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: ResourceT
     power_systems_type::String
     "Zone where tech operates in"
     region::Vector{RegionTopology}
-    "ID for individual generator"
-    id::Int64
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Capital costs for investing in a technology. (USD/MW)"
@@ -144,8 +140,8 @@ mutable struct ColocatedSupplyStorageTechnology{T <: PSY.Generator} <: ResourceT
 end
 
 
-function ColocatedSupplyStorageTechnology{T}(; name, power_systems_type, region=Vector(), id, available=true, capital_costs_solar=LinearCurve(0.0), operation_costs_solar=RenewableGenerationCost(nothing), capacity_limits_solar=(min=0, max=1e8), lifetime_solar=100, capital_costs_wind=LinearCurve(0.0), operation_costs_wind=RenewableGenerationCost(nothing), capacity_limits_wind=(min=0, max=1e8), lifetime_wind=100, capital_costs_energy=LinearCurve(0.0), capital_costs_power=LinearCurve(0.0), operation_costs_energy=StorageCost(nothing), operation_costs_power=StorageCost(nothing), capacity_power_limits=(min=0,max=1e8), capacity_energy_limits=(min=0,max=1e8), duration_limits=(min=0,max=60000), efficiency_storage=(in=1, out=1), losses_storage=0.0, lifetime_storage=100, financial_data, max_inverter_capacity=1e8, min_inverter_capacity=1e8, capital_costs_inverter, operation_costs_inverter, inverter_efficiency, inverter_supply_ratio, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
-    ColocatedSupplyStorageTechnology{T}(name, power_systems_type, region, id, available, capital_costs_solar, operation_costs_solar, capacity_limits_solar, lifetime_solar, capital_costs_wind, operation_costs_wind, capacity_limits_wind, lifetime_wind, capital_costs_energy, capital_costs_power, operation_costs_energy, operation_costs_power, capacity_power_limits, capacity_energy_limits, duration_limits, efficiency_storage, losses_storage, lifetime_storage, financial_data, max_inverter_capacity, min_inverter_capacity, capital_costs_inverter, operation_costs_inverter, inverter_efficiency, inverter_supply_ratio, ext, internal, )
+function ColocatedSupplyStorageTechnology{T}(; name, power_systems_type, region=Vector(), available=true, capital_costs_solar=LinearCurve(0.0), operation_costs_solar=RenewableGenerationCost(nothing), capacity_limits_solar=(min=0, max=1e8), lifetime_solar=100, capital_costs_wind=LinearCurve(0.0), operation_costs_wind=RenewableGenerationCost(nothing), capacity_limits_wind=(min=0, max=1e8), lifetime_wind=100, capital_costs_energy=LinearCurve(0.0), capital_costs_power=LinearCurve(0.0), operation_costs_energy=StorageCost(nothing), operation_costs_power=StorageCost(nothing), capacity_power_limits=(min=0,max=1e8), capacity_energy_limits=(min=0,max=1e8), duration_limits=(min=0,max=60000), efficiency_storage=(in=1, out=1), losses_storage=0.0, lifetime_storage=100, financial_data, max_inverter_capacity=1e8, min_inverter_capacity=1e8, capital_costs_inverter, operation_costs_inverter, inverter_efficiency, inverter_supply_ratio, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
+    ColocatedSupplyStorageTechnology{T}(name, power_systems_type, region, available, capital_costs_solar, operation_costs_solar, capacity_limits_solar, lifetime_solar, capital_costs_wind, operation_costs_wind, capacity_limits_wind, lifetime_wind, capital_costs_energy, capital_costs_power, operation_costs_energy, operation_costs_power, capacity_power_limits, capacity_energy_limits, duration_limits, efficiency_storage, losses_storage, lifetime_storage, financial_data, max_inverter_capacity, min_inverter_capacity, capital_costs_inverter, operation_costs_inverter, inverter_efficiency, inverter_supply_ratio, ext, internal, )
 end
 
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `name`."""
@@ -154,8 +150,6 @@ get_name(value::ColocatedSupplyStorageTechnology) = value.name
 get_power_systems_type(value::ColocatedSupplyStorageTechnology) = value.power_systems_type
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `region`."""
 get_region(value::ColocatedSupplyStorageTechnology) = value.region
-"""Get [`ColocatedSupplyStorageTechnology`](@ref) `id`."""
-get_id(value::ColocatedSupplyStorageTechnology) = value.id
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `available`."""
 get_available(value::ColocatedSupplyStorageTechnology) = value.available
 """Get [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_solar` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capital_costs_solar_unitful`](@ref)."""
@@ -299,8 +293,6 @@ set_name!(value::ColocatedSupplyStorageTechnology, val) = value.name = val
 set_power_systems_type!(value::ColocatedSupplyStorageTechnology, val) = value.power_systems_type = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `region`."""
 set_region!(value::ColocatedSupplyStorageTechnology, val) = value.region = val
-"""Set [`ColocatedSupplyStorageTechnology`](@ref) `id`."""
-set_id!(value::ColocatedSupplyStorageTechnology, val) = value.id = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `available`."""
 set_available!(value::ColocatedSupplyStorageTechnology, val) = value.available = val
 """Set [`ColocatedSupplyStorageTechnology`](@ref) `capital_costs_solar`."""
@@ -365,7 +357,6 @@ function from_openapi(po::PI.ColocatedSupplyStorageTechnology, refs::OpenAPIRefs
         name = po.name,
         power_systems_type = po.power_systems_type,
         region = resolve_refs(refs, po.region, RegionTopology),
-        id = po.id,
         available = po.available,
         capital_costs_solar = convert_value_curve(po.capital_costs_solar),
         operation_costs_solar = convert_cost(po.operation_costs_solar)::PSY.RenewableGenerationCost,
@@ -397,10 +388,10 @@ end
 
 function to_openapi(value::ColocatedSupplyStorageTechnology{T}, refs::OpenAPIRefs) where {T <: PSY.Generator}
     return PI.ColocatedSupplyStorageTechnology(;
+        id = get_id(value),
         name = get_name(value),
         power_systems_type = string(nameof(T)),
         region = component_ids(refs, get_region(value)),
-        id = get_id(value),
         available = get_available(value),
         capital_costs_solar = convert_value_curve_to_openapi(get_capital_costs_solar(value, IS.NU)),
         operation_costs_solar = convert_cost_to_openapi(get_operation_costs_solar(value, IS.NU)),

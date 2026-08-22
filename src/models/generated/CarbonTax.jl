@@ -8,7 +8,6 @@ This file is auto-generated. Do not edit.
     mutable struct CarbonTax <: Requirement
         name::String
         available::Bool
-        id::Int64
         target_year::Int64
         tax_dollars_per_ton::Float64
         ext::Dict
@@ -20,7 +19,6 @@ Policy requirement that defines an additional cost penalty per ton of CO2 produc
 # Arguments
 - `name::String`: The requirement name
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
-- `id::Int64`: ID for individual policy
 - `target_year::Int64`: (default: `2050`) Year in which carbon tax will be applied
 - `tax_dollars_per_ton::Float64`: (default: `0.0`) Cost penalty per ton of CO2 emitted by technologies in the eligible regions during the target year (USD/tCO2)
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
@@ -31,8 +29,6 @@ mutable struct CarbonTax <: Requirement
     name::String
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
-    "ID for individual policy"
-    id::Int64
     "Year in which carbon tax will be applied"
     target_year::Int64
     "Cost penalty per ton of CO2 emitted by technologies in the eligible regions during the target year (USD/tCO2)"
@@ -44,16 +40,14 @@ mutable struct CarbonTax <: Requirement
 end
 
 
-function CarbonTax(; name, available, id, target_year=2050, tax_dollars_per_ton=0.0, ext=Dict(), internal=InfrastructureSystemsInternal(), )
-    CarbonTax(name, available, id, target_year, tax_dollars_per_ton, ext, internal, )
+function CarbonTax(; name, available, target_year=2050, tax_dollars_per_ton=0.0, ext=Dict(), internal=InfrastructureSystemsInternal(), )
+    CarbonTax(name, available, target_year, tax_dollars_per_ton, ext, internal, )
 end
 
 """Get [`CarbonTax`](@ref) `name`."""
 get_name(value::CarbonTax) = value.name
 """Get [`CarbonTax`](@ref) `available`."""
 get_available(value::CarbonTax) = value.available
-"""Get [`CarbonTax`](@ref) `id`."""
-get_id(value::CarbonTax) = value.id
 """Get [`CarbonTax`](@ref) `target_year`."""
 get_target_year(value::CarbonTax) = value.target_year
 """Get [`CarbonTax`](@ref) `tax_dollars_per_ton` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_tax_dollars_per_ton_unitful`](@ref)."""
@@ -71,8 +65,6 @@ get_internal(value::CarbonTax) = value.internal
 set_name!(value::CarbonTax, val) = value.name = val
 """Set [`CarbonTax`](@ref) `available`."""
 set_available!(value::CarbonTax, val) = value.available = val
-"""Set [`CarbonTax`](@ref) `id`."""
-set_id!(value::CarbonTax, val) = value.id = val
 """Set [`CarbonTax`](@ref) `target_year`."""
 set_target_year!(value::CarbonTax, val) = value.target_year = val
 """Set [`CarbonTax`](@ref) `tax_dollars_per_ton`."""
@@ -88,7 +80,6 @@ function from_openapi(po::PI.CarbonTax, refs::OpenAPIRefs)
     return CarbonTax(;
         name = po.name,
         available = po.available,
-        id = po.id,
         target_year = po.target_year,
         tax_dollars_per_ton = po.tax_dollars_per_ton,
     )
@@ -96,9 +87,9 @@ end
 
 function to_openapi(value::CarbonTax, refs::OpenAPIRefs)
     return PI.CarbonTax(;
+        id = get_id(value),
         name = get_name(value),
         available = get_available(value),
-        id = get_id(value),
         target_year = get_target_year(value),
         tax_dollars_per_ton = get_tax_dollars_per_ton(value, IS.NU),
     )

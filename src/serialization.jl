@@ -55,36 +55,23 @@ end
 
 """
 Constructs a Portfolio from a file path ending with .json
-
-If the file is JSON, then `assign_new_uuids = true` will generate new UUIDs for the system
-and all components.
 """
-function Portfolio(
-    file_path::AbstractString;
-    assign_new_uuids=false,
-    try_reimport=true,
-    kwargs...,
-)
+function Portfolio(file_path::AbstractString; try_reimport=true, kwargs...)
     ext = lowercase(splitext(file_path)[2])
     if ext == ".json"
         unsupported = setdiff(keys(kwargs), SYSTEM_KWARGS)
         !isempty(unsupported) && error("Unsupported kwargs = $unsupported")
-        runchecks = get(kwargs, :runchecks, false)
         time_series_read_only = get(kwargs, :time_series_read_only, false)
         time_series_directory = get(kwargs, :time_series_directory, nothing)
-        portfolio = deserialize(
+        # TODO: `runchecks` governs the base system read only; portfolio-level validation on
+        # load is not wired up yet.
+        return deserialize(
             Portfolio,
             file_path;
             time_series_read_only=time_series_read_only,
-            # runchecks = runchecks,
             time_series_directory=time_series_directory,
+            runchecks=get(kwargs, :runchecks, false),
         )
-        _post_deserialize_handling(
-            portfolio;
-            runchecks=runchecks,
-            assign_new_uuids=assign_new_uuids,
-        )
-        return portfolio
     else
         throw(IS.DataFormatError("$file_path is not a supported file type"))
     end
@@ -92,8 +79,6 @@ end
 
 function IS.serialize(portfolio::T) where {T <: Portfolio}
     refs = _build_export_refs(portfolio)
-    # Written before the field loop so the ledger reaches `internal`'s ext in this document.
-    store_ledger!(portfolio, refs)
     return task_local_storage(_EXPORT_REFS_KEY, refs) do
         data = Dict{String, Any}()
         data["data_format_version"] = DATA_FORMAT_VERSION
@@ -251,7 +236,9 @@ function from_dict(
     #Base system
     base_system_file =
         joinpath(dirname(filename), splitext(basename(filename))[1] * "_base_system.json")
-    base_system = PSY.System(base_system_file)
+    # `runchecks` reaches PSY here: a portfolio's base system is often a placeholder with no
+    # buses, and PSY's checks report that as an error. The caller says whether to run them.
+    base_system = PSY.System(base_system_file; runchecks=get(kwargs, :runchecks, false))
 
     internal = IS.deserialize(InfrastructureSystemsInternal, raw["internal"])
     aggregation = _deserialize_type_name(raw["aggregation"])
@@ -281,25 +268,14 @@ function from_dict(
         description=description,
         parsed_kwargs...,
     )
-    # Original id→UUID the document recorded before this load mints anything. Restoring
-    # these onto the rebuilt components and attributes keeps supplemental-attribute
-    # associations — which key on those UUIDs — resolving after the round trip. Empty when
-    # the document carried no ledger, in which case the minted UUIDs stand.
-    doc_id_to_uuid = _document_id_to_uuid(portfolio)
-    # One registry for the whole document: attributes and components share an id space, so
-    # a collision between the two families is caught rather than silently overwritten.
+    # The cross-reference registry for the whole document. Only components are referenced
+    # (technologies point at regions and requirements), so only components are registered;
+    # attributes resolve nothing and share an independent id stream, so they stay out of it.
     refs = OpenAPIRefs()
-    portfolio.data.supplemental_attribute_manager = deserialize_attributes(
+    deserialize_attributes!(
         portfolio,
-        IS.SupplementalAttributeManager,
-        get(
-            raw["data"],
-            "supplemental_attribute_manager",
-            Dict("attributes" => [], "associations" => []),
-        ),
-        portfolio.data.time_series_manager,
+        get(raw["data"], "supplemental_attribute_manager", Dict("attributes" => [])),
         refs,
-        doc_id_to_uuid,
     )
     if raw["data_format_version"] != DATA_FORMAT_VERSION
         pre_deserialize_conversion!(raw, portfolio)
@@ -308,12 +284,11 @@ function from_dict(
     ext = get_ext(portfolio)
     ext["deserialization_in_progress"] = true
     try
-        deserialize_components!(portfolio, raw["data"], refs, doc_id_to_uuid)
+        deserialize_components!(portfolio, raw["data"], refs)
     finally
         pop!(ext, "deserialization_in_progress")
         isempty(ext) && clear_ext!(portfolio)
     end
-    store_ledger_after_load!(portfolio, refs)
 
     if raw["data_format_version"] != DATA_FORMAT_VERSION
         post_deserialize_conversion!(portfolio, raw)
@@ -350,8 +325,10 @@ function _deserialize_type_name(name::AbstractString)
     return getproperty(IS.get_module(String(parts[1])), Symbol(parts[2]))
 end
 
-# Function copied over from IS. This version of the function is modified to not use the internal field  and UUIDs for components,
-# since the internal field is not stored in the JSON when serializing with OpenAPI structs
+# Mirrors `IS.deserialize(::Type{IS.SystemData}, ::Dict)`, with one deliberate difference:
+# the supplemental attribute manager is left empty here and filled by
+# [`deserialize_attributes!`](@ref) once the `Portfolio` exists, because PSIP attributes are
+# rebuilt through the OpenAPI converters and those need the document's id registry.
 function deserialize(
     ::Type{IS.SystemData},
     raw::Dict;
@@ -360,52 +337,9 @@ function deserialize(
     validation_descriptor_file=nothing,
     kwargs...,
 )
-    if haskey(raw, "time_series_storage_file")
-        if !isfile(raw["time_series_storage_file"])
-            error("time series file $(raw["time_series_storage_file"]) does not exist")
-        end
-
-        # TODO: need to address this limitation
-        if IS.strip_module_name(raw["time_series_storage_type"]) ==
-           "InMemoryTimeSeriesStorage"
-            @info "Deserializing with InMemoryTimeSeriesStorage is currently not supported. Using HDF"
-            #hdf5_storage = Hdf5TimeSeriesStorage(raw["time_series_storage_file"], true)
-            #time_series_storage = InMemoryTimeSeriesStorage(hdf5_storage)
-        end
-        time_series_storage = IS.from_file(
-            IS.Hdf5TimeSeriesStorage,
-            raw["time_series_storage_file"];
-            directory=time_series_directory,
-            read_only=time_series_read_only,
-        )
-        time_series_metadata_store = IS.from_h5_file(
-            IS.TimeSeriesMetadataStore,
-            time_series_storage.file_path,
-            time_series_directory,
-        )
-    else
-        time_series_storage = IS.make_time_series_storage(;
-            compression=CompressionSettings(;
-                enabled=get(raw, "time_series_compression_enabled", false),
-            ),
-            directory=time_series_directory,
-        )
-        time_series_metadata_store = nothing
-    end
-
-    time_series_manager = IS.TimeSeriesManager(;
-        data_store=time_series_storage,
-        read_only=time_series_read_only,
-        metadata_store=time_series_metadata_store,
-    )
-    subsystems = Dict(k => Set(Base.UUID.(v)) for (k, v) in raw["subsystems"])
-
-    # Deserialize with empty supplemental_attribute_manager to start, will be
-    # deserialized later after Portfolio is initialized
-    supplemental_attribute_manager = IS.SupplementalAttributeManager(
-        IS.SupplementalAttributesByType(IS.SupplementalAttributesByType()),
-        IS.from_records(IS.SupplementalAttributeAssociations, []),
-    )
+    time_series_manager =
+        _deserialize_time_series_manager(raw, time_series_directory, time_series_read_only)
+    subsystems = Dict(k => Set(Int.(v)) for (k, v) in raw["subsystems"])
     internal = IS.deserialize(IS.InfrastructureSystemsInternal, raw["internal"])
     validation_descriptors = if isnothing(validation_descriptor_file)
         []
@@ -413,27 +347,56 @@ function deserialize(
         IS.read_validation_descriptor(validation_descriptor_file)
     end
 
-    sys = IS.SystemData(
+    return IS.SystemData(
         validation_descriptors,
         time_series_manager,
+        Int(get(raw, "next_component_id", 1)),
+        Int(get(raw, "next_supplemental_attribute_id", 1)),
         subsystems,
-        supplemental_attribute_manager,
+        IS.SupplementalAttributeManager(time_series_manager.data_store),
         internal,
     )
-    attributes_by_uuid = Dict{Base.UUID, IS.SupplementalAttribute}()
-    for attr_dict in values(supplemental_attribute_manager.data)
-        for attr in values(attr_dict)
-            uuid = IS.get_uuid(attr)
-            if haskey(attributes_by_uuid, uuid)
-                error("Bug: Found duplicate supplemental attribute UUID: $uuid")
-            end
-            attributes_by_uuid[uuid] = attr
-        end
-    end
+end
 
-    # Note: components need to be deserialized by the parent so that they can go through
-    # the proper checks.
-    return sys
+"""
+Open the time series store the document names, or create a fresh one when it named none.
+
+Both the arrays and the supplemental attribute association rows live in that store, so a
+document with attributes but no time series still carries one.
+"""
+function _deserialize_time_series_manager(
+    raw::Dict,
+    time_series_directory,
+    time_series_read_only::Bool,
+)
+    if !haskey(raw, "time_series_storage_file")
+        return IS.TimeSeriesManager(;
+            in_memory=get(raw, "time_series_in_memory", true),
+            directory=time_series_directory,
+            read_only=time_series_read_only,
+            compression=CompressionSettings(;
+                enabled=get(raw, "time_series_compression_enabled", false),
+            ),
+        )
+    end
+    storage_type = IS.strip_module_name(get(raw, "time_series_storage_type", ""))
+    if !in(storage_type, ("InfraStore", "RustTimeSeriesStore"))
+        error(
+            "portfolio was serialized with the $storage_type time series storage, which " *
+            "is no longer supported; regenerate it with the InfraStore backend",
+        )
+    end
+    if !isfile(raw["time_series_storage_file"])
+        error("time series file $(raw["time_series_storage_file"]) does not exist")
+    end
+    return IS.TimeSeriesManager(;
+        data_store=IS.open_deserialized_infrastore_store(
+            raw["time_series_storage_file"],
+            time_series_directory,
+            time_series_read_only,
+        ),
+        read_only=time_series_read_only,
+    )
 end
 
 function deserialize(::Type{InvestmentScheduleResults}, raw::Dict)
@@ -465,23 +428,16 @@ function deserialize(::Type{InvestmentScheduleResults}, raw::Dict)
     return InvestmentScheduleResults(schedule)
 end
 
-# Copied from IS and rewritten to build attributes through the OpenAPI converters, so that
-# supplemental attributes take the same route as components in both directions.
-function deserialize_attributes(
-    portfolio::Portfolio,
-    ::Type{IS.SupplementalAttributeManager},
-    data::Dict,
-    time_series_manager::IS.TimeSeriesManager,
-    refs::OpenAPIRefs,
-    doc_id_to_uuid::Dict,
-)
-    mgr = IS.SupplementalAttributeManager(
-        IS.SupplementalAttributesByType(IS.SupplementalAttributesByType()),
-        IS.from_records(IS.SupplementalAttributeAssociations, data["associations"]),
-    )
+# Mirrors `IS.deserialize(::Type{IS.SupplementalAttributeManager}, ...)` but builds each
+# attribute through the OpenAPI converters, so supplemental attributes take the same route as
+# components in both directions. Fills the manager the `IS.SystemData` was constructed with
+# rather than replacing it: that manager already holds the store handle the association rows
+# were read from, and the components added next take their shared references from it.
+function deserialize_attributes!(portfolio::Portfolio, data::Dict, refs::OpenAPIRefs)
+    mgr = portfolio.data.supplemental_attribute_manager
     shared_references = IS.SharedSystemReferences(;
         supplemental_attribute_manager=mgr,
-        time_series_manager=time_series_manager,
+        time_series_manager=portfolio.data.time_series_manager,
     )
     by_type = _group_by_serialized_type(data["attributes"])
     for (attribute_type, _key) in SUPPLEMENTAL_ATTRIBUTE_PLAN
@@ -489,22 +445,25 @@ function deserialize_attributes(
         for raw_attribute in pop!(by_type, attribute_type)
             po = OpenAPI.from_json(_openapi_wire_type(attribute_type), raw_attribute)
             attribute = from_openapi(po, refs)
-            # Restore the original UUID before keying `mgr.data`, so the attribute is stored
-            # under the same UUID its association records name.
-            _restore_document_uuid!(attribute, po.id, doc_id_to_uuid)
+            # The wire carries the document id in `po.id`. Stamp it onto the attribute's
+            # internal identity so it becomes the stored id the store's association rows
+            # name; without it the attribute would be silently lost on reload. Attributes
+            # are never the target of a cross-reference, so they are not registered in
+            # `refs` — and must not be, since an attribute may legitimately share a numeric
+            # id with a component (the two families have independent id streams).
+            IS.set_id!(attribute, Int(po.id))
+            id = get_id(attribute)
             if !haskey(mgr.data, attribute_type)
-                mgr.data[attribute_type] = Dict{Base.UUID, IS.SupplementalAttribute}()
+                mgr.data[attribute_type] = Dict{Int, IS.SupplementalAttribute}()
             end
-            uuid = IS.get_uuid(attribute)
-            if haskey(mgr.data[attribute_type], uuid)
+            if haskey(mgr.data[attribute_type], id)
                 error(
-                    "Bug: duplicate UUID in attributes container: " *
-                    "type=$attribute_type uuid=$uuid",
+                    "Bug: duplicate id in attributes container: " *
+                    "type=$attribute_type id=$id",
                 )
             end
-            mgr.data[attribute_type][uuid] = attribute
+            mgr.data[attribute_type][id] = attribute
             IS.set_shared_system_references!(attribute, shared_references)
-            refs[Int(po.id)] = attribute
         end
     end
     _reject_unplanned_types(
@@ -515,12 +474,7 @@ function deserialize_attributes(
     return mgr
 end
 
-function deserialize_components!(
-    portfolio::Portfolio,
-    raw,
-    refs::OpenAPIRefs,
-    doc_id_to_uuid::Dict,
-)
+function deserialize_components!(portfolio::Portfolio, raw, refs::OpenAPIRefs)
     # DOCUMENT_PLAN order is dependency order: regions and requirements land in `refs`
     # before the technologies whose references resolve against them.
     by_type = _group_by_serialized_type(raw["components"])
@@ -533,37 +487,20 @@ function deserialize_components!(
             handle_deserialization_special_cases!(raw_component, psip_type)
             po = OpenAPI.from_json(_openapi_wire_type(psip_type), raw_component)
             component = from_openapi(po, refs)
-            # Restore the original UUID before `add_component!` registers it, so association
-            # records that name this component's UUID still resolve after the round trip.
-            _restore_document_uuid!(component, po.id, doc_id_to_uuid)
+            # The wire carries the document id in `po.id`; `from_openapi` does not read it
+            # because id is no longer a struct field. Stamp it onto the component's internal
+            # identity before adding so `IS.add_component!` keeps it (rather than assigning a
+            # fresh sequential id) and the document's references resolve against it.
+            IS.set_id!(component, Int(po.id))
             #TODO: skip_validation currently set to true, review the IS validation
             IS.add_component!(portfolio.data, component; skip_validation=true)
             # Registered after conversion, never before: a component cannot reference
             # itself, and registering first would mask a DOCUMENT_PLAN ordering bug.
-            refs[Int(po.id)] = component
+            refs[get_id(component)] = component
         end
     end
     _reject_unplanned_types(by_type, "component", "DOCUMENT_PLAN")
     return
-end
-
-"""
-Restore the document's original UUID onto a freshly converted component or supplemental
-attribute, keyed on its own document id.
-
-The OpenAPI payload carries no `internal`, so `from_openapi` mints a fresh UUID. Supplemental
-attribute association records are serialized against the *original* UUIDs, so without this
-restore the owner and attribute both get new UUIDs and no association row matches. A no-op
-when the document carried no ledger (`doc_id_to_uuid` has no entry for this id); the minted
-UUID then stands.
-"""
-function _restore_document_uuid!(obj, po_id, doc_id_to_uuid::Dict)
-    # The ledger keys ids as `string(Int(...))` ("10"), so match that: `po.id` can arrive as
-    # a `Float64` from the OpenAPI payload, and `string(10.0)` would be "10.0" — no match.
-    key = string(Int(po_id))
-    haskey(doc_id_to_uuid, key) || return nothing
-    IS.set_uuid!(IS.get_internal(obj), Base.UUID(doc_id_to_uuid[key]))
-    return nothing
 end
 
 """
@@ -699,19 +636,13 @@ function _serialize_portfolio_metadata_to_file(portfolio::Portfolio, filename, u
 end
 
 """
-If assign_new_uuids = true, generate new UUIDs for the portfolio and all components.
+Construct a Portfolio from a serialized JSON string or stream.
 
 Warning: time series data is not restored by this method. If that is needed, use the normal
 process to construct the portfolio from a serialized JSON file instead, such as with
 `Portfolio("portfolio.json")`.
 """
-function IS.from_json(
-    io::Union{IO, String},
-    ::Type{Portfolio};
-    runchecks=true,
-    assign_new_uuids=false,
-    kwargs...,
-)
+function IS.from_json(io::Union{IO, String}, ::Type{Portfolio}; kwargs...)
     data = JSON3.read(io, Dict)
     # These objects could be removed in to_json(portfolio). Doing it here will allow us to
     # keep that JSON string fully consistent with time series and potentially use it in the
@@ -722,31 +653,5 @@ function IS.from_json(
         end
     end
 
-    portfolio = from_dict(Portfolio, data; kwargs...)
-    _post_deserialize_handling(
-        portfolio;
-        runchecks=runchecks,
-        assign_new_uuids=assign_new_uuids,
-    )
-    return portfolio
-end
-
-function _post_deserialize_handling(
-    portfolio::Portfolio;
-    runchecks=true,
-    assign_new_uuids=false,
-)
-    # runchecks && check(portfolio)
-    if assign_new_uuids
-        IS.assign_new_uuid!(portfolio)
-        for component in get_components(Technology, portfolio)
-            assign_new_uuid!(portfolio, component)
-        end
-        for component in
-            IS.get_masked_components(IS.InfrastructureSystemsComponent, portfolio.data)
-            assign_new_uuid!(portfolio, component)
-        end
-        # Note: this does not change UUIDs for time series data because they are
-        # shared with components.
-    end
+    return from_dict(Portfolio, data; kwargs...)
 end

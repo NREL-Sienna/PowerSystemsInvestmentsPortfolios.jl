@@ -7,7 +7,6 @@ This file is auto-generated. Do not edit.
 """
     mutable struct EnergyShareRequirements <: Requirement
         name::String
-        id::Int64
         available::Bool
         target_year::Int64
         generation_fraction_requirement::Float64
@@ -19,7 +18,6 @@ Policy requirement that the total generation of `eligible_technologies` must be 
 
 # Arguments
 - `name::String`: The policy name
-- `id::Int64`: ID for individual policy
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
 - `target_year::Int64`: (default: `2050`) Year in which the energy share requirement will be applied
 - `generation_fraction_requirement::Float64`: (default: `0.0`) Fraction of total annual demand across all eligible zones that needs to be met by eligible resources.
@@ -29,8 +27,6 @@ Policy requirement that the total generation of `eligible_technologies` must be 
 mutable struct EnergyShareRequirements <: Requirement
     "The policy name"
     name::String
-    "ID for individual policy"
-    id::Int64
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
     "Year in which the energy share requirement will be applied"
@@ -44,14 +40,12 @@ mutable struct EnergyShareRequirements <: Requirement
 end
 
 
-function EnergyShareRequirements(; name, id, available, target_year=2050, generation_fraction_requirement=0.0, ext=Dict(), internal=InfrastructureSystemsInternal(), )
-    EnergyShareRequirements(name, id, available, target_year, generation_fraction_requirement, ext, internal, )
+function EnergyShareRequirements(; name, available, target_year=2050, generation_fraction_requirement=0.0, ext=Dict(), internal=InfrastructureSystemsInternal(), )
+    EnergyShareRequirements(name, available, target_year, generation_fraction_requirement, ext, internal, )
 end
 
 """Get [`EnergyShareRequirements`](@ref) `name`."""
 get_name(value::EnergyShareRequirements) = value.name
-"""Get [`EnergyShareRequirements`](@ref) `id`."""
-get_id(value::EnergyShareRequirements) = value.id
 """Get [`EnergyShareRequirements`](@ref) `available`."""
 get_available(value::EnergyShareRequirements) = value.available
 """Get [`EnergyShareRequirements`](@ref) `target_year`."""
@@ -65,8 +59,6 @@ get_internal(value::EnergyShareRequirements) = value.internal
 
 """Set [`EnergyShareRequirements`](@ref) `name`."""
 set_name!(value::EnergyShareRequirements, val) = value.name = val
-"""Set [`EnergyShareRequirements`](@ref) `id`."""
-set_id!(value::EnergyShareRequirements, val) = value.id = val
 """Set [`EnergyShareRequirements`](@ref) `available`."""
 set_available!(value::EnergyShareRequirements, val) = value.available = val
 """Set [`EnergyShareRequirements`](@ref) `target_year`."""
@@ -83,7 +75,6 @@ set_internal!(value::EnergyShareRequirements, val) = value.internal = val
 function from_openapi(po::PI.EnergyShareRequirements, refs::OpenAPIRefs)
     return EnergyShareRequirements(;
         name = po.name,
-        id = po.id,
         available = po.available,
         target_year = po.target_year,
         generation_fraction_requirement = po.generation_fraction_requirement,
@@ -92,8 +83,8 @@ end
 
 function to_openapi(value::EnergyShareRequirements, refs::OpenAPIRefs)
     return PI.EnergyShareRequirements(;
-        name = get_name(value),
         id = get_id(value),
+        name = get_name(value),
         available = get_available(value),
         target_year = get_target_year(value),
         generation_fraction_requirement = get_generation_fraction_requirement(value),

@@ -1,7 +1,7 @@
 @testset "OpenAPIRefs registration and resolution" begin
     refs = PSIP.OpenAPIRefs()
-    zone = Zone(name="z1", id=1)
-    node = Node(name="n1", id=2)
+    zone = Zone(name="z1")
+    node = Node(name="n1")
 
     refs[1] = zone
     refs[2] = node
@@ -23,11 +23,11 @@ end
 
 @testset "OpenAPIRefs errors loudly on malformed input" begin
     refs = PSIP.OpenAPIRefs()
-    zone = Zone(name="z1", id=1)
+    zone = Zone(name="z1")
     refs[1] = zone
 
-    @test_throws ErrorException refs[1] = Zone(name="other", id=1)
+    @test_throws ErrorException refs[1] = Zone(name="other")
     @test_throws ErrorException refs[7]
     @test_throws ErrorException PSIP.resolve_ref(refs, 7)
-    @test_throws ErrorException PSIP.component_id(refs, Node(name="n", id=3))
+    @test_throws ErrorException PSIP.component_id(refs, Node(name="n"))
 end

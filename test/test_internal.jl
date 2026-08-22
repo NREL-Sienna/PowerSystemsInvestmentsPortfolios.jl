@@ -1,51 +1,42 @@
-import UUIDs
-
 """
-Recursively validates that the object and fields have UUIDs.
+Recursively validates that every component reachable from `obj` carries an id assigned by
+the system it is attached to.
 """
-function validate_uuids(obj::T) where {T}
-    if !(obj isa IS.InfrastructureSystemsComponent)
-        return true
-    end
+validate_ids(::Any) = true
 
+function validate_ids(component::IS.InfrastructureSystemsComponent)
     result = true
-    if !(IS.get_uuid(obj) isa Base.UUID)
+    if IS.get_id(component) == IS.UNASSIGNED_ID
         result = false
-        @error "object does not have a UUID" obj
+        @error "component has no id assigned" component
     end
-
-    for fieldname in fieldnames(T)
-        val = getfield(obj, fieldname)
-        if !validate_uuids(val)
+    for fieldname in fieldnames(typeof(component))
+        if !validate_ids(getfield(component, fieldname))
             result = false
         end
     end
-
     return result
 end
 
-function validate_uuids(obj::T) where {T <: AbstractArray}
+function validate_ids(objs::AbstractArray)
     result = true
-    for elem in obj
-        if !validate_uuids(elem)
-            result = false
-        end
-    end
-
-    return result
-end
-
-function validate_uuids(obj::T) where {T <: AbstractDict}
-    result = true
-    for elem in values(obj)
-        if !validate_uuids(elem)
+    for elem in objs
+        if !validate_ids(elem)
             result = false
         end
     end
     return result
 end
+
+validate_ids(objs::AbstractDict) = validate_ids(collect(values(objs)))
 
 @testset "Test internal values" begin
     port = build_portfolio()
-    @test validate_uuids(port)
+
+    technologies = collect(get_technologies(PSIP.Technology, port))
+    regions = collect(PSIP.get_regions(PSIP.RegionTopology, port))
+    @test !isempty(technologies)
+    @test !isempty(regions)
+    @test validate_ids(technologies)
+    @test validate_ids(regions)
 end

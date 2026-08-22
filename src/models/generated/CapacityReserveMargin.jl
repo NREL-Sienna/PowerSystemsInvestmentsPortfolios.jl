@@ -8,7 +8,6 @@ This file is auto-generated. Do not edit.
     mutable struct CapacityReserveMargin <: Requirement
         name::String
         available::Bool
-        id::Int64
         target_year::Int64
         capacity_reserve_fraction::Float64
         ext::Dict
@@ -20,7 +19,6 @@ Policy requirement to enforce a minimum capacity reserve margin, such that (tota
 # Arguments
 - `name::String`: The requirement name
 - `available::Bool`: Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)
-- `id::Int64`: ID for individual policy
 - `target_year::Int64`: (default: `2050`) Year in which capacity reserve margin will be applied
 - `capacity_reserve_fraction::Float64`: (default: `0.0`) Capacity reserve requirements, represented as a fraction of peak demand in a region
 - `ext::Dict`: (default: `Dict()`) Optional dictionary to provide additional data
@@ -31,8 +29,6 @@ mutable struct CapacityReserveMargin <: Requirement
     name::String
     "Indicator of whether the component is connected and online (`true`) or disconnected, offline, or down (`false`)"
     available::Bool
-    "ID for individual policy"
-    id::Int64
     "Year in which capacity reserve margin will be applied"
     target_year::Int64
     "Capacity reserve requirements, represented as a fraction of peak demand in a region"
@@ -44,16 +40,14 @@ mutable struct CapacityReserveMargin <: Requirement
 end
 
 
-function CapacityReserveMargin(; name, available, id, target_year=2050, capacity_reserve_fraction=0.0, ext=Dict(), internal=InfrastructureSystemsInternal(), )
-    CapacityReserveMargin(name, available, id, target_year, capacity_reserve_fraction, ext, internal, )
+function CapacityReserveMargin(; name, available, target_year=2050, capacity_reserve_fraction=0.0, ext=Dict(), internal=InfrastructureSystemsInternal(), )
+    CapacityReserveMargin(name, available, target_year, capacity_reserve_fraction, ext, internal, )
 end
 
 """Get [`CapacityReserveMargin`](@ref) `name`."""
 get_name(value::CapacityReserveMargin) = value.name
 """Get [`CapacityReserveMargin`](@ref) `available`."""
 get_available(value::CapacityReserveMargin) = value.available
-"""Get [`CapacityReserveMargin`](@ref) `id`."""
-get_id(value::CapacityReserveMargin) = value.id
 """Get [`CapacityReserveMargin`](@ref) `target_year`."""
 get_target_year(value::CapacityReserveMargin) = value.target_year
 """Get [`CapacityReserveMargin`](@ref) `capacity_reserve_fraction`."""
@@ -67,8 +61,6 @@ get_internal(value::CapacityReserveMargin) = value.internal
 set_name!(value::CapacityReserveMargin, val) = value.name = val
 """Set [`CapacityReserveMargin`](@ref) `available`."""
 set_available!(value::CapacityReserveMargin, val) = value.available = val
-"""Set [`CapacityReserveMargin`](@ref) `id`."""
-set_id!(value::CapacityReserveMargin, val) = value.id = val
 """Set [`CapacityReserveMargin`](@ref) `target_year`."""
 set_target_year!(value::CapacityReserveMargin, val) = value.target_year = val
 """Set [`CapacityReserveMargin`](@ref) `capacity_reserve_fraction`."""
@@ -84,7 +76,6 @@ function from_openapi(po::PI.CapacityReserveMargin, refs::OpenAPIRefs)
     return CapacityReserveMargin(;
         name = po.name,
         available = po.available,
-        id = po.id,
         target_year = po.target_year,
         capacity_reserve_fraction = po.capacity_reserve_fraction,
     )
@@ -92,9 +83,9 @@ end
 
 function to_openapi(value::CapacityReserveMargin, refs::OpenAPIRefs)
     return PI.CapacityReserveMargin(;
+        id = get_id(value),
         name = get_name(value),
         available = get_available(value),
-        id = get_id(value),
         target_year = get_target_year(value),
         capacity_reserve_fraction = get_capacity_reserve_fraction(value),
     )
