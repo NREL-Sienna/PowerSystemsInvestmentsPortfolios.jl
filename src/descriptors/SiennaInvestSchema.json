@@ -552,9 +552,9 @@
                     ],
                     "description": "Storage Technology Type"
                 },
-                "capital_costs": {
+                "capital_costs_storage": {
                     "type": "StorageCapitalCost",
-                    "description": "Capital costs for investing in a technology. (USD/MWh)",
+                    "description": "Capital costs for investing in a storage technology. (USD/MWh)",
                     "default": "StorageCapitalCost(nothing)"
                 },
                 "operation_costs": {
@@ -1491,14 +1491,9 @@
                 "capital_costs_storage": {
                     "type": "StorageCapitalCost",
                     "description": "Capital costs for investing in a storage technology's energy capacity. (USD/MWh)",
-                    "default": "StorageCapitalCost()"
+                    "default": "StorageCapitalCost(nothing)"
                 },
-                "operation_costs_energy": {
-                    "type": "PSY.OperationalCost",
-                    "description": "Fixed and variable O&M costs for a storage technology",
-                    "default": "StorageCost(nothing)"
-                },
-                "operation_costs_power": {
+                "operation_costs_storage": {
                     "type": "PSY.OperationalCost",
                     "description": "Fixed and variable O&M costs for a storage technology",
                     "default": "StorageCost(nothing)"
@@ -1549,8 +1544,7 @@
                 },
                 "capital_costs_inverter": {
                     "type": "CapitalCost",
-                    "description": "Capitals costs for investing in inverter capacity (USD/MW)",
-                    "default": "CapitalCost(nothing)"
+                    "description": "Capitals costs for investing in inverter capacity (USD/MW)"
                 },
                 "operation_costs_inverter": {
                     "type": "PSY.OperationalCost",

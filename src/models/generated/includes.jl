@@ -1,5 +1,3 @@
-include("Node.jl")
-include("Zone.jl")
 include("MinimumCapacityRequirements.jl")
 include("SupplyTechnology.jl")
 include("DemandRequirement.jl")
@@ -13,10 +11,12 @@ include("NodalHVDCTransportTechnology.jl")
 include("DemandSideTechnology.jl")
 include("EnergyShareRequirements.jl")
 include("AggregateRetirementPotential.jl")
+include("Zone.jl")
 include("AggregateTransportTechnology.jl")
 include("StorageTechnology.jl")
 include("ExistingDevices.jl")
 include("CarbonCaps.jl")
+include("Node.jl")
 include("CarbonTax.jl")
 include("RetrofitPotential.jl")
 include("HourlyMatching.jl")
@@ -84,10 +84,9 @@ export get_name
 export get_new_construction_year
 export get_new_demand_mw
 export get_operation_costs
-export get_operation_costs_energy
 export get_operation_costs_inverter
-export get_operation_costs_power
 export get_operation_costs_solar
+export get_operation_costs_storage
 export get_operation_costs_wind
 export get_outage_factors
 export get_peak_demand_mw
@@ -182,10 +181,9 @@ export set_name!
 export set_new_construction_year!
 export set_new_demand_mw!
 export set_operation_costs!
-export set_operation_costs_energy!
 export set_operation_costs_inverter!
-export set_operation_costs_power!
 export set_operation_costs_solar!
+export set_operation_costs_storage!
 export set_operation_costs_wind!
 export set_outage_factors!
 export set_peak_demand_mw!
