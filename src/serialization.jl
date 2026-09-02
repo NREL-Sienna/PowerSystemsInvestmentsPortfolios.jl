@@ -268,10 +268,12 @@ function from_dict(
         description=description,
         parsed_kwargs...,
     )
-    # The cross-reference registry for the whole document. Only components are referenced
-    # (technologies point at regions and requirements), so only components are registered;
+    # The cross-reference registry for the whole document. Technologies point at the base
+    # system's topology (buses, areas, ...) and at requirements by id, so the registry is
+    # seeded with the base system's topology components before any technology is converted;
     # attributes resolve nothing and share an independent id stream, so they stay out of it.
     refs = OpenAPIRefs()
+    _register_base_system_topology!(refs, base_system)
     deserialize_attributes!(
         portfolio,
         get(raw["data"], "supplemental_attribute_manager", Dict("attributes" => [])),

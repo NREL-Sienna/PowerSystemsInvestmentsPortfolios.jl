@@ -190,9 +190,13 @@ const OPENAPI_COMPOUND_EXTRACTORS = Dict(
 )
 
 # PSY derives this from the descriptor's own struct names. That fails here: PSIP's
-# reference fields are typed with the ABSTRACT supertypes `RegionTopology` and
-# `Requirement`, which are never component names, so the set is declared instead.
-const OPENAPI_REFERENCE_TYPES = Set(["RegionTopology", "Requirement", "Zone", "Node"])
+# reference fields are typed with the ABSTRACT supertype `Requirement` (a portfolio
+# component) and with PowerSystems topology types (`PSY.Topology`, `PSY.Bus`,
+# `PSY.AggregationTopology`) that live in the base system, so the set is declared instead.
+# Topology references resolve through the same `OpenAPIRefs` registry, which is seeded with
+# the base system's topology components alongside the portfolio's own (see document.jl).
+const OPENAPI_REFERENCE_TYPES =
+    Set(["Requirement", "PSY.Topology", "PSY.Bus", "PSY.AggregationTopology"])
 
 const OPENAPI_ENUM_TYPES =
     Set(["PrimeMovers", "ThermalFuels", "StorageTech", "ACBusTypes", "PSY.LoadConformity"])

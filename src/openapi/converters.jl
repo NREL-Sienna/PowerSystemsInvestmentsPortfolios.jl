@@ -255,9 +255,8 @@ convert_cost(v::Real) = Float64(v)
 convert_cost(v::AbstractString) = error(
     "convert_cost: a String variant (\"$v\") — a time-series reference — is not implemented",
 )
-convert_cost(w::PC.FuelCurveFuelCost) = convert_cost(w.value)
 
-_fuel_cost_to_openapi(v::Real) = PC.FuelCurveFuelCost(Float64(v))
+_fuel_cost_to_openapi(v::Real) = Float64(v)
 
 # ── ProductionVariableCostCurve: CostCurve / FuelCurve ─────────────────────────
 
@@ -462,7 +461,7 @@ end
 
 # ── financial data ───────────────────────────────────────────────────────────
 
-function convert_nested_data(po::PC.TechnologyFinancialData)
+function convert_nested_data(po::PI.TechnologyFinancialData)
     return TechnologyFinancialData(;
         capital_recovery_period=po.capital_recovery_period,
         technology_base_year=po.technology_base_year,
@@ -481,7 +480,7 @@ function convert_nested_data(po)
 end
 
 function convert_nested_data_to_openapi(fd::TechnologyFinancialData)
-    return PC.TechnologyFinancialData(;
+    return PI.TechnologyFinancialData(;
         capital_recovery_period=get_capital_recovery_period(fd),
         technology_base_year=get_technology_base_year(fd),
         debt_fraction=get_debt_fraction(fd),

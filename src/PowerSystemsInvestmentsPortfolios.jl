@@ -65,9 +65,7 @@ export StorageTechnology
 export DemandRequirement
 export DemandSideTechnology
 export RetirementPotential
-export AggregateRetirementPotential
 export RetrofitPotential
-export AggregateRetrofitPotential
 export ExistingDevices
 export TopologyMapping
 export CarbonCaps
@@ -78,8 +76,6 @@ export EnergyShareRequirements
 export MinimumCapacityRequirements
 export MaximumCapacityRequirements
 export RegionTopology
-export Zone
-export Node
 export PortfolioFinancialData
 export InvestmentScheduleResults
 export TechnologyFinancialData
