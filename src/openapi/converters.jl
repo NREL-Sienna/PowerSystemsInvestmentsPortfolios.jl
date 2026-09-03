@@ -57,6 +57,13 @@ _inout_po(v) = PC.InOut(; in=v.in, out=v.out)
 _inout_po_optional(::Nothing) = nothing
 _inout_po_optional(v) = _inout_po(v)
 
+_outagefactors_from_po(x::PC.OutageFactors) = (max=x.max, min=x.min)
+_outagefactors_from_po(::Nothing) = nothing
+
+_outagefactors_po(v) = PC.OutageFactors(; max=v.max, min=v.min)
+_outagefactors_po_optional(::Nothing) = nothing
+_outagefactors_po_optional(v) = _outagefactors_po(v)
+
 # ── value curves: FunctionData leaves + InputOutputCurve/IncrementalCurve/AverageRateCurve ──
 #
 # `convert_value_curve` accepts either the wrapped `PC.ValueCurve`/`PC.*FunctionData` oneOf or
@@ -361,7 +368,12 @@ end
 
 function convert_cost(po::PC.ThermalGenerationCost)
     return ThermalGenerationCost(;
-        variable=convert_cost(_require(po.variable, "ThermalGenerationCost.variable")),
+        variable_operation_cost=convert_cost(
+            _require(
+                po.variable_operation_cost,
+                "ThermalGenerationCost.variable_operation_cost",
+            ),
+        ),
         fixed=po.fixed,
         start_up=convert_cost(_require(po.start_up, "ThermalGenerationCost.start_up")),
         shut_down=po.shut_down,
@@ -370,7 +382,12 @@ end
 
 function convert_cost(po::PC.RenewableGenerationCost)
     return RenewableGenerationCost(;
-        variable=convert_cost(_require(po.variable, "RenewableGenerationCost.variable")),
+        variable_operation_cost=convert_cost(
+            _require(
+                po.variable_operation_cost,
+                "RenewableGenerationCost.variable_operation_cost",
+            ),
+        ),
         curtailment_cost=_optional_cost_curve(po.curtailment_cost),
         fixed=po.fixed,
     )
@@ -378,7 +395,12 @@ end
 
 function convert_cost(po::PC.HydroGenerationCost)
     return HydroGenerationCost(;
-        variable=convert_cost(_require(po.variable, "HydroGenerationCost.variable")),
+        variable_operation_cost=convert_cost(
+            _require(
+                po.variable_operation_cost,
+                "HydroGenerationCost.variable_operation_cost",
+            ),
+        ),
         fixed=po.fixed,
     )
 end
@@ -411,15 +433,15 @@ function convert_cost_to_openapi(cost::ThermalGenerationCost)
         fixed=get_fixed(cost),
         shut_down=get_shut_down(cost),
         start_up=_thermal_start_up_to_openapi(get_start_up(cost)),
-        variable=PC.ProductionVariableCostCurve(
-            convert_cost_to_openapi(get_variable(cost)),
+        variable_operation_cost=PC.ProductionVariableCostCurve(
+            convert_cost_to_openapi(get_variable_operation_cost(cost)),
         ),
     )
 end
 
 function convert_cost_to_openapi(cost::RenewableGenerationCost)
     return PC.RenewableGenerationCost(;
-        variable=convert_cost_to_openapi(get_variable(cost)),
+        variable_operation_cost=convert_cost_to_openapi(get_variable_operation_cost(cost)),
         # `get_curtailment_cost` is shadowed in this module by `DemandSideTechnology`'s
         # generated 2-arg getter of the same name, so PSY's 1-arg getter must be qualified.
         curtailment_cost=_optional_cost_curve_to_openapi(PSY.get_curtailment_cost(cost)),
@@ -430,8 +452,8 @@ end
 function convert_cost_to_openapi(cost::HydroGenerationCost)
     return PC.HydroGenerationCost(;
         fixed=get_fixed(cost),
-        variable=PC.ProductionVariableCostCurve(
-            convert_cost_to_openapi(get_variable(cost)),
+        variable_operation_cost=PC.ProductionVariableCostCurve(
+            convert_cost_to_openapi(get_variable_operation_cost(cost)),
         ),
     )
 end
@@ -496,3 +518,73 @@ function convert_nested_data_to_openapi(fd)
         "$(nameof(typeof(fd))) — every financial data record must be converted, not skipped",
     )
 end
+
+# ── investment costs: CapitalCost / StorageCapitalCost ────────────────────────
+#
+# Nested cost structs that embed `ValueCurve`s, so unlike `TechnologyFinancialData`
+# (scalar fields only) they recurse through `convert_value_curve`. `interconnection_cost`
+# is schema-optional (defaults to 0.0), so an omitted PO value imports as 0.0.
+
+function convert_nested_data(po::PC.CapitalCost)
+    return CapitalCost(;
+        capital_cost=convert_value_curve(
+            _require(po.capital_cost, "CapitalCost.capital_cost"),
+        ),
+        interconnection_cost=something(po.interconnection_cost, 0.0),
+    )
+end
+
+function convert_nested_data_to_openapi(cc::CapitalCost)
+    return PC.CapitalCost(;
+        capital_cost=convert_value_curve_to_openapi(get_capital_cost(cc)),
+        interconnection_cost=get_interconnection_cost(cc),
+    )
+end
+
+function convert_nested_data(po::PC.StorageCapitalCost)
+    return StorageCapitalCost(;
+        charge_capital_cost=convert_value_curve(
+            _require(po.charge_capital_cost, "StorageCapitalCost.charge_capital_cost"),
+        ),
+        discharge_capital_cost=convert_value_curve(
+            _require(
+                po.discharge_capital_cost,
+                "StorageCapitalCost.discharge_capital_cost",
+            ),
+        ),
+        energy_capital_cost=convert_value_curve(
+            _require(po.energy_capital_cost, "StorageCapitalCost.energy_capital_cost"),
+        ),
+        interconnection_cost=something(po.interconnection_cost, 0.0),
+    )
+end
+
+function convert_nested_data_to_openapi(sc::StorageCapitalCost)
+    return PC.StorageCapitalCost(;
+        charge_capital_cost=convert_value_curve_to_openapi(get_charge_capital_cost(sc)),
+        discharge_capital_cost=convert_value_curve_to_openapi(
+            get_discharge_capital_cost(sc),
+        ),
+        energy_capital_cost=convert_value_curve_to_openapi(get_energy_capital_cost(sc)),
+        interconnection_cost=get_interconnection_cost(sc),
+    )
+end
+
+# ── capacity bounds: a MinMax, or a per-topology map of MinMax ────────────────
+#
+# The platform model wraps the value in a field-specific AnyOf struct whose `.value` is
+# either a `PC.MinMax` or a `Dict{String, PC.MinMax}`. In the map case the string keys are
+# base-system topology ids, so they resolve to the `PSY.Topology` component through `refs`
+# (seeded from the base system). A nullable bound omitted on the wire imports as the default.
+
+_capacity_bound_from_po(::Nothing, ::OpenAPIRefs) = (min=0.0, max=1e8)
+_capacity_bound_from_po(po, refs::OpenAPIRefs) = _capacity_bound_value(po.value, refs)
+_capacity_bound_value(x::PC.MinMax, ::OpenAPIRefs) = (min=x.min, max=x.max)
+_capacity_bound_value(d::AbstractDict, refs::OpenAPIRefs) = Dict{PSY.Topology, MinMax}(
+    resolve_ref(refs, parse(Int, string(k)), PSY.Topology) => (min=v.min, max=v.max) for
+    (k, v) in d
+)
+
+_capacity_bound_po_value(v::NamedTuple, ::OpenAPIRefs) = PC.MinMax(; min=v.min, max=v.max)
+_capacity_bound_po_value(d::AbstractDict, refs::OpenAPIRefs) =
+    Dict(string(component_id(refs, k)) => PC.MinMax(; min=v.min, max=v.max) for (k, v) in d)

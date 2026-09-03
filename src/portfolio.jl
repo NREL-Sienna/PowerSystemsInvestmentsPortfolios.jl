@@ -782,74 +782,146 @@ end
 ###########################
 
 """
-Add a RegionTopology to the portfolio.
+Attach a PowerSystems topology component (`Area`, `LoadZone`, bus, arc, ...) to the
+portfolio. The component is stored in the portfolio's base system; callers never need to
+reach into `base_system` directly.
 
-Throws ArgumentError if the region's name is already stored for its concrete type.
-Throws ArgumentError if any region-specific rule is violated.
-Throws InvalidValue if any of the region's field values are outside of defined valid
-range.
+The portfolio's convention is natural units, but `Area`/`LoadZone` (and other system-base
+topology) store `peak_active_power`/`peak_reactive_power` internally in device base. To keep
+the natural-units contract, pass those fields as `add_topology!` keyword arguments in
+natural units (MW / MVAr) rather than to the raw `PSY.*` constructor: they are applied
+through the units-tagged setters *after* attachment, once the system base power is synced. A
+nonzero power value left on the raw constructor is device-base and triggers a warning.
+
+Throws ArgumentError if the component's name is already stored for its concrete type, any
+PowerSystems rule is violated, or a power keyword is given for a topology type that has no
+such (system-base) field.
 
 # Examples
 
 ```julia
 portfolio = Portfolio(...)
 
-# Add a single technology.
-add_region!(portfolio, zone)
+# Add a bus (no power fields; base_voltage is natural kV).
+add_topology!(portfolio, ACBus(; name="bus_1", base_voltage=138.0, ...))
+
+# Add an Area with its peak power in natural units (MW / MVAr).
+add_topology!(
+    portfolio,
+    PSY.Area(; name="west");
+    peak_active_power=250.0,
+    peak_reactive_power=50.0,
+)
 
 # Add many at once.
-foreach(x -> add_region!(portfolio, x), Iterators.flatten((buses, generators)))
+foreach(x -> add_topology!(portfolio, x), buses)
 ```
 """
-function add_region!(
+function add_topology!(
     portfolio::Portfolio,
-    zone::T;
-    skip_validation=false,
+    topology::PSY.Topology;
+    peak_active_power=nothing,
+    peak_reactive_power=nothing,
     kwargs...,
-) where {T <: RegionTopology}
-    deserialization_in_progress = _is_deserialization_in_progress(portfolio)
-    skip_validation = _validate_or_skip!(portfolio, zone, skip_validation)
-    IS.add_component!(
-        portfolio.data,
-        zone;
-        allow_existing_time_series=deserialization_in_progress,
-        skip_validation=skip_validation,
-        kwargs...,
-    )
-
+)
+    _check_topology_power_units(topology, peak_active_power, peak_reactive_power)
+    PSY.add_component!(portfolio.base_system, topology; kwargs...)
+    # Attachment has synced the system base power, so the units-tagged setters can now
+    # convert these natural-units (MW / MVAr) values into the component's device-base storage.
+    isnothing(peak_active_power) ||
+        PSY.set_peak_active_power!(topology, peak_active_power * PSY.MW)
+    isnothing(peak_reactive_power) ||
+        PSY.set_peak_reactive_power!(topology, peak_reactive_power * PSY.MVAr)
     return
 end
 
+# Guard the natural-units power keywords of `add_topology!`. They only apply to system-base
+# topology (`Area`, `LoadZone`, ...) whose power fields per-unitize against the system base;
+# for anything else they are meaningless and rejected. When the keyword is omitted but the
+# raw constructor already stored a nonzero (device-base) power, warn: that value is not in
+# the natural units the portfolio otherwise uses.
+function _check_topology_power_units(topology, peak_active_power, peak_reactive_power)
+    is_system_base = PSY.base_power_kind(topology) isa PSY.SystemBasePower
+    if !is_system_base
+        if !isnothing(peak_active_power) || !isnothing(peak_reactive_power)
+            throw(
+                ArgumentError(
+                    "peak_active_power / peak_reactive_power keywords are only valid for " *
+                    "system-base topology (e.g. Area, LoadZone); got $(typeof(topology)).",
+                ),
+            )
+        end
+        return
+    end
+    for (field, provided) in (
+        (:peak_active_power, peak_active_power),
+        (:peak_reactive_power, peak_reactive_power),
+    )
+        isnothing(provided) || continue
+        hasproperty(topology, field) || continue
+        getproperty(topology, field) == 0 && continue
+        @warn(
+            "add_topology!: $(summary(topology)) was constructed with a nonzero $field " *
+            "that is stored in device base, not the natural units the portfolio uses. " *
+            "Pass $field in natural units (MW / MVAr) as an add_topology! keyword instead.",
+            maxlog = 1,
+        )
+    end
+    return
+end
+
+# Backwards-compatible alias for the older "region" naming.
+add_region!(portfolio::Portfolio, topology::PSY.Topology; kwargs...) =
+    add_topology!(portfolio, topology; kwargs...)
+
 """
-Returns an iterator of regions. T can be concrete or abstract.
-Call collect on the result if an array is desired.
+Returns an iterator of the portfolio's topology components of type `T` (concrete or
+abstract). Call `collect` on the result if an array is desired.
 
 # Examples
 
 ```julia
-iter = Portfolio.get_regions(RegionTopology, portfolio)
-regions = collect(Portfolio.get_regions(RegionTopology, portfolio))
+iter = Portfolio.get_topologies(PSY.Topology, portfolio)
+areas = collect(Portfolio.get_topologies(PSY.Area, portfolio))
 ```
-
 """
-
-function get_regions(::Type{T}, portfolio::Portfolio;) where {T <: RegionTopology}
-    return IS.get_components(T, portfolio.data)
+function get_topologies(::Type{T}, portfolio::Portfolio) where {T <: PSY.Topology}
+    return PSY.get_components(T, portfolio.base_system)
 end
 
-"""
-Get the region of type T with name. Returns nothing if no region matches. If T is an abstract
-type then the names of regions across all subtypes of T must be unique.
+# Backwards-compatible alias for the older "region" naming.
+get_regions(::Type{T}, portfolio::Portfolio) where {T <: PSY.Topology} =
+    get_topologies(T, portfolio)
 
-Throws ArgumentError if T is not a concrete type and there is more than one region with
-requested name
 """
-function get_region(
+Get the topology component of type `T` with `name`. Returns `nothing` if none matches. If
+`T` is abstract then names across all subtypes of `T` must be unique.
+
+Throws ArgumentError if `T` is not concrete and more than one component has the requested
+name.
+"""
+function get_topology(
     ::Type{T},
     portfolio::Portfolio,
     name::AbstractString,
-) where {T <: RegionTopology}
-    return IS.get_component(T, portfolio.data, name)
+) where {T <: PSY.Topology}
+    return PSY.get_component(T, portfolio.base_system, name)
+end
+
+# Backwards-compatible alias for the older "region" naming. Adds a method to the existing
+# `get_region` generic (whose other methods are per-technology accessors).
+get_region(
+    ::Type{T},
+    portfolio::Portfolio,
+    name::AbstractString,
+) where {T <: PSY.Topology} = get_topology(T, portfolio, name)
+
+"""
+Remove a topology component from the portfolio's base system.
+"""
+function remove_topology!(portfolio::Portfolio, topology::PSY.Topology)
+    PSY.remove_component!(portfolio.base_system, topology)
+    return
 end
 
 ################################

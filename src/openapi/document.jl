@@ -1,8 +1,8 @@
 # The type ordering both conversion directions share. References resolve by id, and
-# `OpenAPIRefs` errors on an unregistered one, so a type must appear after everything
-# it points at: requirements have no references, technologies point at the base system's
-# topology (seeded into `refs` up front) and at requirements. Topology components live in
-# the base `PSY.System`, not the portfolio, so they are not in this plan.
+# `OpenAPIRefs` errors on an unregistered one, so a type must appear after everything it
+# points at: requirements have no references, technologies point at the base system's
+# topology (seeded into `refs` up front) and at requirements. Topology lives in the base
+# `PSY.System`, not the portfolio's own component store, so it is not in this plan.
 const DOCUMENT_PLAN = [
     (CarbonCaps, "CarbonCaps"),
     (CarbonTax, "CarbonTax"),

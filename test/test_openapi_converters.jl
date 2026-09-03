@@ -19,7 +19,7 @@ end
     po = PSIP.convert_cost_to_openapi(thermal)
     round_tripped = PSIP.convert_cost(po)
     @test round_tripped isa PSY.ThermalGenerationCost
-    @test get_variable(round_tripped) == get_variable(thermal)
+    @test get_variable_operation_cost(round_tripped) == get_variable_operation_cost(thermal)
     @test get_fixed(round_tripped) == get_fixed(thermal)
     @test get_start_up(round_tripped) == get_start_up(thermal)
     @test get_shut_down(round_tripped) == get_shut_down(thermal)
@@ -40,7 +40,8 @@ end
     po = PSIP.convert_cost_to_openapi(renewable)
     round_tripped = PSIP.convert_cost(po)
     @test round_tripped isa PSY.RenewableGenerationCost
-    @test get_variable(round_tripped) == get_variable(renewable)
+    @test get_variable_operation_cost(round_tripped) ==
+          get_variable_operation_cost(renewable)
     # `get_curtailment_cost` is ambiguous between PSY and PSIP's own
     # `DemandSideTechnology` getter of the same name — qualify it.
     @test PSY.get_curtailment_cost(round_tripped) == PSY.get_curtailment_cost(renewable)
@@ -439,8 +440,8 @@ end
     @test PSIP.get_capacity_limits(tech2, IS.NU) == (min=0.0, max=500.0)
     # nested value curves and operational costs survive the JSON round trip
     @test PSIP.get_capital_costs(tech2, IS.NU) == LinearCurve(1000.0)
-    @test get_variable(PSIP.get_operation_costs(tech2, IS.NU)) ==
-          get_variable(PSY.ThermalGenerationCost(nothing))
+    @test get_variable_operation_cost(PSIP.get_operation_costs(tech2, IS.NU)) ==
+          get_variable_operation_cost(PSY.ThermalGenerationCost(nothing))
     @test PSIP.get_co2(tech2, IS.NU) == Dict(ThermalFuels.NATURAL_GAS => 0.05)
     @test PSIP.get_cofire_level_limits(tech2) ==
           Dict(ThermalFuels.NATURAL_GAS => (min=0.0, max=1.0))
@@ -486,7 +487,7 @@ end
     # cost type with `curtailment_cost` replaced by `start_up`/`shut_down`
     solar_cost = PSIP.get_operation_costs_solar(colocated2, IS.NU)
     @test solar_cost isa PSY.RenewableGenerationCost
-    @test get_variable(solar_cost) == CostCurve(LinearCurve(5.0))
+    @test get_variable_operation_cost(solar_cost) == CostCurve(LinearCurve(5.0))
     @test PSY.get_curtailment_cost(solar_cost) == CostCurve(LinearCurve(0.5))
     @test get_fixed(solar_cost) == 10.0
     @test PSIP.get_operation_costs_wind(colocated2, IS.NU) isa PSY.RenewableGenerationCost

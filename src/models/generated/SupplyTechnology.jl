@@ -14,11 +14,11 @@ This file is auto-generated. Do not edit.
         fuel::Vector{ThermalFuels}
         cofire_start_limits::Dict{ThermalFuels, MinMax}
         cofire_level_limits::Dict{ThermalFuels, MinMax}
-        capital_costs::PSY.ValueCurve
+        capital_costs::CapitalCost
         operation_costs::PSY.OperationalCost
         unit_size::Float64
-        capacity_limits::MinMax
-        outage_factor::Float64
+        capacity_limits::Union{MinMax, Dict{PSY.Topology, MinMax}}
+        outage_factor::OutageFactors
         min_generation_fraction::Float64
         ramp_limits::UpDown
         time_limits::UpDown
@@ -41,11 +41,11 @@ Candidate generation technology for a region. Can represent either a thermal or 
 - `fuel::Vector{ThermalFuels}`: (default: `[ThermalFuels.OTHER]`) Prime mover fuel according to EIA 923.
 - `cofire_start_limits::Dict{ThermalFuels, MinMax}`: (default: `Dict()`) Minimum and maximum blending level (%) of each fuel during start-up process for multi-fuel generator
 - `cofire_level_limits::Dict{ThermalFuels, MinMax}`: (default: `Dict()`) Minimum and maximum blending level (%) of each fuel during normal generation process for multi-fuel generator
-- `capital_costs::PSY.ValueCurve`: (default: `LinearCurve(0.0)`) Capital costs for investing in a technology. (USD/MW)
+- `capital_costs::CapitalCost`: (default: `CapitalCost(nothing)`) Capital costs for investing in a technology. (USD/MW)
 - `operation_costs::PSY.OperationalCost`: (default: `ThermalGenerationCost(nothing)`) Fixed and variable O&M costs for a technology
 - `unit_size::Float64`: (default: `0.0`) Used for discrete investment decisions. Size of each unit being built (MW)
-- `capacity_limits::MinMax`: (default: `(min=0, max=1e8)`) Minimum and maximum allowable installed capacity for a technology (MW)
-- `outage_factor::Float64`: (default: `1.0`) Derating factor to account for planned or forced outages of a technology. Fraction of hours in a year where technology is unavailable.
+- `capacity_limits::Union{MinMax, Dict{PSY.Topology, MinMax}}`: (default: `(min = 0.0, max = 1e8)`) Minimum and maximum allowable installed capacity for a technology (MW)
+- `outage_factor::OutageFactors`: (default: `(max = 0.0, min = 0.0)`) Planned (`max`) and forced (`min`) outage factors for a technology, each a fraction of total availability.
 - `min_generation_fraction::Float64`: (default: `0.0`) Minimum generation as a fraction of total capacity
 - `ramp_limits::UpDown`: (default: `(up=1.0, down=1.0)`) Maximum decrease and increase in output between operation periods. Fraction of nameplate capacity per hour
 - `time_limits::UpDown`: (default: `(up=60.0, down=60.0)`) Minimum amount of time a resource has to stay in the committed or shutdown state (minutes). Units: min.
@@ -74,15 +74,15 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
     "Minimum and maximum blending level (%) of each fuel during normal generation process for multi-fuel generator"
     cofire_level_limits::Dict{ThermalFuels, MinMax}
     "Capital costs for investing in a technology. (USD/MW)"
-    capital_costs::PSY.ValueCurve
+    capital_costs::CapitalCost
     "Fixed and variable O&M costs for a technology"
     operation_costs::PSY.OperationalCost
     "Used for discrete investment decisions. Size of each unit being built (MW)"
     unit_size::Float64
     "Minimum and maximum allowable installed capacity for a technology (MW)"
-    capacity_limits::MinMax
-    "Derating factor to account for planned or forced outages of a technology. Fraction of hours in a year where technology is unavailable."
-    outage_factor::Float64
+    capacity_limits::Union{MinMax, Dict{PSY.Topology, MinMax}}
+    "Planned (`max`) and forced (`min`) outage factors for a technology, each a fraction of total availability."
+    outage_factor::OutageFactors
     "Minimum generation as a fraction of total capacity"
     min_generation_fraction::Float64
     "Maximum decrease and increase in output between operation periods. Fraction of nameplate capacity per hour"
@@ -104,7 +104,7 @@ mutable struct SupplyTechnology{T <: PSY.Generator} <: ResourceTechnology
 end
 
 
-function SupplyTechnology{T}(; name, power_systems_type, region=Vector(), available=true, prime_mover_type=PrimeMovers.OT, fuel=[ThermalFuels.OTHER], cofire_start_limits=Dict(), cofire_level_limits=Dict(), capital_costs=LinearCurve(0.0), operation_costs=ThermalGenerationCost(nothing), unit_size=0.0, capacity_limits=(min=0, max=1e8), outage_factor=1.0, min_generation_fraction=0.0, ramp_limits=(up=1.0, down=1.0), time_limits=(up=60.0, down=60.0), start_fuel_mmbtu_per_mw=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
+function SupplyTechnology{T}(; name, power_systems_type, region=Vector(), available=true, prime_mover_type=PrimeMovers.OT, fuel=[ThermalFuels.OTHER], cofire_start_limits=Dict(), cofire_level_limits=Dict(), capital_costs=CapitalCost(nothing), operation_costs=ThermalGenerationCost(nothing), unit_size=0.0, capacity_limits=(min = 0.0, max = 1e8), outage_factor=(max = 0.0, min = 0.0), min_generation_fraction=0.0, ramp_limits=(up=1.0, down=1.0), time_limits=(up=60.0, down=60.0), start_fuel_mmbtu_per_mw=0.0, lifetime=100, requirements=Vector(), financial_data, ext=Dict(), internal=InfrastructureSystemsInternal(), ) where T <: PSY.Generator
     SupplyTechnology{T}(name, power_systems_type, region, available, prime_mover_type, fuel, cofire_start_limits, cofire_level_limits, capital_costs, operation_costs, unit_size, capacity_limits, outage_factor, min_generation_fraction, ramp_limits, time_limits, start_fuel_mmbtu_per_mw, lifetime, requirements, financial_data, ext, internal, )
 end
 
@@ -124,12 +124,8 @@ get_fuel(value::SupplyTechnology) = value.fuel
 get_cofire_start_limits(value::SupplyTechnology) = value.cofire_start_limits
 """Get [`SupplyTechnology`](@ref) `cofire_level_limits`."""
 get_cofire_level_limits(value::SupplyTechnology) = value.cofire_level_limits
-"""Get [`SupplyTechnology`](@ref) `capital_costs` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_capital_costs_unitful`](@ref)."""
-get_capital_costs(value::SupplyTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:capital_costs), Val(:usd_per_mw), units))
-"""Get [`SupplyTechnology`](@ref) `capital_costs` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_capital_costs`](@ref)."""
-get_capital_costs_unitful(value::SupplyTechnology, units) = get_value(value, Val(:capital_costs), Val(:usd_per_mw), units)
-InfrastructureSystems.display_units_arg(::typeof(get_capital_costs), ::Type{SupplyTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
-InfrastructureSystems.display_units_arg(::typeof(get_capital_costs_unitful), ::Type{SupplyTechnology{T}}) where {T <: PSY.Generator} = InfrastructureSystems.NU
+"""Get [`SupplyTechnology`](@ref) `capital_costs`."""
+get_capital_costs(value::SupplyTechnology) = value.capital_costs
 """Get [`SupplyTechnology`](@ref) `operation_costs` as a bare number in the requested `units` (e.g. `SU`, `DU`; domain-provided units such as `MW` are also accepted when the owning domain package has registered a `_strip_units` method for the returned quantity type). Returns a bare number only when such a method is registered; otherwise returns the quantity wrapper. For the unit-bearing value see [`get_operation_costs_unitful`](@ref)."""
 get_operation_costs(value::SupplyTechnology, units) = InfrastructureSystems._strip_units(get_value(value, Val(:operation_costs), Val(:usd_per_mwh), units))
 """Get [`SupplyTechnology`](@ref) `operation_costs` as a unit-bearing quantity in the requested `units` (e.g. `SU`, `DU`, `MW`). For a bare number see [`get_operation_costs`](@ref)."""
@@ -202,7 +198,7 @@ set_cofire_start_limits!(value::SupplyTechnology, val) = value.cofire_start_limi
 """Set [`SupplyTechnology`](@ref) `cofire_level_limits`."""
 set_cofire_level_limits!(value::SupplyTechnology, val) = value.cofire_level_limits = val
 """Set [`SupplyTechnology`](@ref) `capital_costs`."""
-set_capital_costs!(value::SupplyTechnology, val, unit) = value.capital_costs = set_value(value, Val(:capital_costs), val, unit, Val(:usd_per_mw))
+set_capital_costs!(value::SupplyTechnology, val) = value.capital_costs = val
 """Set [`SupplyTechnology`](@ref) `operation_costs`."""
 set_operation_costs!(value::SupplyTechnology, val, unit) = value.operation_costs = set_value(value, Val(:operation_costs), val, unit, Val(:usd_per_mwh))
 """Set [`SupplyTechnology`](@ref) `unit_size`."""
@@ -242,11 +238,11 @@ function from_openapi(po::PI.SupplyTechnology, refs::OpenAPIRefs)
         fuel = [ThermalFuels(v) for v in po.fuel],
         cofire_start_limits = Dict(ThermalFuels(k) => _minmax_from_po(v) for (k, v) in po.cofire_start_limits),
         cofire_level_limits = Dict(ThermalFuels(k) => _minmax_from_po(v) for (k, v) in po.cofire_level_limits),
-        capital_costs = convert_value_curve(po.capital_costs),
+        capital_costs = convert_nested_data(po.capital_costs),
         operation_costs = convert_cost(po.operation_costs)::PSY.OperationalCost,
         unit_size = po.unit_size,
-        capacity_limits = _minmax_from_po(po.capacity_limits),
-        outage_factor = po.outage_factor,
+        capacity_limits = _capacity_bound_from_po(po.capacity_limits, refs),
+        outage_factor = _outagefactors_from_po(po.outage_factor),
         min_generation_fraction = po.min_generation_fraction,
         ramp_limits = _updown_from_po(po.ramp_limits),
         time_limits = _updown_from_po(po.time_limits),
@@ -268,11 +264,11 @@ function to_openapi(value::SupplyTechnology{T}, refs::OpenAPIRefs) where {T <: P
         fuel = [string(v) for v in get_fuel(value)],
         cofire_start_limits = Dict(string(k) => _minmax_po(v) for (k, v) in get_cofire_start_limits(value)),
         cofire_level_limits = Dict(string(k) => _minmax_po(v) for (k, v) in get_cofire_level_limits(value)),
-        capital_costs = convert_value_curve_to_openapi(get_capital_costs(value, IS.NU)),
+        capital_costs = convert_nested_data_to_openapi(get_capital_costs(value)),
         operation_costs = convert_cost_to_openapi(get_operation_costs(value, IS.NU)),
         unit_size = get_unit_size(value, IS.NU),
-        capacity_limits = _minmax_po(get_capacity_limits(value, IS.NU)),
-        outage_factor = get_outage_factor(value),
+        capacity_limits = PI.SupplyTechnologyCapacityLimits(_capacity_bound_po_value(get_capacity_limits(value, IS.NU), refs)),
+        outage_factor = _outagefactors_po(get_outage_factor(value)),
         min_generation_fraction = get_min_generation_fraction(value),
         ramp_limits = _updown_po(get_ramp_limits(value, IS.NU)),
         time_limits = _updown_po(get_time_limits(value, IS.NU)),

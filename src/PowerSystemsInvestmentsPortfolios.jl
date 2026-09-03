@@ -55,7 +55,6 @@ export ResourceTechnology
 export DemandTechnology
 export TransmissionTechnology
 export FinancialData
-export RegionTopology
 export SupplyTechnology
 export ColocatedSupplyStorageTechnology
 export NodalACTransportTechnology
@@ -75,7 +74,6 @@ export HourlyMatching
 export EnergyShareRequirements
 export MinimumCapacityRequirements
 export MaximumCapacityRequirements
-export RegionTopology
 export PortfolioFinancialData
 export InvestmentScheduleResults
 export TechnologyFinancialData
@@ -86,6 +84,8 @@ export OperationalPeriods
 export get_name
 export get_description
 export get_regions
+export get_topologies
+export get_topology
 export get_technologies
 export get_technology
 export get_available_technology
@@ -119,6 +119,8 @@ export check_technology
 export check_technologies
 export remove_technology!
 export add_region!
+export add_topology!
+export remove_topology!
 export add_requirement!
 export add_time_series!
 export clear_time_series!
@@ -170,6 +172,9 @@ include("models/technologies.jl")
 include("models/regions.jl")
 include("models/financial_data/financial_data.jl")
 include("models/financial_data/TechnologyFinancialData.jl")
+include("models/cost_functions/investment_cost.jl")
+include("models/cost_functions/CapitalCost.jl")
+include("models/cost_functions/StorageCapitalCost.jl")
 include("openapi/refs.jl")
 include("openapi/converters.jl")
 include("models/generated/includes.jl")

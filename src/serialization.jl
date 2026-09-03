@@ -159,7 +159,6 @@ function _serialize_openapi(component)
 end
 
 IS.serialize(value::Technology) = _serialize_openapi(value)
-IS.serialize(value::RegionTopology) = _serialize_openapi(value)
 IS.serialize(value::Requirement) = _serialize_openapi(value)
 
 # PSIP's supplemental attributes subtype `IS.SupplementalAttribute` directly, with no PSIP

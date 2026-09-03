@@ -304,9 +304,9 @@ Return `true` if the technology is valid.
 """
 validate_technology_with_portfolio(::Technology, ::Portfolio) = true
 
-function _validate_unique_region_id(region::RegionTopology, portfolio::Portfolio)
+function _validate_unique_region_id(region::PSY.Topology, portfolio::Portfolio)
     region_id = get_id(region)
-    for stored_region in get_regions(RegionTopology, portfolio)
+    for stored_region in get_regions(PSY.Topology, portfolio)
         if get_id(stored_region) == region_id
             @error(
                 "Region ID is already attached to the portfolio",
@@ -343,7 +343,11 @@ function _validate_attached_references(
 )
     is_valid = true
     for reference in references
-        if !IS.has_component(portfolio.data, reference)
+        if !PSY.has_component(
+            typeof(reference),
+            portfolio.base_system,
+            PSY.get_name(reference),
+        )
             @error(
                 "Technology references a $reference_type that is not attached to the portfolio",
                 technology = get_name(technology),
@@ -389,7 +393,11 @@ function _validate_transport_endpoints(
     start_endpoint, end_endpoint = _get_transport_endpoints(technology)
     is_valid = true
     for (endpoint_name, endpoint) in (("start", start_endpoint), ("end", end_endpoint))
-        if !IS.has_component(portfolio.data, endpoint)
+        if !PSY.has_component(
+            typeof(endpoint),
+            portfolio.base_system,
+            PSY.get_name(endpoint),
+        )
             @error(
                 "Transport endpoint is not attached to the portfolio",
                 technology = get_name(technology),
@@ -427,7 +435,7 @@ end
 
 function _validate_or_skip!(
     portfolio::Portfolio,
-    region::RegionTopology,
+    region::PSY.Topology,
     skip_validation::Bool,
 )
     if !skip_validation && !_validate_unique_region_id(region, portfolio)
